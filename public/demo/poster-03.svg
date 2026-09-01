@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="900" viewBox="0 0 640 900">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(111 45% 24%)"/>
+      <stop offset="1" stop-color="hsl(181 55% 62%)"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="900" rx="28" fill="url(#g)"/>
+  <circle cx="510" cy="170" r="190" fill="rgba(255,255,255,.12)"/>
+  <circle cx="150" cy="690" r="240" fill="rgba(0,0,0,.12)"/>
+  <rect x="56" y="64" width="528" height="772" rx="22" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
+  <text x="64" y="130" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="700">DEMO-003</text>
+  <text x="64" y="720" fill="white" font-family="Arial, sans-serif" font-size="42" font-weight="700">近い距離 VR</text>
+  <text x="64" y="780" fill="rgba(255,255,255,.78)" font-family="Arial, sans-serif" font-size="24">LOCALOGUE · FICTIONAL DEMO</text>
+</svg>

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "maker_crescent",
+  "kind": "maker",
+  "names": {
+    "ja": "クレセント",
+    "zh-CN": "新月影像",
+    "en": "Crescent Studio"
+  },
+  "descriptions": {
+    "ja": "架空メーカー",
+    "zh-CN": "用于筛选演示的虚构厂商",
+    "en": "Fictional demo maker"
+  }
+}

@@ -4,100 +4,176 @@
 
 Localogue 的目标不是成为另一个“刮削器”，也不是优先成为播放器，而是建立一个**长期可信、可维护、可浏览、可筛选、可迁移的个人媒体资料库**。
 
-它把 NFO、JSON、CSV、XLSX、本地文件、图片、人工录入以及未来可选的外部数据源统一视为输入，通过规范化、实体匹配、审核与来源追踪，形成自己的 **Canonical Library（规范资料库）**。
+项目同时重视两件事：
+
+- **资料治理（Curation）**：把不同来源的数据规范化、匹配、审核并沉淀为可信资料；
+- **资料探索（Exploration）**：按人物、导演、厂商、厂牌、系列、年份、时长、作品类型、Genre、Tag 等维度浏览收藏。
 
 ## 当前阶段
 
-当前仓库版本为 **V0：设计与规范冻结版**。
+当前进入 **V1：File-backed Library** 的第一批实现。
 
-V0 不实现正式业务代码，目标是先确定：
+本批代码已经完成：
 
-- 产品定位与边界；
-- 核心架构原则；
-- 作品、人物、组织、系列、分类、资源、媒体文件等数据模型；
-- JSON-first 的 V1 持久化方案；
-- CSV / XLSX 的导入导出与批量编辑定位；
-- V2 迁移 SQLite 的兼容策略；
-- 多维筛选、排序、时间线和全文搜索设计；
-- 演员档案页的信息结构；
-- 日文原文优先、中英映射的多语言策略；
-- Evidence → Review → Canonical Library 的数据治理流程；
-- 受控词表及中 / 日 / 英三语对照；
-- 后续 AI 协作时必须遵守的项目约束。
+- Next.js Web 基础工程；
+- TypeScript 严格模式；
+- Work / Person / Organization / Series / Asset 等 Domain Model；
+- `LibraryRepository` 抽象；
+- `JsonLibraryRepository`；
+- 文件化 Canonical Library；
+- 受控词表读取；
+- 日 / 中 / 英元数据回退；
+- UI 语言与元数据语言独立设置；
+- 浅色 / 深色 / 跟随系统主题；
+- 首页资料库概览；
+- 作品库和作品详情；
+- 演员库和演员详情；
+- 番号 / 标题搜索；
+- 演员、导演、Maker、Label、Series、Genre、Work Type、Tag、年份、日期范围、时长筛选的 Query Engine 基础；
+- 发行日期、时长、番号、标题、加入时间、更新时间排序基础；
+- 人物详情页复用统一 WorkQuery 进行二次筛选；
+- 完全虚构的演示数据和演示图片。
 
-## 核心定位
+## 技术栈
 
-Localogue 同时重视两件事：
+- Next.js 16.3.3
+- React 19.2.8
+- TypeScript 5.9
+- ESLint 9
+- pnpm 11.x
+- V1 持久化：JSON
+- V2 计划：SQLite
 
-1. **资料治理（Curation）**：把来源不同、质量不同的数据整理成可信资料；
-2. **资料探索（Exploration）**：让用户可以按演员、导演、系列、厂商、厂牌、时间、类型、标签、时长等维度自由筛选和浏览。
+V1 暂时没有 Tailwind、ORM、数据库、状态管理库和 UI 组件库。这样更适合先理解浏览器、React、Next.js、CSS、数据模型和 Repository 的基本关系。
 
-## 四个一级能力
+## 运行项目
 
-- **浏览**：作品、演员、导演、系列、厂商、厂牌、类型、标签、时间线；
-- **导入**：文件夹扫描、NFO、JSON、CSV、XLSX、图片、手工录入；
-- **整理**：待审核、重复实体、缺失资料、冲突字段、未匹配关系、资料完整度；
-- **设置**：界面语言、元数据语言优先级、主题、文件存储策略等。
+建议 Node.js 22 或更高版本。
 
-## V1 / V2 路线
+```bash
+pnpm install
+pnpm dev
+```
 
-### V1：File-backed Library
-
-- JSON 为规范资料库的持久化格式；
-- CSV / XLSX 用于批量导入、导出和人工编辑；
-- Web 端完成作品浏览、人物档案、多维筛选、排序、时间线、导入审核等核心体验；
-- 不依赖网络、不依赖任何刮削站点；
-- 不实现正式播放器；
-- 不把 SQLite 作为前置条件。
-
-### V2：SQLite Library
-
-- 用 SQLite 替换 JSON Repository；
-- Domain Model、页面、查询条件、受控词表和导入格式尽量保持不变；
-- JSON / CSV / XLSX 继续作为交换格式存在；
-- 引入更高效的关系查询、聚合统计、FTS 全文搜索和索引。
-
-## 阅读顺序
-
-第一次接触项目的人或 AI，建议依次阅读：
-
-1. `README.md`
-2. `AGENTS.md`
-3. `PROJECT_STATUS.md`
-4. `docs/README.md`
-5. `docs/product/vision.md`
-6. `docs/product/principles.md`
-7. `docs/architecture/overview.md`
-8. `docs/data-model/overview.md`
-9. `docs/vocabulary/README.md`
-10. `docs/decisions/` 下的 ADR
-
-## 目录说明
+浏览器打开：
 
 ```text
-Localogue/
-├── README.md
-├── AGENTS.md
-├── PROJECT_STATUS.md
-├── CHANGELOG.md
-├── docs/                 # 中文设计与开发文档
-├── resources/            # 机器可读的受控词表
-├── schemas/              # V1 数据格式约定
-└── examples/             # 示例数据
+http://localhost:3000
 ```
+
+开发前建议执行完整检查：
+
+```bash
+pnpm check
+```
+
+它依次执行：
+
+```text
+validate:data → lint → typecheck → build
+```
+
+## 推荐学习顺序
+
+如果你希望一边开发 Localogue 一边学习网页和数据库相关知识，建议按这个顺序看代码：
+
+1. `docs/development/learning-path.md`
+2. `src/domain/entities/`
+3. `data/demo-library/`
+4. `src/domain/repositories/library-repository.ts`
+5. `src/infrastructure/repositories/json-file-store.ts`
+6. `src/infrastructure/repositories/json-library-repository.ts`
+7. `src/application/services/`
+8. `src/app/layout.tsx`
+9. `src/app/page.tsx`
+10. `src/app/works/page.tsx`
+11. `src/app/people/[id]/page.tsx`
+12. `src/app/globals.css`
+
+## 为什么 V1 先用 JSON
+
+JSON 是 V1 的持久化实现，而不是 Domain Model 本身。
+
+页面不能这样做：
+
+```text
+React Page → fs.readFile("works/xxx.json")
+```
+
+Localogue 使用：
+
+```text
+Page
+  ↓
+Application Service
+  ↓
+LibraryRepository
+  ↓
+JsonLibraryRepository（V1）
+  ↓
+JSON files
+```
+
+V2 会变成：
+
+```text
+Page
+  ↓
+Application Service
+  ↓
+LibraryRepository
+  ↓
+SqliteLibraryRepository（V2）
+  ↓
+SQLite
+```
+
+因此迁移数据库的目标不是“重写网站”，而是替换持久化实现。
+
+## 数据目录
+
+V1 示例 Canonical Library：
+
+```text
+data/demo-library/
+├── works/
+├── people/
+├── organizations/
+├── series/
+├── genres/
+├── tags/
+├── assets/
+├── evidence/
+└── indexes/
+```
+
+仓库中的 `DEMO-*` 作品、人物、厂商和图片全部是虚构示例，仅用于开发和学习。
+
+真实个人资料后续会提供更明确的“用户资料目录”和导入流程，不应直接混入 Git 仓库中的 Demo 数据。
 
 ## 项目原则摘要
 
 - Canonical Library 是最终真相源；
-- 外部输入是 Evidence，不直接覆盖正式资料；
+- 外部输入先成为 Evidence；
 - 原始日文元数据永久保留；
+- UI 语言和元数据显示语言分离；
 - Work 与 MediaFile 分离；
-- Person 与作品关系结构化，不把演员名塞成逗号字符串；
-- Work Type、Genre、Tag 是三个不同概念；
-- 筛选与资料治理同等重要；
-- V1 先 JSON，V2 再 SQLite；
-- 持久化层必须通过 Repository 抽象，避免重写业务层；
-- 默认不破坏用户已有文件；
-- 核心功能应在完全离线环境中可用。
+- Person 是统一人物实体；
+- Work Type、Genre、Tag 分离；
+- 关键关系必须结构化；
+- 筛选、排序、时间线和反向导航是一等能力；
+- V1 JSON，V2 SQLite；
+- 默认文件操作非破坏性；
+- 核心功能离线可运行。
 
-详细内容见 `docs/README.md`。
+## 文档
+
+完整设计见 [`docs/README.md`](docs/README.md)。
+
+后续 AI 或开发者开始修改项目前，必须先阅读：
+
+1. `AGENTS.md`
+2. `PROJECT_STATUS.md`
+3. `docs/README.md`
+4. `docs/product/principles.md`
+5. `docs/decisions/`

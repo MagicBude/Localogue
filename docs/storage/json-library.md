@@ -40,3 +40,20 @@ people/person_example_001.json
 - 格式校验；
 - schemaVersion；
 - 自动备份或版本控制。
+
+
+## V1 的公开 Demo 与私人资料隔离
+
+代码仓库中的虚构演示资料放在：
+
+```text
+data/demo-library/
+```
+
+真实个人资料建议放在：
+
+```text
+data/library/
+```
+
+或仓库外独立目录，并通过 `LOCALOGUE_LIBRARY_PATH` 配置。`data/library/` 默认由 `.gitignore` 排除，避免私人资料被误提交到 Git。

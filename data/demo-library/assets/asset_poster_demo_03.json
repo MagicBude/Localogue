@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_poster_demo_03",
+  "type": "poster",
+  "storagePath": "/demo/poster-03.svg",
+  "mimeType": "image/svg+xml",
+  "width": 640,
+  "height": 900
+}

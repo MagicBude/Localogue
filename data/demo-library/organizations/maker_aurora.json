@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "maker_aurora",
+  "kind": "maker",
+  "names": {
+    "ja": "オーロラ映像",
+    "zh-CN": "极光映像",
+    "en": "Aurora Pictures"
+  },
+  "descriptions": {
+    "ja": "架空メーカー",
+    "zh-CN": "用于演示的虚构厂商",
+    "en": "Fictional demo maker"
+  }
+}

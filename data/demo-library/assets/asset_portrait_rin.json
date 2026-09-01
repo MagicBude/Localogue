@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_rin",
+  "type": "portrait",
+  "storagePath": "/demo/portrait-rin.svg",
+  "mimeType": "image/svg+xml",
+  "width": 700,
+  "height": 900
+}

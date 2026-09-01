@@ -1,0 +1,9 @@
+{
+  "id": "needs_review",
+  "names": {
+    "ja": "要確認",
+    "zh-CN": "待审核",
+    "en": "Needs Review"
+  },
+  "builtIn": true
+}

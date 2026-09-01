@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "person_director_sato",
+  "names": [
+    {
+      "language": "ja",
+      "value": "佐藤圭",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "佐藤圭",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Kei Sato",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2016",
+        "precision": "year"
+      }
+    }
+  ],
+  "birthPlace": {
+    "ja": "愛知県",
+    "zh-CN": "爱知县",
+    "en": "Aichi, Japan"
+  },
+  "biographies": {
+    "ja": "別の監督フィルターを確認するための架空人物です。",
+    "zh-CN": "用于验证多个导演筛选条件的虚构人物。",
+    "en": "A fictional director for testing director filters."
+  },
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-01T17:00:00+08:00"
+}

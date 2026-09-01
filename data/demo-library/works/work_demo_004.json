@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "work_demo_004",
+  "code": "DEMO-004",
+  "originalLanguage": "ja",
+  "titles": {
+    "ja": "春色ポートレート",
+    "zh-CN": "春色写真影像",
+    "en": "Spring Portrait"
+  },
+  "descriptions": {
+    "ja": "Localogue V1 の画面、検索、関連データ表示を確認するための架空作品です。",
+    "zh-CN": "这是用于 Localogue V1 页面、筛选和关系展示测试的虚构作品数据。",
+    "en": "A fictional work used to test Localogue V1 pages, filtering and relationships."
+  },
+  "releaseDate": {
+    "value": "2025-03-03",
+    "precision": "day"
+  },
+  "durationMinutes": 72,
+  "workTypeIds": [
+    "image_video"
+  ],
+  "personRelations": [
+    {
+      "personId": "person_asakura_mio",
+      "role": "performer",
+      "billingOrder": 1
+    },
+    {
+      "personId": "person_director_sato",
+      "role": "director"
+    }
+  ],
+  "makerId": "maker_crescent",
+  "labelId": "label_nova",
+  "seriesIds": [
+    "series_season_letters"
+  ],
+  "genreIds": [
+    "documentary",
+    "slender"
+  ],
+  "tagIds": [
+    "favorite"
+  ],
+  "assetIds": [
+    "asset_poster_demo_04"
+  ],
+  "mediaFileIds": [],
+  "createdAt": "2026-09-01T14:00:00+08:00",
+  "updatedAt": "2026-09-01T14:00:00+08:00"
+}

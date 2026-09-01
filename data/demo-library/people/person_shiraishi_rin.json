@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "person_shiraishi_rin",
+  "names": [
+    {
+      "language": "ja",
+      "value": "白石りん",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "白石凛",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Rin Shiraishi",
+      "type": "romanized"
+    },
+    {
+      "language": "ja",
+      "value": "しろりん",
+      "type": "alias"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2022-03",
+        "precision": "month"
+      }
+    }
+  ],
+  "birthDate": {
+    "value": "2000-02-09",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "大阪府",
+    "zh-CN": "大阪府",
+    "en": "Osaka, Japan"
+  },
+  "heightCm": 162,
+  "measurements": {
+    "bustCm": 82,
+    "waistCm": 55,
+    "hipCm": 84,
+    "cup": "D"
+  },
+  "biographies": {
+    "ja": "検索と共演作品の表示確認に使用する架空データです。",
+    "zh-CN": "用于测试筛选、共演关系与人物详情页的虚构数据。",
+    "en": "Fictional demo data for filtering, co-starring relations and profile pages."
+  },
+  "portraitAssetId": "asset_portrait_rin",
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-01T17:00:00+08:00"
+}

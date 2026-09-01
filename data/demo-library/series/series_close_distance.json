@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "series_close_distance",
+  "names": {
+    "ja": "近い距離",
+    "zh-CN": "近距离",
+    "en": "Close Distance"
+  },
+  "descriptions": {
+    "ja": "VR表示確認用の架空シリーズ",
+    "zh-CN": "用于 VR 类型展示的虚构系列",
+    "en": "A fictional series for VR display tests"
+  }
+}

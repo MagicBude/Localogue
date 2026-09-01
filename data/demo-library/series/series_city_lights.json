@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "series_city_lights",
+  "names": {
+    "ja": "街の灯り",
+    "zh-CN": "城市灯火",
+    "en": "City Lights"
+  },
+  "descriptions": {
+    "ja": "都市をテーマにした架空シリーズ",
+    "zh-CN": "以城市为主题的虚构系列",
+    "en": "A fictional city-themed series"
+  }
+}

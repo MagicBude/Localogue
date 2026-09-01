@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_mio",
+  "type": "portrait",
+  "storagePath": "/demo/portrait-mio.svg",
+  "mimeType": "image/svg+xml",
+  "width": 700,
+  "height": 900
+}

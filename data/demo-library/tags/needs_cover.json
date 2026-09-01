@@ -1,0 +1,9 @@
+{
+  "id": "needs_cover",
+  "names": {
+    "ja": "カバー補完待ち",
+    "zh-CN": "待补封面",
+    "en": "Needs Cover"
+  },
+  "builtIn": true
+}

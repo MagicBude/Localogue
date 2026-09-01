@@ -1,20 +1,36 @@
-# 操作系统
-.DS_Store
-Thumbs.db
-
-# 编辑器
-.vscode/
-.idea/
-
-# V1 以后生成的数据目录
-data/
-!data/.gitkeep
-
-# Node / 构建产物（V1 预留）
+# Dependencies
 node_modules/
+
+# Next.js build output
 .next/
-dist/
-coverage/
+out/
+
+# Local environment files
 .env
 .env.*
 !.env.example
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated TypeScript build metadata
+*.tsbuildinfo
+
+# Localogue private/runtime data must not be committed.
+# Public fictional examples live in data/demo-library/.
+data/library/*
+!data/library/.gitkeep
+data/runtime/
+data/backups/
+data/imports/
+
+# Future database files (V2+)
+*.sqlite
+*.sqlite3
+*.db

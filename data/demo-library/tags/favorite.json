@@ -1,0 +1,9 @@
+{
+  "id": "favorite",
+  "names": {
+    "ja": "お気に入り",
+    "zh-CN": "收藏",
+    "en": "Favorite"
+  },
+  "builtIn": true
+}

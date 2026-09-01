@@ -12,3 +12,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 - [ADR-008：Work Type / Genre / Tag 分离](ADR-008-classification-separation.md)
 - [ADR-009：Person 统一人物模型](ADR-009-person-model.md)
 - [ADR-010：默认非破坏性文件管理](ADR-010-non-destructive-storage.md)
+
+- [ADR-011：V1 优先单一 Next.js 应用](ADR-011-single-app-before-monorepo.md)
+- [ADR-012：公开 Demo 与私人资料库隔离](ADR-012-separate-demo-and-private-library.md)

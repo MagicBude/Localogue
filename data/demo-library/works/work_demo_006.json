@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "work_demo_006",
+  "code": "DEMO-006",
+  "originalLanguage": "ja",
+  "titles": {
+    "ja": "記憶のアルバム",
+    "zh-CN": "记忆相册",
+    "en": "Album of Memories"
+  },
+  "descriptions": {
+    "ja": "Localogue V1 の画面、検索、関連データ表示を確認するための架空作品です。",
+    "zh-CN": "这是用于 Localogue V1 页面、筛选和关系展示测试的虚构作品数据。",
+    "en": "A fictional work used to test Localogue V1 pages, filtering and relationships."
+  },
+  "releaseDate": {
+    "value": "2024-08-16",
+    "precision": "day"
+  },
+  "durationMinutes": 210,
+  "workTypeIds": [
+    "compilation"
+  ],
+  "personRelations": [
+    {
+      "personId": "person_fujiwara_haruka",
+      "role": "performer",
+      "billingOrder": 1
+    },
+    {
+      "personId": "person_director_sato",
+      "role": "director"
+    }
+  ],
+  "makerId": "maker_crescent",
+  "labelId": "label_nova",
+  "seriesIds": [],
+  "genreIds": [
+    "anniversary"
+  ],
+  "tagIds": [
+    "favorite"
+  ],
+  "assetIds": [
+    "asset_poster_demo_06"
+  ],
+  "mediaFileIds": [],
+  "createdAt": "2026-09-01T16:00:00+08:00",
+  "updatedAt": "2026-09-01T16:00:00+08:00"
+}

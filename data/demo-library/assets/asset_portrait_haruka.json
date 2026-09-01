@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_haruka",
+  "type": "portrait",
+  "storagePath": "/demo/portrait-haruka.svg",
+  "mimeType": "image/svg+xml",
+  "width": 700,
+  "height": 900
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "person_fujiwara_haruka",
+  "names": [
+    {
+      "language": "ja",
+      "value": "藤原はるか",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "藤原遥",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Haruka Fujiwara",
+      "type": "romanized"
+    },
+    {
+      "language": "ja",
+      "value": "春川はる",
+      "type": "former_name",
+      "validFrom": "2015-02",
+      "validTo": "2019-12"
+    },
+    {
+      "language": "ja",
+      "value": "はるちゃん",
+      "type": "alias"
+    }
+  ],
+  "activityStatus": "retired",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2015-02",
+        "precision": "month"
+      }
+    },
+    {
+      "type": "name_change",
+      "date": {
+        "value": "2020-01",
+        "precision": "month"
+      }
+    },
+    {
+      "type": "retirement",
+      "date": {
+        "value": "2024-08",
+        "precision": "month"
+      }
+    }
+  ],
+  "birthDate": {
+    "value": "1993-04-12",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "北海道",
+    "zh-CN": "北海道",
+    "en": "Hokkaido, Japan"
+  },
+  "heightCm": 160,
+  "measurements": {
+    "bustCm": 80,
+    "waistCm": 54,
+    "hipCm": 83,
+    "cup": "C"
+  },
+  "biographies": {
+    "ja": "旧名と引退履歴の表示確認に使用する架空データです。",
+    "zh-CN": "用于测试旧艺名、曾用名和引退时间线展示的虚构人物。",
+    "en": "Fictional data for demonstrating former names and retirement history."
+  },
+  "portraitAssetId": "asset_portrait_haruka",
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-01T17:00:00+08:00"
+}

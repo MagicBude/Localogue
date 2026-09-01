@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "label_lumen",
+  "kind": "label",
+  "names": {
+    "ja": "ルーメン",
+    "zh-CN": "流明",
+    "en": "Lumen"
+  },
+  "parentOrganizationId": "maker_aurora"
+}
