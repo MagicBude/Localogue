@@ -1,0 +1,9 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {"id":"same","ja":"一致","zh-CN":"一致","en":"Same","descriptionZh":"Evidence 与 Canonical Library 在当前比较规则下相同"},
+    {"id":"different","ja":"異なる","zh-CN":"不同","en":"Different","descriptionZh":"Evidence 与 Canonical Library 两侧均有值但不一致"},
+    {"id":"evidence_only","ja":"Evidence のみ","zh-CN":"仅 Evidence 有值","en":"Evidence only","descriptionZh":"Evidence 有值而 Canonical Library 当前缺失，可作为补全候选"},
+    {"id":"library_only","ja":"Library のみ","zh-CN":"仅资料库有值","en":"Library only","descriptionZh":"Canonical Library 有值而 Evidence 未提供，不代表应该删除"}
+  ]
+}

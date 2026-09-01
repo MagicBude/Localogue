@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ChangeEvent } from "react";
 
 import type { ImportPreview } from "@/domain/entities/evidence";
@@ -145,7 +146,12 @@ export function ImportWorkbench({ dictionary, uiLanguage }: ImportWorkbenchProps
       </section>
 
       {message ? (
-        <p className={`import-message import-message--${state}`}>{message}</p>
+        <div className={`import-message import-message--${state}`}>
+          <span>{message}</span>
+          {state === "saved" ? (
+            <Link href="/review">{dictionary.openReviewInbox}</Link>
+          ) : null}
+        </div>
       ) : null}
 
       {preview ? (

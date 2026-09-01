@@ -1,0 +1,5 @@
+id,ja,zh-CN,en,descriptionZh
+same,一致,一致,Same,Evidence 与 Canonical Library 在当前规则下相同
+different,異なる,不同,Different,Evidence 与 Canonical Library 两侧均有值但不一致
+evidence_only,Evidence のみ,仅 Evidence 有值,Evidence only,Evidence 有值而资料库缺失可作为补全候选
+library_only,Library のみ,仅资料库有值,Library only,资料库有值而 Evidence 未提供不代表应该删除

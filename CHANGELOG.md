@@ -1,5 +1,20 @@
 # 更新日志
 
+## V1-05 · Evidence Inbox 与实体匹配审核
+
+- 新增 `/review` Evidence Inbox，集中查看私人资料目录中保存的 Evidence。
+- 新增 `/review/[id]` 审核详情页，展示 Raw、Normalized 与 Canonical 三层数据。
+- 按规范化番号精确检测 Canonical Library 中是否已有同一 Work。
+- 新增保守 Entity Resolution：Person、Maker、Label、Series、Genre、Tag、Work Type 均采用规范化精确匹配。
+- Person 匹配覆盖正式名、本地化名、罗马字、旧艺名、曾用名、别名和其他名称。
+- 新增 `matched / new / ambiguous / unresolved` 实体解析状态。
+- 新增 `same / different / evidence_only / library_only` 字段比较状态。
+- 已有 Work 可对照番号、标题、发行日期、时长、简介、人物关系和分类关系。
+- 导入成功后可直接进入 Evidence 审核箱。
+- 新增已有作品冲突演示文件 `sample-existing-work.json`。
+- 新增 Review Analysis、Evidence Inbox、实体匹配教材文档和 ADR-013。
+- V1-05 仍不直接修改 Canonical Library，为 V1-06 字段级审核决策保留安全边界。
+
 ## V1-04 · Evidence-first 导入基础
 
 - 修复点击“应用筛选”后页面跳回顶部的问题，筛选提交继续使用 URL 但保留当前滚动位置。

@@ -1,0 +1,9 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {"id":"existing_clean","ja":"既存作品・一致","zh-CN":"已有作品 · 基本一致","en":"Existing · clean match","descriptionZh":"番号命中已有作品，当前比较字段均一致"},
+    {"id":"existing_conflict","ja":"既存作品・差分あり","zh-CN":"已有作品 · 存在差异","en":"Existing · conflicts","descriptionZh":"番号命中已有作品，但一个或多个字段存在差异"},
+    {"id":"new_work","ja":"新規作品候補","zh-CN":"新作品候选","en":"New work candidate","descriptionZh":"有番号，但当前 Canonical Library 中没有同番号作品"},
+    {"id":"missing_code","ja":"品番不足","zh-CN":"缺少番号","en":"Missing code","descriptionZh":"缺少可靠番号，无法进行最主要的作品唯一匹配"}
+  ]
+}

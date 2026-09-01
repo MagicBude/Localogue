@@ -1,0 +1,5 @@
+id,ja,zh-CN,en,descriptionZh
+matched,一致,已匹配,Matched,规范化后唯一精确命中已有实体
+new,新規候補,新实体候选,New candidate,来源有明确值但资料库中没有精确命中
+ambiguous,曖昧,存在歧义,Ambiguous,同一来源值精确命中了多个候选实体
+unresolved,未解決,未解决,Unresolved,输入本身不足以进入当前匹配流程

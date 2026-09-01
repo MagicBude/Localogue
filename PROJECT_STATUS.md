@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-04：Evidence-first 文件导入基础。**
+**V1-05：Evidence Inbox、实体匹配与差异审核基础。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -37,19 +37,26 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 解析警告；
 - Evidence 文件写入；
 - 真实导入默认写入 `data/library`，不修改 Demo Library；
-- Importer 不直接修改 Canonical Work / Person。
+- Importer 不直接修改 Canonical Work / Person；
+- `/review` Evidence Inbox；
+- 单条 Evidence 审核详情；
+- 按番号精确识别已有 Work；
+- Person 全姓名类型精确匹配；
+- Maker / Label / Series / Genre / Tag / Work Type 匹配；
+- 字段级 `same / different / evidence_only / library_only` 对照；
+- Review Analysis 仍不直接修改 Canonical Library。
 
 ## 下一阶段建议
 
-**V1-05：Review 与实体解析基础。**
+**V1-06：Review Decision 与正式归档计划。**
 
-1. Evidence Inbox 列表；
-2. 单条 Evidence Review 页面；
-3. 按番号检查已有 Work；
-4. Person 名称 / 别名候选匹配；
-5. Maker / Label / Series / Genre 候选匹配；
-6. 展示“新增 / 保留 / 冲突 / 待确认”；
-7. 先实现“确认创建全新 Work”，仍不做复杂自动合并。
+1. 字段级选择“采用 Evidence / 保留 Library”；
+2. 新人物候选明确“新建 / 绑定已有 / 忽略”；
+3. 歧义候选人工选择；
+4. 生成可预览的 Commit Plan；
+5. 最终确认后才写 Canonical JSON；
+6. 保存 Review Decision 与字段 Provenance；
+7. 写入失败时保证原 Canonical Library 不被部分污染。
 
 ## 当前不做
 

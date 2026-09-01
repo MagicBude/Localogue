@@ -9,6 +9,7 @@ const dictionaries = {
     navAbout: "設計について",
     navBrowse: "分類ブラウズ",
     navImport: "インポート",
+    navReview: "レビュー",
     uiLanguage: "UI言語",
     metadataLanguage: "メタデータ",
     theme: "テーマ",
@@ -119,6 +120,7 @@ const dictionaries = {
     importSafetyTitle: "この段階では正式ライブラリを直接変更しません",
     importSafetyBody: "V1-04 は異なる形式を統一 Evidence に変換する段階です。Evidence を保存しても Work / Person は変更されず、後続の照合・差分確認・Review を経て初めて Canonical Library に反映されます。",
     importPreviewLimit: "ページ負荷を抑えるため先頭100件のみ表示します。Evidence 保存時は全件保存されます。",
+    openReviewInbox: "Evidence レビューを開く",
   },
   "zh-CN": {
     brandSubtitle: "本地优先的个人媒体资料库",
@@ -128,6 +130,7 @@ const dictionaries = {
     navAbout: "设计说明",
     navBrowse: "分类浏览",
     navImport: "导入",
+    navReview: "审核",
     uiLanguage: "界面语言",
     metadataLanguage: "元数据语言",
     theme: "主题",
@@ -238,6 +241,7 @@ const dictionaries = {
     importSafetyTitle: "这一阶段不会直接修改正式资料库",
     importSafetyBody: "V1-04 先验证不同格式能否统一进入 Evidence。保存 Evidence 只负责留档，不会修改 Work / Person；后续仍需实体匹配、差异比较和人工 Review，才能进入 Canonical Library。",
     importPreviewLimit: "为避免页面过重，预览仅显示前 100 条；保存 Evidence 时仍会保存全部记录。",
+    openReviewInbox: "打开 Evidence 审核箱",
   },
   en: {
     brandSubtitle: "A local-first personal media catalog",
@@ -247,6 +251,7 @@ const dictionaries = {
     navAbout: "Design",
     navBrowse: "Browse",
     navImport: "Import",
+    navReview: "Review",
     uiLanguage: "UI language",
     metadataLanguage: "Metadata",
     theme: "Theme",
@@ -357,6 +362,7 @@ const dictionaries = {
     importSafetyTitle: "This stage does not modify the canonical library directly",
     importSafetyBody: "V1-04 first proves that different formats can become unified Evidence. Saving Evidence only archives the input; Work / Person stay unchanged until entity matching, diff review, and explicit confirmation are implemented.",
     importPreviewLimit: "Only the first 100 items are shown to keep the page light; saving Evidence still stores every item.",
+    openReviewInbox: "Open Evidence review",
   },
 } as const;
 

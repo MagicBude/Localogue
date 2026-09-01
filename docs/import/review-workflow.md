@@ -35,3 +35,34 @@ Review 是 Localogue 的核心页面之一。
 ## 批量审核
 
 对于完全无冲突的新数据，可以支持批量确认，但仍需有导入记录可追溯。
+
+
+## V1-05 已实现部分
+
+当前代码已经实现：
+
+```text
+Evidence Store
+  ↓
+Evidence Inbox
+  ↓
+Work 番号匹配
+  ↓
+Entity Resolution
+  ↓
+Field Comparison
+  ↓
+只读 Review 页面
+```
+
+尚未实现：
+
+```text
+Review Decision
+  ↓
+Commit Plan
+  ↓
+Canonical Write
+```
+
+因此 V1-05 是“看清差异”的阶段，V1-06 才是“做出并执行决策”的阶段。

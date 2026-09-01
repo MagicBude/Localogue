@@ -112,3 +112,15 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 未匹配的人物、厂商、系列、Genre 在 Evidence 阶段允许保留来源字符串，禁止 Parser 为了方便伪造内部 ID。
 - 导入真实数据默认写入 `data/library` 或 `LOCALOGUE_LIBRARY_PATH`，不得写入公开 `data/demo-library`。
 - 新增导入格式时必须同步 `docs/import/`、示例文件和必要的解析警告说明。
+
+
+## V1-05 实现约束补充
+
+- Evidence 是来源历史记录，Review Analysis 应根据“当前 Evidence + 当前 Canonical Library”重新计算，不把临时匹配结果写死回 Evidence。
+- 自动 Entity Resolution 只能使用保守、可解释的规范化精确匹配；模糊候选可以未来作为建议，但不得自动绑定。
+- Person 匹配必须覆盖 `Person.names` 的全部姓名类型，避免旧艺名和别名造成重复人物。
+- Organization 匹配必须先限制 `kind`，Maker 不得跨到 Label / Agency 中猜测。
+- `evidence_only` 不等于“自动补全”，`library_only` 更不等于“应删除”；所有字段差异必须等待 Review Decision。
+- V1-05 Review 页面只展示分析，不得添加绕过字段决策的“一键覆盖资料库”逻辑。
+- 新增 Review / Resolution 状态时，要同步 Domain Type、三语 UI 映射和治理文档。
+- V1-06 如果开始正式写 Canonical Library，必须先设计 Commit Plan 与失败回滚/原子写入策略。

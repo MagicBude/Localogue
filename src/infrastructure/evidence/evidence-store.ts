@@ -40,3 +40,20 @@ export async function savePreviewAsEvidence(preview: ImportPreview): Promise<Evi
   await Promise.all(records.map((record) => store.writeEntity("evidence", record)));
   return records;
 }
+
+/**
+ * Evidence Inbox 读取的是“私人资料目录”中的证据，而不是公开 Demo Library。
+ *
+ * 这两个读取源在默认开发模式下故意不同：
+ * - Canonical Library：data/demo-library
+ * - Evidence Inbox：data/library/evidence
+ */
+export async function listEvidenceRecords(): Promise<EvidenceRecord[]> {
+  const records = await store.readCollection<EvidenceRecord>("evidence");
+  return records.sort((a, b) => b.importedAt.localeCompare(a.importedAt));
+}
+
+export async function findEvidenceRecordById(id: string): Promise<EvidenceRecord | null> {
+  const records = await listEvidenceRecords();
+  return records.find((record) => record.id === id) ?? null;
+}

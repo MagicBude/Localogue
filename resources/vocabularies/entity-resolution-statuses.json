@@ -1,0 +1,9 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {"id":"matched","ja":"一致","zh-CN":"已匹配","en":"Matched","descriptionZh":"规范化后唯一精确命中已有实体"},
+    {"id":"new","ja":"新規候補","zh-CN":"新实体候选","en":"New candidate","descriptionZh":"来源有明确值，但资料库中没有精确命中"},
+    {"id":"ambiguous","ja":"曖昧","zh-CN":"存在歧义","en":"Ambiguous","descriptionZh":"同一来源值精确命中了多个候选实体"},
+    {"id":"unresolved","ja":"未解決","zh-CN":"未解决","en":"Unresolved","descriptionZh":"输入本身不足以进入当前匹配流程，预留给后续规则"}
+  ]
+}

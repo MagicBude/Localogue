@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-04：Evidence-first 文件导入基础阶段**。
+当前处于 **V1-05：Evidence Inbox、实体匹配与差异审核基础阶段**。
 
 当前 V1 已完成：
 
@@ -34,7 +34,11 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - 人物详情页复用统一 WorkQuery 进行二次筛选；
 - 完全虚构的演示数据和演示图片；
 - JSON / NFO / CSV / XLSX 导入预览；
-- Evidence 文件保存。
+- Evidence 文件保存；
+- Evidence Inbox；
+- 按番号检测已有作品；
+- 人物 / 组织 / 系列 / Genre / Work Type 精确实体匹配；
+- Evidence 与 Canonical Work 字段差异对照。
 
 ## 技术栈
 
@@ -275,3 +279,50 @@ V1-04 还修复了“应用筛选”提交后跳回页面顶部的问题：筛�
 6. `src/application/importers/`
 7. `src/app/api/import/preview/route.ts`
 8. `src/components/import-workbench.tsx`
+
+
+## V1-05：Evidence Inbox 与实体匹配
+
+V1-05 在 V1-04 的“保存 Evidence”之后加入正式 Review 入口：
+
+```text
+/import
+  ↓
+保存 Evidence
+  ↓
+/review
+  ↓
+Work 重复检测
+  ↓
+Entity Resolution
+  ↓
+字段差异对照
+```
+
+当前自动匹配坚持“规范化后的精确匹配”：
+
+- Person 会检查正式名、本地化名、罗马字、旧艺名、曾用名、别名等全部 `Person.names`；
+- Maker / Label 会先限定 Organization Kind，再进行名称匹配；
+- Series / Genre / Tag / Work Type 可通过稳定 ID 或多语言名称匹配；
+- 唯一命中为 `matched`，无命中为 `new`，多个命中为 `ambiguous`；
+- 暂不使用编辑距离、拼音、AI 等模糊算法自动绑定实体。
+
+已有作品会进行字段级比较：
+
+```text
+same
+different
+evidence_only
+library_only
+```
+
+V1-05 **仍然不会自动写入 Canonical Library**。下一阶段会在 Review Analysis 上加入字段级决策和正式 Commit Plan。
+
+建议学习：
+
+1. `docs/development/v1-05-evidence-inbox-walkthrough.md`
+2. `docs/development/v1-05-entity-resolution-walkthrough.md`
+3. `src/domain/entities/review.ts`
+4. `src/application/review/entity-resolution-service.ts`
+5. `src/app/review/page.tsx`
+6. `src/app/review/[id]/page.tsx`

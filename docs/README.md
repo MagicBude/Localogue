@@ -50,6 +50,9 @@
 - [来源类型](vocabulary/source-types.md)
 - [日期精度](vocabulary/date-precision.md)
 - [资料治理状态](vocabulary/curation-statuses.md)
+- [Review 作品状态](vocabulary/review-work-statuses.md)
+- [实体匹配状态](vocabulary/entity-resolution-statuses.md)
+- [字段比较状态](vocabulary/field-comparison-statuses.md)
 
 ## 资料治理
 
@@ -140,3 +143,12 @@
 - [已选筛选条件 Chips](discovery/active-filter-chips.md)
 - [响应式筛选器设计](ui/responsive-filters.md)
 - [Maker / Label / Series 详情页](ui/catalog-detail-pages.md)
+
+
+## V1-05 新增实现文档
+
+- [V1-05 Review Analysis 模型](curation/v1-05-review-analysis.md)
+- [教材：Evidence Inbox 与 Server Component](development/v1-05-evidence-inbox-walkthrough.md)
+- [教材：实体匹配是怎样工作的](development/v1-05-entity-resolution-walkthrough.md)
+- [V1-05 Evidence Inbox 使用说明](import/v1-05-review-inbox.md)
+- [ADR-013：保守的规范化精确实体匹配](decisions/ADR-013-conservative-exact-entity-resolution.md)

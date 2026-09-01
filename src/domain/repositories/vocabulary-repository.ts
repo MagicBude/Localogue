@@ -21,7 +21,10 @@ export type VocabularyName =
   | "person-roles"
   | "asset-types"
   | "languages"
-  | "built-in-tags";
+  | "built-in-tags"
+  | "review-work-statuses"
+  | "entity-resolution-statuses"
+  | "field-comparison-statuses";
 
 export interface VocabularyRepository {
   load(name: VocabularyName): Promise<VocabularyDocument>;

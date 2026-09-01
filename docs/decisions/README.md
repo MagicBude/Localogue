@@ -15,3 +15,5 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-011：V1 优先单一 Next.js 应用](ADR-011-single-app-before-monorepo.md)
 - [ADR-012：公开 Demo 与私人资料库隔离](ADR-012-separate-demo-and-private-library.md)
+
+- [ADR-013：V1 实体匹配采用保守的规范化精确匹配](ADR-013-conservative-exact-entity-resolution.md)
