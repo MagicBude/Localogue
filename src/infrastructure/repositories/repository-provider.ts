@@ -12,7 +12,7 @@ import { JsonLibraryRepository } from "@/infrastructure/repositories/json-librar
 function resolveLibraryRoot(): string {
   const configured = process.env.LOCALOGUE_LIBRARY_PATH?.trim();
   if (configured) {
-    return path.resolve(process.cwd(), configured);
+    return path.resolve(/* turbopackIgnore: true */ process.cwd(), configured);
   }
 
   return path.join(process.cwd(), "data", "demo-library");

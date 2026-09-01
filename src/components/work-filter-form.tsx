@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { WorkQuery } from "@/domain/queries/work-query";
 import type { UiDictionary } from "@/i18n/ui";
+import { UrlQueryForm } from "@/components/url-query-form";
 
 export interface FilterOption {
   id: string;
@@ -27,7 +28,8 @@ interface WorkFilterFormProps {
 }
 
 /**
- * 第一版筛选器故意使用普通 GET Form，而不是一上来引入复杂状态管理。
+ * 筛选器保持标准 GET Query 语义，但 V1-04 用 UrlQueryForm 接管导航，
+ * 从而在提交“应用筛选”时保留当前滚动位置。
  *
  * 提交后所有条件都会进入 URL，这带来三个好处：
  * 1. 刷新页面不丢筛选条件；
@@ -60,7 +62,7 @@ export function WorkFilterForm({
         <Link href={action}>{dictionary.clear}</Link>
       </div>
 
-      <form action={action} className="filter-form" method="get">
+      <UrlQueryForm action={action} className="filter-form">
         {view !== "grid" ? <input name="view" type="hidden" value={view} /> : null}
         {fixedPersonId ? (
           <input name="person" type="hidden" value={fixedPersonId} />
@@ -218,7 +220,7 @@ export function WorkFilterForm({
         <button className="primary-button" type="submit">
           {dictionary.apply}
         </button>
-      </form>
+      </UrlQueryForm>
     </aside>
   );
 }

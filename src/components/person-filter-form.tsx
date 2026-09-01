@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import type { PersonQuery } from "@/domain/queries/person-query";
 import type { UiDictionary } from "@/i18n/ui";
+import { UrlQueryForm } from "@/components/url-query-form";
 
 export interface PersonFilterOption {
   id: string;
@@ -34,7 +35,7 @@ export function PersonFilterForm({
   retirementYears,
 }: PersonFilterFormProps) {
   return (
-    <form action={action} className="person-filter-panel" method="get">
+    <UrlQueryForm action={action} className="person-filter-panel">
       <div className="person-filter-panel__heading">
         <strong>{dictionary.peopleFilters}</strong>
         <Link href={action}>{dictionary.clear}</Link>
@@ -137,6 +138,6 @@ export function PersonFilterForm({
           {dictionary.apply}
         </button>
       </div>
-    </form>
+    </UrlQueryForm>
   );
 }

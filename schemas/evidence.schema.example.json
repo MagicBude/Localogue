@@ -4,15 +4,26 @@
   "sourceType": "nfo",
   "sourceName": "本地 NFO 示例",
   "importedAt": "2026-09-01T17:00:00+08:00",
-  "sourcePath": "D:/Media/ABC-123/ABC-123.nfo",
+  "sourcePath": "D:/Media/DEMO-001/DEMO-001.nfo",
   "raw": {
     "title": "示例作品标题",
-    "code": "ABC-123",
+    "code": "DEMO-001",
     "runtime": "125"
   },
   "normalized": {
-    "code": "ABC-123",
-    "durationMinutes": 125
+    "code": "DEMO-001",
+    "title": "示例作品标题",
+    "durationMinutes": 125,
+    "performers": [],
+    "directors": [],
+    "series": [],
+    "genres": [],
+    "tags": [],
+    "workTypes": []
   },
-  "warnings": []
+  "warnings": [
+    {
+      "code": "missing_performers"
+    }
+  ]
 }

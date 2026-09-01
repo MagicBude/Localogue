@@ -69,6 +69,8 @@
 - [NFO](import/nfo.md)
 - [文件夹扫描](import/folder-scanning.md)
 - [审核流程](import/review-workflow.md)
+- [V1-04 已实现格式](import/v1-04-supported-formats.md)
+- [Evidence 文件存储](import/evidence-storage.md)
 
 ## 浏览与检索
 
@@ -133,6 +135,8 @@
 - [响应式筛选栏与滚动位置修复](development/v1-03-responsive-filter-and-scroll.md)
 - [URL 分页实现讲解](development/v1-03-pagination-walkthrough.md)
 - [人物库高级筛选讲解](development/v1-03-person-filtering-walkthrough.md)
+- [V1-04 导入流水线实现导读](development/v1-04-import-pipeline-walkthrough.md)
+- [V1-04 应用筛选滚动位置修复](development/v1-04-filter-submit-scroll.md)
 - [已选筛选条件 Chips](discovery/active-filter-chips.md)
 - [响应式筛选器设计](ui/responsive-filters.md)
 - [Maker / Label / Series 详情页](ui/catalog-detail-pages.md)

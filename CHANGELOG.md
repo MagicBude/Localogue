@@ -1,5 +1,16 @@
 # 更新日志
 
+## V1-04 · Evidence-first 导入基础
+
+- 修复点击“应用筛选”后页面跳回顶部的问题，筛选提交继续使用 URL 但保留当前滚动位置。
+- 新增 `/import` 导入工作台。
+- 新增 JSON、NFO、CSV、XLSX 四种文件预览。
+- 新增粘贴 JSON 直接生成导入预览。
+- 建立 Importer Registry、统一 Normalizer 与基础 Validator。
+- 预览同时展示 Raw Data、Normalized Data 与解析警告。
+- 新增 Evidence Store，确认后写入私人 `data/library/evidence`，不修改正式作品和人物。
+- 新增四种虚构导入示例与 V1-04 教材级中文文档。
+
 ## V1-03 · 浏览体验与实体详情增强
 
 - 修复作品筛选栏过窄、日期控件和长文本导致横向滚动的问题。

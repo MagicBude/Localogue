@@ -102,3 +102,13 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 人物搜索必须覆盖 `Person.names` 中所有姓名类型，不得只搜索 primary name；
 - Maker、Label、Series 等关系实体应支持详情页和反向导航，而不仅用于 `<select>`；
 - 继续保持教材级中文注释：重点解释设计原因、Web 原理和未来 SQLite 映射，不写无意义逐行翻译式注释。
+
+
+## V1-04 实现约束补充
+
+- 点击“应用筛选”属于条件更新，不应把用户强制送回页面顶部；URL 仍然是筛选状态真相源。
+- Importer 只负责把外部格式解析为 Evidence Candidate，不得直接创建或覆盖 Canonical Work / Person。
+- Parser、Normalizer、Validator、Entity Resolution、Review 必须保持职责分离。
+- 未匹配的人物、厂商、系列、Genre 在 Evidence 阶段允许保留来源字符串，禁止 Parser 为了方便伪造内部 ID。
+- 导入真实数据默认写入 `data/library` 或 `LOCALOGUE_LIBRARY_PATH`，不得写入公开 `data/demo-library`。
+- 新增导入格式时必须同步 `docs/import/`、示例文件和必要的解析警告说明。

@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-03：File-backed Library 浏览体验与实体详情增强阶段**。
+当前处于 **V1-04：Evidence-first 文件导入基础阶段**。
 
 当前 V1 已完成：
 
@@ -32,7 +32,9 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - 演员、导演、Maker、Label、Series、Genre、Work Type、Tag、年份、日期范围、时长筛选的 Query Engine 基础；
 - 发行日期、时长、番号、标题、加入时间、更新时间排序基础；
 - 人物详情页复用统一 WorkQuery 进行二次筛选；
-- 完全虚构的演示数据和演示图片。
+- 完全虚构的演示数据和演示图片；
+- JSON / NFO / CSV / XLSX 导入预览；
+- Evidence 文件保存。
 
 ## 技术栈
 
@@ -218,3 +220,58 @@ V1-03 在 V1-02 的多维筛选基础上继续强化“资料探索”体验：
 4. `src/components/work-filter-chips.tsx`；
 5. `src/components/pagination.tsx`；
 6. `src/app/makers/[id]/page.tsx`。
+
+## V1-04：Evidence-first 文件导入
+
+V1-04 第一次让 Localogue 可以接收自己的资料，而不再只是浏览 Demo Library。
+
+新增 `/import`，支持：
+
+- JSON 文件；
+- 直接粘贴 JSON；
+- NFO；
+- CSV；
+- XLSX。
+
+处理链路：
+
+```text
+外部文件
+  ↓
+Importer
+  ↓
+Normalizer
+  ↓
+Validator
+  ↓
+Preview
+  ↓
+Evidence Store
+```
+
+这一阶段仍然**不会直接写入正式 `works/` 或 `people/`**。真实导入默认保存到 Git 忽略的：
+
+```text
+data/library/evidence/
+```
+
+也可以通过：
+
+```bash
+LOCALOGUE_LIBRARY_PATH=D:/YourLibrary
+```
+
+将资料目录放到仓库之外。
+
+V1-04 还修复了“应用筛选”提交后跳回页面顶部的问题：筛选仍然保存到 URL，但使用 Next.js 客户端导航保留滚动位置。
+
+建议学习：
+
+1. `docs/development/v1-04-filter-submit-scroll.md`
+2. `src/components/url-query-form.tsx`
+3. `docs/development/v1-04-import-pipeline-walkthrough.md`
+4. `src/domain/entities/evidence.ts`
+5. `src/infrastructure/importers/`
+6. `src/application/importers/`
+7. `src/app/api/import/preview/route.ts`
+8. `src/components/import-workbench.tsx`
