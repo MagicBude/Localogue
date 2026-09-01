@@ -38,9 +38,10 @@ const reviewDictionary = {
     workTypes: "作品タイプ",
     noValues: "なし",
     candidates: "候補",
-    analysisOnlyTitle: "V1-05 は分析のみです",
-    analysisOnlyBody: "この画面では Evidence と既存 Library の差分を確認できますが、まだ Work / Person を自動作成・上書きしません。フィールド単位の採用判断と正式反映は次段階で追加します。",
+    analysisOnlyTitle: "V1-06 は明示的な確認後のみ書き込みます",
+    analysisOnlyBody: "Evidence の比較自体は読み取り専用です。下部で判断を選び、Commit Plan を生成し、最後に明示的に確認した場合のみ Canonical Library を変更します。",
     canonicalWork: "正式作品を見る",
+    committed: "コミット済み",
   },
   "zh-CN": {
     inboxTitle: "Evidence 审核箱",
@@ -71,9 +72,10 @@ const reviewDictionary = {
     workTypes: "作品类型",
     noValues: "无",
     candidates: "候选项",
-    analysisOnlyTitle: "V1-05 只做分析，不直接归档",
-    analysisOnlyBody: "这一页可以查看 Evidence 与现有资料库的匹配和差异，但暂时不会自动新建或覆盖 Work / Person。字段级采用策略和正式写入会在下一阶段加入。",
+    analysisOnlyTitle: "V1-06 只有明确确认后才会写入",
+    analysisOnlyBody: "Evidence 对比本身仍然只读。只有在下方明确选择决策、生成 Commit Plan，并再次确认后，才会修改 Canonical Library。",
     canonicalWork: "查看正式作品",
+    committed: "已归档",
   },
   en: {
     inboxTitle: "Evidence Review Inbox",
@@ -104,9 +106,10 @@ const reviewDictionary = {
     workTypes: "Work types",
     noValues: "None",
     candidates: "Candidates",
-    analysisOnlyTitle: "V1-05 is analysis-only",
-    analysisOnlyBody: "This page compares Evidence with the current library, but it does not create or overwrite Work / Person yet. Field-level decisions and canonical writes come next.",
+    analysisOnlyTitle: "V1-06 writes only after explicit confirmation",
+    analysisOnlyBody: "Evidence comparison remains read-only. The Canonical Library changes only after you choose decisions, generate a Commit Plan, and explicitly confirm it.",
     canonicalWork: "Open canonical work",
+    committed: "Committed",
   },
 } as const;
 

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "evidence_example_001",
+  "generatedAt": "2026-09-01T15:00:00.000Z",
+  "mode": "update",
+  "targetWorkId": "work_demo_001",
+  "targetWorkCode": "DEMO-001",
+  "operations": [
+    {
+      "kind": "update_work",
+      "entityId": "work_demo_001",
+      "label": "DEMO-001",
+      "detail": "更新 Work：时长"
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "fingerprint": "sha256-example"
+}

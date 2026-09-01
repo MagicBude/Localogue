@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "review-field-decisions",
+  "items": [
+    { "id": "keep_library", "ja": "ライブラリを保持", "zh-CN": "保留资料库", "en": "Keep library" },
+    { "id": "use_evidence", "ja": "Evidence を採用", "zh-CN": "采用 Evidence", "en": "Use Evidence" }
+  ]
+}

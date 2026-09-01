@@ -8,6 +8,7 @@ import { getReviewDictionary } from "@/i18n/review";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
 import { listEvidenceRecords } from "@/infrastructure/evidence/evidence-store";
+import { listCommitReceipts } from "@/infrastructure/evidence/review-commit-store";
 import { getUserPreferences } from "@/lib/preferences";
 
 export const metadata: Metadata = { title: "Evidence 审核" };
@@ -16,10 +17,12 @@ export default async function ReviewInboxPage() {
   const preferences = await getUserPreferences();
   const text = getReviewDictionary(preferences.uiLanguage);
   const records = await listEvidenceRecords();
-  const [analyses, workStatusLabels] = await Promise.all([
+  const [analyses, workStatusLabels, receipts] = await Promise.all([
     analyzeEvidenceRecords(records, libraryRepository, vocabularyRepository),
     getVocabularyLabelMap(vocabularyRepository, "review-work-statuses", preferences.uiLanguage),
+    listCommitReceipts(),
   ]);
+  const committedEvidenceIds = new Set(receipts.map((receipt) => receipt.evidenceId));
 
   return (
     <div className="page-stack">
@@ -50,6 +53,9 @@ export default async function ReviewInboxPage() {
                   <span className={`review-status review-status--${analysis.workStatus}`}>
                     {workStatusLabels.get(analysis.workStatus) ?? analysis.workStatus}
                   </span>
+                  {committedEvidenceIds.has(analysis.evidenceId) ? (
+                    <span className="review-status review-status--committed">{text.committed}</span>
+                  ) : null}
                   <span className="work-code">{analysis.code ?? "—"}</span>
                 </div>
                 <h2>{analysis.title ?? analysis.sourceName}</h2>

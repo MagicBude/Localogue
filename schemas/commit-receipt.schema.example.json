@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "commit_example_001",
+  "evidenceId": "evidence_example_001",
+  "committedAt": "2026-09-01T15:01:00.000Z",
+  "fingerprint": "sha256-example",
+  "targetWorkId": "work_demo_001",
+  "targetWorkCode": "DEMO-001",
+  "operationCount": 1
+}

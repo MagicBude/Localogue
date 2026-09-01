@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1 File-backed Library 开发**。
+当前阶段：**V1-06 File-backed Library / Canonical Commit 开发**。
 
 V1 当前约束：
 
@@ -124,3 +124,15 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - V1-05 Review 页面只展示分析，不得添加绕过字段决策的“一键覆盖资料库”逻辑。
 - 新增 Review / Resolution 状态时，要同步 Domain Type、三语 UI 映射和治理文档。
 - V1-06 如果开始正式写 Canonical Library，必须先设计 Commit Plan 与失败回滚/原子写入策略。
+
+
+## V1-06 实现约束补充
+
+- 默认 `data/demo-library` 是只读教学资料，不得通过 Review/Commit API 修改。
+- 任何 Canonical 写入必须要求显式 `LOCALOGUE_LIBRARY_PATH`，保证读写目标是同一个私人 Library。
+- Review Analysis、Review Decisions、Commit Plan、Commit Executor 必须保持分层，禁止在 React 页面中直接调用文件写入。
+- ambiguous / unresolved 实体不得拥有自动绑定默认值；没有人工明确决策时必须产生 blocker。
+- Work Type 属于受控词表，未知输入不得自动生成新的 Work Type ID。
+- Commit 执行前必须重新生成 Plan 并比较 fingerprint，不能信任浏览器持有的旧计划。
+- JSON V1 跨文件写入不具备 ACID Transaction；写入顺序必须优先保证引用安全，并保存 Commit Receipt。
+- 新增正式写入能力时必须同步 `docs/architecture/commit-plan.md`、相关 ADR 和教材文档。

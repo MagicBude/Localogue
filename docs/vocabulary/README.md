@@ -29,3 +29,5 @@ solo
 - 词表可逐步扩展，不追求 V0 一次穷举所有行业术语；
 - 文档表格用于人阅读；
 - `resources/vocabularies/` 中的 JSON 用于未来程序读取。
+- [Review 字段决策](review-field-decisions.md)
+- [实体审核动作](entity-review-actions.md)

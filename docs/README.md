@@ -20,6 +20,7 @@
 - [多语言架构](architecture/localization.md)
 - [存储演进](architecture/storage-evolution.md)
 - [查询引擎](architecture/query-engine.md)
+- [Commit Plan 架构](architecture/commit-plan.md)
 
 ## 数据模型
 
@@ -53,6 +54,8 @@
 - [Review 作品状态](vocabulary/review-work-statuses.md)
 - [实体匹配状态](vocabulary/entity-resolution-statuses.md)
 - [字段比较状态](vocabulary/field-comparison-statuses.md)
+- [Review 字段决策](vocabulary/review-field-decisions.md)
+- [实体审核动作](vocabulary/entity-review-actions.md)
 
 ## 资料治理
 
@@ -61,6 +64,7 @@
 - [重复检测](curation/duplicate-detection.md)
 - [实体匹配](curation/entity-resolution.md)
 - [字段冲突](curation/conflict-resolution.md)
+- [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
 
 ## 导入
 
@@ -108,6 +112,7 @@
 - [资源文件](storage/assets.md)
 - [文件存储模式](storage/storage-modes.md)
 - [SQLite 迁移](storage/sqlite-migration.md)
+- [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
 
 ## 开发
 
@@ -152,3 +157,13 @@
 - [教材：实体匹配是怎样工作的](development/v1-05-entity-resolution-walkthrough.md)
 - [V1-05 Evidence Inbox 使用说明](import/v1-05-review-inbox.md)
 - [ADR-013：保守的规范化精确实体匹配](decisions/ADR-013-conservative-exact-entity-resolution.md)
+
+
+## V1-06 新增实现文档
+
+- [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
+- [Commit Plan 架构](architecture/commit-plan.md)
+- [教材：从 Review 到 Commit Plan](development/v1-06-commit-plan-walkthrough.md)
+- [教材：Demo 与私人可写 Library](development/v1-06-private-library-mode.md)
+- [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
+- [ADR-014：正式写入前必须经过 Commit Plan](decisions/ADR-014-explicit-commit-plan-before-canonical-write.md)

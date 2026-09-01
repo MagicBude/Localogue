@@ -178,6 +178,22 @@ export class JsonLibraryRepository implements LibraryRepository {
   savePerson(person: Person): Promise<void> {
     return this.store.writeEntity("people", person);
   }
+
+  saveOrganization(organization: Organization): Promise<void> {
+    return this.store.writeEntity("organizations", organization);
+  }
+
+  saveSeries(series: Series): Promise<void> {
+    return this.store.writeEntity("series", series);
+  }
+
+  saveGenre(genre: Genre): Promise<void> {
+    return this.store.writeEntity("genres", genre);
+  }
+
+  saveTag(tag: Tag): Promise<void> {
+    return this.store.writeEntity("tags", tag);
+  }
 }
 
 function matchesWork(work: Work, query: WorkQuery): boolean {

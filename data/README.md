@@ -50,3 +50,7 @@ LOCALOGUE_LIBRARY_PATH=./data/library
 ```
 
 物理隔离。
+## V1-06 私人 Canonical Library
+
+默认 `data/demo-library` 只读。可执行 `pnpm library:init` 把 Demo Canonical 数据复制到 Git 忽略的 `data/library`，再通过 `.env.local` 设置 `LOCALOGUE_LIBRARY_PATH=./data/library` 开启可写私人模式。正式归档留痕保存在私人 Library 的 `review-commits/`。
+

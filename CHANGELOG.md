@@ -1,5 +1,22 @@
 # 更新日志
 
+## V1-06 · Review Decision 与 Canonical Commit
+
+- 新增字段级 `keep_library / use_evidence` 审核决策。
+- 新增实体级 `use_match / bind_existing / create_new / skip` 决策。
+- ambiguous / unresolved 实体不再提供默认动作，必须人工明确处理。
+- 新增 Commit Plan，正式写入前可预览将创建和修改的实体。
+- 新增 SHA-256 fingerprint；执行前服务器重新生成计划，拒绝过期 Plan。
+- 新增 Canonical Commit API 与 Commit Executor。
+- 新增 Person、Organization、Series、Genre、Tag 的 JSON Repository 写入能力。
+- Canonical JSON 写入顺序固定为“新依赖实体 → Work → Commit Receipt”。
+- 新增 `review-commits` 留痕，Evidence Inbox 可识别已归档记录。
+- 默认 Demo Library 明确设为只读；只有配置 `LOCALOGUE_LIBRARY_PATH` 才允许正式归档。
+- 新增 `pnpm library:init`，可把 Demo Canonical 数据安全复制到 Git 忽略的私人 Library 用于学习和测试。
+- `validate:data` 会读取 `.env.local`，使 CLI 校验与 Next.js 使用同一个 Library。
+- 新增 Commit Plan、乐观并发、JSON 写入安全和私人 Library 模式教材文档。
+- 新增 ADR-014，规定任何 Canonical 写入必须先经过 Commit Plan 和明确确认。
+
 ## V1-05 · Evidence Inbox 与实体匹配审核
 
 - 新增 `/review` Evidence Inbox，集中查看私人资料目录中保存的 Evidence。

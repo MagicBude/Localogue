@@ -39,4 +39,8 @@ export interface LibraryRepository {
 
   saveWork(work: Work): Promise<void>;
   savePerson(person: Person): Promise<void>;
+  saveOrganization(organization: Organization): Promise<void>;
+  saveSeries(series: Series): Promise<void>;
+  saveGenre(genre: Genre): Promise<void>;
+  saveTag(tag: Tag): Promise<void>;
 }

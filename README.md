@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-05：Evidence Inbox、实体匹配与差异审核基础阶段**。
+当前处于 **V1-06：Review Decision、Commit Plan 与 Canonical JSON 正式归档阶段**。
 
 当前 V1 已完成：
 
@@ -38,7 +38,13 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - Evidence Inbox；
 - 按番号检测已有作品；
 - 人物 / 组织 / 系列 / Genre / Work Type 精确实体匹配；
-- Evidence 与 Canonical Work 字段差异对照。
+- Evidence 与 Canonical Work 字段差异对照；
+- 字段级审核决策；
+- 人物 / 组织 / Series / Genre / Tag 实体级审核决策；
+- Commit Plan 预览；
+- fingerprint 过期计划保护；
+- 私人 JSON Canonical Library 正式写入；
+- Commit Receipt 留痕。
 
 ## 技术栈
 
@@ -155,7 +161,21 @@ data/demo-library/
 
 仓库中的 `DEMO-*` 作品、人物、厂商和图片全部是虚构示例，仅用于开发和学习。
 
-真实个人资料后续会提供更明确的“用户资料目录”和导入流程，不应直接混入 Git 仓库中的 Demo 数据。
+真实个人资料使用 Git 忽略的 `data/library/` 或仓库外 `LOCALOGUE_LIBRARY_PATH`。
+
+V1-06 起，默认 Demo 模式是只读的。要练习正式归档，可以先执行：
+
+```bash
+pnpm library:init
+```
+
+然后创建 `.env.local`：
+
+```text
+LOCALOGUE_LIBRARY_PATH=./data/library
+```
+
+重新启动 `pnpm dev` 后，页面、Review 和 Commit 都会使用同一个私人 Canonical Library。
 
 ## 项目原则摘要
 
@@ -316,7 +336,23 @@ evidence_only
 library_only
 ```
 
-V1-05 **仍然不会自动写入 Canonical Library**。下一阶段会在 Review Analysis 上加入字段级决策和正式 Commit Plan。
+V1-06 在这个基础上加入了真正的安全写入闭环：
+
+```text
+Review Analysis
+  ↓
+Review Decisions
+  ↓
+Commit Plan
+  ↓
+Explicit Confirm
+  ↓
+Fingerprint Recheck
+  ↓
+Canonical JSON + Commit Receipt
+```
+
+默认 Demo 模式仍然禁止写入，只有显式配置私人 `LOCALOGUE_LIBRARY_PATH` 后才启用正式归档。
 
 建议学习：
 
@@ -326,3 +362,21 @@ V1-05 **仍然不会自动写入 Canonical Library**。下一阶段会在 Review
 4. `src/application/review/entity-resolution-service.ts`
 5. `src/app/review/page.tsx`
 6. `src/app/review/[id]/page.tsx`
+
+
+## V1-06：Review Decision 与 Commit Plan
+
+V1-06 第一次允许审核后的 Evidence 正式进入 Canonical Library，但没有加入“一键覆盖”。
+
+字段冲突可以明确选择“保留资料库”或“采用 Evidence”；实体关系可以选择使用精确匹配、绑定歧义候选、创建新实体或跳过。
+
+生成 Commit Plan 后，页面会列出准备创建/修改的实体以及 blockers / warnings。最终确认时服务器重新生成计划并比较 SHA-256 fingerprint，避免旧页面依据过期资料执行写入。
+
+推荐学习：
+
+1. `docs/curation/v1-06-review-decisions.md`
+2. `docs/architecture/commit-plan.md`
+3. `docs/development/v1-06-commit-plan-walkthrough.md`
+4. `src/application/review/commit-plan-service.ts`
+5. `src/application/review/commit-executor.ts`
+6. `src/components/review-commit-workbench.tsx`

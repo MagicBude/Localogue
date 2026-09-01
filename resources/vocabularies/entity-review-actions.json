@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "entity-review-actions",
+  "items": [
+    { "id": "use_match", "ja": "一致したエンティティを使用", "zh-CN": "使用已匹配实体", "en": "Use matched entity" },
+    { "id": "bind_existing", "ja": "既存候補に紐付け", "zh-CN": "绑定已有候选", "en": "Bind existing candidate" },
+    { "id": "create_new", "ja": "新規エンティティを作成", "zh-CN": "创建新实体", "en": "Create new entity" },
+    { "id": "skip", "ja": "今回スキップ", "zh-CN": "本次跳过", "en": "Skip this value" }
+  ]
+}

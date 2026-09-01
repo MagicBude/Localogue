@@ -2,6 +2,16 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
+// Next.js 会自动读取 .env.local，但独立 Node 脚本不会。
+// Node 22 提供 loadEnvFile，可让 validate:data 与网页使用同一个资料库路径。
+if (!process.env.LOCALOGUE_LIBRARY_PATH) {
+  try {
+    process.loadEnvFile(path.join(process.cwd(), ".env.local"));
+  } catch {
+    // 没有 .env.local 时继续使用 Demo Library，这是正常的首次运行状态。
+  }
+}
+
 /**
  * 这是一个“不依赖 Next.js / TypeScript”的资料库健康检查脚本。
  *

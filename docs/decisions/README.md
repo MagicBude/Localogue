@@ -17,3 +17,4 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 - [ADR-012：公开 Demo 与私人资料库隔离](ADR-012-separate-demo-and-private-library.md)
 
 - [ADR-013：V1 实体匹配采用保守的规范化精确匹配](ADR-013-conservative-exact-entity-resolution.md)
+- [ADR-014：正式写入前必须经过 Commit Plan](ADR-014-explicit-commit-plan-before-canonical-write.md)

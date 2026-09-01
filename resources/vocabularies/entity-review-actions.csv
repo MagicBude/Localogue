@@ -1,0 +1,5 @@
+id,ja,zh-CN,en
+use_match,一致したエンティティを使用,使用已匹配实体,Use matched entity
+bind_existing,既存候補に紐付け,绑定已有候选,Bind existing candidate
+create_new,新規エンティティを作成,创建新实体,Create new entity
+skip,今回スキップ,本次跳过,Skip this value
