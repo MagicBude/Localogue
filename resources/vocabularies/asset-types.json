@@ -1,0 +1,65 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "cover",
+      "ja": "カバー",
+      "zh-CN": "封面",
+      "en": "Cover"
+    },
+    {
+      "id": "poster",
+      "ja": "ポスター",
+      "zh-CN": "海报",
+      "en": "Poster"
+    },
+    {
+      "id": "fanart",
+      "ja": "ファンアート",
+      "zh-CN": "背景图",
+      "en": "Fanart"
+    },
+    {
+      "id": "screenshot",
+      "ja": "スクリーンショット",
+      "zh-CN": "剧照 / 截图",
+      "en": "Screenshot"
+    },
+    {
+      "id": "portrait",
+      "ja": "ポートレート",
+      "zh-CN": "人物头像",
+      "en": "Portrait"
+    },
+    {
+      "id": "gallery",
+      "ja": "ギャラリー",
+      "zh-CN": "图集图片",
+      "en": "Gallery Image"
+    },
+    {
+      "id": "logo",
+      "ja": "ロゴ",
+      "zh-CN": "标志",
+      "en": "Logo"
+    },
+    {
+      "id": "subtitle",
+      "ja": "字幕",
+      "zh-CN": "字幕",
+      "en": "Subtitle"
+    },
+    {
+      "id": "document",
+      "ja": "ドキュメント",
+      "zh-CN": "文档",
+      "en": "Document"
+    },
+    {
+      "id": "other",
+      "ja": "その他",
+      "zh-CN": "其他",
+      "en": "Other"
+    }
+  ]
+}

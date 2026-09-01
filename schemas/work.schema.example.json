@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "work_example_abc_123",
+  "code": "ABC-123",
+  "originalLanguage": "ja",
+  "titles": {
+    "ja": "示例作品标题",
+    "zh-CN": "示例作品中文映射",
+    "en": "Example Work Title"
+  },
+  "descriptions": {
+    "ja": "用于展示 Localogue 数据结构的示例简介。",
+    "zh-CN": "用于展示 Localogue 数据结构的示例简介。",
+    "en": "Example description for the Localogue data model."
+  },
+  "releaseDate": {
+    "value": "2026-08-15",
+    "precision": "day"
+  },
+  "durationMinutes": 125,
+  "workTypeIds": [
+    "solo"
+  ],
+  "personRelations": [
+    {
+      "personId": "person_example_001",
+      "role": "performer",
+      "billingOrder": 1
+    },
+    {
+      "personId": "person_example_director",
+      "role": "director"
+    }
+  ],
+  "makerId": "maker_example",
+  "labelId": "label_example",
+  "seriesIds": [
+    "series_example"
+  ],
+  "genreIds": [
+    "uniform",
+    "drama"
+  ],
+  "tagIds": [
+    "favorite"
+  ],
+  "assetIds": [
+    "asset_example_cover"
+  ],
+  "mediaFileIds": [],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-01T17:00:00+08:00"
+}

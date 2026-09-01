@@ -1,0 +1,53 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "debut",
+      "ja": "デビュー",
+      "zh-CN": "出道",
+      "en": "Debut"
+    },
+    {
+      "id": "retirement",
+      "ja": "引退",
+      "zh-CN": "引退",
+      "en": "Retirement"
+    },
+    {
+      "id": "return",
+      "ja": "復帰",
+      "zh-CN": "复出",
+      "en": "Return"
+    },
+    {
+      "id": "hiatus_start",
+      "ja": "活動休止",
+      "zh-CN": "开始休业",
+      "en": "Hiatus Start"
+    },
+    {
+      "id": "hiatus_end",
+      "ja": "活動再開",
+      "zh-CN": "恢复活动",
+      "en": "Hiatus End"
+    },
+    {
+      "id": "name_change",
+      "ja": "改名",
+      "zh-CN": "改名",
+      "en": "Name Change"
+    },
+    {
+      "id": "agency_change",
+      "ja": "所属変更",
+      "zh-CN": "所属变更",
+      "en": "Agency Change"
+    },
+    {
+      "id": "other",
+      "ja": "その他",
+      "zh-CN": "其他",
+      "en": "Other"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "favorite",
+      "ja": "お気に入り",
+      "zh-CN": "收藏",
+      "en": "Favorite"
+    },
+    {
+      "id": "recommended",
+      "ja": "おすすめ",
+      "zh-CN": "推荐",
+      "en": "Recommended"
+    },
+    {
+      "id": "watch_later",
+      "ja": "後で見る",
+      "zh-CN": "待观看",
+      "en": "Watch Later"
+    },
+    {
+      "id": "needs_metadata",
+      "ja": "情報補完待ち",
+      "zh-CN": "待补资料",
+      "en": "Needs Metadata"
+    },
+    {
+      "id": "needs_cover",
+      "ja": "カバー補完待ち",
+      "zh-CN": "待补封面",
+      "en": "Needs Cover"
+    },
+    {
+      "id": "needs_review",
+      "ja": "要確認",
+      "zh-CN": "待审核",
+      "en": "Needs Review"
+    }
+  ]
+}

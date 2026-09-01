@@ -1,0 +1,47 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "complete",
+      "ja": "完全",
+      "zh-CN": "完整",
+      "en": "Complete"
+    },
+    {
+      "id": "partial",
+      "ja": "一部不足",
+      "zh-CN": "部分完整",
+      "en": "Partial"
+    },
+    {
+      "id": "minimal",
+      "ja": "最小情報",
+      "zh-CN": "最小资料",
+      "en": "Minimal"
+    },
+    {
+      "id": "needs_review",
+      "ja": "要確認",
+      "zh-CN": "待审核",
+      "en": "Needs Review"
+    },
+    {
+      "id": "conflict",
+      "ja": "競合あり",
+      "zh-CN": "存在冲突",
+      "en": "Conflict"
+    },
+    {
+      "id": "duplicate_candidate",
+      "ja": "重複候補",
+      "zh-CN": "疑似重复",
+      "en": "Duplicate Candidate"
+    },
+    {
+      "id": "unmapped",
+      "ja": "未マッピング",
+      "zh-CN": "未映射",
+      "en": "Unmapped"
+    }
+  ]
+}

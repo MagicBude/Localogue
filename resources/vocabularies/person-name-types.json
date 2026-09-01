@@ -1,0 +1,47 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "primary",
+      "ja": "正式名",
+      "zh-CN": "正式名",
+      "en": "Primary Name"
+    },
+    {
+      "id": "localized",
+      "ja": "翻訳名",
+      "zh-CN": "本地化名称",
+      "en": "Localized Name"
+    },
+    {
+      "id": "romanized",
+      "ja": "ローマ字",
+      "zh-CN": "罗马字名",
+      "en": "Romanized Name"
+    },
+    {
+      "id": "stage_name",
+      "ja": "芸名",
+      "zh-CN": "艺名",
+      "en": "Stage Name"
+    },
+    {
+      "id": "alias",
+      "ja": "別名",
+      "zh-CN": "别名",
+      "en": "Alias"
+    },
+    {
+      "id": "former_name",
+      "ja": "旧名",
+      "zh-CN": "旧艺名 / 曾用名",
+      "en": "Former Name"
+    },
+    {
+      "id": "alternate",
+      "ja": "別表記",
+      "zh-CN": "其他写法",
+      "en": "Alternate Name"
+    }
+  ]
+}

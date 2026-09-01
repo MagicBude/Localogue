@@ -1,0 +1,194 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "code",
+      "ja": "品番",
+      "zh-CN": "番号",
+      "en": "Code",
+      "descriptionZh": "作品主番号"
+    },
+    {
+      "id": "title",
+      "ja": "タイトル",
+      "zh-CN": "标题",
+      "en": "Title",
+      "descriptionZh": "当前语言标题"
+    },
+    {
+      "id": "original_title",
+      "ja": "原題",
+      "zh-CN": "原始标题",
+      "en": "Original Title",
+      "descriptionZh": "原始语言标题"
+    },
+    {
+      "id": "release_date",
+      "ja": "発売日",
+      "zh-CN": "发行日期",
+      "en": "Release Date",
+      "descriptionZh": "支持日期精度"
+    },
+    {
+      "id": "duration",
+      "ja": "収録時間",
+      "zh-CN": "时长",
+      "en": "Duration",
+      "descriptionZh": "V1 使用分钟"
+    },
+    {
+      "id": "performer",
+      "ja": "出演者",
+      "zh-CN": "演员",
+      "en": "Performer",
+      "descriptionZh": "Person 关系"
+    },
+    {
+      "id": "director",
+      "ja": "監督",
+      "zh-CN": "导演",
+      "en": "Director",
+      "descriptionZh": "Person 关系"
+    },
+    {
+      "id": "maker",
+      "ja": "メーカー",
+      "zh-CN": "厂商",
+      "en": "Maker",
+      "descriptionZh": "Organization"
+    },
+    {
+      "id": "label",
+      "ja": "レーベル",
+      "zh-CN": "厂牌",
+      "en": "Label",
+      "descriptionZh": "Organization"
+    },
+    {
+      "id": "series",
+      "ja": "シリーズ",
+      "zh-CN": "系列",
+      "en": "Series",
+      "descriptionZh": "系列实体"
+    },
+    {
+      "id": "work_type",
+      "ja": "作品タイプ",
+      "zh-CN": "作品类型",
+      "en": "Work Type",
+      "descriptionZh": "可多值"
+    },
+    {
+      "id": "genre",
+      "ja": "ジャンル",
+      "zh-CN": "分类",
+      "en": "Genre",
+      "descriptionZh": "受控分类"
+    },
+    {
+      "id": "tag",
+      "ja": "タグ",
+      "zh-CN": "标签",
+      "en": "Tag",
+      "descriptionZh": "用户整理标签"
+    },
+    {
+      "id": "description",
+      "ja": "あらすじ",
+      "zh-CN": "简介",
+      "en": "Description",
+      "descriptionZh": "多语言文本"
+    },
+    {
+      "id": "cover",
+      "ja": "カバー",
+      "zh-CN": "封面",
+      "en": "Cover",
+      "descriptionZh": "Asset"
+    },
+    {
+      "id": "media_file",
+      "ja": "メディアファイル",
+      "zh-CN": "媒体文件",
+      "en": "Media File",
+      "descriptionZh": "本地文件"
+    },
+    {
+      "id": "activity_status",
+      "ja": "活動状況",
+      "zh-CN": "活动状态",
+      "en": "Activity Status",
+      "descriptionZh": "在役 / 引退等"
+    },
+    {
+      "id": "debut_date",
+      "ja": "デビュー時期",
+      "zh-CN": "出道时间",
+      "en": "Debut Date",
+      "descriptionZh": "可只有年月"
+    },
+    {
+      "id": "retirement_date",
+      "ja": "引退時期",
+      "zh-CN": "引退时间",
+      "en": "Retirement Date",
+      "descriptionZh": "可为空"
+    },
+    {
+      "id": "birth_date",
+      "ja": "生年月日",
+      "zh-CN": "出生日期",
+      "en": "Birth Date",
+      "descriptionZh": "可带精度"
+    },
+    {
+      "id": "birth_place",
+      "ja": "出身地",
+      "zh-CN": "出生地",
+      "en": "Birth Place",
+      "descriptionZh": "多语言"
+    },
+    {
+      "id": "height",
+      "ja": "身長",
+      "zh-CN": "身高",
+      "en": "Height",
+      "descriptionZh": "cm"
+    },
+    {
+      "id": "bust",
+      "ja": "バスト",
+      "zh-CN": "胸围",
+      "en": "Bust",
+      "descriptionZh": "cm"
+    },
+    {
+      "id": "waist",
+      "ja": "ウエスト",
+      "zh-CN": "腰围",
+      "en": "Waist",
+      "descriptionZh": "cm"
+    },
+    {
+      "id": "hip",
+      "ja": "ヒップ",
+      "zh-CN": "臀围",
+      "en": "Hip",
+      "descriptionZh": "cm"
+    },
+    {
+      "id": "cup",
+      "ja": "カップ",
+      "zh-CN": "Cup",
+      "en": "Cup",
+      "descriptionZh": "可为空"
+    },
+    {
+      "id": "biography",
+      "ja": "プロフィール",
+      "zh-CN": "个人简介",
+      "en": "Biography",
+      "descriptionZh": "多语言"
+    }
+  ]
+}

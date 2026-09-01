@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "person_example_001",
+  "names": [
+    {
+      "language": "ja",
+      "value": "架空かな",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "架空香奈",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Kana Example",
+      "type": "romanized"
+    },
+    {
+      "language": "ja",
+      "value": "旧名サンプル",
+      "type": "former_name",
+      "validTo": "2022-12"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2020-04",
+        "precision": "month"
+      }
+    },
+    {
+      "type": "name_change",
+      "date": {
+        "value": "2023-01",
+        "precision": "month"
+      },
+      "note": "示例改名事件"
+    }
+  ],
+  "birthDate": {
+    "value": "1998-05-20",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "東京都",
+    "zh-CN": "东京都",
+    "en": "Tokyo, Japan"
+  },
+  "heightCm": 160,
+  "measurements": {
+    "bustCm": 84,
+    "waistCm": 56,
+    "hipCm": 85,
+    "cup": "F"
+  },
+  "biographies": {
+    "ja": "架空の人物データです。",
+    "zh-CN": "这是用于文档演示的虚构人物数据。",
+    "en": "This is fictional sample data for documentation."
+  },
+  "portraitAssetId": "asset_example_portrait",
+  "galleryAssetIds": []
+}

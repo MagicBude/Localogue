@@ -1,0 +1,29 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "day",
+      "ja": "日",
+      "zh-CN": "日",
+      "en": "Day"
+    },
+    {
+      "id": "month",
+      "ja": "月",
+      "zh-CN": "月",
+      "en": "Month"
+    },
+    {
+      "id": "year",
+      "ja": "年",
+      "zh-CN": "年",
+      "en": "Year"
+    },
+    {
+      "id": "unknown",
+      "ja": "不明",
+      "zh-CN": "未知",
+      "en": "Unknown"
+    }
+  ]
+}

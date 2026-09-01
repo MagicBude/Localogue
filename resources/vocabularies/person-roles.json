@@ -1,0 +1,29 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "performer",
+      "ja": "出演者",
+      "zh-CN": "演员",
+      "en": "Performer"
+    },
+    {
+      "id": "director",
+      "ja": "監督",
+      "zh-CN": "导演",
+      "en": "Director"
+    },
+    {
+      "id": "photographer",
+      "ja": "撮影",
+      "zh-CN": "摄影",
+      "en": "Photographer"
+    },
+    {
+      "id": "other",
+      "ja": "その他",
+      "zh-CN": "其他",
+      "en": "Other"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "active",
+      "ja": "現役",
+      "zh-CN": "在役",
+      "en": "Active"
+    },
+    {
+      "id": "retired",
+      "ja": "引退",
+      "zh-CN": "引退",
+      "en": "Retired"
+    },
+    {
+      "id": "hiatus",
+      "ja": "活動休止",
+      "zh-CN": "活动休止",
+      "en": "Hiatus"
+    },
+    {
+      "id": "inactive",
+      "ja": "活動停止",
+      "zh-CN": "非活跃",
+      "en": "Inactive"
+    },
+    {
+      "id": "unknown",
+      "ja": "不明",
+      "zh-CN": "未知",
+      "en": "Unknown"
+    }
+  ]
+}

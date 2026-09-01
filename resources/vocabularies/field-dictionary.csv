@@ -1,0 +1,28 @@
+﻿id,ja,zh-CN,en,descriptionZh
+code,品番,番号,Code,作品主番号
+title,タイトル,标题,Title,当前语言标题
+original_title,原題,原始标题,Original Title,原始语言标题
+release_date,発売日,发行日期,Release Date,支持日期精度
+duration,収録時間,时长,Duration,V1 使用分钟
+performer,出演者,演员,Performer,Person 关系
+director,監督,导演,Director,Person 关系
+maker,メーカー,厂商,Maker,Organization
+label,レーベル,厂牌,Label,Organization
+series,シリーズ,系列,Series,系列实体
+work_type,作品タイプ,作品类型,Work Type,可多值
+genre,ジャンル,分类,Genre,受控分类
+tag,タグ,标签,Tag,用户整理标签
+description,あらすじ,简介,Description,多语言文本
+cover,カバー,封面,Cover,Asset
+media_file,メディアファイル,媒体文件,Media File,本地文件
+activity_status,活動状況,活动状态,Activity Status,在役 / 引退等
+debut_date,デビュー時期,出道时间,Debut Date,可只有年月
+retirement_date,引退時期,引退时间,Retirement Date,可为空
+birth_date,生年月日,出生日期,Birth Date,可带精度
+birth_place,出身地,出生地,Birth Place,多语言
+height,身長,身高,Height,cm
+bust,バスト,胸围,Bust,cm
+waist,ウエスト,腰围,Waist,cm
+hip,ヒップ,臀围,Hip,cm
+cup,カップ,Cup,Cup,可为空
+biography,プロフィール,个人简介,Biography,多语言

@@ -1,0 +1,11 @@
+# 资料治理状态
+
+| ID | 日本語 | 简体中文 | English |
+|---|---|---|---|
+| `complete` | 完全 | 完整 | Complete |
+| `partial` | 一部不足 | 部分完整 | Partial |
+| `minimal` | 最小情報 | 最小资料 | Minimal |
+| `needs_review` | 要確認 | 待审核 | Needs Review |
+| `conflict` | 競合あり | 存在冲突 | Conflict |
+| `duplicate_candidate` | 重複候補 | 疑似重复 | Duplicate Candidate |
+| `unmapped` | 未マッピング | 未映射 | Unmapped |

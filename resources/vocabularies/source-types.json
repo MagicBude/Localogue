@@ -1,0 +1,47 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "manual",
+      "ja": "手動入力",
+      "zh-CN": "手工录入",
+      "en": "Manual"
+    },
+    {
+      "id": "localogue_json",
+      "ja": "Localogue JSON",
+      "zh-CN": "Localogue JSON",
+      "en": "Localogue JSON"
+    },
+    {
+      "id": "nfo",
+      "ja": "NFO",
+      "zh-CN": "NFO",
+      "en": "NFO"
+    },
+    {
+      "id": "csv",
+      "ja": "CSV",
+      "zh-CN": "CSV",
+      "en": "CSV"
+    },
+    {
+      "id": "xlsx",
+      "ja": "XLSX",
+      "zh-CN": "XLSX",
+      "en": "XLSX"
+    },
+    {
+      "id": "folder_scan",
+      "ja": "フォルダスキャン",
+      "zh-CN": "文件夹扫描",
+      "en": "Folder Scan"
+    },
+    {
+      "id": "connector",
+      "ja": "コネクター",
+      "zh-CN": "外部连接器",
+      "en": "Connector"
+    }
+  ]
+}

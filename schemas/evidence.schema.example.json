@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "evidence_example_001",
+  "sourceType": "nfo",
+  "sourceName": "本地 NFO 示例",
+  "importedAt": "2026-09-01T17:00:00+08:00",
+  "sourcePath": "D:/Media/ABC-123/ABC-123.nfo",
+  "raw": {
+    "title": "示例作品标题",
+    "code": "ABC-123",
+    "runtime": "125"
+  },
+  "normalized": {
+    "code": "ABC-123",
+    "durationMinutes": 125
+  },
+  "warnings": []
+}

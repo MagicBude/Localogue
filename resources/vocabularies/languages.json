@@ -1,0 +1,23 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "ja",
+      "ja": "日本語",
+      "zh-CN": "日文",
+      "en": "Japanese"
+    },
+    {
+      "id": "zh-CN",
+      "ja": "簡体中国語",
+      "zh-CN": "简体中文",
+      "en": "Simplified Chinese"
+    },
+    {
+      "id": "en",
+      "ja": "英語",
+      "zh-CN": "英文",
+      "en": "English"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    {
+      "id": "solo",
+      "ja": "単体作品",
+      "zh-CN": "单体作品",
+      "en": "Solo",
+      "descriptionZh": "主要围绕单一主演人物的作品"
+    },
+    {
+      "id": "co_starring",
+      "ja": "共演作品",
+      "zh-CN": "共演作品",
+      "en": "Co-starring",
+      "descriptionZh": "多位主要人物共同出演"
+    },
+    {
+      "id": "vr",
+      "ja": "VR作品",
+      "zh-CN": "VR作品",
+      "en": "VR",
+      "descriptionZh": "VR 形式作品"
+    },
+    {
+      "id": "image_video",
+      "ja": "イメージビデオ",
+      "zh-CN": "写真影像",
+      "en": "Image Video",
+      "descriptionZh": "以形象、写真影像为主要定位"
+    },
+    {
+      "id": "compilation",
+      "ja": "総集編",
+      "zh-CN": "合辑",
+      "en": "Compilation",
+      "descriptionZh": "已有内容整理形成的合集"
+    },
+    {
+      "id": "omnibus",
+      "ja": "オムニバス",
+      "zh-CN": "单元合集",
+      "en": "Omnibus",
+      "descriptionZh": "多个相对独立单元组合"
+    },
+    {
+      "id": "best_of",
+      "ja": "ベスト",
+      "zh-CN": "精选集",
+      "en": "Best Of",
+      "descriptionZh": "精选性质的汇编作品"
+    },
+    {
+      "id": "other",
+      "ja": "その他",
+      "zh-CN": "其他",
+      "en": "Other",
+      "descriptionZh": "无法归入已知类型"
+    }
+  ]
+}
