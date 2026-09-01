@@ -4,11 +4,14 @@ import { getPreferredPersonName, localizeText } from "@/application/services/loc
 import { presentWorkCard } from "@/application/services/work-presentation-service";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
 import { EmptyState } from "@/components/empty-state";
+import { Pagination } from "@/components/pagination";
 import {
   type FilterOption,
   WorkFilterForm,
 } from "@/components/work-filter-form";
-import { WorkCard } from "@/components/work-card";
+import { WorkFilterChips } from "@/components/work-filter-chips";
+import { WorkResults } from "@/components/work-results";
+import { parseWorkView, WorkViewSwitcher } from "@/components/work-view-switcher";
 import { getUiDictionary } from "@/i18n/ui";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
@@ -27,7 +30,8 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
     getUserPreferences(),
   ]);
   const dictionary = getUiDictionary(preferences.uiLanguage);
-  const query = parseWorkQuery(rawParams, { pageSize: 48 });
+  const query = parseWorkQuery(rawParams, { pageSize: 24 });
+  const view = parseWorkView(rawParams.view);
 
   const [result, peopleResult, organizations, series, genres, tags, workTypeLabels] =
     await Promise.all([
@@ -147,22 +151,55 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
           tags={tagOptions}
           workTypes={workTypeOptions}
           years={yearOptions}
+          view={view}
         />
 
-        <section>
+        <section className="results-panel" id="work-results">
+          <WorkFilterChips
+            action="/works"
+            dictionary={dictionary}
+            directors={directorOptions}
+            genres={genreOptions}
+            labels={labelOptions}
+            makers={makerOptions}
+            people={peopleOptions}
+            searchParams={rawParams}
+            series={seriesOptions}
+            tags={tagOptions}
+            workTypes={workTypeOptions}
+            years={yearOptions}
+          />
+
+          <div className="results-toolbar">
+            <p className="muted">
+              {dictionary.viewMode} · {result.total} {dictionary.resultCount}
+            </p>
+            <WorkViewSwitcher
+              action="/works"
+              current={view}
+              dictionary={dictionary}
+              searchParams={rawParams}
+            />
+          </div>
+
           {workCards.length ? (
-            <div className="work-grid work-grid--library">
-              {workCards.map((work) => (
-                <WorkCard
-                  dictionary={dictionary}
-                  key={work.id}
-                  work={work}
-                  workTypeLabels={work.workTypeIds.map(
-                    (id) => workTypeLabels.get(id) ?? id,
-                  )}
-                />
-              ))}
-            </div>
+            <>
+              <WorkResults
+                dictionary={dictionary}
+                view={view}
+                works={workCards}
+                workTypeLabels={workTypeLabels}
+              />
+              <Pagination
+                action="/works"
+                anchorId="work-results"
+                dictionary={dictionary}
+                page={result.page}
+                pageSize={result.pageSize}
+                searchParams={rawParams}
+                total={result.total}
+              />
+            </>
           ) : (
             <EmptyState message={dictionary.noResults} />
           )}

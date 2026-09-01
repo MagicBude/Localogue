@@ -1,3 +1,4 @@
+import type { PersonQuery, PersonSort } from "@/domain/queries/person-query";
 import type { WorkQuery, WorkSort } from "@/domain/queries/work-query";
 
 export type RawSearchParams = Record<
@@ -75,4 +76,43 @@ function toWorkSort(value: string | undefined): WorkSort | undefined {
   ];
 
   return allowed.includes(value as WorkSort) ? (value as WorkSort) : undefined;
+}
+
+
+/**
+ * 与作品查询一样，人物筛选也统一从 URL 字符串转换为类型明确的 Domain Query。
+ * 页面只负责收集参数，Repository 只接收已经解析过的查询对象。
+ */
+export function parsePersonQuery(
+  params: RawSearchParams,
+  defaults: Partial<PersonQuery> = {},
+): PersonQuery {
+  return {
+    ...defaults,
+    text: first(params.q),
+    statuses: many(params.status),
+    birthYears: many(params.birthYear),
+    debutYears: many(params.debutYear),
+    retirementYears: many(params.retirementYear),
+    heightMin: toOptionalNumber(first(params.heightMin)),
+    heightMax: toOptionalNumber(first(params.heightMax)),
+    sort: toPersonSort(first(params.sort)) ?? defaults.sort ?? "name_asc",
+    page: toOptionalNumber(first(params.page)) ?? defaults.page ?? 1,
+    pageSize: defaults.pageSize ?? 24,
+  };
+}
+
+function toPersonSort(value: string | undefined): PersonSort | undefined {
+  const allowed: PersonSort[] = [
+    "name_asc",
+    "name_desc",
+    "birth_asc",
+    "birth_desc",
+    "debut_asc",
+    "debut_desc",
+    "height_asc",
+    "height_desc",
+  ];
+
+  return allowed.includes(value as PersonSort) ? (value as PersonSort) : undefined;
 }

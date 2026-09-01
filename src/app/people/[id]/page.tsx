@@ -10,8 +10,11 @@ import {
 import { presentWorkCard } from "@/application/services/work-presentation-service";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
 import { EmptyState } from "@/components/empty-state";
+import { Pagination } from "@/components/pagination";
+import { WorkFilterChips } from "@/components/work-filter-chips";
 import { WorkFilterForm } from "@/components/work-filter-form";
-import { WorkCard } from "@/components/work-card";
+import { WorkResults } from "@/components/work-results";
+import { parseWorkView, WorkViewSwitcher } from "@/components/work-view-switcher";
 import { getUiDictionary } from "@/i18n/ui";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
@@ -46,9 +49,10 @@ export default async function PersonDetailPage({
   if (!person) notFound();
 
   const dictionary = getUiDictionary(preferences.uiLanguage);
+  const view = parseWorkView(rawParams.view);
   const query = parseWorkQuery(rawParams, {
     personIds: [person.id],
-    pageSize: 48,
+    pageSize: 24,
     sort: "release_desc",
   });
   // 即使 URL 中没有 person 参数，也强制当前人物作为查询前提。
@@ -289,24 +293,59 @@ export default async function PersonDetailPage({
             tags={tagOptions}
             workTypes={typeOptions}
             years={yearOptions}
+            view={view}
           />
 
-          {cards.length ? (
-            <div className="work-grid work-grid--library">
-              {cards.map((work) => (
-                <WorkCard
-                  dictionary={dictionary}
-                  key={work.id}
-                  work={work}
-                  workTypeLabels={work.workTypeIds.map(
-                    (typeId) => workTypeLabels.get(typeId) ?? typeId,
-                  )}
-                />
-              ))}
+          <section className="results-panel" id="person-work-results">
+            <WorkFilterChips
+              action={`/people/${person.id}`}
+              dictionary={dictionary}
+              directors={directorOptions}
+              fixedPersonId={person.id}
+              genres={genreOptions}
+              labels={labelOptions}
+              makers={makerOptions}
+              searchParams={rawParams}
+              series={seriesOptions}
+              tags={tagOptions}
+              workTypes={typeOptions}
+              years={yearOptions}
+            />
+
+            <div className="results-toolbar">
+              <p className="muted">
+                {dictionary.viewMode} · {workResult.total} {dictionary.resultCount}
+              </p>
+              <WorkViewSwitcher
+                action={`/people/${person.id}`}
+                current={view}
+                dictionary={dictionary}
+                searchParams={rawParams}
+              />
             </div>
-          ) : (
-            <EmptyState message={dictionary.noResults} />
-          )}
+
+            {cards.length ? (
+              <>
+                <WorkResults
+                  dictionary={dictionary}
+                  view={view}
+                  works={cards}
+                  workTypeLabels={workTypeLabels}
+                />
+                <Pagination
+                  action={`/people/${person.id}`}
+                  anchorId="person-work-results"
+                  dictionary={dictionary}
+                  page={workResult.page}
+                  pageSize={workResult.pageSize}
+                  searchParams={rawParams}
+                  total={workResult.total}
+                />
+              </>
+            ) : (
+              <EmptyState message={dictionary.noResults} />
+            )}
+          </section>
         </div>
       </section>
     </div>

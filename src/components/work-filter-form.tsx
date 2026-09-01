@@ -23,6 +23,7 @@ interface WorkFilterFormProps {
   tags?: FilterOption[];
   years?: FilterOption[];
   fixedPersonId?: string;
+  view?: "grid" | "list" | "table";
 }
 
 /**
@@ -50,6 +51,7 @@ export function WorkFilterForm({
   tags = [],
   years = [],
   fixedPersonId,
+  view = "grid",
 }: WorkFilterFormProps) {
   return (
     <aside className="filter-panel">
@@ -59,6 +61,7 @@ export function WorkFilterForm({
       </div>
 
       <form action={action} className="filter-form" method="get">
+        {view !== "grid" ? <input name="view" type="hidden" value={view} /> : null}
         {fixedPersonId ? (
           <input name="person" type="hidden" value={fixedPersonId} />
         ) : null}

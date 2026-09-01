@@ -121,3 +121,18 @@
 ## 参考项目
 
 见 [research/reference-projects.md](research/reference-projects.md)。
+
+## V1-02 新增实现文档
+
+- [分类索引浏览](discovery/catalog-browsing.md)
+- [V1-02 Faceted Search 实现讲解](development/v1-02-faceted-search-walkthrough.md)
+- [V1-02 三种作品视图讲解](development/v1-02-view-modes-walkthrough.md)
+
+## V1-03 新增实现文档
+
+- [响应式筛选栏与滚动位置修复](development/v1-03-responsive-filter-and-scroll.md)
+- [URL 分页实现讲解](development/v1-03-pagination-walkthrough.md)
+- [人物库高级筛选讲解](development/v1-03-person-filtering-walkthrough.md)
+- [已选筛选条件 Chips](discovery/active-filter-chips.md)
+- [响应式筛选器设计](ui/responsive-filters.md)
+- [Maker / Label / Series 详情页](ui/catalog-detail-pages.md)

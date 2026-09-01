@@ -11,9 +11,9 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前进入 **V1：File-backed Library** 的第一批实现。
+当前处于 **V1-03：File-backed Library 浏览体验与实体详情增强阶段**。
 
-本批代码已经完成：
+当前 V1 已完成：
 
 - Next.js Web 基础工程；
 - TypeScript 严格模式；
@@ -177,3 +177,44 @@ data/demo-library/
 3. `docs/README.md`
 4. `docs/product/principles.md`
 5. `docs/decisions/`
+
+
+## V1-02：分类浏览与三种作品视图
+
+在 V1-01 基础上，V1-02 增加了真正面向“资料探索”的浏览能力：
+
+- `/browse`：分类浏览总入口；
+- `/makers`、`/labels`、`/series`、`/genres`、`/directors`、`/work-types`、`/tags`；
+- `/works`：海报墙 / 列表 / 表格三种视图；
+- Facet 使用 self-excluding 计数，让组合筛选时的数量提示更符合真实浏览习惯；
+- 筛选、排序、视图全部保存在 URL，可刷新、复制和使用浏览器前进/后退。
+
+建议学习顺序：
+
+1. `docs/development/v1-02-view-modes-walkthrough.md`；
+2. `src/components/work-view-switcher.tsx`；
+3. `src/components/work-results.tsx`；
+4. `docs/development/v1-02-faceted-search-walkthrough.md`；
+5. `src/infrastructure/repositories/json-library-repository.ts` 中的 `buildWorkFacets()`。
+
+## V1-03：浏览体验、分页与实体详情
+
+V1-03 在 V1-02 的多维筛选基础上继续强化“资料探索”体验：
+
+- 作品筛选侧栏加宽，并修复日期控件、Select、长文本导致的横向滚动；
+- 小屏幕下筛选字段自动切换为更适合阅读的单列布局；
+- 海报墙 / 列表 / 表格切换保持当前滚动位置；
+- 当前筛选条件以 Chips 形式展示，可以逐项移除；
+- 作品列表和人物列表加入 URL 分页；
+- 人物库增加状态、出生年份、出道年份、引退年份、身高范围与多种排序；
+- 人物搜索会覆盖正式名、中文映射、罗马字、别名、旧艺名和其他名称；
+- Maker / Label / Series 拥有独立详情页，可以查看三语名称、关系与相关作品。
+
+建议继续阅读：
+
+1. `docs/development/v1-03-responsive-filter-and-scroll.md`；
+2. `docs/development/v1-03-pagination-walkthrough.md`；
+3. `docs/development/v1-03-person-filtering-walkthrough.md`；
+4. `src/components/work-filter-chips.tsx`；
+5. `src/components/pagination.tsx`；
+6. `src/app/makers/[id]/page.tsx`。

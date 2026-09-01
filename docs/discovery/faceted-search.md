@@ -38,3 +38,13 @@ VR     18
 ## URL 状态
 
 筛选应尽量反映在 URL Query 中，以支持刷新、前进后退和复制链接。
+
+## V1-02 实现说明
+
+V1-02 已把 Facet 计数升级为 **self-excluding facets**。计算某一个维度的计数时，会忽略该维度自身已有选择，但保留其它筛选条件。
+
+这样用户即使已经选择某个 Maker、年份或 Genre，仍能看到同一维度其它候选项在当前其它条件下的可用数量。
+
+详细代码讲解见：
+
+- `docs/development/v1-02-faceted-search-walkthrough.md`

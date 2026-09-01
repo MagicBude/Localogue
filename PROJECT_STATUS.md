@@ -1,78 +1,48 @@
-# 项目状态
+# Localogue 项目状态
 
-## 当前版本
+## 当前阶段
 
-- 阶段：V1
-- 子阶段：V1-01 Foundation / 浏览基础
-- 名称：Localogue
-- 状态：开发中
-- 日期：2026-09-01
+**V1-03：浏览体验、URL 状态与实体详情增强。**
 
-## V0 已完成
+V0 的设计规范仍然是项目架构基线；V1 使用 JSON 作为文件化 Canonical Library，SQLite 计划在 V2 引入。
 
-- 产品定位、范围、路线图；
-- 核心架构原则；
-- Domain Model 设计；
-- JSON-first → SQLite 演进路线；
-- 受控词表；
-- 多语言、筛选、排序、时间线设计；
-- Import / Evidence / Review 设计；
-- UI 信息架构；
-- ADR 和参考项目研究。
+## 已完成
 
-## V1-01 已实现
-
-- Next.js 16.3.3 + React 19 + TypeScript；
-- 单应用结构，不提前引入 monorepo；
-- Domain / Application / Infrastructure / UI 分层；
-- `LibraryRepository`；
-- `JsonLibraryRepository`；
-- JSON 原子写入基础；
-- Work / Person / Organization / Series / Asset / MediaFile / Genre / Tag 模型；
-- 8 条虚构作品、6 条虚构人物及关联样例；
-- 首页；
-- 作品库；
-- 作品详情；
-- 演员库；
-- 高信息密度演员详情页；
-- 人物旧艺名 / 别名 / 名称映射展示；
-- 人物状态与职业事件时间线；
-- UI Language / Metadata Language 分离；
-- 日 / 中 / 英元数据回退；
+- Domain Model 与 JSON Repository；
+- 三语 UI / 元数据语言回退；
 - Light / Dark / System 主题；
-- WorkQuery 基础；
-- 番号 / 标题搜索；
-- 人物、导演、Maker、Label、Series、Genre、Work Type、Tag、年份、日期、时长条件；
-- 多种排序；
-- 基础 Facet Count；
-- 人物页复用 WorkQuery 二次筛选。
+- 作品库、作品详情、人物库、人物详情；
+- 组合筛选：演员、导演、Maker、Label、Series、Genre、Work Type、Tag、年份、日期范围、时长、封面、本地媒体；
+- self-excluding Facet 动态计数；
+- 海报墙、列表、表格三种作品视图；
+- 修复筛选侧栏过窄和横向溢出；
+- 视图切换保持当前滚动位置；
+- 已选筛选条件 Chips 与单项移除；
+- 作品与人物 URL 分页；
+- 人物状态、出生年份、出道年份、引退年份、身高范围与排序；
+- Maker / Label / Series 详情页；
+- Maker ↔ Label 关系浏览；
+- `/browse` 与 Maker / Label / Series / Genre / Director / Work Type / Tag 分类入口；
+- 虚构 Demo Library 与真实私人资料目录隔离；
+- JSON 数据引用校验脚本；
+- V1-01 ~ V1-03 对应教材级中文实现文档。
 
-## V1-01 有意暂缓
+## 下一阶段建议
 
-以下内容仍属于 V1，但没有塞入第一批代码：
+V1-04 优先实现：
 
-- CSV 导入 / 导出；
-- XLSX 导入 / 导出；
-- NFO 解析；
-- 文件夹扫描；
-- Evidence 实际落盘；
-- Review 页面；
-- 手工新增 / 编辑表单；
-- 完整的 Facet 自排除计数算法；
-- 月份 / 任意日期范围 UI；
-- Tag 筛选 UI（Query Engine 已具备字段）；
-- 导演独立浏览页；
-- Maker / Label / Series 独立详情页；
-- 列表视图 / 表格视图；
-- 资料完整度算法。
+1. Genre / Director / Work Type / Tag 详情页；
+2. 人物库已选条件 Chips 与更完整 Facet 计数；
+3. 作品列表的“每页数量”设置；
+4. 统一 URL Query Builder，减少组件内重复拼接；
+5. 建立 Import / Review 的文件化数据结构；
+6. 开始 Localogue JSON 的真实导入预览流程。
 
-## 下一步建议：V1-02
+## 当前不做
 
-优先完成“浏览系统增强”，再进入导入：
-
-1. 完善 Faceted Search，使每个 Facet 计算时排除自身条件；
-2. 增加导演、Maker、Label、Series、Genre 的可点击详情/筛选入口；
-3. 增加月份、日期范围、Tag、是否有封面 / 本地文件筛选 UI；
-4. 增加海报墙 / 列表 / 表格视图切换；
-5. 增加作品和人物的真正分页；
-6. 再开始 Import / Evidence / Review。
+- SQLite；
+- 在线爬虫与 Provider；
+- 外部 API Connector；
+- AI Agent；
+- 浏览器播放器；
+- 自动搬移用户媒体文件。

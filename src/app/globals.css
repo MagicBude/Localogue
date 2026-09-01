@@ -489,16 +489,19 @@ code {
 
 .library-layout {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 350px) minmax(0, 1fr);
   align-items: start;
-  gap: 28px;
+  gap: 24px;
 }
 
 .filter-panel {
   position: sticky;
   top: 98px;
+  width: 100%;
+  min-width: 0;
   max-height: calc(100vh - 120px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -518,6 +521,7 @@ code {
 
 .filter-form,
 .toolbar {
+  min-width: 0;
   display: grid;
   gap: 13px;
 }
@@ -532,6 +536,7 @@ code {
 }
 
 .field {
+  min-width: 0;
   display: grid;
   gap: 5px;
   color: var(--text-soft);
@@ -541,6 +546,8 @@ code {
 .field input,
 .field select {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 39px;
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -557,7 +564,7 @@ code {
 
 .field-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -577,12 +584,14 @@ code {
 }
 
 .filter-options {
+  min-width: 0;
   display: grid;
   gap: 5px;
   margin-top: 9px;
 }
 
 .check-option {
+  min-width: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -904,5 +913,477 @@ code {
 
   .timeline li {
     grid-template-columns: 85px 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * V1-02：分类浏览与多视图
+ * -------------------------------------------------------------------------- */
+
+.results-panel {
+  min-width: 0;
+}
+
+.results-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.results-toolbar p {
+  margin: 0;
+}
+
+.view-switcher {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  padding: 4px;
+}
+
+.view-switcher a {
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.view-switcher a:hover,
+.view-switcher a.is-active {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.work-list {
+  display: grid;
+  gap: 10px;
+}
+
+.work-list-row {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) minmax(180px, 0.45fr);
+  align-items: center;
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 10px;
+}
+
+.work-list-row__poster {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 640 / 900;
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.work-list-row__poster img {
+  object-fit: cover;
+}
+
+.work-list-row__main h3,
+.work-list-row__main p {
+  margin: 4px 0 0;
+}
+
+.work-list-row__facts {
+  display: grid;
+  gap: 3px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.work-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.work-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.work-table th,
+.work-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 11px 13px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.work-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-soft);
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.work-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.catalog-card {
+  min-height: 118px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 20px;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.catalog-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--text-soft);
+}
+
+.catalog-card strong {
+  font-size: 1.05rem;
+}
+
+.catalog-card p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.catalog-card > span {
+  flex: 0 0 auto;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 980px) {
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .work-list-row {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .work-list-row__facts {
+    grid-column: 2;
+    text-align: left;
+  }
+}
+
+@media (max-width: 620px) {
+  .results-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .view-switcher {
+    align-self: flex-start;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+ * V1-03：筛选体验、Chips、分页、人物高级筛选与分类详情页
+ * -------------------------------------------------------------------------- */
+
+/*
+ * 筛选侧栏里的日期控件、select 和长文本都可能带有较大的“固有宽度”。
+ * min-width: 0 + overflow-wrap 可以告诉 Grid 子项允许真正收缩，避免把整个侧栏撑出
+ * 横向滚动条。这是 CSS Grid 中非常常见的布局问题。
+ */
+.filter-group,
+.filter-group summary,
+.check-option span {
+  min-width: 0;
+}
+
+.check-option span {
+  overflow-wrap: anywhere;
+}
+
+.active-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 10px 12px;
+}
+
+.active-filters__label {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.active-filters__chips {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 360px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  padding: 4px 9px;
+  color: var(--text-soft);
+  font-size: 0.73rem;
+}
+
+.filter-chip:hover {
+  border-color: var(--text-soft);
+  color: var(--text);
+}
+
+.filter-chip span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.active-filters__clear {
+  color: var(--text-soft);
+  font-size: 0.73rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.pagination > a,
+.pagination__pages a,
+.pagination__pages span {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  padding: 6px 10px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.pagination__pages {
+  display: flex;
+  gap: 6px;
+}
+
+.pagination a:hover,
+.pagination a.is-active {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.pagination a.is-disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.person-filter-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 16px;
+}
+
+.person-filter-panel__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.person-filter-panel__heading a {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.person-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.person-filter-grid .field--wide {
+  grid-column: span 2;
+}
+
+.person-filter-panel__submit {
+  min-height: 39px;
+}
+
+.catalog-detail-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: clamp(28px, 5vw, 70px);
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: clamp(28px, 5vw, 58px);
+}
+
+.catalog-detail-hero h1 {
+  margin-bottom: 16px;
+  font-size: clamp(2.2rem, 5vw, 5.3rem);
+}
+
+.catalog-detail-hero__description {
+  max-width: 760px;
+  color: var(--text-soft);
+}
+
+.catalog-detail-hero__meta {
+  display: grid;
+  gap: 22px;
+}
+
+.catalog-detail-hero__meta > div > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.localized-name-list,
+.catalog-detail-facts {
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.localized-name-list > div,
+.catalog-detail-facts > div {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 0;
+}
+
+.localized-name-list dt,
+.catalog-detail-facts dt {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+
+.localized-name-list dd,
+.catalog-detail-facts dd {
+  margin: 0;
+}
+
+.section-heading--action {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 8px 13px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.secondary-button:hover {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+@media (max-width: 1180px) {
+  .person-filter-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .catalog-detail-hero {
+    grid-template-columns: 1fr 340px;
+  }
+}
+
+@media (max-width: 860px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .person-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-detail-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .person-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .person-filter-grid .field--wide {
+    grid-column: auto;
+  }
+
+  .pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination__pages {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .section-heading--action {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

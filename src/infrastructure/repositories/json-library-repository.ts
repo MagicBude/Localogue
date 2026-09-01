@@ -10,6 +10,7 @@ import type { LibraryRepository } from "@/domain/repositories/library-repository
 import type {
   PersonQuery,
   PersonSearchResult,
+  PersonSort,
 } from "@/domain/queries/person-query";
 import type {
   FacetCount,
@@ -52,7 +53,9 @@ export class JsonLibraryRepository implements LibraryRepository {
     const sorted = [...filtered].sort(createWorkComparator(query.sort));
 
     const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
-    const page = positiveInteger(query.page, 1);
+    const requestedPage = positiveInteger(query.page, 1);
+    const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
+    const page = Math.min(requestedPage, pageCount);
     const start = (page - 1) * pageSize;
 
     return {
@@ -60,7 +63,7 @@ export class JsonLibraryRepository implements LibraryRepository {
       total: sorted.length,
       page,
       pageSize,
-      facets: buildWorkFacets(filtered),
+      facets: buildWorkFacets(works, query),
     };
   }
 
@@ -81,7 +84,30 @@ export class JsonLibraryRepository implements LibraryRepository {
         return false;
       }
 
+      if (!matchesYear(person.birthDate?.value, query.birthYears)) return false;
+      if (!matchesCareerEventYear(person, "debut", query.debutYears)) return false;
+      if (
+        !matchesCareerEventYear(person, "retirement", query.retirementYears)
+      ) {
+        return false;
+      }
+
+      if (
+        query.heightMin !== undefined &&
+        (person.heightCm === undefined || person.heightCm < query.heightMin)
+      ) {
+        return false;
+      }
+
+      if (
+        query.heightMax !== undefined &&
+        (person.heightCm === undefined || person.heightCm > query.heightMax)
+      ) {
+        return false;
+      }
+
       if (text) {
+        // 所有姓名类型都进入搜索范围，因此正式名、译名、罗马字、旧艺名和别名都可搜索。
         const searchable = person.names
           .map((name) => name.value)
           .join(" ")
@@ -94,11 +120,12 @@ export class JsonLibraryRepository implements LibraryRepository {
       return true;
     });
 
-    // V1 暂按主要姓名排序；以后可增加出道时间、作品数等人物排序方式。
-    filtered.sort((a, b) => getPersonSortName(a).localeCompare(getPersonSortName(b), "ja"));
+    filtered.sort(createPersonComparator(query.sort));
 
     const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
-    const page = positiveInteger(query.page, 1);
+    const requestedPage = positiveInteger(query.page, 1);
+    const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+    const page = Math.min(requestedPage, pageCount);
     const start = (page - 1) * pageSize;
 
     return {
@@ -258,33 +285,70 @@ function createWorkComparator(sort: WorkSort = "release_desc") {
   };
 }
 
-function buildWorkFacets(works: Work[]): WorkFacets {
+function buildWorkFacets(works: Work[], query: WorkQuery): WorkFacets {
+  /**
+   * Faceted Navigation 的计数不能简单基于“最终筛选结果”计算。
+   *
+   * 例：用户已经勾选 Maker A，如果 Maker facet 也基于最终结果统计，
+   * Maker B/C 会变成 0 或直接消失，用户就很难继续切换或组合条件。
+   *
+   * 标准做法是：计算某个维度时，只临时忽略“这个维度自身”的条件，
+   * 但保留其它所有筛选条件。这种计数常被称为 self-excluding facets。
+   */
+  const facetWorks = (ignoredKeys: Array<keyof WorkQuery>) => {
+    const facetQuery = { ...query };
+    for (const key of ignoredKeys) {
+      delete facetQuery[key];
+    }
+    // 排序和分页不影响 facet，本身也无需参与匹配。
+    delete facetQuery.sort;
+    delete facetQuery.page;
+    delete facetQuery.pageSize;
+    return works.filter((work) => matchesWork(work, facetQuery));
+  };
+
   return {
     years: countFacet(
-      works.flatMap((work) =>
+      facetWorks(["releaseYears"]).flatMap((work) =>
         work.releaseDate ? [work.releaseDate.value.slice(0, 4)] : [],
       ),
     ),
     people: countFacet(
-      works.flatMap((work) =>
+      facetWorks(["personIds"]).flatMap((work) =>
         work.personRelations
           .filter((relation) => relation.role === "performer")
           .map((relation) => relation.personId),
       ),
     ),
     directors: countFacet(
-      works.flatMap((work) =>
+      facetWorks(["directorIds"]).flatMap((work) =>
         work.personRelations
           .filter((relation) => relation.role === "director")
           .map((relation) => relation.personId),
       ),
     ),
-    makers: countFacet(works.flatMap((work) => (work.makerId ? [work.makerId] : []))),
-    labels: countFacet(works.flatMap((work) => (work.labelId ? [work.labelId] : []))),
-    series: countFacet(works.flatMap((work) => work.seriesIds)),
-    genres: countFacet(works.flatMap((work) => work.genreIds)),
-    workTypes: countFacet(works.flatMap((work) => work.workTypeIds)),
-    tags: countFacet(works.flatMap((work) => work.tagIds)),
+    makers: countFacet(
+      facetWorks(["makerIds"]).flatMap((work) =>
+        work.makerId ? [work.makerId] : [],
+      ),
+    ),
+    labels: countFacet(
+      facetWorks(["labelIds"]).flatMap((work) =>
+        work.labelId ? [work.labelId] : [],
+      ),
+    ),
+    series: countFacet(
+      facetWorks(["seriesIds"]).flatMap((work) => work.seriesIds),
+    ),
+    genres: countFacet(
+      facetWorks(["genreIds"]).flatMap((work) => work.genreIds),
+    ),
+    workTypes: countFacet(
+      facetWorks(["workTypeIds"]).flatMap((work) => work.workTypeIds),
+    ),
+    tags: countFacet(
+      facetWorks(["tagIds"]).flatMap((work) => work.tagIds),
+    ),
   };
 }
 
@@ -297,6 +361,65 @@ function countFacet(values: string[]): FacetCount[] {
   return [...counts.entries()]
     .map(([id, count]) => ({ id, count }))
     .sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
+}
+
+function createPersonComparator(sort: PersonSort = "name_asc") {
+  return (a: Person, b: Person): number => {
+    switch (sort) {
+      case "name_asc":
+        return getPersonSortName(a).localeCompare(getPersonSortName(b), "ja");
+      case "name_desc":
+        return getPersonSortName(b).localeCompare(getPersonSortName(a), "ja");
+      case "birth_asc":
+        return compareText(a.birthDate?.value, b.birthDate?.value);
+      case "birth_desc":
+        return compareText(b.birthDate?.value, a.birthDate?.value);
+      case "debut_asc":
+        return compareText(
+          getCareerEventDate(a, "debut"),
+          getCareerEventDate(b, "debut"),
+        );
+      case "debut_desc":
+        return compareText(
+          getCareerEventDate(b, "debut"),
+          getCareerEventDate(a, "debut"),
+        );
+      case "height_asc":
+        return (a.heightCm ?? Number.MAX_SAFE_INTEGER) - (b.heightCm ?? Number.MAX_SAFE_INTEGER);
+      case "height_desc":
+        return (b.heightCm ?? -1) - (a.heightCm ?? -1);
+    }
+  };
+}
+
+function getCareerEventDate(
+  person: Person,
+  type: Person["careerEvents"][number]["type"],
+): string | undefined {
+  return person.careerEvents
+    .filter((event) => event.type === type && event.date?.value)
+    .map((event) => event.date!.value)
+    .sort()[0];
+}
+
+function matchesYear(value: string | undefined, years?: string[]): boolean {
+  if (!years?.length) return true;
+  return value !== undefined && years.includes(value.slice(0, 4));
+}
+
+function matchesCareerEventYear(
+  person: Person,
+  type: Person["careerEvents"][number]["type"],
+  years?: string[],
+): boolean {
+  if (!years?.length) return true;
+
+  return person.careerEvents.some(
+    (event) =>
+      event.type === type &&
+      event.date?.value !== undefined &&
+      years.includes(event.date.value.slice(0, 4)),
+  );
 }
 
 function getWorkSortTitle(work: Work): string {
