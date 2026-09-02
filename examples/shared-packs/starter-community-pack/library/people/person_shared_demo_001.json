@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "person_shared_demo_001",
+  "names": [
+    {
+      "language": "ja",
+      "value": "共有デモ花",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "共享示例花",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Hana Shared Demo",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2024",
+        "precision": "year"
+      }
+    }
+  ],
+  "birthPlace": {
+    "ja": "架空県",
+    "zh-CN": "虚构县",
+    "en": "Fictional Prefecture"
+  },
+  "biographies": {
+    "ja": "Shared Pack の仕組みを説明する架空人物です。",
+    "zh-CN": "用于演示 Shared Pack 机制的虚构人物。",
+    "en": "A fictional person used to demonstrate Shared Packs."
+  },
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-02T09:00:00+08:00",
+  "updatedAt": "2026-09-02T09:00:00+08:00"
+}

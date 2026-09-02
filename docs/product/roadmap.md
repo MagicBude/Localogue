@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理增强
 
-已进入此阶段。V1-08 已完成资料完整度、治理队列、Evidence 批量生命周期治理、人物手工维护与重复候选基础。
+已进入此阶段。V1-09 已完成实例设置中心、Shared Pack 挂载与 Local Override 数据分层基础。
 
 后续重点：
 
@@ -31,7 +31,8 @@
 - ~~Evidence 生命周期批量治理~~（V1-08）；
 - ~~人物资料手工维护~~（V1-08）；
 - ~~重复作品 / 人物候选基础~~（V1-08）；
-- Asset 上传、封面选择与 SHA-256 去重；
+- ~~网页设置中心、Library 路径与 Shared Pack 数据分层~~（V1-09）；
+- Asset 上传、封面选择、Presentation Preference 与 SHA-256 去重；
 - MediaFile 扫描、ffprobe 与哈希；
 - Work ↔ MediaFile 绑定审核；
 - 更安全的实体 Merge Plan；

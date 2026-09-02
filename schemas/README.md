@@ -17,3 +17,9 @@
 
 ### V1-08
 - `person-edit-receipt.schema.example.json`：人物手工编辑 before/after 审计记录示例。
+
+
+## V1-09
+
+- `instance-settings.schema.json`：本机实例设置。
+- `shared-pack-manifest.schema.json`：只读 Shared Pack 清单。

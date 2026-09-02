@@ -1,6 +1,6 @@
 {
   "name": "localogue",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -15,7 +15,8 @@
     "check": "pnpm validate:data && pnpm validate:audit && pnpm lint && pnpm typecheck && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
-    "validate:audit": "node scripts/validate-audit.mjs"
+    "validate:audit": "node scripts/validate-audit.mjs",
+    "library:init:demo": "node scripts/init-private-library.mjs --demo"
   },
   "dependencies": {
     "next": "16.3.3",

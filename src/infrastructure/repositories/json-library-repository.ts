@@ -19,7 +19,7 @@ import type {
   WorkSearchResult,
   WorkSort,
 } from "@/domain/queries/work-query";
-import { JsonFileStore } from "@/infrastructure/repositories/json-file-store";
+import { JsonFileStore, type JsonStoreRoots } from "@/infrastructure/repositories/json-file-store";
 
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -32,8 +32,11 @@ const DEFAULT_PAGE_SIZE = 24;
 export class JsonLibraryRepository implements LibraryRepository {
   private readonly store: JsonFileStore;
 
-  constructor(libraryRoot = path.join(process.cwd(), "data", "library")) {
-    this.store = new JsonFileStore(libraryRoot);
+  constructor(
+    readRoots: JsonStoreRoots = path.join(process.cwd(), "data", "library"),
+    private readonly writableRoot: string | (() => string | null) = path.join(process.cwd(), "data", "library"),
+  ) {
+    this.store = new JsonFileStore(readRoots);
   }
 
   async findWorkById(id: string): Promise<Work | null> {
@@ -172,27 +175,35 @@ export class JsonLibraryRepository implements LibraryRepository {
   }
 
   saveWork(work: Work): Promise<void> {
-    return this.store.writeEntity("works", work);
+    return this.writer().writeEntity("works", work);
   }
 
   savePerson(person: Person): Promise<void> {
-    return this.store.writeEntity("people", person);
+    return this.writer().writeEntity("people", person);
   }
 
   saveOrganization(organization: Organization): Promise<void> {
-    return this.store.writeEntity("organizations", organization);
+    return this.writer().writeEntity("organizations", organization);
   }
 
   saveSeries(series: Series): Promise<void> {
-    return this.store.writeEntity("series", series);
+    return this.writer().writeEntity("series", series);
   }
 
   saveGenre(genre: Genre): Promise<void> {
-    return this.store.writeEntity("genres", genre);
+    return this.writer().writeEntity("genres", genre);
   }
 
   saveTag(tag: Tag): Promise<void> {
-    return this.store.writeEntity("tags", tag);
+    return this.writer().writeEntity("tags", tag);
+  }
+
+  private writer(): JsonFileStore {
+    const root = typeof this.writableRoot === "function" ? this.writableRoot() : this.writableRoot;
+    if (!root) {
+      throw new Error("当前没有配置可写私人资料库；Shared Pack 与 Demo Library 都是只读的。");
+    }
+    return new JsonFileStore(root);
   }
 }
 

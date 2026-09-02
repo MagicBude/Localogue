@@ -2533,3 +2533,146 @@ code {
   .curation-row__actions { justify-content: flex-start; }
   .editable-row--name input:nth-of-type(1) { grid-column: auto; }
 }
+
+
+/* V1-09 · 实例设置与 Shared Pack */
+.settings-stack {
+  display: grid;
+  gap: 24px;
+}
+
+.settings-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: clamp(22px, 3vw, 34px);
+  box-shadow: var(--shadow);
+}
+
+.settings-card--soft {
+  background: var(--surface-soft);
+  box-shadow: none;
+}
+
+.settings-card h2 {
+  margin: 6px 0 8px;
+}
+
+.settings-field {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  font-weight: 650;
+}
+
+.settings-field input,
+.settings-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.settings-field textarea {
+  resize: vertical;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  line-height: 1.55;
+}
+
+.settings-field small,
+.settings-info span,
+.shared-pack-row p {
+  color: var(--text-soft);
+  font-weight: 450;
+}
+
+.settings-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.settings-info {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.settings-info code {
+  overflow-wrap: anywhere;
+}
+
+.shared-pack-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.shared-pack-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(240px, 1.4fr);
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.shared-pack-row p {
+  margin: 3px 0 0;
+  font-size: 0.84rem;
+}
+
+.shared-pack-row code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.status-chip {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-chip--ok {
+  background: color-mix(in srgb, #2e9c5b, transparent 84%);
+}
+
+.status-chip--warn {
+  background: color-mix(in srgb, #c47a1d, transparent 82%);
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.notice-box {
+  border-left: 4px solid #c47a1d;
+  border-radius: 9px;
+  background: color-mix(in srgb, #c47a1d, transparent 90%);
+  padding: 12px 14px;
+}
+
+.success-text { color: #2e9c5b; }
+.error-text { color: #c94848; }
+
+@media (max-width: 980px) {
+  .settings-info-grid,
+  .shared-pack-row {
+    grid-template-columns: 1fr;
+  }
+}

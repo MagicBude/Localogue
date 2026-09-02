@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-08 File-backed Library / 资料完整度、治理队列、人物编辑与重复候选开发**。
+当前阶段：**V1-09 File-backed Library / 实例设置、Shared Pack 与 Local Override 数据分层**。
 
 V1 当前约束：
 
@@ -129,7 +129,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 ## V1-06 实现约束补充
 
 - 默认 `data/demo-library` 是只读教学资料，不得通过 Review/Commit API 修改。
-- 任何 Canonical 写入必须要求显式 `LOCALOGUE_LIBRARY_PATH`，保证读写目标是同一个私人 Library。
+- 任何 Canonical 写入必须要求显式私人 Library 配置（`LOCALOGUE_LIBRARY_PATH` 或 `/settings` 保存的 `libraryPath`），保证读写目标是同一个私人 Library。
 - Review Analysis、Review Decisions、Commit Plan、Commit Executor 必须保持分层，禁止在 React 页面中直接调用文件写入。
 - ambiguous / unresolved 实体不得拥有自动绑定默认值；没有人工明确决策时必须产生 blocker。
 - Work Type 属于受控词表，未知输入不得自动生成新的 Work Type ID。
@@ -164,3 +164,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 人物手工编辑必须保留 before/after 审计 Receipt；Receipt 写入失败时应尝试补偿恢复。
 - Evidence 批量动作只修改 Lifecycle，不得批量改写 Evidence Raw / Normalized 本体。
 - 新增治理规则时必须同步 `docs/curation/`，若涉及稳定状态或等级应同步受控词表。
+
+
+## V1-09 实现约束补充
+
+- 普通用户的实例配置默认通过 `/settings` 管理，保存在 Git 忽略的 `.localogue/settings.json`。
+- `LOCALOGUE_LIBRARY_PATH` 保留给 Docker / NAS / 服务器等部署场景，并且优先于网页设置。
+- Shared Pack 必须视为只读基础资料，任何 Repository 写入都只能进入显式配置的 Private Library。
+- 读取优先级固定为 `Private Library > Shared Pack（配置顺序）`；同一稳定 ID 由靠前数据源胜出。
+- Demo Library 只能在没有 Private Library 且没有有效 Shared Pack 时使用；禁止把虚构 Demo 当真实数据层 fallback。
+- Shared Pack V1 使用整实体覆盖语义，不得偷偷实现不可解释的字段级深度合并。
+- 社区公共资料与主程序仓库应保持逻辑分离；真实共享数据必须考虑来源、许可与 Provenance。
+- “用户喜欢的头像/封面”属于 Presentation Preference，不应等同于修改公共事实元数据；Asset 阶段应实现独立本地偏好层。
+- CLI 校验脚本必须和 Next.js 使用相同的 Library / Shared Pack 路径解析规则。

@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-08：资料完整度、治理队列、人物手工维护与重复候选基础。**
+**V1-09：实例设置中心、Shared Pack 与 Local Override 数据分层。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -73,16 +73,35 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - `/curation/duplicates` Work / Person 可解释重复候选；
 - 完整度等级与重复候选置信级别中日英受控词表。
 
+
+### V1-09 设置与共享资料层
+
+- 新增 `/settings` 实例设置中心；
+- 新增 `.localogue/settings.json` 本机配置文件并 Git 忽略；
+- `/settings` 可配置私人 Canonical Library 路径；
+- `LOCALOGUE_LIBRARY_PATH` 继续保留最高优先级，适合 Docker / NAS / 服务器部署；
+- 新增 Shared Pack 目录协议与 `localogue-pack.json` manifest；
+- `/settings` 支持配置多个 Shared Pack，并显示有效/无效状态；
+- JSON Repository 支持多根只读合并；
+- 读取优先级固定为 `Private Library > Shared Pack（配置顺序）`；
+- 同一稳定 ID 由更高优先级数据源的完整实体覆盖；
+- Shared Pack 永远只读，Canonical 写入只进入私人 Library；
+- Demo 仅在没有任何真实数据源时启用，避免虚构数据混入真实资料；
+- CLI `validate:data / validate:audit / library:init` 开始识别网页实例设置；
+- 新增 Community Data、Shared Pack、Local Override 与许可边界文档。
+- 新增跨用户稳定实体 ID 规则和 Local-First 管理接口安全部署边界。
+
 ## 下一阶段建议
 
-**V1-09：资产与媒体文件治理。**
+**V1-10：Asset、MediaFile 与 Presentation Preference。**
 
-1. Asset 上传/登记与封面选择；
-2. Asset SHA-256 去重基础；
-3. MediaFile 文件夹扫描；
-4. ffprobe 媒体时长、分辨率、编码信息；
-5. Work ↔ MediaFile 绑定审核；
-6. 作品完整度队列与 Asset/MediaFile 治理联动。
+1. Asset 上传/登记、SHA-256 与图片尺寸；
+2. 人物头像、作品封面/海报/剧照管理；
+3. 本地 `preferredPortrait / preferredCover` 显示偏好层；
+4. Shared Pack Asset 读取与本地 Asset 覆盖；
+5. MediaFile 目录扫描；
+6. ffprobe 媒体时长、分辨率、编码信息；
+7. Work ↔ MediaFile 绑定审核。
 
 ## 当前不做
 

@@ -1,26 +1,16 @@
 import { randomUUID } from "node:crypto";
-import path from "node:path";
-
 import type { EvidenceRecord, ImportPreview } from "@/domain/entities/evidence";
 import { JsonFileStore } from "@/infrastructure/repositories/json-file-store";
+import { getPrivateRuntimeLibraryPath } from "@/infrastructure/repositories/library-path";
 
 /**
- * 导入写入路径与 Demo 浏览路径刻意分开。
+ * Evidence 永远属于私人运行数据。
  *
- * - 浏览若未配置环境变量，仍读取 data/demo-library；
- * - 导入若未配置环境变量，则写到被 Git 忽略的 data/library。
+ * - 配置私人 Library 后：跟随该 Library；
+ * - 尚未配置时：暂存在 Git 忽略的 data/library。
  *
- * 这样第一次尝试导入时不会意外修改仓库里的 Demo 数据。
+ * Shared Pack 永远只读，因此 Evidence 不会写入 Pack。
  */
-function resolveWritableLibraryRoot(): string {
-  const configured = process.env.LOCALOGUE_LIBRARY_PATH?.trim();
-  return configured
-    ? path.resolve(/* turbopackIgnore: true */ process.cwd(), configured)
-    : path.join(process.cwd(), "data", "library");
-}
-
-const store = new JsonFileStore(resolveWritableLibraryRoot());
-
 export async function savePreviewAsEvidence(preview: ImportPreview): Promise<EvidenceRecord[]> {
   const timestamp = new Date();
   const importedAt = timestamp.toISOString();
@@ -37,6 +27,7 @@ export async function savePreviewAsEvidence(preview: ImportPreview): Promise<Evi
     warnings: [...preview.warnings, ...candidate.warnings],
   }));
 
+  const store = new JsonFileStore(getPrivateRuntimeLibraryPath());
   await Promise.all(records.map((record) => store.writeEntity("evidence", record)));
   return records;
 }
@@ -49,7 +40,7 @@ export async function savePreviewAsEvidence(preview: ImportPreview): Promise<Evi
  * - Evidence Inbox：data/library/evidence
  */
 export async function listEvidenceRecords(): Promise<EvidenceRecord[]> {
-  const records = await store.readCollection<EvidenceRecord>("evidence");
+  const records = await new JsonFileStore(getPrivateRuntimeLibraryPath()).readCollection<EvidenceRecord>("evidence");
   return records.sort((a, b) => b.importedAt.localeCompare(a.importedAt));
 }
 

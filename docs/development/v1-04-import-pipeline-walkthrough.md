@@ -99,7 +99,7 @@ Review 确认
 
 ## 为什么 Evidence 默认写到 data/library
 
-浏览器未配置 `LOCALOGUE_LIBRARY_PATH` 时，为了方便演示，页面读取：
+未显式配置私人 Library（网页设置或 `LOCALOGUE_LIBRARY_PATH`）时，为了方便演示，页面读取：
 
 ```text
 data/demo-library

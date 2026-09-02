@@ -2,19 +2,21 @@ import type {
   EvidenceLifecycleRecord,
   EvidenceLifecycleStatus,
 } from "@/domain/entities/evidence-lifecycle";
-import { getConfiguredPrivateLibraryPath } from "@/infrastructure/repositories/library-path";
+import { getPrivateRuntimeLibraryPath } from "@/infrastructure/repositories/library-path";
 import { JsonFileStore } from "@/infrastructure/repositories/json-file-store";
 
 function resolveLifecycleRoot(): string {
-  return getConfiguredPrivateLibraryPath() ?? `${process.cwd()}/data/library`;
+  return getPrivateRuntimeLibraryPath();
 }
 
-const store = new JsonFileStore(resolveLifecycleRoot());
+function lifecycleStore(): JsonFileStore {
+  return new JsonFileStore(resolveLifecycleRoot());
+}
 
 export async function getEvidenceLifecycle(
   evidenceId: string,
 ): Promise<EvidenceLifecycleRecord> {
-  const all = await store.readCollection<EvidenceLifecycleRecord>("evidence-lifecycle");
+  const all = await lifecycleStore().readCollection<EvidenceLifecycleRecord>("evidence-lifecycle");
   return all.find((item) => item.evidenceId === evidenceId) ?? {
     schemaVersion: 1,
     id: evidenceId,
@@ -25,7 +27,7 @@ export async function getEvidenceLifecycle(
 }
 
 export async function listEvidenceLifecycles(): Promise<EvidenceLifecycleRecord[]> {
-  return store.readCollection<EvidenceLifecycleRecord>("evidence-lifecycle");
+  return lifecycleStore().readCollection<EvidenceLifecycleRecord>("evidence-lifecycle");
 }
 
 export async function setEvidenceLifecycle(
@@ -41,6 +43,6 @@ export async function setEvidenceLifecycle(
     updatedAt: new Date().toISOString(),
     ...options,
   };
-  await store.writeEntity("evidence-lifecycle", record);
+  await lifecycleStore().writeEntity("evidence-lifecycle", record);
   return record;
 }

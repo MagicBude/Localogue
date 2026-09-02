@@ -1,24 +1,20 @@
-import path from "node:path";
 
 import type { CanonicalCommitReceipt } from "@/domain/entities/commit-plan";
 import { listRestoreReceipts } from "@/infrastructure/history/restore-receipt-store";
 import { JsonFileStore } from "@/infrastructure/repositories/json-file-store";
+import { getPrivateRuntimeLibraryPath } from "@/infrastructure/repositories/library-path";
 
-function resolveReceiptRoot(): string {
-  const configured = process.env.LOCALOGUE_LIBRARY_PATH?.trim();
-  return configured
-    ? path.resolve(/* turbopackIgnore: true */ process.cwd(), configured)
-    : path.join(process.cwd(), "data", "library");
+function receiptStore(): JsonFileStore {
+  return new JsonFileStore(getPrivateRuntimeLibraryPath());
 }
 
-const store = new JsonFileStore(resolveReceiptRoot());
 
 export async function saveCommitReceipt(receipt: CanonicalCommitReceipt): Promise<void> {
-  await store.writeEntity("review-commits", receipt);
+  await receiptStore().writeEntity("review-commits", receipt);
 }
 
 export async function listCommitReceipts(): Promise<CanonicalCommitReceipt[]> {
-  const items = await store.readCollection<CanonicalCommitReceipt>("review-commits");
+  const items = await receiptStore().readCollection<CanonicalCommitReceipt>("review-commits");
   return items.sort((a, b) => b.committedAt.localeCompare(a.committedAt));
 }
 

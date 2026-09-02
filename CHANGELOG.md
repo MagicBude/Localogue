@@ -1,5 +1,28 @@
 # 更新日志
 
+## V1-09 · 设置中心、Shared Pack 与 Local Override
+
+- 新增 `/settings` 实例设置中心，普通用户不再必须编辑 `.env.local` 才能切换私人资料库。
+- 新增 Git 忽略的 `.localogue/settings.json` 保存当前机器实例配置。
+- 保留 `LOCALOGUE_LIBRARY_PATH` 环境变量，并规定其优先于网页设置。
+- 新增 Shared Pack manifest 与只读目录挂载协议。
+- 支持在设置页配置多个 Shared Pack，并显示 manifest、版本和有效状态。
+- `JsonFileStore` / `JsonLibraryRepository` 支持多根读取和单独私人写根。
+- 读取优先级实现为 `Private Library > Shared Packs（配置顺序）`。
+- 同一稳定 ID 使用高优先级数据源完整实体，实现 V1 Local Override。
+- Demo Library 只在没有任何真实数据源时使用，禁止与真实 Shared Pack 混合 fallback。
+- Repository 路径改为延迟解析，网页保存设置后后续请求无需重启进程即可读取新路径。
+- Evidence、Lifecycle、Commit Receipt 等私人运行数据开始跟随网页配置的私人 Library。
+- CLI `validate:data` 支持按相同优先级合并 Private + Shared 数据。
+- CLI `validate:audit` 与 `library:init` 支持读取网页实例设置。
+- 新增 Shared Pack manifest JSON Schema 与完全虚构示例 Pack。
+- 新增 Community Data、Local Override、设置优先级、共享许可边界及教材文档。
+- 新增 ADR-019 / ADR-020 固化配置优先级和 Shared Base 只读原则。
+- 补充 Community Data 稳定实体 ID 原则，避免姓名、标题变化导致跨 Pack 身份漂移。
+- 补充 Presentation Preference 架构，为 V1-10 的本地头像/封面优先选择预留独立偏好层。
+- 补充 Local-First 管理接口安全边界，明确当前 `/settings` 与写操作不应直接暴露到不受信任公网。
+- 修正 CLI `.env.local` 加载逻辑：始终尝试加载本地环境文件，同时保留进程环境变量的最高优先级。
+
 ## V1-08 · 资料完整度、治理队列与人物手工维护
 
 - 新增 `/curation` 资料治理工作台，集中显示作品/人物完整度、Evidence 队列和重复候选。

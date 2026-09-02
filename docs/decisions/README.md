@@ -26,3 +26,8 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-08
 - [ADR-017：完整度是派生治理信号](ADR-017-completeness-is-derived-signal.md)
 - [ADR-018：人物手工编辑必须保留 before/after Receipt](ADR-018-person-manual-edit-audit-receipt.md)
+
+
+### V1-09
+- [ADR-019：网页设置作为默认配置入口，环境变量保留最高优先级](ADR-019-web-settings-with-environment-override.md)
+- [ADR-020：Shared Base 只读，本地稳定 ID 覆盖优先](ADR-020-shared-base-local-override.md)

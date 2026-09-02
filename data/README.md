@@ -64,3 +64,10 @@ person-edits/
 ```
 
 其中保存人物 Web 手工编辑的 before/after 审计 Receipt。该目录属于私人 Library 数据，不应提交到公开仓库。
+
+
+## V1-09 路径配置
+
+普通本地用户建议通过网页 `/settings` 配置私人 Library。实例设置写入 `.localogue/settings.json`，不会提交 Git。
+
+`LOCALOGUE_LIBRARY_PATH` 继续用于 Docker / NAS / 服务器等部署场景，并且优先于网页设置。

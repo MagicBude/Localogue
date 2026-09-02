@@ -22,6 +22,8 @@
 - [查询引擎](architecture/query-engine.md)
 - [Commit Plan 架构](architecture/commit-plan.md)
 - [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
+- [数据分层与 Local Override 优先级](architecture/data-layer-precedence.md)
+- [Presentation Preference：共享事实与我的展示选择](architecture/presentation-preferences.md)
 
 ## 数据模型
 
@@ -112,6 +114,16 @@
 
 - [导出总览](export/overview.md)
 
+## 分享与社区资料
+
+- [Shared Pack 规范](sharing/shared-packs.md)
+- [Community Data 共享原则](sharing/community-data-policy.md)
+- [社区资料稳定实体 ID](sharing/stable-community-ids.md)
+
+## 安全
+
+- [本地部署与设置接口安全边界](security/local-deployment.md)
+
 ## 存储
 
 - [JSON Library](storage/json-library.md)
@@ -139,6 +151,8 @@
 ## 参考项目
 
 见 [research/reference-projects.md](research/reference-projects.md)。
+
+- [Gfriends 共享头像仓库对 Localogue 的启发](research/gfriends-sharing-model.md)
 
 ## V1-02 新增实现文档
 
@@ -174,6 +188,7 @@
 - [V1-08 治理队列](curation/v1-08-governance-queues.md)
 - [Commit Plan 架构](architecture/commit-plan.md)
 - [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
+- [数据分层与 Local Override 优先级](architecture/data-layer-precedence.md)
 - [教材：从 Review 到 Commit Plan](development/v1-06-commit-plan-walkthrough.md)
 - [教材：Demo 与私人可写 Library](development/v1-06-private-library-mode.md)
 - [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
@@ -184,6 +199,7 @@
 ## V1-07 新增实现文档
 
 - [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
+- [数据分层与 Local Override 优先级](architecture/data-layer-precedence.md)
 - [Evidence 生命周期](curation/evidence-lifecycle.md)
 - [V1-08 治理队列](curation/v1-08-governance-queues.md)
 - [教材：从写文件到可审计资料库](development/v1-07-provenance-history-walkthrough.md)
@@ -205,3 +221,16 @@
 - [重复候选置信级别词表](vocabulary/duplicate-confidence-levels.md)
 - [ADR-017：完整度是派生治理信号](decisions/ADR-017-completeness-is-derived-signal.md)
 - [ADR-018：人物手工编辑必须保留 before/after Receipt](decisions/ADR-018-person-manual-edit-audit-receipt.md)
+
+
+## V1-09 新增实现文档
+
+- [数据分层与 Local Override 优先级](architecture/data-layer-precedence.md)
+- [Presentation Preference：共享事实与我的展示选择](architecture/presentation-preferences.md)
+- [Shared Pack 规范](sharing/shared-packs.md)
+- [Community Data 共享原则](sharing/community-data-policy.md)
+- [社区资料稳定实体 ID](sharing/stable-community-ids.md)
+- [本地部署与设置接口安全边界](security/local-deployment.md)
+- [教材：设置页与分层资料库](development/v1-09-settings-and-layered-library-walkthrough.md)
+- [ADR-019：网页设置与环境变量优先级](decisions/ADR-019-web-settings-with-environment-override.md)
+- [ADR-020：Shared Base + Local Override](decisions/ADR-020-shared-base-local-override.md)

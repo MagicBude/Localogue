@@ -76,3 +76,6 @@ pnpm validate:data
 ```
 
 校验的是私人 Canonical Library，而不是 Demo Library。
+
+
+> V1-09 更新：`pnpm library:init` 现在只创建空私人资料库；教学复制 Demo 请显式使用 `pnpm library:init:demo`，避免虚构数据混入真实资料。

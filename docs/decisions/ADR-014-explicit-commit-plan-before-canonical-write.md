@@ -21,7 +21,7 @@ Canonical Library 的写操作必须经过：
 6. fingerprint 一致性检查；
 7. Commit Executor。
 
-默认 Demo Library 永远不允许 Canonical Commit；只有显式配置私人 `LOCALOGUE_LIBRARY_PATH` 后才启用。
+默认 Demo Library 永远不允许 Canonical Commit；只有通过 `/settings` 或 `LOCALOGUE_LIBRARY_PATH` 显式配置私人 Library 后才启用。
 
 ## Consequences
 

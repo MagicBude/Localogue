@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-08：资料完整度、治理队列、人物资料编辑与重复候选阶段**。
+当前处于 **V1-09：实例设置、Shared Pack 与 Local Override 数据分层阶段**。
 
 当前 V1 已完成：
 
@@ -56,6 +56,11 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - Evidence pending / ignored 批量生命周期治理；
 - 人物资料 Web 手工编辑与 before/after 审计 Receipt；
 - Work / Person 可解释重复候选发现。
+- `/settings` 实例设置中心；
+- 网页配置 Private Library 路径；
+- Shared Pack 只读共享资料挂载；
+- `Private Library > Shared Packs` 本地优先读取；
+- `.localogue/settings.json` 本机配置与环境变量覆盖。
 
 ## 技术栈
 
@@ -174,19 +179,40 @@ data/demo-library/
 
 真实个人资料使用 Git 忽略的 `data/library/` 或仓库外 `LOCALOGUE_LIBRARY_PATH`。
 
-V1-06 起，默认 Demo 模式是只读的；V1-07 又在正式 Commit 前增加 Snapshot 与 Provenance。要练习正式归档，可以先执行：
+V1-09 起，普通本地用户可以直接打开：
+
+```text
+http://localhost:3000/settings
+```
+
+设置 Private Library 路径，例如：
+
+```text
+./data/library
+D:\LocalogueLibrary
+```
+
+设置保存在 Git 忽略的 `.localogue/settings.json`，保存后后续请求即可使用新路径。
+
+`.env.local` 中的 `LOCALOGUE_LIBRARY_PATH` 仍然支持，主要面向 Docker / NAS / 服务器部署，并且优先级高于网页设置。
+
+初始化真实私人资料库建议执行：
 
 ```bash
 pnpm library:init
 ```
 
-然后创建 `.env.local`：
+它只创建空目录，不复制 Demo。若明确要做教学练习，再执行：
 
-```text
-LOCALOGUE_LIBRARY_PATH=./data/library
+```bash
+pnpm library:init:demo
 ```
 
-重新启动 `pnpm dev` 后，页面、Review 和 Commit 都会使用同一个私人 Canonical Library。
+V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓库中只读挂载，而本地同 ID 实体始终拥有更高优先级。
+
+真实社区资料建议与主程序仓库分离：主仓库只保存代码、Schema、词表、文档和虚构 Demo；可合法共享的事实型元数据放独立 Community Data / Shared Pack。图片、长篇简介等内容则必须额外确认再分发权限。
+
+后续头像、封面会再增加 **Presentation Preference**：公共资料可以提供默认头像，但用户选择的本地头像拥有更高显示优先级，而且不会因为社区资料更新被覆盖。
 
 ## 项目原则摘要
 
@@ -363,7 +389,7 @@ Fingerprint Recheck
 Canonical JSON + Commit Receipt
 ```
 
-默认 Demo 模式仍然禁止写入，只有显式配置私人 `LOCALOGUE_LIBRARY_PATH` 后才启用正式归档。
+默认 Demo 模式仍然禁止写入，只有通过 `/settings` 或 `LOCALOGUE_LIBRARY_PATH` 显式配置私人 Library 后才启用正式归档。
 
 建议学习：
 
@@ -464,7 +490,7 @@ V1-08 增加 `/curation`，把“知道资料哪里不完整”变成可以直�
 /people/[id]/edit
 ```
 
-完整度是运行时派生数据，不写入 Canonical JSON；重复检测只产生候选，不自动合并。人物编辑只有配置 `LOCALOGUE_LIBRARY_PATH` 的私人资料库才允许保存，每次修改生成 `person-edits/` before/after 审计记录。
+完整度是运行时派生数据，不写入 Canonical JSON；重复检测只产生候选，不自动合并。人物编辑只有显式配置私人 Library（网页设置或 `LOCALOGUE_LIBRARY_PATH`）后才允许保存，每次修改生成 `person-edits/` before/after 审计记录。
 
 建议学习：
 

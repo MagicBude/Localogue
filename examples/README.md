@@ -27,3 +27,9 @@ Evidence
 ```
 
 导入并保存后，到 `/review` 查看审核结果。
+
+
+## V1-09
+
+- `shared-packs/starter-community-pack/`：完全虚构的 Shared Pack 示例。
+- `settings/settings.example.json`：实例设置文件示例。

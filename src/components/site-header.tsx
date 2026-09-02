@@ -29,6 +29,7 @@ export function SiteHeader({ preferences, dictionary }: SiteHeaderProps) {
           <Link href="/review">{dictionary.navReview}</Link>
           <Link href="/curation">{dictionary.navCuration}</Link>
           <Link href="/history">{dictionary.navHistory}</Link>
+          <Link href="/settings">{dictionary.navSettings}</Link>
           <Link href="/about">{dictionary.navAbout}</Link>
         </nav>
 

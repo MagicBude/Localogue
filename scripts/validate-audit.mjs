@@ -1,14 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import process from "node:process";
-
-if (!process.env.LOCALOGUE_LIBRARY_PATH) {
-  try {
-    process.loadEnvFile(path.join(process.cwd(), ".env.local"));
-  } catch {
-    // 没有 .env.local 时检查默认 data/library；该目录为空也属于合法状态。
-  }
-}
+import { resolvePrivateRuntimeRoot } from "./lib/runtime-settings.mjs";
 
 /**
  * V1-08 审计数据完整性检查。
@@ -17,9 +9,7 @@ if (!process.env.LOCALOGUE_LIBRARY_PATH) {
  * Commit Receipt → Snapshot、Lifecycle → Commit、Restore → Commit/Snapshot、
  * Provenance → Commit/Restore。两类校验分开可以更清楚地理解职责。
  */
-const root = process.env.LOCALOGUE_LIBRARY_PATH?.trim()
-  ? path.resolve(process.cwd(), process.env.LOCALOGUE_LIBRARY_PATH.trim())
-  : path.join(process.cwd(), "data", "library");
+const root = resolvePrivateRuntimeRoot();
 
 const errors = [];
 const commits = await readCollection("review-commits");

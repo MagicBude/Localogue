@@ -1,16 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import process from "node:process";
-
-// Next.js 会自动读取 .env.local，但独立 Node 脚本不会。
-// Node 22 提供 loadEnvFile，可让 validate:data 与网页使用同一个资料库路径。
-if (!process.env.LOCALOGUE_LIBRARY_PATH) {
-  try {
-    process.loadEnvFile(path.join(process.cwd(), ".env.local"));
-  } catch {
-    // 没有 .env.local 时继续使用 Demo Library，这是正常的首次运行状态。
-  }
-}
+import { resolveReadableLibraryRoots } from "./lib/runtime-settings.mjs";
 
 /**
  * 这是一个“不依赖 Next.js / TypeScript”的资料库健康检查脚本。
@@ -19,7 +9,7 @@ if (!process.env.LOCALOGUE_LIBRARY_PATH) {
  * 作品引用的人物/厂商/系列/Genre/Asset 是否真实存在。
  * 后续 V1.x 会把更多 schema 校验规则逐步加入这里。
  */
-const libraryRoot = resolveLibraryRoot();
+const libraryRoots = resolveReadableLibraryRoots();
 const errors = [];
 
 const collections = {
@@ -54,36 +44,35 @@ if (errors.length > 0) {
   );
 }
 
-function resolveLibraryRoot() {
-  const configured = process.env.LOCALOGUE_LIBRARY_PATH?.trim();
-  return configured
-    ? path.resolve(process.cwd(), configured)
-    : path.join(process.cwd(), "data", "demo-library");
-}
-
 async function readCollection(name) {
-  const directory = path.join(libraryRoot, name);
-  let names;
+  const merged = new Map();
 
-  try {
-    names = await readdir(directory);
-  } catch (error) {
-    errors.push(`${name}: 无法读取目录 ${directory} (${error.message})`);
-    return [];
-  }
-
-  const items = [];
-  for (const fileName of names.filter((item) => item.endsWith(".json")).sort()) {
-    const filePath = path.join(directory, fileName);
+  for (const root of libraryRoots) {
+    const directory = path.join(root, name);
+    let names;
     try {
-      const raw = await readFile(filePath, "utf8");
-      items.push(JSON.parse(raw));
+      names = await readdir(directory);
     } catch (error) {
-      errors.push(`${name}/${fileName}: JSON 无法解析 (${error.message})`);
+      if (error?.code === "ENOENT") continue;
+      errors.push(`${name}: 无法读取目录 ${directory} (${error.message})`);
+      continue;
+    }
+
+    for (const fileName of names.filter((item) => item.endsWith(".json")).sort()) {
+      try {
+        const item = JSON.parse(await readFile(path.join(directory, fileName), "utf8"));
+        if (!item?.id) {
+          errors.push(`${name}/${fileName}: 缺少 id，无法参与分层资料合并`);
+          continue;
+        }
+        if (!merged.has(item.id)) merged.set(item.id, item);
+      } catch (error) {
+        errors.push(`${name}/${fileName}: JSON 无法解析 (${error.message})`);
+      }
     }
   }
 
-  return items;
+  return [...merged.values()];
 }
 
 function indexById(collectionName, items) {

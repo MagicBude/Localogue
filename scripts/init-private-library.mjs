@@ -1,15 +1,20 @@
-import { access, cp, mkdir, readdir } from "node:fs/promises";
+import { cp, mkdir, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
+import { resolvePrivateLibraryRoot } from "./lib/runtime-settings.mjs";
+
 /**
- * 为 V1 JSON-first 阶段初始化一个可写的私人 Canonical Library。
+ * 初始化私人 Canonical Library 目录结构。
  *
- * 默认把公开 Demo Canonical 数据复制到 data/library，方便安全练习“已有作品更新”。
- * Evidence / review-commits 等私人运行数据不会被覆盖。
+ * V1-09 起默认只创建空结构，避免把虚构 Demo 混进真实资料。
+ * 只有显式传入 --demo 才复制教学数据：
+ *
+ *   pnpm library:init:demo
  */
 const sourceRoot = path.join(process.cwd(), "data", "demo-library");
-const targetRoot = path.join(process.cwd(), "data", "library");
+const targetRoot = resolvePrivateLibraryRoot() ?? path.join(process.cwd(), "data", "library");
+const copyDemo = process.argv.includes("--demo");
 const canonicalCollections = [
   "works",
   "people",
@@ -22,37 +27,40 @@ const canonicalCollections = [
 ];
 
 await mkdir(targetRoot, { recursive: true });
+for (const collection of canonicalCollections) {
+  await mkdir(path.join(targetRoot, collection), { recursive: true });
+}
+
 let copied = 0;
 let skipped = 0;
 
-for (const collection of canonicalCollections) {
-  const source = path.join(sourceRoot, collection);
-  const target = path.join(targetRoot, collection);
-
-  if (!(await exists(source))) continue;
-  await mkdir(target, { recursive: true });
-
-  for (const name of (await readdir(source)).filter((item) => item.endsWith(".json"))) {
-    const destination = path.join(target, name);
-    if (await exists(destination)) {
-      skipped += 1;
+if (copyDemo) {
+  for (const collection of canonicalCollections) {
+    const source = path.join(sourceRoot, collection);
+    const target = path.join(targetRoot, collection);
+    let names = [];
+    try {
+      names = (await readdir(source)).filter((item) => item.endsWith(".json"));
+    } catch {
       continue;
     }
-    await cp(path.join(source, name), destination);
-    copied += 1;
+
+    const existing = new Set(await readdir(target));
+    for (const name of names) {
+      if (existing.has(name)) {
+        skipped += 1;
+        continue;
+      }
+      await cp(path.join(source, name), path.join(target, name));
+      copied += 1;
+    }
   }
 }
 
-console.log(`Localogue 私人资料库初始化完成：复制 ${copied} 个文件，跳过 ${skipped} 个已存在文件。`);
-console.log("\n接下来创建 .env.local，并写入：\n");
-console.log("LOCALOGUE_LIBRARY_PATH=./data/library");
-console.log("\n然后重新启动 pnpm dev。这样页面和 Review/Commit 都会使用私人资料库。\n");
-
-async function exists(target) {
-  try {
-    await access(target);
-    return true;
-  } catch {
-    return false;
-  }
+console.log(`Localogue 私人资料库目录：${targetRoot}`);
+if (copyDemo) {
+  console.log(`教学 Demo 初始化完成：复制 ${copied} 个文件，跳过 ${skipped} 个已存在文件。`);
+} else {
+  console.log("空资料库结构初始化完成；没有复制任何 Demo 数据。");
 }
+console.log("\n从 V1-09 起可在 /settings 页面设置 Library 路径；若使用 LOCALOGUE_LIBRARY_PATH 环境变量，则环境变量优先。\n");

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "libraryPath": "./data/library",
+  "sharedPackPaths": [
+    "./examples/shared-packs/starter-community-pack"
+  ]
+}
