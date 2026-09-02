@@ -47,3 +47,12 @@ V1-09 已实现 `/settings`。
 - 扫描目录；
 - 本地头像/封面 Presentation Preference；
 - Pack 安装、更新、导出和备份 UI。
+
+## V1-10：本地媒体设置
+
+设置页新增：
+
+- 多个媒体扫描目录；
+- `ffprobe` 可执行文件路径。
+
+扫描目录属于当前实例配置，不进入 Community Pack。一般用户保留 `ffprobe` 即可；只有 FFmpeg 未加入 PATH 时才填写完整路径。

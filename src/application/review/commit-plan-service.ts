@@ -443,8 +443,14 @@ function changedWorkFields(before: Work, after: Work): string[] {
   return fields.filter(([, a, b]) => JSON.stringify(a) !== JSON.stringify(b)).map(([name]) => name);
 }
 
-function pickWorkForPlan(work: Work) {
-  const { updatedAt: _updatedAt, ...stable } = work;
+function pickWorkForPlan(work: Work): Omit<Work, "updatedAt"> {
+  // Commit Plan 的 fingerprint 不应该因为 updatedAt 这种“写入时间戳”而变化。
+  //
+  // 这里不用 `const { updatedAt: _updatedAt, ...stable } = work`，因为新版
+  // @typescript-eslint/no-unused-vars 仍会把仅用于丢弃字段的 `_updatedAt` 视为未使用变量。
+  // 先复制 Work，再用 Reflect.deleteProperty 删除字段；这样运行时语义清楚，也不会制造无意义变量。
+  const stable = { ...work };
+  Reflect.deleteProperty(stable, "updatedAt");
   return stable;
 }
 

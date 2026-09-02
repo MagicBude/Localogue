@@ -91,3 +91,20 @@ Presentation Preference 表示：
 V1-09 先把 Shared Pack、Private Library 和设置路径做好，保证数据层优先级稳定。
 
 V1-10 再实现 Asset / MediaFile 时，Presentation Preference 才有真实 Asset ID 可以引用。这样不会先设计一个没有资源实体支撑的空壳偏好系统。
+
+## V1-10 实现状态
+
+V1-10 已实现文件化 `PresentationPreference`：
+
+```text
+presentation-preferences/
+├── presentation_person_<id>.json
+└── presentation_work_<id>.json
+```
+
+当前支持：
+
+- `preferredPortraitAssetId`
+- `preferredCoverAssetId`
+
+用户上传本地图片时，通过 Asset 的 `subjectType / subjectId` 建立归属，不要求建立 Person/Work whole-entity override。

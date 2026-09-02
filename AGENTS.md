@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-09 File-backed Library / 实例设置、Shared Pack 与 Local Override 数据分层**。
+当前阶段：**V1-10 File-backed Library / Asset、Presentation Preference 与本地 MediaFile**。
 
 V1 当前约束：
 
@@ -177,3 +177,19 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 社区公共资料与主程序仓库应保持逻辑分离；真实共享数据必须考虑来源、许可与 Provenance。
 - “用户喜欢的头像/封面”属于 Presentation Preference，不应等同于修改公共事实元数据；Asset 阶段应实现独立本地偏好层。
 - CLI 校验脚本必须和 Next.js 使用相同的 Library / Shared Pack 路径解析规则。
+
+
+## V1-10 实现约束补充
+
+- Presentation Preference 属于“怎样显示”的私人偏好，不得因为选头像/封面就强迫复制整个 Shared Person / Work。
+- 本地上传 Asset 应使用 `subjectType / subjectId` 建立归属；共享 Canonical Asset 继续通过 Person/Work 原有引用建立归属。
+- 用户上传图片必须落入 Private Library；Shared Pack 永远只读。
+- Asset 二进制与 Asset JSON 分离，用户上传图片使用 SHA-256 内容寻址；禁止把大体积 Base64 图片塞进 JSON。
+- 未实现可靠清洗器前，不接受用户上传 SVG；内置受控 SVG Demo 不受此限制。
+- Asset 内容路径必须经过资料根路径越界检查，禁止 `..` 逃逸。
+- MediaFile 永远属于 Private Layer；Shared Pack 中即使存在 `media-files/` 也必须忽略。
+- Work 与 MediaFile 的本地关联以 `MediaFile.workId` 为主，不应为了本地文件状态复制/覆盖 Community Work。
+- 未识别 MediaFile 是合法状态，禁止扫描器为了提高命中率进行不可解释的模糊自动绑定。
+- ffprobe 必须通过参数数组调用，不拼接 Shell 命令字符串。
+- 视频 SHA-256 是高成本操作，默认不得在普通扫描中强制启用。
+- 目录扫描当前是 V1 同步实现；数据规模增大后应升级 Job / Worker，而不是无限增加 HTTP 请求时长。

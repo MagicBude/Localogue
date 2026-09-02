@@ -71,3 +71,15 @@ person-edits/
 普通本地用户建议通过网页 `/settings` 配置私人 Library。实例设置写入 `.localogue/settings.json`，不会提交 Git。
 
 `LOCALOGUE_LIBRARY_PATH` 继续用于 Docker / NAS / 服务器等部署场景，并且优先于网页设置。
+
+## V1-10 私人资源目录
+
+Private Library 还可能包含：
+
+```text
+asset-files/                 # 图片二进制，按 SHA-256 内容寻址
+presentation-preferences/    # 用户自己的头像/封面显示选择
+media-files/                 # 本机媒体文件记录，只属于 Private Layer
+```
+
+`media-files/` 不从 Shared Pack 读取；本地媒体路径不属于可共享公共元数据。

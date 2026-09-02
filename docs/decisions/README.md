@@ -31,3 +31,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-09
 - [ADR-019：网页设置作为默认配置入口，环境变量保留最高优先级](ADR-019-web-settings-with-environment-override.md)
 - [ADR-020：Shared Base 只读，本地稳定 ID 覆盖优先](ADR-020-shared-base-local-override.md)
+
+- [ADR-021：展示偏好不得强迫复制 Shared Entity](ADR-021-presentation-preference-does-not-copy-shared-entity.md)
+- [ADR-022：MediaFile 永远属于 Private Layer](ADR-022-mediafile-is-private-only.md)

@@ -8,8 +8,10 @@ import {
   getPreferredPersonName,
   localizeText,
 } from "@/application/services/localization-service";
+import { assetDisplayUrl, listPersonAssets, resolvePersonPortraitAsset } from "@/application/assets/presentation-asset-service";
 import { presentWorkCard } from "@/application/services/work-presentation-service";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
+import { AssetPreferenceWorkbench } from "@/components/asset-preference-workbench";
 import { EmptyState } from "@/components/empty-state";
 import { Pagination } from "@/components/pagination";
 import { WorkFilterChips } from "@/components/work-filter-chips";
@@ -18,7 +20,8 @@ import { WorkResults } from "@/components/work-results";
 import { parseWorkView, WorkViewSwitcher } from "@/components/work-view-switcher";
 import { getCurationDictionary } from "@/i18n/curation";
 import { getUiDictionary } from "@/i18n/ui";
-import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
+import { isPrivateLibraryConfigured, libraryRepository } from "@/infrastructure/repositories/repository-provider";
+import { getPresentationPreference } from "@/infrastructure/presentation/presentation-preference-store";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
 import { formatMeasurements, formatPartialDate } from "@/lib/format";
 import { getUserPreferences } from "@/lib/preferences";
@@ -75,9 +78,7 @@ export default async function PersonDetailPage({
     peopleResult,
   ] = await Promise.all([
       libraryRepository.listWorks(query),
-      person.portraitAssetId
-        ? libraryRepository.findAssetById(person.portraitAssetId)
-        : Promise.resolve(null),
+      resolvePersonPortraitAsset(libraryRepository, person),
       getVocabularyLabelMap(
         vocabularyRepository,
         "person-statuses",
@@ -104,6 +105,11 @@ export default async function PersonDetailPage({
       libraryRepository.listTags(),
       libraryRepository.listPeople({ page: 1, pageSize: 9999 }),
     ]);
+
+  const [personAssets, presentationPreference] = await Promise.all([
+    listPersonAssets(libraryRepository, person),
+    getPresentationPreference("person", person.id),
+  ]);
 
   const cards = await Promise.all(
     workResult.items.map((work) =>
@@ -184,7 +190,7 @@ export default async function PersonDetailPage({
               unoptimized
               priority
               sizes="(max-width: 760px) 90vw, 320px"
-              src={portrait.storagePath}
+              src={assetDisplayUrl(portrait)}
             />
           ) : (
             <div className="portrait-placeholder">{displayName.slice(0, 1)}</div>
@@ -273,6 +279,16 @@ export default async function PersonDetailPage({
             ))}
         </ol>
       </section>
+
+      <AssetPreferenceWorkbench
+        candidates={personAssets.map((asset) => ({ id: asset.id, type: asset.type, url: assetDisplayUrl(asset), width: asset.width, height: asset.height, fileSize: asset.fileSize }))}
+        entityId={person.id}
+        entityType="person"
+        language={preferences.uiLanguage}
+        preferredAssetId={presentationPreference?.preferredPortraitAssetId}
+        activeAssetId={portrait?.id}
+        writable={isPrivateLibraryConfigured()}
+      />
 
       <section>
         <div className="section-heading">

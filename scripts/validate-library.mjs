@@ -1,6 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
-import { resolveReadableLibraryRoots } from "./lib/runtime-settings.mjs";
+import { resolvePrivateLibraryRoot, resolveReadableLibraryRoots } from "./lib/runtime-settings.mjs";
 
 /**
  * 这是一个“不依赖 Next.js / TypeScript”的资料库健康检查脚本。
@@ -20,6 +20,7 @@ const collections = {
   genres: await readCollection("genres"),
   tags: await readCollection("tags"),
   assets: await readCollection("assets"),
+  mediaFiles: await readPrivateCollection("media-files"),
 };
 
 const indexes = Object.fromEntries(
@@ -28,6 +29,8 @@ const indexes = Object.fromEntries(
 
 validateWorks();
 validatePeople();
+validateAssets();
+validateMediaFiles();
 
 if (errors.length > 0) {
   console.error("\nLocalogue 资料库校验失败：\n");
@@ -73,6 +76,25 @@ async function readCollection(name) {
   }
 
   return [...merged.values()];
+}
+
+async function readPrivateCollection(name) {
+  const root = resolvePrivateLibraryRoot();
+  if (!root) return [];
+  const directory = path.join(root, name);
+  let names;
+  try { names = await readdir(directory); }
+  catch (error) {
+    if (error?.code === "ENOENT") return [];
+    errors.push(`${name}: 无法读取私人目录 ${directory} (${error.message})`);
+    return [];
+  }
+  const items = [];
+  for (const fileName of names.filter((item) => item.endsWith(".json")).sort()) {
+    try { items.push(JSON.parse(await readFile(path.join(directory, fileName), "utf8"))); }
+    catch (error) { errors.push(`${name}/${fileName}: JSON 无法解析 (${error.message})`); }
+  }
+  return items;
 }
 
 function indexById(collectionName, items) {
@@ -161,6 +183,31 @@ function validatePeople() {
     for (const relation of person.organizationRelations ?? []) {
       requireReference(prefix, "organization", relation.organizationId, indexes.organizations);
     }
+  }
+}
+
+function validateAssets() {
+  for (const asset of collections.assets) {
+    const prefix = `asset ${asset.id ?? "<unknown>"}`;
+    if (!asset.storagePath || typeof asset.storagePath !== "string") {
+      errors.push(`${prefix}: 缺少 storagePath`);
+    }
+    if ((asset.subjectType && !asset.subjectId) || (!asset.subjectType && asset.subjectId)) {
+      errors.push(`${prefix}: subjectType / subjectId 必须同时存在或同时省略`);
+    }
+    if (asset.subjectType === "person") requireReference(prefix, "subject person", asset.subjectId, indexes.people);
+    if (asset.subjectType === "work") requireReference(prefix, "subject work", asset.subjectId, indexes.works);
+  }
+}
+
+function validateMediaFiles() {
+  for (const media of collections.mediaFiles) {
+    const prefix = `media-file ${media.id ?? "<unknown>"}`;
+    if (!media.path || typeof media.path !== "string") errors.push(`${prefix}: 缺少 path`);
+    if (!media.fileName || typeof media.fileName !== "string") errors.push(`${prefix}: 缺少 fileName`);
+    if (media.workId) requireReference(prefix, "work", media.workId, indexes.works);
+    if (media.fileSize !== undefined && media.fileSize < 0) errors.push(`${prefix}: fileSize 不能小于 0`);
+    if (media.durationSeconds !== undefined && media.durationSeconds < 0) errors.push(`${prefix}: durationSeconds 不能小于 0`);
   }
 }
 

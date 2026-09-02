@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-09：实例设置、Shared Pack 与 Local Override 数据分层阶段**。
+当前处于 **V1-10：Asset、Presentation Preference 与本地 MediaFile 阶段**。
 
 当前 V1 已完成：
 
@@ -61,6 +61,14 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - Shared Pack 只读共享资料挂载；
 - `Private Library > Shared Packs` 本地优先读取；
 - `.localogue/settings.json` 本机配置与环境变量覆盖。
+- Private Asset 图片上传与 SHA-256 内容寻址；
+- 人物头像 / 作品首图 Presentation Preference；
+- Shared Pack Asset 与本地 Asset 统一显示；
+- `/media` 本地视频文件管理；
+- 设置页媒体扫描目录与 ffprobe 配置；
+- ffprobe 实际时长、分辨率和编码分析；
+- 可选视频完整 SHA-256；
+- MediaFile 私人层与 Work 反向关联。
 
 ## 技术栈
 
@@ -212,7 +220,9 @@ V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓�
 
 真实社区资料建议与主程序仓库分离：主仓库只保存代码、Schema、词表、文档和虚构 Demo；可合法共享的事实型元数据放独立 Community Data / Shared Pack。图片、长篇简介等内容则必须额外确认再分发权限。
 
-后续头像、封面会再增加 **Presentation Preference**：公共资料可以提供默认头像，但用户选择的本地头像拥有更高显示优先级，而且不会因为社区资料更新被覆盖。
+V1-10 已实现 **Presentation Preference**：公共资料可以提供默认头像/封面，用户上传并选择的本地图片拥有更高显示优先级，而且不会因为社区资料更新被覆盖。
+
+本地媒体目录可在 `/settings` 配置，再通过 `/media` 扫描。MediaFile 只属于私人层，不进入 Community Pack。
 
 ## 项目原则摘要
 

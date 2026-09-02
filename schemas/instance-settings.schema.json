@@ -23,6 +23,16 @@
     },
     "updatedAt": {
       "type": "string"
+    },
+    "mediaScanPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "ffprobePath": {
+      "type": "string"
     }
   }
 }

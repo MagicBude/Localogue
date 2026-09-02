@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "presentation_person_person_example",
+  "entityType": "person",
+  "entityId": "person_example",
+  "preferredPortraitAssetId": "asset_my_favorite_portrait",
+  "updatedAt": "2026-09-02T00:00:00.000Z"
+}

@@ -29,6 +29,8 @@ export function SettingsForm({
   const text = getSettingsDictionary(language);
   const [libraryPath, setLibraryPath] = useState(settings.libraryPath ?? "");
   const [sharedPackText, setSharedPackText] = useState(settings.sharedPackPaths.join("\n"));
+  const [mediaScanText, setMediaScanText] = useState((settings.mediaScanPaths ?? []).join("\n"));
+  const [ffprobePath, setFfprobePath] = useState(settings.ffprobePath ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -44,6 +46,8 @@ export function SettingsForm({
         body: JSON.stringify({
           libraryPath,
           sharedPackPaths: sharedPackText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
+          mediaScanPaths: mediaScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
+          ffprobePath,
         }),
       });
       const body = await response.json() as { error?: string };
@@ -120,6 +124,21 @@ export function SettingsForm({
             </article>
           )) : <p className="muted">{text.noPacks}</p>}
         </div>
+      </section>
+
+
+      <section className="settings-card">
+        <div className="section-heading"><div><span className="eyebrow">MEDIA · SCAN · FFPROBE</span><h2>{text.mediaTitle}</h2></div></div>
+        <label className="settings-field">
+          <span>{text.mediaPaths}</span>
+          <textarea rows={5} value={mediaScanText} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setMediaScanText(event.target.value)} placeholder="D:\\Media\\Movies\nE:\\Archive" />
+          <small>{text.mediaHelp}</small>
+        </label>
+        <label className="settings-field">
+          <span>{text.ffprobePath}</span>
+          <input value={ffprobePath} onChange={(event: ChangeEvent<HTMLInputElement>) => setFfprobePath(event.target.value)} placeholder="ffprobe" />
+          <small>{text.ffprobeHelp}</small>
+        </label>
       </section>
 
       <section className="settings-card settings-card--soft">

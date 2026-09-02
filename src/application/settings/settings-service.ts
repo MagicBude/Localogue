@@ -34,10 +34,14 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
 
   const libraryPath = optionalString(input.libraryPath);
   const sharedPackPaths = stringArray(input.sharedPackPaths);
+  const mediaScanPaths = stringArray(input.mediaScanPaths);
+  const ffprobePath = optionalStringField(input.ffprobePath, "ffprobePath");
   const saved = saveInstanceSettings({
     schemaVersion: 1,
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
+    ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
+    ...(ffprobePath ? { ffprobePath } : {}),
   });
 
   if (saved.libraryPath) {
@@ -59,6 +63,14 @@ function optionalString(value: unknown): string | undefined {
   if (!trimmed) return undefined;
   if (trimmed.includes("\0")) throw new Error("libraryPath 不能包含 NUL 字符。");
   return trimmed;
+}
+
+function optionalStringField(value: unknown, fieldName: string): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") throw new Error(`${fieldName} 必须是字符串。`);
+  const trimmed = value.trim();
+  if (trimmed.includes("\0")) throw new Error(`${fieldName} 不能包含 NUL 字符。`);
+  return trimmed || undefined;
 }
 
 function stringArray(value: unknown): string[] {

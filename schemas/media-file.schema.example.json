@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "media_0123456789abcdef01234567",
+  "workId": "work_example",
+  "path": "D:\\Media\\ABC-123.mp4",
+  "fileName": "ABC-123.mp4",
+  "extension": ".mp4",
+  "fileSize": 8589934592,
+  "durationSeconds": 7199.8,
+  "width": 1920,
+  "height": 1080,
+  "videoCodec": "hevc",
+  "audioCodec": "aac",
+  "container": "mov,mp4,m4a,3gp,3g2,mj2",
+  "sha256": "optional-full-file-hash",
+  "scanRoot": "D:\\Media",
+  "matchMethod": "code",
+  "fileModifiedAt": "2026-09-02T00:00:00.000Z",
+  "analyzedAt": "2026-09-02T00:05:00.000Z"
+}

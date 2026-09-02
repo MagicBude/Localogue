@@ -234,3 +234,13 @@
 - [教材：设置页与分层资料库](development/v1-09-settings-and-layered-library-walkthrough.md)
 - [ADR-019：网页设置与环境变量优先级](decisions/ADR-019-web-settings-with-environment-override.md)
 - [ADR-020：Shared Base + Local Override](decisions/ADR-020-shared-base-local-override.md)
+
+## V1-10 · Asset / MediaFile / Presentation Preference
+
+- [Asset 与 Presentation Preference 解析](architecture/asset-presentation-resolution.md)
+- [MediaFile 私人数据层](architecture/mediafile-private-layer.md)
+- [V1-10 图片上传与媒体扫描教材](development/v1-10-assets-and-media-walkthrough.md)
+- [Private Asset 文件存储](storage/asset-files.md)
+- [媒体文件页面](ui/media-library.md)
+- [ADR-021 展示偏好不得强迫复制 Shared Entity](decisions/ADR-021-presentation-preference-does-not-copy-shared-entity.md)
+- [ADR-022 MediaFile 永远属于 Private Layer](decisions/ADR-022-mediafile-is-private-only.md)

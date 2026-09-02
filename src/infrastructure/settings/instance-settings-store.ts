@@ -55,18 +55,24 @@ export function saveInstanceSettings(input: InstanceSettings): InstanceSettings 
 
 function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
   const libraryPath = normalizeOptionalPath(input.libraryPath);
-  const sharedPackPaths = Array.from(
-    new Set((Array.isArray(input.sharedPackPaths) ? input.sharedPackPaths : [])
-      .map((item) => normalizeOptionalPath(item))
-      .filter((item): item is string => Boolean(item))),
-  );
+  const sharedPackPaths = normalizePathArray(input.sharedPackPaths);
+  const mediaScanPaths = normalizePathArray(input.mediaScanPaths);
+  const ffprobePath = normalizeOptionalPath(input.ffprobePath);
 
   return {
     schemaVersion: 1,
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
+    ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
+    ...(ffprobePath ? { ffprobePath } : {}),
     ...(typeof input.updatedAt === "string" ? { updatedAt: input.updatedAt } : {}),
   };
+}
+
+function normalizePathArray(value: unknown): string[] {
+  return Array.from(new Set((Array.isArray(value) ? value : [])
+    .map((item) => normalizeOptionalPath(item))
+    .filter((item): item is string => Boolean(item))));
 }
 
 function normalizeOptionalPath(value: unknown): string | undefined {

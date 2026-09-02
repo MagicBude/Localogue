@@ -1,4 +1,4 @@
-import { mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 /**
@@ -65,6 +65,17 @@ export class JsonFileStore {
     // rename 在同一文件系统内通常是原子的，可降低写到一半程序中断造成损坏的风险。
     await writeFile(temporaryPath, serialized, "utf8");
     await rename(temporaryPath, finalPath);
+  }
+
+  async deleteEntity(directoryName: string, id: string): Promise<void> {
+    const rootDirectory = this.resolveRoots()[0];
+    if (!rootDirectory) throw new Error("JsonFileStore 没有可写根目录。");
+    const finalPath = path.join(rootDirectory, directoryName, `${toSafeFileName(id)}.json`);
+    try {
+      await unlink(finalPath);
+    } catch (error) {
+      if (!isMissingFileError(error)) throw error;
+    }
   }
 
   private resolveRoots(): string[] {

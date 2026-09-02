@@ -1,3 +1,4 @@
+import { assetDisplayUrl, resolveWorkCoverAsset } from "@/application/assets/presentation-asset-service";
 import type { Asset } from "@/domain/entities/asset";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
@@ -19,6 +20,7 @@ export interface WorkCardViewModel {
   performerNames: string[];
   makerName?: string;
   posterPath?: string;
+  posterAssetId?: string;
   workTypeIds: string[];
 }
 
@@ -43,20 +45,6 @@ async function loadPeople(
   return items.filter((item): item is Person => item !== null);
 }
 
-async function loadPoster(
-  repository: LibraryRepository,
-  work: Work,
-): Promise<Asset | undefined> {
-  const assets = await Promise.all(
-    work.assetIds.map((id) => repository.findAssetById(id)),
-  );
-
-  return assets.find(
-    (asset): asset is Asset =>
-      asset !== null && (asset.type === "poster" || asset.type === "cover"),
-  );
-}
-
 export async function presentWorkCard(
   repository: LibraryRepository,
   work: Work,
@@ -72,7 +60,7 @@ export async function presentWorkCard(
     work.makerId
       ? repository.findOrganizationById(work.makerId)
       : Promise.resolve(null),
-    loadPoster(repository, work),
+    resolveWorkCoverAsset(repository, work),
   ]);
 
   return {
@@ -85,7 +73,8 @@ export async function presentWorkCard(
       getPreferredPersonName(person, language),
     ),
     makerName: maker ? localizeText(maker.names, language) : undefined,
-    posterPath: poster?.storagePath,
+    posterPath: poster ? assetDisplayUrl(poster) : undefined,
+    posterAssetId: poster?.id,
     workTypeIds: work.workTypeIds,
   };
 }

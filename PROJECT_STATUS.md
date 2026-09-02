@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-09：实例设置中心、Shared Pack 与 Local Override 数据分层。**
+**V1-10：Asset、Presentation Preference 与本地 MediaFile 管理。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -91,17 +91,37 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 新增 Community Data、Shared Pack、Local Override 与许可边界文档。
 - 新增跨用户稳定实体 ID 规则和 Local-First 管理接口安全部署边界。
 
+### V1-10 资源与本地媒体
+
+- 新增 Private Asset 图片上传；
+- 图片二进制使用 SHA-256 内容寻址，Asset JSON 与文件分离；
+- 支持 JPEG / PNG / WebP / GIF / AVIF；用户 SVG 暂不接收；
+- Asset 支持 `subjectType / subjectId`，可给 Shared Person/Work 增加本地图片而无需复制整个实体；
+- 新增文件化 Presentation Preference；
+- 人物支持 `preferredPortraitAssetId`，作品支持 `preferredCoverAssetId`；
+- 页面显示优先级为 Presentation Preference → Canonical 默认 Asset → Placeholder；
+- Shared Pack Asset 支持按真实来源根目录解析相对资源；
+- 新增 `/media` 本地媒体页面；
+- `/settings` 增加媒体扫描目录和 ffprobe 路径；
+- 支持递归扫描常见视频格式；
+- MediaFile 通过规范化番号进行保守 Work 匹配；
+- ffprobe 读取实际时长、分辨率、容器、视频/音频编码；
+- 可选计算完整文件 SHA-256；
+- MediaFile 只从 Private Library 读取，Shared Pack 中的 media-files 永远忽略；
+- “有本地影片”筛选优先从 MediaFile.workId 反查，不再要求把私人文件 ID 回写 Community Work；
+- `validate:data` 开始检查 Asset subject 与 MediaFile 引用；
+- `validate:audit` 开始识别 Presentation Preference。
+
 ## 下一阶段建议
 
-**V1-10：Asset、MediaFile 与 Presentation Preference。**
+**V1-11：MediaFile 绑定治理、Asset Pack 与便携分享。**
 
-1. Asset 上传/登记、SHA-256 与图片尺寸；
-2. 人物头像、作品封面/海报/剧照管理；
-3. 本地 `preferredPortrait / preferredCover` 显示偏好层；
-4. Shared Pack Asset 读取与本地 Asset 覆盖；
-5. MediaFile 目录扫描；
-6. ffprobe 媒体时长、分辨率、编码信息；
-7. Work ↔ MediaFile 绑定审核。
+1. 未识别 MediaFile 手工绑定 / 解绑 Work；
+2. 媒体匹配候选与审核，不让复杂文件名规则直接改绑定；
+3. Asset 图集管理、删除/孤儿资源治理；
+4. Presentation Preference 导出与迁移；
+5. Shared Pack / Personal Pack 打包、导入与版本检查；
+6. 为真正 Community Data 仓库冻结稳定 ID 和 Pack 更新策略。
 
 ## 当前不做
 

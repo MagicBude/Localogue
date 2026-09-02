@@ -23,3 +23,9 @@
 
 - `instance-settings.schema.json`：本机实例设置。
 - `shared-pack-manifest.schema.json`：只读 Shared Pack 清单。
+
+## V1-10
+
+- `asset.schema.example.json`：带 subject 与 SHA-256 的 Asset 示例；
+- `media-file.schema.example.json`：ffprobe / Hash 后的本地 MediaFile 示例；
+- `presentation-preference.schema.example.json`：用户显示头像/封面偏好示例。

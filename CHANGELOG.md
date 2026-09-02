@@ -1,5 +1,27 @@
 # 更新日志
 
+## V1-10 · Asset、Presentation Preference 与本地 MediaFile
+
+- 新增 Private Asset 图片上传与 SHA-256 内容寻址文件存储。
+- Asset 增加 subjectType / subjectId，使本地头像/封面无需复制整个 Shared Entity。
+- 新增 Presentation Preference 文件化存储，实现人物本地首选头像和作品本地首选封面。
+- 人物卡片、人物详情、作品卡片和作品详情统一应用本地显示偏好。
+- 新增受控 Asset 内容读取 Route，正确解析 Private / Shared Pack 资源根并防止路径逃逸。
+- 上传图片支持 JPEG / PNG / WebP / GIF / AVIF，并拒绝未经清洗的用户 SVG。
+- 新增 `/media` 本地媒体文件页面。
+- 设置页新增媒体扫描目录和 ffprobe 路径。
+- 新增递归视频目录扫描、番号匹配、ffprobe 分析和可选完整 SHA-256。
+- MediaFile.workId 改为可选，支持扫描后未识别文件。
+- MediaFile 强制只读取 Private Library，Shared Pack 的本地路径数据永远忽略。
+- “有本地影片”筛选改为从 MediaFile 反向判断，同时兼容早期 work.mediaFileIds。
+- 作品详情展示本地文件大小、真实时长、分辨率、编码和 Hash。
+- `validate:data` 新增 Asset subject 与 MediaFile 引用校验。
+- `validate:audit` 新增 Presentation Preference 基础完整性检查。
+- 新增 Asset/Presentation、MediaFile 私人层、内容寻址、ffprobe 扫描教材与 ADR-021 / ADR-022。
+- 修复 Node.js 24 类型定义下媒体 SHA-256 Stream data 回调的 TypeScript 兼容问题。
+- 清理 Commit Plan 排除 updatedAt 时产生的 ESLint 未使用变量 warning。
+
+
 ## V1-09 · 设置中心、Shared Pack 与 Local Override
 
 - 新增 `/settings` 实例设置中心，普通用户不再必须编辑 `.env.local` 才能切换私人资料库。

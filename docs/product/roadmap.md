@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理增强
 
-已进入此阶段。V1-09 已完成实例设置中心、Shared Pack 挂载与 Local Override 数据分层基础。
+已进入此阶段。V1-10 已完成 Asset、Presentation Preference、本地媒体扫描与 ffprobe 基础。
 
 后续重点：
 
@@ -32,9 +32,11 @@
 - ~~人物资料手工维护~~（V1-08）；
 - ~~重复作品 / 人物候选基础~~（V1-08）；
 - ~~网页设置中心、Library 路径与 Shared Pack 数据分层~~（V1-09）；
-- Asset 上传、封面选择、Presentation Preference 与 SHA-256 去重；
-- MediaFile 扫描、ffprobe 与哈希；
-- Work ↔ MediaFile 绑定审核；
+- ~~Asset 上传、封面选择、Presentation Preference 与 SHA-256 内容寻址~~（V1-10）；
+- ~~MediaFile 扫描、ffprobe 与可选视频哈希~~（V1-10）；
+- Work ↔ MediaFile 手工绑定 / 解绑与候选审核；
+- Asset 图集、孤儿资源和安全删除治理；
+- Shared / Personal Pack 打包导入导出；
 - 更安全的实体 Merge Plan；
 - CSV / XLSX 更完整的批量编辑回写。
 

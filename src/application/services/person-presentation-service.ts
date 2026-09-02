@@ -1,6 +1,7 @@
 import type { Person } from "@/domain/entities/person";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
+import { resolvePersonPortraitAsset, assetDisplayUrl } from "@/application/assets/presentation-asset-service";
 import {
   getPreferredPersonName,
   localizeText,
@@ -21,9 +22,7 @@ export async function presentPersonCard(
   language: SupportedLanguage,
 ): Promise<PersonCardViewModel> {
   const [asset, works] = await Promise.all([
-    person.portraitAssetId
-      ? repository.findAssetById(person.portraitAssetId)
-      : Promise.resolve(null),
+    resolvePersonPortraitAsset(repository, person),
     repository.listWorks({ personIds: [person.id], page: 1, pageSize: 1 }),
   ]);
 
@@ -37,7 +36,7 @@ export async function presentPersonCard(
     name: primaryName,
     secondaryName: secondary?.value,
     status: person.activityStatus,
-    portraitPath: asset?.storagePath,
+    portraitPath: asset ? assetDisplayUrl(asset) : undefined,
     workCount: works.total,
   };
 }

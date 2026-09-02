@@ -1,5 +1,6 @@
 import type { Asset } from "@/domain/entities/asset";
 import type { Genre, Tag } from "@/domain/entities/classification";
+import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Series } from "@/domain/entities/series";
@@ -33,6 +34,10 @@ export interface LibraryRepository {
 
   findAssetById(id: string): Promise<Asset | null>;
   listAssets(): Promise<Asset[]>;
+  listAssetsForSubject(subjectType: "person" | "work", subjectId: string): Promise<Asset[]>;
+
+  findMediaFileById(id: string): Promise<MediaFile | null>;
+  listMediaFiles(workId?: string): Promise<MediaFile[]>;
 
   listGenres(): Promise<Genre[]>;
   listTags(): Promise<Tag[]>;
@@ -43,4 +48,7 @@ export interface LibraryRepository {
   saveSeries(series: Series): Promise<void>;
   saveGenre(genre: Genre): Promise<void>;
   saveTag(tag: Tag): Promise<void>;
+  saveAsset(asset: Asset): Promise<void>;
+  saveMediaFile(mediaFile: MediaFile): Promise<void>;
+  deleteMediaFile(id: string): Promise<void>;
 }

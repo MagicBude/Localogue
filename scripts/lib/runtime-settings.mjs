@@ -22,14 +22,12 @@ export function readInstanceSettings() {
     const parsed = JSON.parse(readFileSync(settingsPath, "utf8"));
     return {
       libraryPath: typeof parsed.libraryPath === "string" ? parsed.libraryPath.trim() : "",
-      sharedPackPaths: Array.isArray(parsed.sharedPackPaths)
-        ? parsed.sharedPackPaths
-            .filter((item) => typeof item === "string" && item.trim())
-            .map((item) => item.trim())
-        : [],
+      sharedPackPaths: normalizeStringArray(parsed.sharedPackPaths),
+      mediaScanPaths: normalizeStringArray(parsed.mediaScanPaths),
+      ffprobePath: typeof parsed.ffprobePath === "string" ? parsed.ffprobePath.trim() : "",
     };
   } catch (error) {
-    if (error?.code === "ENOENT") return { libraryPath: "", sharedPackPaths: [] };
+    if (error?.code === "ENOENT") return { libraryPath: "", sharedPackPaths: [], mediaScanPaths: [], ffprobePath: "" };
     throw new Error(`无法读取 Localogue 实例设置：${error.message}`);
   }
 }
@@ -67,4 +65,10 @@ export function resolveReadableLibraryRoots() {
 
   const realRoots = [...(privateRoot ? [privateRoot] : []), ...sharedRoots];
   return realRoots.length ? realRoots : [path.join(process.cwd(), "data", "demo-library")];
+}
+
+function normalizeStringArray(value) {
+  return Array.isArray(value)
+    ? value.filter((item) => typeof item === "string" && item.trim()).map((item) => item.trim())
+    : [];
 }

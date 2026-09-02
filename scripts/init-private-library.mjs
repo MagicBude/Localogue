@@ -24,9 +24,11 @@ const canonicalCollections = [
   "tags",
   "assets",
   "media-files",
+  "presentation-preferences",
 ];
 
 await mkdir(targetRoot, { recursive: true });
+await mkdir(path.join(targetRoot, "asset-files"), { recursive: true });
 for (const collection of canonicalCollections) {
   await mkdir(path.join(targetRoot, collection), { recursive: true });
 }

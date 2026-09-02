@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_0123456789abcdef01234567",
+  "type": "portrait",
+  "storagePath": "asset-files/0123456789abcdef.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1200,
+  "height": 1600,
+  "fileSize": 345678,
+  "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "subjectType": "person",
+  "subjectId": "person_example",
+  "createdAt": "2026-09-02T00:00:00.000Z"
+}

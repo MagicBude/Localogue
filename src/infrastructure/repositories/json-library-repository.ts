@@ -2,6 +2,7 @@ import path from "node:path";
 
 import type { Asset } from "@/domain/entities/asset";
 import type { Genre, Tag } from "@/domain/entities/classification";
+import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Series } from "@/domain/entities/series";
@@ -51,8 +52,18 @@ export class JsonLibraryRepository implements LibraryRepository {
   }
 
   async listWorks(query: WorkQuery = {}): Promise<WorkSearchResult> {
-    const works = await this.store.readCollection<Work>("works");
-    const filtered = works.filter((work) => matchesWork(work, query));
+    const [works, mediaFiles, assets] = await Promise.all([
+      this.store.readCollection<Work>("works"),
+      this.listMediaFiles(),
+      this.store.readCollection<Asset>("assets"),
+    ]);
+    const mediaWorkIds = new Set(mediaFiles.flatMap((item) => item.workId ? [item.workId] : []));
+    const subjectCoverWorkIds = new Set(
+      assets
+        .filter((item) => item.subjectType === "work" && ["cover", "poster"].includes(item.type))
+        .flatMap((item) => item.subjectId ? [item.subjectId] : []),
+    );
+    const filtered = works.filter((work) => matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds));
     const sorted = [...filtered].sort(createWorkComparator(query.sort));
 
     const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
@@ -66,7 +77,7 @@ export class JsonLibraryRepository implements LibraryRepository {
       total: sorted.length,
       page,
       pageSize,
-      facets: buildWorkFacets(works, query),
+      facets: buildWorkFacets(works, query, mediaWorkIds, subjectCoverWorkIds),
     };
   }
 
@@ -166,6 +177,25 @@ export class JsonLibraryRepository implements LibraryRepository {
     return this.store.readCollection<Asset>("assets");
   }
 
+  async listAssetsForSubject(subjectType: "person" | "work", subjectId: string): Promise<Asset[]> {
+    const assets = await this.listAssets();
+    return assets.filter((item) => item.subjectType === subjectType && item.subjectId === subjectId);
+  }
+
+  async findMediaFileById(id: string): Promise<MediaFile | null> {
+    const mediaFiles = await this.listMediaFiles();
+    return mediaFiles.find((item) => item.id === id) ?? null;
+  }
+
+  async listMediaFiles(workId?: string): Promise<MediaFile[]> {
+    // MediaFile 是本机/私人状态，Shared Pack 中即使意外出现 media-files/ 也绝不能读取。
+    const root = this.resolveWritableRoot();
+    if (!root) return [];
+    const mediaFiles = await new JsonFileStore(root).readCollection<MediaFile>("media-files");
+    const filtered = workId ? mediaFiles.filter((item) => item.workId === workId) : mediaFiles;
+    return [...filtered].sort((a, b) => a.path.localeCompare(b.path, "en"));
+  }
+
   listGenres(): Promise<Genre[]> {
     return this.store.readCollection<Genre>("genres");
   }
@@ -198,16 +228,38 @@ export class JsonLibraryRepository implements LibraryRepository {
     return this.writer().writeEntity("tags", tag);
   }
 
+  saveAsset(asset: Asset): Promise<void> {
+    return this.writer().writeEntity("assets", asset);
+  }
+
+  saveMediaFile(mediaFile: MediaFile): Promise<void> {
+    return this.writer().writeEntity("media-files", mediaFile);
+  }
+
+  deleteMediaFile(id: string): Promise<void> {
+    return this.writer().deleteEntity("media-files", id);
+  }
+
   private writer(): JsonFileStore {
-    const root = typeof this.writableRoot === "function" ? this.writableRoot() : this.writableRoot;
+    const root = this.resolveWritableRoot();
     if (!root) {
       throw new Error("当前没有配置可写私人资料库；Shared Pack 与 Demo Library 都是只读的。");
     }
     return new JsonFileStore(root);
   }
+
+  private resolveWritableRoot(): string | null {
+    const root = typeof this.writableRoot === "function" ? this.writableRoot() : this.writableRoot;
+    return root || null;
+  }
 }
 
-function matchesWork(work: Work, query: WorkQuery): boolean {
+function matchesWork(
+  work: Work,
+  query: WorkQuery,
+  mediaWorkIds: ReadonlySet<string> = new Set(),
+  subjectCoverWorkIds: ReadonlySet<string> = new Set(),
+): boolean {
   if (query.text) {
     const needle = query.text.trim().toLocaleLowerCase();
     const titles = Object.values(work.titles).filter(Boolean).join(" ");
@@ -255,13 +307,14 @@ function matchesWork(work: Work, query: WorkQuery): boolean {
   }
 
   if (query.hasMedia !== undefined) {
-    const hasMedia = work.mediaFileIds.length > 0;
+    // V1-10 起 MediaFile.workId 是本地拥有状态的主要关联来源。
+    // work.mediaFileIds 只作为早期数据兼容，不再要求 Community Work 被本地状态覆盖。
+    const hasMedia = mediaWorkIds.has(work.id) || work.mediaFileIds.length > 0;
     if (hasMedia !== query.hasMedia) return false;
   }
 
   if (query.hasCover !== undefined) {
-    // V1 示例资料中 assetIds 只挂载可展示图片；后续会根据 Asset.type 精确判断。
-    const hasCover = work.assetIds.length > 0;
+    const hasCover = work.assetIds.length > 0 || subjectCoverWorkIds.has(work.id);
     if (hasCover !== query.hasCover) return false;
   }
 
@@ -312,7 +365,12 @@ function createWorkComparator(sort: WorkSort = "release_desc") {
   };
 }
 
-function buildWorkFacets(works: Work[], query: WorkQuery): WorkFacets {
+function buildWorkFacets(
+  works: Work[],
+  query: WorkQuery,
+  mediaWorkIds: ReadonlySet<string>,
+  subjectCoverWorkIds: ReadonlySet<string>,
+): WorkFacets {
   /**
    * Faceted Navigation 的计数不能简单基于“最终筛选结果”计算。
    *
@@ -331,7 +389,7 @@ function buildWorkFacets(works: Work[], query: WorkQuery): WorkFacets {
     delete facetQuery.sort;
     delete facetQuery.page;
     delete facetQuery.pageSize;
-    return works.filter((work) => matchesWork(work, facetQuery));
+    return works.filter((work) => matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds));
   };
 
   return {

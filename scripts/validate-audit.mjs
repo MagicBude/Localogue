@@ -19,12 +19,15 @@ const provenanceLogs = await readCollection("provenance");
 const lifecycles = await readCollection("evidence-lifecycle");
 const evidence = await readCollection("evidence");
 const personEdits = await readCollection("person-edits");
+const presentationPreferences = await readCollection("presentation-preferences");
+const privateAssets = await readCollection("assets");
 
 const byId = (items) => new Map(items.filter((item) => item?.id).map((item) => [item.id, item]));
 const commitById = byId(commits);
 const snapshotById = byId(snapshots);
 const restoreById = byId(restores);
 const evidenceById = byId(evidence);
+const privateAssetById = byId(privateAssets);
 
 for (const commit of commits) {
   if (!commit.evidenceId || !evidenceById.has(commit.evidenceId)) {
@@ -109,6 +112,19 @@ for (const edit of personEdits) {
   }
 }
 
+for (const preference of presentationPreferences) {
+  if (!preference.entityType || !preference.entityId) {
+    errors.push(`presentation-preference ${preference.id}: 缺少 entityType / entityId`);
+  }
+  for (const assetId of [preference.preferredPortraitAssetId, preference.preferredCoverAssetId].filter(Boolean)) {
+    // Community Asset 可能不在私人 assets/，所以这里只在本地存在同 ID 时做结构确认，
+    // 真实跨层引用由 Web Repository 在运行时解析。
+    if (privateAssetById.has(assetId) && !privateAssetById.get(assetId)?.storagePath) {
+      errors.push(`presentation-preference ${preference.id}: 本地 Asset 缺少 storagePath (${assetId})`);
+    }
+  }
+}
+
 if (errors.length) {
   console.error("\nLocalogue 审计数据校验失败：\n");
   for (const error of errors) console.error(`- ${error}`);
@@ -123,6 +139,7 @@ if (errors.length) {
     lifecycles: lifecycles.length,
     evidence: evidence.length,
     personEdits: personEdits.length,
+    presentationPreferences: presentationPreferences.length,
   });
 }
 

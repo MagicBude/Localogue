@@ -13,6 +13,10 @@ export interface InstanceSettings {
    * 本地私人 Library 永远排在它们之前。
    */
   sharedPackPaths: string[];
+  /** 本地媒体扫描目录；MediaFile 永远属于私人层。 */
+  mediaScanPaths?: string[];
+  /** ffprobe 可执行文件。为空时使用 PATH 中的 ffprobe。 */
+  ffprobePath?: string;
   updatedAt?: string;
 }
 
