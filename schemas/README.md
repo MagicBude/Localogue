@@ -13,3 +13,7 @@
 - `provenance.schema.example.json`：Work 字段级来源事件历史。
 
 未来进入 V2 SQLite 后，这些结构会映射为数据库表、外键、事务和迁移，而不是被丢弃。
+
+
+### V1-08
+- `person-edit-receipt.schema.example.json`：人物手工编辑 before/after 审计记录示例。

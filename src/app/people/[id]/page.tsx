@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -15,6 +16,7 @@ import { WorkFilterChips } from "@/components/work-filter-chips";
 import { WorkFilterForm } from "@/components/work-filter-form";
 import { WorkResults } from "@/components/work-results";
 import { parseWorkView, WorkViewSwitcher } from "@/components/work-view-switcher";
+import { getCurationDictionary } from "@/i18n/curation";
 import { getUiDictionary } from "@/i18n/ui";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
@@ -49,6 +51,7 @@ export default async function PersonDetailPage({
   if (!person) notFound();
 
   const dictionary = getUiDictionary(preferences.uiLanguage);
+  const curationText = getCurationDictionary(preferences.uiLanguage);
   const view = parseWorkView(rawParams.view);
   const query = parseWorkQuery(rawParams, {
     personIds: [person.id],
@@ -192,7 +195,10 @@ export default async function PersonDetailPage({
           <span className="status-badge">
             {statusLabels.get(person.activityStatus) ?? person.activityStatus}
           </span>
-          <h1>{displayName}</h1>
+          <div className="person-profile-title-row">
+            <h1>{displayName}</h1>
+            <Link className="secondary-button" href={`/people/${encodeURIComponent(person.id)}/edit`}>{curationText.editPerson}</Link>
+          </div>
           <div className="name-stack">
             {person.names
               .filter((name) => ["primary", "localized", "romanized"].includes(name.type))

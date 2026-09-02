@@ -10,3 +10,8 @@ V1-07 新增：
 
 - `evidence-lifecycle-statuses`：Evidence 的待审核 / 已归档 / 已忽略状态；
 - `provenance-event-types`：字段采用 Evidence 与 Snapshot 恢复事件。
+
+
+### V1-08
+- `completeness-levels.json/csv`：资料完整度等级。
+- `duplicate-confidence-levels.json/csv`：重复候选置信级别。

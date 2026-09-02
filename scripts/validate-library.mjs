@@ -155,6 +155,9 @@ function validatePeople() {
     if (primaryNames.length === 0) {
       errors.push(`${prefix}: 至少需要一个 primary 姓名`);
     }
+    if (!primaryNames.some((name) => name.language === "ja")) {
+      errors.push(`${prefix}: 至少需要一个日文 primary 姓名`);
+    }
 
     if (person.heightCm !== undefined && person.heightCm <= 0) {
       errors.push(`${prefix}: heightCm 必须大于 0`);
@@ -162,6 +165,12 @@ function validatePeople() {
 
     if (person.portraitAssetId) {
       requireReference(prefix, "portrait asset", person.portraitAssetId, indexes.assets);
+    }
+    for (const id of person.galleryAssetIds ?? []) {
+      requireReference(prefix, "gallery asset", id, indexes.assets);
+    }
+    for (const relation of person.organizationRelations ?? []) {
+      requireReference(prefix, "organization", relation.organizationId, indexes.organizations);
     }
   }
 }

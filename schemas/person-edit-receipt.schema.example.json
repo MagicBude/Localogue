@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "person_edit_2026-09-02T00-00-00-000Z_abcd1234",
+  "personId": "person_demo",
+  "editedAt": "2026-09-02T00:00:00.000Z",
+  "changedFields": ["names", "biographies"],
+  "before": { "id": "person_demo", "schemaVersion": 1 },
+  "after": { "id": "person_demo", "schemaVersion": 1 }
+}

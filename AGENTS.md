@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-07 File-backed Library / Provenance、History 与 Snapshot Recovery 开发**。
+当前阶段：**V1-08 File-backed Library / 资料完整度、治理队列、人物编辑与重复候选开发**。
 
 V1 当前约束：
 
@@ -151,3 +151,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Snapshot 中的 relativePath 必须经过路径越界检查，禁止绝对路径和 `..`。
 - 审计数据变化必须同步 `pnpm validate:audit` 规则、Schema 示例和中文文档。
 - JSON Snapshot 只是 V1 的补偿式恢复机制，不得把它描述成 SQLite/数据库 ACID Transaction。
+
+
+## V1-08 实现约束补充
+
+- Completeness 是可重算的治理信号，不得写进 Canonical Entity 当作真相字段。
+- “资料完整”不代表“资料正确”；真实性继续由 Evidence、Review 与 Provenance 负责。
+- Work 完整度不得因为没有 MediaFile 扣分，继续维护 Work / MediaFile 分离原则。
+- DuplicateCandidate 只能作为人工检查队列，任何候选规则都不得直接触发自动 merge。
+- 人物重复检测继续优先使用精确姓名/别名与出生日期等可解释信号，不得引入静默模糊合并。
+- 人物 Web 手工编辑必须只允许私人 Library，并经过服务端 DTO 校验；页面不得直接写 JSON 文件。
+- 人物手工编辑必须保留 before/after 审计 Receipt；Receipt 写入失败时应尝试补偿恢复。
+- Evidence 批量动作只修改 Lifecycle，不得批量改写 Evidence Raw / Normalized 本体。
+- 新增治理规则时必须同步 `docs/curation/`，若涉及稳定状态或等级应同步受控词表。

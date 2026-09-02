@@ -1,0 +1,8 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    { "id": "high", "ja": "高", "zh-CN": "高", "en": "High" },
+    { "id": "medium", "ja": "中", "zh-CN": "中", "en": "Medium" },
+    { "id": "low", "ja": "低", "zh-CN": "低", "en": "Low" }
+  ]
+}

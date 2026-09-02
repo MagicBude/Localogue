@@ -59,6 +59,8 @@
 - [实体审核动作](vocabulary/entity-review-actions.md)
 - [Evidence 生命周期状态](vocabulary/evidence-lifecycle-statuses.md)
 - [Provenance 事件类型](vocabulary/provenance-event-types.md)
+- [资料完整度等级](vocabulary/completeness-levels.md)
+- [重复候选置信级别](vocabulary/duplicate-confidence-levels.md)
 
 ## 资料治理
 
@@ -69,6 +71,7 @@
 - [字段冲突](curation/conflict-resolution.md)
 - [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
 - [Evidence 生命周期](curation/evidence-lifecycle.md)
+- [V1-08 治理队列](curation/v1-08-governance-queues.md)
 
 ## 导入
 
@@ -168,6 +171,7 @@
 
 - [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
 - [Evidence 生命周期](curation/evidence-lifecycle.md)
+- [V1-08 治理队列](curation/v1-08-governance-queues.md)
 - [Commit Plan 架构](architecture/commit-plan.md)
 - [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
 - [教材：从 Review 到 Commit Plan](development/v1-06-commit-plan-walkthrough.md)
@@ -181,9 +185,23 @@
 
 - [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
 - [Evidence 生命周期](curation/evidence-lifecycle.md)
+- [V1-08 治理队列](curation/v1-08-governance-queues.md)
 - [教材：从写文件到可审计资料库](development/v1-07-provenance-history-walkthrough.md)
 - [V1 JSON Snapshot 与恢复策略](storage/snapshot-recovery.md)
 - [Evidence 生命周期状态词表](vocabulary/evidence-lifecycle-statuses.md)
 - [Provenance 事件类型词表](vocabulary/provenance-event-types.md)
 - [ADR-015：Evidence 生命周期与 Evidence 本体分离](decisions/ADR-015-evidence-lifecycle-separate-from-evidence.md)
 - [ADR-016：最小 Snapshot 与最新提交优先恢复](decisions/ADR-016-minimal-snapshot-and-latest-first-restore.md)
+
+
+## V1-08 新增实现文档
+
+- [资料完整度规则](curation/completeness.md)
+- [重复候选规则](curation/duplicate-detection.md)
+- [V1-08 治理队列](curation/v1-08-governance-queues.md)
+- [教材：从字段检查到治理队列](development/v1-08-curation-walkthrough.md)
+- [教材：人物资料写入链路](development/v1-08-person-editor-walkthrough.md)
+- [资料完整度等级词表](vocabulary/completeness-levels.md)
+- [重复候选置信级别词表](vocabulary/duplicate-confidence-levels.md)
+- [ADR-017：完整度是派生治理信号](decisions/ADR-017-completeness-is-derived-signal.md)
+- [ADR-018：人物手工编辑必须保留 before/after Receipt](decisions/ADR-018-person-manual-edit-audit-receipt.md)

@@ -23,19 +23,19 @@
 
 ## V1.x：资料治理增强
 
-已进入此阶段。V1-07 已完成 Provenance、Commit History、Evidence Lifecycle 与 JSON Snapshot Recovery。
+已进入此阶段。V1-08 已完成资料完整度、治理队列、Evidence 批量生命周期治理、人物手工维护与重复候选基础。
 
 后续重点：
 
-- 资料完整度与治理队列；
-- 批量审核与批量编辑；
-- 人物资料手工维护；
-- 重复作品检测；
-- 人物别名匹配；
-- 资料完整度；
-- 批量编辑；
-- Asset 去重；
-- MediaFile 扫描和哈希。
+- ~~资料完整度与治理队列~~（V1-08）；
+- ~~Evidence 生命周期批量治理~~（V1-08）；
+- ~~人物资料手工维护~~（V1-08）；
+- ~~重复作品 / 人物候选基础~~（V1-08）；
+- Asset 上传、封面选择与 SHA-256 去重；
+- MediaFile 扫描、ffprobe 与哈希；
+- Work ↔ MediaFile 绑定审核；
+- 更安全的实体 Merge Plan；
+- CSV / XLSX 更完整的批量编辑回写。
 
 ## V2：SQLite
 

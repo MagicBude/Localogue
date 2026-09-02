@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-07：Provenance、Commit History、Evidence 生命周期与 JSON Snapshot 恢复阶段**。
+当前处于 **V1-08：资料完整度、治理队列、人物资料编辑与重复候选阶段**。
 
 当前 V1 已完成：
 
@@ -50,7 +50,12 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - Commit 前最小 Snapshot；
 - 失败自动恢复与受控人工恢复；
 - Evidence 生命周期 pending / committed / ignored；
-- Audit 数据完整性校验。
+- Audit 数据完整性校验；
+- Work / Person 资料完整度评分与缺失项解释；
+- `/curation` 日常资料治理工作台；
+- Evidence pending / ignored 批量生命周期治理；
+- 人物资料 Web 手工编辑与 before/after 审计 Receipt；
+- Work / Person 可解释重复候选发现。
 
 ## 技术栈
 
@@ -444,3 +449,27 @@ pnpm validate:audit
 3. `src/infrastructure/history/canonical-snapshot-store.ts`；
 4. `src/application/history/restore-service.ts`；
 5. `src/infrastructure/provenance/work-provenance-store.ts`。
+
+
+## V1-08：资料治理工作台
+
+V1-08 增加 `/curation`，把“知道资料哪里不完整”变成可以直接处理的队列。
+
+主要入口：
+
+```text
+/curation
+/curation/evidence
+/curation/duplicates
+/people/[id]/edit
+```
+
+完整度是运行时派生数据，不写入 Canonical JSON；重复检测只产生候选，不自动合并。人物编辑只有配置 `LOCALOGUE_LIBRARY_PATH` 的私人资料库才允许保存，每次修改生成 `person-edits/` before/after 审计记录。
+
+建议学习：
+
+1. `docs/development/v1-08-curation-walkthrough.md`
+2. `src/application/curation/completeness-service.ts`
+3. `src/application/curation/duplicate-detection-service.ts`
+4. `docs/development/v1-08-person-editor-walkthrough.md`
+5. `src/application/people/person-edit-service.ts`

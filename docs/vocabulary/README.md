@@ -33,3 +33,10 @@ solo
 - [实体审核动作](entity-review-actions.md)
 - [Evidence 生命周期状态](evidence-lifecycle-statuses.md)
 - [Provenance 事件类型](provenance-event-types.md)
+
+## V1-08 新增
+
+- `completeness-levels`：完整度分数对应的治理等级；
+- `duplicate-confidence-levels`：重复候选用于排序和提示的置信级别。
+
+两者都只表达治理信号，不表达“资料正确”或“已经确认重复”。

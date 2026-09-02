@@ -1,5 +1,23 @@
 # 更新日志
 
+## V1-08 · 资料完整度、治理队列与人物手工维护
+
+- 新增 `/curation` 资料治理工作台，集中显示作品/人物完整度、Evidence 队列和重复候选。
+- 新增 Work / Person 可解释完整度评分，返回 score、level、checks 与 missingIds。
+- Work 完整度明确不因缺少 MediaFile 扣分，继续保持 Work / MediaFile 分离。
+- 新增 `/curation/evidence`，支持 pending / ignored Evidence 多选批量治理。
+- 批量 Evidence 操作只修改 Lifecycle，并使用 before-state 做失败补偿恢复。
+- 新增 `/curation/duplicates`，按精确番号、标题/年份/共同演员、精确人物姓名/别名和出生日期生成重复候选。
+- 重复检测只生成 DuplicateCandidate，不自动合并任何 Canonical Entity。
+- 新增 `/people/[id]/edit` 人物资料编辑器。
+- 支持日文正式名、中文映射、英文/罗马字、旧艺名、别名、状态、生日/出生地、身高三围、三语简介、职业事件等手工维护。
+- 人物编辑只允许私人 Library，所有请求在服务端重新校验。
+- 新增 PersonEditReceipt，保存手工修改 before/after image 与 changedFields。
+- Person Receipt 写入失败时尝试恢复修改前 Person，降低 JSON 多文件半提交风险。
+- `pnpm validate:audit` 新增 person-edits 审计记录完整性检查。
+- 新增完整度等级和重复候选置信级别中日英受控词表。
+- 新增完整度、重复检测、治理队列、人物编辑教材文档及 ADR-017 / ADR-018。
+
 ## V1-07 · Provenance、Commit History 与 Snapshot Recovery
 
 - 新增 Work 字段级 append-only Provenance，记录字段采用 Evidence 与 Snapshot Restore 的历史。

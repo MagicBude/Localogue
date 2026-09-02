@@ -11,7 +11,7 @@ if (!process.env.LOCALOGUE_LIBRARY_PATH) {
 }
 
 /**
- * V1-07 审计数据完整性检查。
+ * V1-08 审计数据完整性检查。
  *
  * validate:data 检查 Canonical 实体关系；本脚本专门检查“历史系统”内部引用：
  * Commit Receipt → Snapshot、Lifecycle → Commit、Restore → Commit/Snapshot、
@@ -28,6 +28,7 @@ const restores = await readCollection("restore-receipts");
 const provenanceLogs = await readCollection("provenance");
 const lifecycles = await readCollection("evidence-lifecycle");
 const evidence = await readCollection("evidence");
+const personEdits = await readCollection("person-edits");
 
 const byId = (items) => new Map(items.filter((item) => item?.id).map((item) => [item.id, item]));
 const commitById = byId(commits);
@@ -105,6 +106,19 @@ for (const log of provenanceLogs) {
   }
 }
 
+for (const edit of personEdits) {
+  if (!edit.personId || !edit.before || !edit.after) {
+    errors.push(`person-edit ${edit.id}: 缺少 personId / before / after`);
+    continue;
+  }
+  if (edit.before.id !== edit.personId || edit.after.id !== edit.personId) {
+    errors.push(`person-edit ${edit.id}: before/after 与 personId 不一致`);
+  }
+  if (!Array.isArray(edit.changedFields) || !edit.changedFields.length) {
+    errors.push(`person-edit ${edit.id}: changedFields 为空或不是数组`);
+  }
+}
+
 if (errors.length) {
   console.error("\nLocalogue 审计数据校验失败：\n");
   for (const error of errors) console.error(`- ${error}`);
@@ -118,6 +132,7 @@ if (errors.length) {
     provenanceLogs: provenanceLogs.length,
     lifecycles: lifecycles.length,
     evidence: evidence.length,
+    personEdits: personEdits.length,
   });
 }
 

@@ -24,7 +24,9 @@ export type VocabularyName =
   | "built-in-tags"
   | "review-work-statuses"
   | "entity-resolution-statuses"
-  | "field-comparison-statuses";
+  | "field-comparison-statuses"
+  | "completeness-levels"
+  | "duplicate-confidence-levels";
 
 export interface VocabularyRepository {
   load(name: VocabularyName): Promise<VocabularyDocument>;

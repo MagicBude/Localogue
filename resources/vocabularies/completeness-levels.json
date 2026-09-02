@@ -1,0 +1,9 @@
+{
+  "vocabularyVersion": 1,
+  "items": [
+    { "id": "complete", "ja": "完全", "zh-CN": "完整", "en": "Complete", "minScore": 90 },
+    { "id": "good", "ja": "良好", "zh-CN": "良好", "en": "Good", "minScore": 75 },
+    { "id": "needs_attention", "ja": "要確認", "zh-CN": "需要补全", "en": "Needs attention", "minScore": 50 },
+    { "id": "incomplete", "ja": "不完全", "zh-CN": "资料不足", "en": "Incomplete", "minScore": 0 }
+  ]
+}

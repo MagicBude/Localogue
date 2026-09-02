@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-07：Provenance、Commit History、Evidence 生命周期与 JSON Snapshot 恢复。**
+**V1-08：资料完整度、治理队列、人物手工维护与重复候选基础。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -61,16 +61,28 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 新增 `pnpm validate:audit` 检查审计数据引用完整性；
 - `pnpm check` 同时执行 Canonical 数据与 Audit 数据检查。
 
+### V1-08 资料治理
+
+- Work / Person 可解释完整度评分；
+- `/curation` 治理首页；
+- 缺标题、日期、时长、演员、封面、人物简介等缺失项队列；
+- `/curation/evidence` pending / ignored Evidence 批量治理；
+- `/people/[id]/edit` 人物资料手工编辑；
+- 日中英姓名、别名/旧艺名、状态、出生资料、三围、简介、职业事件编辑；
+- Person 手工编辑 before/after Receipt 与失败补偿恢复；
+- `/curation/duplicates` Work / Person 可解释重复候选；
+- 完整度等级与重复候选置信级别中日英受控词表。
+
 ## 下一阶段建议
 
-**V1-08：资料完整度、批量治理与人物资料补全。**
+**V1-09：资产与媒体文件治理。**
 
-1. Canonical Work / Person 资料完整度评分；
-2. 缺封面、缺演员、缺系列、缺日期等治理队列；
-3. Evidence Inbox 批量选择与安全批量动作；
-4. 人物资料手工编辑与多语言名称维护；
-5. 人物旧艺名 / 别名合并辅助；
-6. 重复作品与重复人物候选基础。
+1. Asset 上传/登记与封面选择；
+2. Asset SHA-256 去重基础；
+3. MediaFile 文件夹扫描；
+4. ffprobe 媒体时长、分辨率、编码信息；
+5. Work ↔ MediaFile 绑定审核；
+6. 作品完整度队列与 Asset/MediaFile 治理联动。
 
 ## 当前不做
 

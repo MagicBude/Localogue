@@ -21,3 +21,8 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-015：Evidence 生命周期与 Evidence 本体分离](ADR-015-evidence-lifecycle-separate-from-evidence.md)
 - [ADR-016：最小 Snapshot 与最新提交优先恢复](ADR-016-minimal-snapshot-and-latest-first-restore.md)
+
+
+### V1-08
+- [ADR-017：完整度是派生治理信号](ADR-017-completeness-is-derived-signal.md)
+- [ADR-018：人物手工编辑必须保留 before/after Receipt](ADR-018-person-manual-edit-audit-receipt.md)

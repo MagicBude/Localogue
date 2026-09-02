@@ -54,3 +54,13 @@ LOCALOGUE_LIBRARY_PATH=./data/library
 
 默认 `data/demo-library` 只读。可执行 `pnpm library:init` 把 Demo Canonical 数据复制到 Git 忽略的 `data/library`，再通过 `.env.local` 设置 `LOCALOGUE_LIBRARY_PATH=./data/library` 开启可写私人模式。正式归档留痕保存在私人 Library 的 `review-commits/`。
 
+
+## V1-08 私人资料新增目录
+
+私人 `LOCALOGUE_LIBRARY_PATH` 在实际使用后可能出现：
+
+```text
+person-edits/
+```
+
+其中保存人物 Web 手工编辑的 before/after 审计 Receipt。该目录属于私人 Library 数据，不应提交到公开仓库。
