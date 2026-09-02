@@ -93,3 +93,11 @@ Shared Pack Directory
 Shared Pack 的覆盖语义依赖跨设备稳定 ID。具体原则见 [社区资料的稳定实体 ID](stable-community-ids.md)。
 
 在身份规则未冻结之前，Localogue 不建议把一次性按姓名生成的 ID 当成长期社区 ID 发布。
+
+## V1-11 Portable Archive
+
+目录挂载仍是 Shared Pack 的原生运行形态；`.localogue-pack` 只是离线传输容器。
+
+正式 Community Shared Pack 可以在 `/packs` 经过 Community Validator 后导出单文件；另一台 Localogue 先临时解包和校验，再安装到 `.localogue/packs/` 并自动加入 `sharedPackPaths`。
+
+详见 [Portable Pack](portable-packs.md) 与 [Community Data 主项目对接](community-data-integration.md)。

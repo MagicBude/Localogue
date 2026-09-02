@@ -2740,3 +2740,40 @@ code {
 @media (max-width: 760px) {
   .asset-upload-form { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* V1-11 · MediaFile 绑定治理与 Portable Pack */
+.media-binding-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+.media-binding-search input { min-width: 0; }
+.candidate-list, .pack-list { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.candidate-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.candidate-card p { margin: 0.2rem 0; }
+.candidate-card small { color: var(--muted); }
+.inline-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.85rem; }
+.pack-preview { margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 14px; }
+.warning-text { color: var(--warning, #9a6700); }
+.danger-button {
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent;
+  color: #b42318;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+@media (max-width: 720px) {
+  .media-binding-search { grid-template-columns: 1fr; }
+  .candidate-card { align-items: flex-start; flex-direction: column; }
+}

@@ -34,3 +34,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-021：展示偏好不得强迫复制 Shared Entity](ADR-021-presentation-preference-does-not-copy-shared-entity.md)
 - [ADR-022：MediaFile 永远属于 Private Layer](ADR-022-mediafile-is-private-only.md)
+
+### V1-11
+- [ADR-023：Portable Pack 是传输容器，不是新的资料模型](ADR-023-portable-pack-is-transport-container.md)
+- [ADR-024：MediaFile 人工绑定必须显式并保留审计记录](ADR-024-mediafile-manual-binding-is-audited.md)

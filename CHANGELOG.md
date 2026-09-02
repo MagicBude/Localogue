@@ -1,5 +1,23 @@
 # 更新日志
 
+## V1-11 · MediaFile 绑定治理与 Portable Pack
+
+- 新增 `/media/[id]`，支持未识别 MediaFile 的候选查看、番号/标题搜索和人工绑定。
+- 支持 MediaFile bind / rebind / unbind；人工绑定写入 `matchMethod=manual`。
+- 新增 `media-binding-receipts`，保存人工关系修改 before/after，并在 Receipt 写入失败时补偿恢复 MediaFile。
+- `validate:audit` 新增 Media Binding Receipt 基础完整性检查。
+- 新增 `/packs` Shared / Personal Pack 管理页。
+- 新增无第三方压缩依赖的 `.localogue-pack` V1 便携容器：gzip + versioned JSON Envelope。
+- Pack 内每个文件记录相对路径、编码、字节数和 SHA-256。
+- Personal Pack 支持导出 Canonical JSON、Evidence/History、Presentation Preference、Asset JSON 和 asset-files。
+- Personal Pack 故意排除 MediaFile 路径、实例设置和原始视频；导入默认 skip existing，不静默覆盖。
+- Shared Pack 支持从当前挂载目录导出便携包，并在另一实例安全安装。
+- Shared 安装先进入临时目录，完成文件 Hash 和 Community Validator 后才 rename 到 `.localogue/packs/`。
+- 安装成功后自动追加 Shared Pack 路径到实例设置。
+- 主项目新增与 `localogue-community-data` V0-01 对齐的 Community Validator。
+- Validator 检查 typed UUIDv4、日文 primary name、番号、引用、Source Record 和 Community/Private 数据边界。
+- 新增 Portable Pack / Community Data Integration / Media Binding 教材、Schema 与 ADR-023 / ADR-024。
+
 ## V1-10 · Asset、Presentation Preference 与本地 MediaFile
 
 - 新增 Private Asset 图片上传与 SHA-256 内容寻址文件存储。
@@ -186,3 +204,5 @@
 - 定义多维筛选、排序、时间线和人物页二次筛选；
 - 定义 JSON / CSV / XLSX / NFO 的角色；
 - 记录对 MDC-NG、MDCx、mdcx_sqlite、CM Collectors、Amane、mdcx-diy 的参考分析。
+
+- 修复 Next.js Pack 导出 API 在新版 TypeScript / DOM 类型下 `Uint8Array<ArrayBufferLike>` 无法直接作为 `BodyInit` 的兼容问题，导出响应显式转换为标准 `ArrayBuffer`。

@@ -25,6 +25,7 @@ const canonicalCollections = [
   "assets",
   "media-files",
   "presentation-preferences",
+  "media-binding-receipts",
 ];
 
 await mkdir(targetRoot, { recursive: true });

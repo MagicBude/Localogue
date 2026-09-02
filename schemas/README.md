@@ -29,3 +29,8 @@
 - `asset.schema.example.json`：带 subject 与 SHA-256 的 Asset 示例；
 - `media-file.schema.example.json`：ffprobe / Hash 后的本地 MediaFile 示例；
 - `presentation-preference.schema.example.json`：用户显示头像/封面偏好示例。
+
+## V1-11
+
+- `media-binding-receipt.schema.example.json`：MediaFile 人工绑定 / 改绑 / 解绑审计示例；
+- `portable-pack.schema.example.json`：`.localogue-pack` 解压后的 Envelope 示例。实际文件是该 JSON 的 gzip 压缩结果。

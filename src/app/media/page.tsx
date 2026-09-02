@@ -47,7 +47,7 @@ export default async function MediaPage() {
           const work = file.workId ? workMap.get(file.workId) : undefined;
           return <tr key={file.id}>
             <td><strong>{file.fileName}</strong><small className="path-text">{file.path}</small></td>
-            <td>{work ? <Link href={`/works/${work.id}`}>{work.code}</Link> : <span className="status-chip status-chip--warn">Unmatched</span>}</td>
+            <td>{work ? <><Link href={`/works/${work.id}`}>{work.code}</Link><small><Link href={`/media/${file.id}`}>管理绑定</Link></small></> : <Link className="status-chip status-chip--warn" href={`/media/${file.id}`}>治理 / 绑定</Link>}</td>
             <td>{formatBytes(file.fileSize ?? 0)}</td>
             <td>{file.width && file.height ? `${file.width}×${file.height}` : "—"}{file.durationSeconds ? <small>{formatDuration(file.durationSeconds)}</small> : null}</td>
             <td>{[file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ") || "—"}</td>

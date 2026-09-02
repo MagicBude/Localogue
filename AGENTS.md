@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-10 File-backed Library / Asset、Presentation Preference 与本地 MediaFile**。
+当前阶段：**V1-11 File-backed Library / MediaFile Binding 与 Portable Pack**。
 
 V1 当前约束：
 
@@ -193,3 +193,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - ffprobe 必须通过参数数组调用，不拼接 Shell 命令字符串。
 - 视频 SHA-256 是高成本操作，默认不得在普通扫描中强制启用。
 - 目录扫描当前是 V1 同步实现；数据规模增大后应升级 Job / Worker，而不是无限增加 HTTP 请求时长。
+
+
+## V1-11 实现约束补充
+
+- 未识别 MediaFile 是合法状态；候选搜索可以提供建议，但没有用户明确确认不得写入 `workId`。
+- MediaFile 人工 bind / rebind / unbind 必须经过 Application Service，并保留 `media-binding-receipts` 审计记录。
+- `.localogue-pack` 只是传输容器，不是新的 Canonical Domain Model；不要让页面依赖 gzip/Envelope 细节。
+- Portable Pack 内所有路径必须拒绝绝对路径、空路径和 `..`；每个文件必须校验 size + SHA-256。
+- Personal Pack 默认不覆盖已有私人文件；未来需要覆盖时必须先设计显式 Import Plan / 冲突决策。
+- Personal Pack 不得打包原始视频、MediaFile 本机路径或 `.localogue/settings.json`。
+- Shared Portable Pack 安装必须先写临时目录并通过 Community Validator，校验失败不得进入正式 Shared Pack 路径。
+- `localogue-community-data` 的仓库 CI 是 Community Data 发布最终权威；Localogue 内置 Validator 是安装前防线，规则应保持兼容但不要擅自放宽正式社区约束。
+- V1-11 Portable Pack 当前为内存型、单包 256 MB 上限；不要通过简单放大限制代替未来流式 Job / Archive 实现。

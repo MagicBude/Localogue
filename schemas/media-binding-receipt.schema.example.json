@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "media_binding_1788320000000_ab12cd34",
+  "mediaFileId": "media_123",
+  "mediaFilePath": "D:\\Movies\\ABC-001.mp4",
+  "beforeWorkId": "work_old",
+  "afterWorkId": "work_new",
+  "action": "rebind",
+  "changedAt": "2026-09-02T10:00:00.000Z"
+}

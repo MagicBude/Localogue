@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-10：Asset、Presentation Preference 与本地 MediaFile 管理。**
+**V1-11：MediaFile 绑定治理与 Portable Pack。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -112,16 +112,34 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - `validate:data` 开始检查 Asset subject 与 MediaFile 引用；
 - `validate:audit` 开始识别 Presentation Preference。
 
+
+### V1-11 MediaFile 绑定与便携资料包
+
+- 新增 `/media/[id]` MediaFile 治理详情；
+- 未识别媒体可查看可解释候选并按番号/标题手工搜索；
+- 支持 bind / rebind / unbind，人工变化统一标记 `matchMethod=manual`；
+- 新增 `media-binding-receipts`，保存 before/after Work 绑定和操作时间；
+- `validate:audit` 开始检查 Media Binding Receipt 的结构、动作与路径上下文；
+- 新增 `/packs` 资料包管理页；
+- 新增 `.localogue-pack` V1 便携容器；
+- Personal Pack 可导出 Canonical、Evidence/History、Presentation Preference、Asset JSON 与 asset-files；
+- Personal Pack 故意不携带 MediaFile 路径、实例设置和原始视频；
+- Personal Pack 导入默认只补缺失文件，不覆盖现有 Private Library；
+- Shared Pack 可经过主项目 Community Validator 后导出便携包；
+- Shared Portable Pack 安装前先临时解包、校验 SHA-256 与 Community Data 规则，通过后才进入 `.localogue/packs/`；
+- 安装成功后自动加入 `sharedPackPaths`；
+- Community Validator 与 `MagicBude/localogue-community-data` V0-01 的 typed UUIDv4、Source Record 和私人数据隔离规则对齐。
+
 ## 下一阶段建议
 
-**V1-11：MediaFile 绑定治理、Asset Pack 与便携分享。**
+**V1-12：Community Pack 更新、Asset 治理与平台抽象前置。**
 
-1. 未识别 MediaFile 手工绑定 / 解绑 Work；
-2. 媒体匹配候选与审核，不让复杂文件名规则直接改绑定；
-3. Asset 图集管理、删除/孤儿资源治理；
-4. Presentation Preference 导出与迁移；
-5. Shared Pack / Personal Pack 打包、导入与版本检查；
-6. 为真正 Community Data 仓库冻结稳定 ID 和 Pack 更新策略。
+1. Community Pack 版本更新检测、升级预览与回滚边界；
+2. Asset 图集排序、孤儿资源、安全删除和二进制 GC；
+3. Shared Community Asset Pack 协议初版；
+4. Local Field Override 模型前置，避免整实体 Override 长期挡住社区字段更新；
+5. Platform Abstraction：Folder Picker / File System / ffprobe / Pack Installer 接口，为 Tauri Desktop 做准备；
+6. V2 SQLite Schema 与 JSON→SQLite 迁移准备。
 
 ## 当前不做
 

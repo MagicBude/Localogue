@@ -31,3 +31,12 @@
 - 海报和人物图是重要视觉资产；
 - 筛选器在桌面端高效，在移动端可折叠；
 - URL 尽可能保存查询状态。
+
+## V1-11 新入口
+
+```text
+/packs
+/media/[mediaFileId]
+```
+
+`/packs` 管理 Shared/Personal Portable Pack；`/media/[id]` 负责单个本地媒体文件的人工作品绑定治理。

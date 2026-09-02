@@ -71,6 +71,7 @@
 - [重复检测](curation/duplicate-detection.md)
 - [实体匹配](curation/entity-resolution.md)
 - [字段冲突](curation/conflict-resolution.md)
+- [MediaFile 人工绑定治理](curation/mediafile-binding.md)
 - [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
 - [Evidence 生命周期](curation/evidence-lifecycle.md)
 - [V1-08 治理队列](curation/v1-08-governance-queues.md)
@@ -119,6 +120,8 @@
 - [Shared Pack 规范](sharing/shared-packs.md)
 - [Community Data 共享原则](sharing/community-data-policy.md)
 - [社区资料稳定实体 ID](sharing/stable-community-ids.md)
+- [Portable Pack 便携传输格式](sharing/portable-packs.md)
+- [Community Data 主项目对接](sharing/community-data-integration.md)
 
 ## 安全
 
@@ -230,6 +233,8 @@
 - [Shared Pack 规范](sharing/shared-packs.md)
 - [Community Data 共享原则](sharing/community-data-policy.md)
 - [社区资料稳定实体 ID](sharing/stable-community-ids.md)
+- [Portable Pack 便携传输格式](sharing/portable-packs.md)
+- [Community Data 主项目对接](sharing/community-data-integration.md)
 - [本地部署与设置接口安全边界](security/local-deployment.md)
 - [教材：设置页与分层资料库](development/v1-09-settings-and-layered-library-walkthrough.md)
 - [ADR-019：网页设置与环境变量优先级](decisions/ADR-019-web-settings-with-environment-override.md)
@@ -244,3 +249,13 @@
 - [媒体文件页面](ui/media-library.md)
 - [ADR-021 展示偏好不得强迫复制 Shared Entity](decisions/ADR-021-presentation-preference-does-not-copy-shared-entity.md)
 - [ADR-022 MediaFile 永远属于 Private Layer](decisions/ADR-022-mediafile-is-private-only.md)
+
+
+## V1-11 · Media Binding / Portable Packs
+
+- [MediaFile 人工绑定治理](curation/mediafile-binding.md)
+- [Portable Pack 便携传输格式](sharing/portable-packs.md)
+- [Community Data 主项目对接](sharing/community-data-integration.md)
+- [教材：Portable Pack 与 MediaFile 绑定](development/v1-11-packs-and-media-binding-walkthrough.md)
+- [ADR-023：Portable Pack 是传输容器](decisions/ADR-023-portable-pack-is-transport-container.md)
+- [ADR-024：MediaFile 人工绑定必须审计](decisions/ADR-024-mediafile-manual-binding-is-audited.md)

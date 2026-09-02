@@ -3,7 +3,7 @@ import path from "node:path";
 import { resolvePrivateRuntimeRoot } from "./lib/runtime-settings.mjs";
 
 /**
- * V1-08 审计数据完整性检查。
+ * V1-11 审计数据完整性检查。
  *
  * validate:data 检查 Canonical 实体关系；本脚本专门检查“历史系统”内部引用：
  * Commit Receipt → Snapshot、Lifecycle → Commit、Restore → Commit/Snapshot、
@@ -20,6 +20,7 @@ const lifecycles = await readCollection("evidence-lifecycle");
 const evidence = await readCollection("evidence");
 const personEdits = await readCollection("person-edits");
 const presentationPreferences = await readCollection("presentation-preferences");
+const mediaBindingReceipts = await readCollection("media-binding-receipts");
 const privateAssets = await readCollection("assets");
 
 const byId = (items) => new Map(items.filter((item) => item?.id).map((item) => [item.id, item]));
@@ -125,6 +126,18 @@ for (const preference of presentationPreferences) {
   }
 }
 
+for (const receipt of mediaBindingReceipts) {
+  if (!receipt.mediaFileId || !receipt.mediaFilePath) {
+    errors.push(`media-binding ${receipt.id}: 缺少 mediaFileId / mediaFilePath`);
+  }
+  if (!["bind", "rebind", "unbind"].includes(receipt.action)) {
+    errors.push(`media-binding ${receipt.id}: action 不合法 (${receipt.action ?? "<empty>"})`);
+  }
+  if (receipt.action === "bind" && !receipt.afterWorkId) errors.push(`media-binding ${receipt.id}: bind 缺少 afterWorkId`);
+  if (receipt.action === "rebind" && (!receipt.beforeWorkId || !receipt.afterWorkId)) errors.push(`media-binding ${receipt.id}: rebind 缺少 before/after Work`);
+  if (receipt.action === "unbind" && !receipt.beforeWorkId) errors.push(`media-binding ${receipt.id}: unbind 缺少 beforeWorkId`);
+}
+
 if (errors.length) {
   console.error("\nLocalogue 审计数据校验失败：\n");
   for (const error of errors) console.error(`- ${error}`);
@@ -140,6 +153,7 @@ if (errors.length) {
     evidence: evidence.length,
     personEdits: personEdits.length,
     presentationPreferences: presentationPreferences.length,
+    mediaBindingReceipts: mediaBindingReceipts.length,
   });
 }
 

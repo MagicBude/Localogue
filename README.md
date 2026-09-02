@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-10：Asset、Presentation Preference 与本地 MediaFile 阶段**。
+当前处于 **V1-11：MediaFile 绑定治理与 Portable Pack 阶段**。
 
 当前 V1 已完成：
 
@@ -68,7 +68,11 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - 设置页媒体扫描目录与 ffprobe 配置；
 - ffprobe 实际时长、分辨率和编码分析；
 - 可选视频完整 SHA-256；
-- MediaFile 私人层与 Work 反向关联。
+- MediaFile 私人层与 Work 反向关联；
+- MediaFile 人工绑定 / 改绑 / 解绑与审计 Receipt；
+- `/packs` Shared / Personal Pack 管理；
+- `.localogue-pack` 导出、预览与安全导入；
+- 主项目 Community Validator 与 `localogue-community-data` V0-01 协议对接。
 
 ## 技术栈
 
@@ -509,3 +513,33 @@ V1-08 增加 `/curation`，把“知道资料哪里不完整”变成可以直�
 3. `src/application/curation/duplicate-detection-service.ts`
 4. `docs/development/v1-08-person-editor-walkthrough.md`
 5. `src/application/people/person-edit-service.ts`
+
+
+## V1-11：MediaFile 绑定治理与 Portable Pack
+
+V1-11 增加两个日常入口：
+
+```text
+/media/[mediaFileId]
+/packs
+```
+
+未识别 MediaFile 可以先查看可解释候选，再按番号/标题搜索并明确绑定；绑定、改绑、解绑都会写入 `media-binding-receipts/`。
+
+`/packs` 支持：
+
+- 导出 Personal Pack，用于换电脑迁移私人资料与 Asset；
+- 导入 Personal Pack，默认只补缺失文件，不覆盖已有本地资料；
+- 对已挂载 Community Shared Pack 执行严格 Validator；
+- 将通过校验的 Shared Pack 导出成单文件 `.localogue-pack`；
+- 在另一实例安装 Shared Portable Pack，并自动挂载到 `sharedPackPaths`。
+
+Personal Pack 故意不包含 `media-files/` 和 `.localogue/settings.json`：磁盘路径与实例配置通常不能跨设备直接复用。
+
+推荐学习：
+
+1. `docs/development/v1-11-packs-and-media-binding-walkthrough.md`
+2. `src/application/packs/portable-pack-service.ts`
+3. `src/infrastructure/packs/portable-pack-codec.ts`
+4. `src/infrastructure/packs/community-pack-validator.ts`
+5. `src/application/media/media-binding-service.ts`
