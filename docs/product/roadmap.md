@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理增强
 
-已进入此阶段。V1-12 已完成 Platform Abstraction 与增量媒体扫描基础，下一阶段正式进入 Tauri Desktop Alpha。
+已进入此阶段。V1-13 已完成 Tauri Desktop Alpha 的第一条原生纵向链路，下一阶段进入 Desktop Runtime Integration。
 
 后续重点：
 
@@ -40,8 +40,10 @@
 - ~~Shared / Personal Pack 打包导入导出~~（V1-11）；
 - ~~Media Scan Platform Ports 与 Node/Web Adapter~~（V1-12）；
 - ~~size + mtime 增量扫描、Sidecar Observation 与可取消 Scan Job~~（V1-12）；
-- Tauri 2 Desktop Alpha（V1-13）；
-- 原生 Folder Picker / Open / Reveal / ffprobe Sidecar（V1-13）；
+- ~~Tauri 2 Desktop Alpha（V1-13）~~；
+- ~~原生 Folder Picker / Open / Reveal / Rust ffprobe Command（V1-13）~~；
+- 完整 Tauri FileSystem / FileHash Adapter 与 ScanCoordinator Event Bridge（V1-14）；
+- ffprobe Sidecar target-triple 打包与 Binary Dependency 流程（V1-14）；
 - 更安全的实体 Merge Plan；
 - CSV / XLSX 更完整的批量编辑回写。
 

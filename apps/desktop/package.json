@@ -1,0 +1,32 @@
+{
+  "name": "@localogue/desktop",
+  "version": "0.1.13",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.mts",
+    "build:webview": "tsc -b && vite build --config vite.config.mts",
+    "typecheck": "tsc -b --pretty false",
+    "check": "pnpm typecheck && pnpm build:webview",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev --config src-tauri/tauri.dev.conf.json",
+    "tauri:dev:release-data": "tauri dev",
+    "tauri:build": "tauri build",
+    "rust:check": "cargo check --manifest-path src-tauri/Cargo.toml"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.11.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.3",
+    "vite": "8.2.2",
+    "esbuild": "0.28.2",
+    "@types/node": "^24.0.0"
+  }
+}

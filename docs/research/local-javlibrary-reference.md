@@ -31,7 +31,7 @@ Localogue V1-12 因此正式引入：
 
 ### 5. Desktop Backend 与 UI 隔离
 
-Electron Main / IPC / Vue UI 的边界说明桌面系统能力应该集中在后端 Adapter，而不是散落在组件中。Localogue 采用 Platform Ports，并计划 V1-13 接 Tauri。
+Electron Main / IPC / Vue UI 的边界说明桌面系统能力应该集中在后端 Adapter，而不是散落在组件中。Localogue 采用 Platform Ports，，V1-13 已接入 Tauri Desktop Alpha。
 
 ## 不照搬
 

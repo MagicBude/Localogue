@@ -228,6 +228,44 @@ V1-10 已实现 **Presentation Preference**：公共资料可以提供默认头�
 
 本地媒体目录可在 `/settings` 配置，再通过 `/media` 扫描。MediaFile 只属于私人层，不进入 Community Pack。
 
+
+## V1-13 Desktop Alpha
+
+V1-13 起仓库同时包含：
+
+```text
+Localogue/
+├── src/                # Next.js Web
+└── apps/desktop/       # React/Vite + Tauri 2
+```
+
+第一次覆盖 V1-13 后执行：
+
+```bash
+pnpm install
+pnpm check
+```
+
+只使用 Web：
+
+```bash
+pnpm dev
+```
+
+运行 Desktop 前先检查本机 Rust/Tauri 环境：
+
+```bash
+pnpm desktop:doctor
+pnpm desktop:rust:check
+pnpm desktop:dev
+```
+
+Desktop Alpha 当前提供原生目录/媒体文件选择、默认程序打开、资源管理器定位、App Config 设置隔离和 Rust ffprobe Probe。完整资料浏览与治理仍由 Next.js Web 提供；V1-14 再继续把完整 Media Scan Runtime 接进 Tauri。
+
+第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
+
+详细说明见 [`docs/desktop/tauri-prerequisites.md`](docs/desktop/tauri-prerequisites.md)。
+
 ## 项目原则摘要
 
 - Canonical Library 是最终真相源；
@@ -613,3 +651,20 @@ Tauri Adapter
 5. `src/application/media/media-scan-service.ts`
 6. `src/application/media/media-scan-coordinator.ts`
 7. `src/infrastructure/platform/node-platform-adapters.ts`
+
+### Vite 8 / esbuild 说明
+
+Desktop Webview 的生产压缩使用 Oxc；但为了保留 Tauri 的 `chrome105 / safari14.1` WebView 兼容目标，Vite 8 当前仍会调用可选的 esbuild Compatibility Transform。因此 `apps/desktop` 显式声明 `esbuild` 为开发依赖。升级 Desktop 构建依赖后请先运行 `pnpm install` 更新 `pnpm-lock.yaml`。
+
+### Desktop Webview 构建目标说明
+
+`TAURI_ENV_PLATFORM` 只在 Tauri CLI 启动的构建中可靠存在；仓库根目录的 `pnpm check` 会直接运行 Desktop `vite build`。因此 Desktop Vite Config 会优先读取 Tauri 平台变量，并在变量缺失时使用 Node `process.platform` 作为主机平台 fallback。
+
+Localogue V1-13 的 Webview JavaScript 基线为：Windows `chrome105`，macOS/Linux WebKit `safari14.1`。旧 Tauri Vite 指南中的 `safari13` 示例基于 Vite 5.4.8；在当前 Vite 8 + esbuild 0.28 工具链下会触发 destructuring compatibility transform 限制，因此不再作为 Localogue Desktop Alpha 的构建目标。
+
+
+### Desktop Vite 配置升级说明
+
+V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.config.js` / `vite.config.d.ts`。由于本项目常通过 ZIP 覆盖仓库根目录升级，旧文件不会自动删除，Vite 自动配置发现可能因此拾取历史配置。当前正式配置已经迁移到 `vite.config.mts`，Desktop scripts 使用 `--config vite.config.mts` 显式加载；`pnpm check` 还会首先运行 `pnpm desktop:clean:legacy` 自动清理历史文件。无需用户手工删除旧配置。
+
+- Desktop Dev 的 Vite watcher 不监听 `src-tauri/**`；Rust 热更新由 Tauri/Cargo 自己负责，避免 Windows `.pdb` 文件锁冲突。

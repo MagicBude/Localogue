@@ -1,0 +1,61 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #171717;
+  background: #f4f4f1;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 880px; min-height: 100vh; }
+button, input { font: inherit; }
+button { border: 1px solid #c8c8c2; background: #fff; border-radius: 10px; padding: 9px 13px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: #777; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { background: #171717; color: #fff; border-color: #171717; }
+button.ghost { background: transparent; }
+button.danger { color: #a22; }
+input { width: 100%; border: 1px solid #c8c8c2; border-radius: 10px; padding: 10px 12px; background: #fff; color: inherit; }
+label { display: grid; gap: 7px; font-size: 13px; font-weight: 650; }
+code, .mono { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; overflow-wrap: anywhere; }
+.shell { max-width: 1180px; margin: 0 auto; padding: 36px 34px 50px; display: grid; gap: 18px; }
+.hero { display: flex; justify-content: space-between; gap: 32px; align-items: start; padding: 8px 2px 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .16em; font-weight: 800; opacity: .55; }
+h1 { font-size: 42px; line-height: 1; margin: 10px 0 12px; letter-spacing: -.04em; }
+h2 { margin: 0 0 8px; font-size: 20px; }
+p { line-height: 1.6; }
+.hero p { max-width: 720px; margin: 0; color: #666; }
+.runtime-badge { border: 1px solid #d0d0cb; background: #fff; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-family: monospace; }
+.status-line { padding: 11px 14px; border-radius: 10px; background: #e9e9e5; font-size: 13px; }
+.grid.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.card { background: rgba(255,255,255,.88); border: 1px solid #d9d9d3; border-radius: 18px; padding: 22px; box-shadow: 0 12px 30px rgba(0,0,0,.035); }
+.muted { color: #73736d; margin-top: 4px; }
+.definition-list, .probe-grid { margin: 16px 0 0; display: grid; gap: 10px; }
+.definition-list > div, .probe-grid > div { display: grid; grid-template-columns: 130px 1fr; gap: 16px; border-top: 1px solid #ecece8; padding-top: 10px; }
+dt { color: #777; font-size: 12px; }
+dd { margin: 0; }
+.section-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+.section-heading.compact { align-items: center; }
+.form-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 18px; }
+.input-action { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.media-roots { margin-top: 20px; padding-top: 18px; border-top: 1px solid #ecece8; }
+.path-list { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 7px; }
+.path-list li { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #f6f6f3; border-radius: 10px; padding: 9px 10px 9px 12px; }
+.empty { color: #888; font-size: 13px; }
+.selected-file { margin: 18px 0 12px; padding: 12px 14px; background: #f6f6f3; border-radius: 10px; min-height: 44px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.progress { margin-top: 16px; display: flex; gap: 12px; padding: 11px 13px; border-radius: 10px; background: #efefeb; }
+.progress.completed { background: #e7f2e9; }
+.progress.failed { background: #f8e7e7; }
+.probe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.probe-grid > div { grid-template-columns: 100px 1fr; }
+footer { text-align: center; color: #888; font-size: 12px; padding-top: 12px; }
+@media (prefers-color-scheme: dark) {
+  :root { color: #ecece8; background: #171817; }
+  .card, .runtime-badge { background: #222321; border-color: #393a37; }
+  .status-line, .selected-file, .path-list li, .progress { background: #292a27; }
+  input, button { background: #242522; color: #ecece8; border-color: #454641; }
+  button.primary { background: #ecece8; color: #181918; border-color: #ecece8; }
+  .definition-list > div, .probe-grid > div, .media-roots { border-color: #333430; }
+  .hero p, .muted, .empty, footer, dt { color: #9b9c96; }
+  .progress.completed { background: #213628; }
+  .progress.failed { background: #3b2525; }
+}

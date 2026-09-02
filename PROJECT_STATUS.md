@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-12：Platform Abstraction 与增量媒体扫描。**
+**V1-13：Tauri Desktop Alpha。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -149,17 +149,34 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 设置页显示当前 Web Runtime 原生能力缺口，为 V1-13 Tauri Adapter 做准备；
 - 新增 local-javlibrary 研究记录，吸收增量扫描、单例任务和大库优化经验，但不复制 GPL 实现代码。
 
+### V1-13 Tauri Desktop Alpha
+
+- 新增 `pnpm-workspace.yaml` 与 `apps/desktop`；
+- Desktop 使用 React 19 + Vite 8 + Tauri 2；
+- 新增原生 Folder / File Picker；
+- 新增 Open Path / Reveal in Folder；
+- 新增 Rust ffprobe Command 与媒体技术参数解析；
+- 新增 Tauri Event Progress Bridge；
+- 新增 Desktop Bootstrap Settings，存储在 Tauri App Config；
+- Dev / Release identifier 分离，避免开发数据污染正式桌面数据；
+- 新增 Desktop CSP、应用 Permission 与 Capability；
+- 不开放通用 Shell execute/spawn；
+- `open_web_url` 使用 URL Parser，仅允许 localhost / 127.0.0.1；
+- `open_path` 当前只允许受支持的视频文件，避免任意可执行路径被“默认打开”；
+- 新增首批 Tauri FileDialog / FileOpener / MediaProbe Adapter；
+- 新增 `validate:desktop` 与 Tauri prerequisites doctor。
+
 ## 下一阶段建议
 
-**V1-13：Tauri Desktop Alpha。**
+**V1-14：Desktop Runtime Integration。**
 
-1. 创建 `apps/desktop` Tauri 2 Desktop Alpha；
-2. 原生 Folder / File Picker Adapter；
-3. Open / Reveal File Adapter，并允许调用系统默认播放器；
-4. ffprobe Sidecar / Desktop Media Probe Adapter；
-5. Desktop Dev / Release AppData 隔离；
-6. 将扫描 Job Progress 映射为 Tauri Event；
-7. 保留 Next.js Web 版，与 Desktop 共享 Domain / Application 规则。
+1. 把 FileSystemPort / FileHashPort 实现为完整 Tauri Adapter；
+2. 将 MediaScanCoordinator 从 Web Runtime 映射到 Desktop Task / Event；
+3. Native Pack Open / Save Dialog 与拖放；
+4. 建立 ffprobe Sidecar 获取、target-triple 命名、版本与许可流程；
+5. Desktop Settings 与 Localogue Instance Settings 的明确迁移/同步策略；
+6. Asset 孤儿治理与安全删除；
+7. Community Pack 更新检查与版本升级预览。
 
 ## 当前不做
 
@@ -167,8 +184,18 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 在线爬虫与 Provider；
 - 外部 API Connector；
 - AI Agent；
-- 浏览器播放器；
+- 内置视频播放器；
 - 自动搬移用户媒体文件；
-- Importer 绕过 Review 直接修改正式资料；
-- 绕过 Commit Plan / fingerprint 的直接 Canonical 写入；
-- 把 JSON Snapshot 宣称为真正 ACID Transaction。
+- Desktop 与 Web 设置的隐式双向同步；
+- 未经过许可/版本流程的 FFmpeg 二进制自动打包。
+
+### V1-13 Webview Build Target 补充
+
+Desktop 独立 Vite Check 已支持 Host Platform fallback：在非 Tauri CLI 场景下根据 Node `process.platform` 选择目标。Windows 使用 `chrome105`；WebKit 使用 `safari14.1`。这避免 Windows `pnpm check` 因缺少 `TAURI_ENV_PLATFORM` 而错误构建 Safari 13 bundle。
+
+
+### V1-13 Desktop 构建配置确定性
+
+Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来源，所有 Vite 命令显式使用 `--config`。根 `pnpm check` 会先执行 `desktop:clean:legacy`，清理早期版本曾由 `tsc -b` 误生成的 `vite.config.js/.d.ts` 与旧 `vite.config.ts`。这解决了 ZIP 覆盖升级不会删除历史文件、导致 Validator 读取新配置而 Vite 实际执行旧配置的问题。
+
+- V1-13 Desktop 开发服务器已按 Tauri 推荐配置忽略 `src-tauri/**`，避免 Windows Cargo/MSVC 产物与 Vite watcher 竞争导致 EBUSY。

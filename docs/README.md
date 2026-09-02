@@ -137,6 +137,12 @@
 - [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
 - [V1 JSON Snapshot 与恢复策略](storage/snapshot-recovery.md)
 
+## Desktop
+
+- [Tauri Desktop 开发前置环境](desktop/tauri-prerequisites.md)
+- [Desktop Runtime 架构](architecture/desktop-runtime.md)
+- [V1-13 Tauri Desktop Alpha 实现导读](development/v1-13-tauri-desktop-alpha-walkthrough.md)
+
 ## 开发
 
 - [开始开发](development/getting-started.md)

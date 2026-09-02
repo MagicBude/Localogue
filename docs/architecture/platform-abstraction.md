@@ -35,7 +35,7 @@ src/infrastructure/platform/
 └── node-platform-provider.ts
 ```
 
-Next.js 仍使用 Node Adapter；V1-13 会新增 Tauri Adapter。
+Next.js 仍使用 Node Adapter；V1-13 已新增首批 Tauri Adapter。
 
 ## 依赖方向
 

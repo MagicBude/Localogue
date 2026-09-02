@@ -1,6 +1,6 @@
 {
   "name": "localogue",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -12,12 +12,22 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm validate:data && pnpm validate:audit && pnpm validate:platform && pnpm lint && pnpm typecheck && pnpm build",
+    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
     "validate:audit": "node scripts/validate-audit.mjs",
     "library:init:demo": "node scripts/init-private-library.mjs --demo",
-    "validate:platform": "node scripts/validate-platform-boundaries.mjs"
+    "validate:platform": "node scripts/validate-platform-boundaries.mjs",
+    "validate:desktop": "node scripts/validate-desktop-boundaries.mjs",
+    "desktop:dev": "pnpm --filter @localogue/desktop tauri:dev",
+    "desktop:dev:release-data": "pnpm --filter @localogue/desktop tauri:dev:release-data",
+    "desktop:typecheck": "pnpm --filter @localogue/desktop typecheck",
+    "desktop:build:webview": "pnpm --filter @localogue/desktop build:webview",
+    "desktop:check": "pnpm --filter @localogue/desktop check",
+    "desktop:build": "pnpm --filter @localogue/desktop tauri:build",
+    "desktop:doctor": "node scripts/check-tauri-prerequisites.mjs",
+    "desktop:rust:check": "pnpm --filter @localogue/desktop rust:check",
+    "desktop:clean:legacy": "node scripts/clean-desktop-generated-artifacts.mjs"
   },
   "dependencies": {
     "next": "16.3.3",

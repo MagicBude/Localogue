@@ -219,3 +219,26 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 同一运行时同时只允许一个 Media Scan Job；重复触发必须拒绝或复用，不得并发启动多轮 ffprobe / Hash。
 - Media Scan Job 必须支持可观察状态和取消；不要重新退回“一个 HTTP 请求同步等待整个大目录扫描”的模式。
 - V1-13 Tauri Desktop 应实现已有 Platform Ports，而不是在 UI 组件中直接调用 Tauri API 重写业务规则。
+
+
+## V1-13 实现约束补充
+
+- Web 与 Desktop 现在是两个运行入口，但必须共享同一 Domain / Application 规则；不得在 Tauri UI 中复制一套 Canonical / Evidence / Review 业务逻辑。
+- `apps/desktop` 是独立 Vite + Tauri Workspace Package；根 Next.js Web 继续保留。
+- Tauri Webview 不得获得通用 `shell execute/spawn` 权限；任何本地进程能力必须通过最小化 Rust Command 暴露。
+- `probe_media` 只允许执行文件名为 `ffprobe` / `ffprobe.exe` 的程序，并使用固定参数数组，不经过 Shell。
+- Desktop 自定义 Command 必须通过 `src-tauri/permissions/` 显式授权，并由主窗口 Capability 引用。
+- Desktop 必须启用 CSP，禁止以 `csp=null` 作为长期解决方案。
+- Dev / Release 必须使用不同 Tauri identifier，保证 App Config / AppData 隔离。
+- V1-13 Desktop Bootstrap Settings 与 Web `.localogue/settings.json` 暂时分离；不得假装二者已经实现双向同步。
+- V1-13 只完成 Native Dialog / Open / Reveal / MediaProbe 首批 Adapter；FileSystem / FileHash 与完整 ScanCoordinator 迁移放到 V1-14。
+- ffprobe 打包 Sidecar 在 V1-14 处理 target-triple、版本和再分发边界后再启用；V1-13 不允许配置一个不存在的 `externalBin` 让构建默认失败。
+- 修改 Desktop Runtime 边界后必须运行 `pnpm validate:desktop`；有 Rust/Tauri 环境时另外运行 `pnpm desktop:doctor` 与 `pnpm desktop:dev`。
+
+
+### V1-13 Desktop Open 边界
+
+- `open_web_url` 使用 URL Parser 校验，当前只允许 `http://localhost` 与 `http://127.0.0.1`，不能只依赖字符串前缀。
+- `open_path` 当前只允许 Localogue 支持的视频扩展名，避免 Webview 将“默认程序打开”能力扩大成打开 `.exe` / 脚本等任意可执行目标。
+- `reveal_in_folder` 只负责在系统文件管理器中定位已经存在的路径，不执行目标。
+- 通用 Shell execute/spawn 仍不向 Webview 暴露。

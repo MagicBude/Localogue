@@ -43,3 +43,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 - [ADR-025：先建立 Platform Ports，再引入 Tauri Shell](ADR-025-platform-ports-before-tauri-shell.md)
 - [ADR-026：Snapshot Diff 是扫描基线，Filesystem Watcher 只是增强](ADR-026-snapshot-diff-before-filesystem-watcher.md)
 
+
+### V1-13
+- [ADR-027：Web 与 Tauri Desktop 并存，而不是互相替代](ADR-027-web-and-desktop-coexist.md)
+- [ADR-028：Tauri Webview 只获得最小业务命令，不开放通用 Shell](ADR-028-tauri-minimal-command-surface.md)

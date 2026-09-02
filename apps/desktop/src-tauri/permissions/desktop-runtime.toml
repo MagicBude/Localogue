@@ -1,0 +1,14 @@
+[[permission]]
+identifier = "desktop-runtime"
+description = "允许 Localogue 主窗口调用 V1-13 明确暴露的桌面 Runtime 命令；不包含通用 shell execute/spawn。"
+commands.allow = [
+  "get_runtime_info",
+  "load_desktop_settings",
+  "save_desktop_settings",
+  "pick_directory",
+  "pick_media_file",
+  "open_path",
+  "reveal_in_folder",
+  "open_web_url",
+  "probe_media"
+]

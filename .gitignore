@@ -37,3 +37,13 @@ data/imports/
 *.sqlite
 *.sqlite3
 *.db
+
+# Tauri / Vite desktop build output
+apps/desktop/dist/
+apps/desktop/src-tauri/target/
+
+# V1-13 legacy Vite config emit artifacts (never source files)
+apps/desktop/vite.config.js
+apps/desktop/vite.config.js.map
+apps/desktop/vite.config.d.ts
+apps/desktop/vite.config.d.ts.map

@@ -1,5 +1,27 @@
 # 更新日志
 
+## V1-13 · Tauri Desktop Alpha
+
+- 新增 pnpm workspace，并创建 `apps/desktop` Tauri 2 + React/Vite Desktop Alpha。
+- 保留根 Next.js Web 应用，Desktop 不取代现有 Web。
+- 新增 Desktop Runtime Contract 与首批 Tauri FileDialog / FileOpener / MediaProbe Adapter。
+- 新增原生 Folder Picker、Media File Picker、默认播放器打开和资源管理器/Finder 定位。
+- 新增 Rust Desktop Settings Store，配置写入 Tauri App Config 目录。
+- Dev / Release 使用不同 Tauri identifier，隔离 App Config / App Local Data。
+- 新增 Rust `probe_media` Command，通过固定参数直接调用 `ffprobe`。
+- `ffprobe` 可执行文件名强制限制为 `ffprobe` / `ffprobe.exe`，不向 Webview 暴露通用 Shell。
+- 新增 `localogue://desktop-task-progress` Tauri Event，验证 Rust → Webview 的任务进度桥。
+- 新增应用级 `desktop-runtime` Permission 与主窗口 Capability。
+- Desktop CSP 显式限制为本地资源与 Tauri IPC。
+- 新增 `pnpm validate:desktop`，校验 Dev/Release 隔离、CSP、Shell 权限、ffprobe 白名单和 Web/Tauri 分层。
+- 新增 `pnpm desktop:doctor`、`desktop:dev`、`desktop:check`、`desktop:build` 等命令。
+- 根 `pnpm check` 新增 Desktop Boundary 与 Desktop Webview TypeScript/Vite 校验。
+- V1-13 不打包 ffprobe Sidecar；V1-14 再处理 target-triple 二进制、版本和再分发流程。
+- `open_web_url` 改用 URL Parser 严格限定 localhost / 127.0.0.1，避免字符串前缀校验绕过。
+- `open_path` 当前只允许受支持的视频扩展名，避免桌面“默认打开”能力退化成任意程序执行入口。
+- 新增 Desktop 架构、前置环境、V1-13 教材导读与 ADR-027 / ADR-028。
+- Desktop Vite Dev Server 明确忽略 `**/src-tauri/**`，避免 Windows 下 Cargo/MSVC 锁定 `target` 内 `.pdb/.dll` 时 Vite watcher 触发 `EBUSY` 并中断 `tauri dev`。
+
 ## V1-12 · Platform Abstraction 与增量媒体扫描
 
 - 新增 FileSystem、MediaProbe、FileHash、FileDialog、FileOpener Platform Ports。
@@ -226,3 +248,40 @@
 - 记录对 MDC-NG、MDCx、mdcx_sqlite、CM Collectors、Amane、mdcx-diy 的参考分析。
 
 - 修复 Next.js Pack 导出 API 在新版 TypeScript / DOM 类型下 `Uint8Array<ArrayBufferLike>` 无法直接作为 `BodyInit` 的兼容问题，导出响应显式转换为标准 `ArrayBuffer`。
+
+
+### V1-13 Desktop Open 边界
+
+- `open_web_url` 使用 URL Parser 校验，当前只允许 `http://localhost` 与 `http://127.0.0.1`，不能只依赖字符串前缀。
+- `open_path` 当前只允许 Localogue 支持的视频扩展名，避免 Webview 将“默认程序打开”能力扩大成打开 `.exe` / 脚本等任意可执行目标。
+- `reveal_in_folder` 只负责在系统文件管理器中定位已经存在的路径，不执行目标。
+- 通用 Shell execute/spawn 仍不向 Webview 暴露。
+
+- 修复 Vite 8 Desktop Webview 生产构建仍显式使用已弃用 esbuild Minifier 的问题。
+- 正式构建改用 Vite 8 默认推荐的 Oxc Minifier，不额外引入 esbuild 兼容依赖。
+
+### V1-13 构建兼容性补充
+
+- Desktop Workspace 显式增加 `esbuild` 开发依赖，用于 Vite 8 在 `build.target=chrome105/safari14.1` 下的兼容性语法转换。
+- Desktop 生产压缩继续使用 Oxc；`esbuild` 仅承担 Vite 8 当前仍保留的兼容 Target Transform，不回退到旧的 esbuild Minifier。
+
+### V1-13 Desktop Webview Target 修正
+
+- 修复直接运行 `pnpm check` / `vite build` 时 `TAURI_ENV_PLATFORM` 不存在，Windows 主机被错误回退为 Safari Target 的问题。
+- Desktop Vite Config 现在优先使用 Tauri 注入的平台；没有 Tauri 环境变量时根据 Node `process.platform` 推导 Windows / macOS / Linux。
+- Windows WebView2 继续使用 `chrome105` Target。
+- WebKit Target 从旧 Tauri/Vite 5 示例的 `safari13` 提升为 `safari14.1`，规避 esbuild 0.28 对旧 Safari destructuring compatibility transform 的已知限制。
+- `esbuild` 固定为 `0.28.2`；生产压缩继续使用 Oxc，esbuild 仅用于 Vite 当前仍触发的兼容转换路径。
+- `validate:desktop` 新增 Host Platform Fallback 与 Webview Target 架构校验，防止后续再次退化。
+
+- 修复 ZIP 覆盖升级无法删除旧 `apps/desktop/vite.config.js`，导致 Vite 继续执行历史 `safari13` 配置的问题。
+- Desktop Vite 配置迁移为 `vite.config.mts`，开发和生产构建均通过 `--config` 显式选择。
+- 新增 `desktop:clean:legacy`，在 `pnpm check` 开始时清理旧 Vite 配置 emit、旧 `.ts` 配置与 TypeScript build metadata。
+- `validate:desktop` 增加 Vite 配置唯一来源和覆盖升级确定性校验。
+
+- 修复 Windows 下 `desktop:doctor` 使用 `execFile` 直接探测 `pnpm` 时无法解析 `pnpm.cmd`，导致已由 pnpm 启动却误报“未找到 pnpm”的问题。Doctor 现在优先从当前 pnpm 进程的 `npm_config_user_agent` 识别版本，并在独立探测时使用 Windows `.cmd` shim。
+
+### V1-13 Desktop Alpha build resource fix
+- 补齐 Tauri Desktop 应用图标资源：32x32、128x128、256x256、Windows ICO 与 macOS ICNS。
+- `tauri.conf.json` 显式声明 bundle icon 列表，修复 Windows `tauri-build` / `cargo check` 生成 Resource 时缺少 `icons/icon.ico` 的失败。
+- `validate:desktop` 增加 Desktop Icon 资源与 Bundle 声明检查，防止后续重新遗漏构建资源。
