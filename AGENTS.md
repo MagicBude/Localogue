@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-11 File-backed Library / MediaFile Binding 与 Portable Pack**。
+当前阶段：**V1-14 Desktop Runtime Integration**。
 
 V1 当前约束：
 
@@ -233,6 +233,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - V1-13 Desktop Bootstrap Settings 与 Web `.localogue/settings.json` 暂时分离；不得假装二者已经实现双向同步。
 - V1-13 只完成 Native Dialog / Open / Reveal / MediaProbe 首批 Adapter；FileSystem / FileHash 与完整 ScanCoordinator 迁移放到 V1-14。
 - ffprobe 打包 Sidecar 在 V1-14 处理 target-triple、版本和再分发边界后再启用；V1-13 不允许配置一个不存在的 `externalBin` 让构建默认失败。
+
+## V1-14 实现约束补充
+
+- Desktop 必须复用 `scanMediaLibrary` 与 `MediaScanCoordinator`，不得在 React UI 或 Rust 中复制增量比较、匹配和 stale 规则。
+- Tauri FileSystem / FileHash 只能通过最小 Commands 实现；Webview 继续不得获得通用 Shell 能力。
+- Desktop 扫描专用 Repository 只允许读取 `works` 和读写私人 `media-files`，不得扩大为任意集合文件 API。
+- Web 与 Desktop 设置字段语义保持一致；两个运行入口可以拥有不同本机设置文件，但 UI/文档不得把它描述为两套产品规则。
+- Desktop Scan 取消以 Application `AbortSignal` 为真相源；单个原生 IO 调用完成后必须再次检查取消状态。
+- ffprobe 查找顺序为显式用户路径、发行包 `resources/bin`、系统 PATH；所有候选仍须通过 basename 白名单。
+- 未准备齐 target-triple 二进制、许可证与校验摘要前，不得配置不存在的 Tauri `externalBin`。
 - 修改 Desktop Runtime 边界后必须运行 `pnpm validate:desktop`；有 Rust/Tauri 环境时另外运行 `pnpm desktop:doctor` 与 `pnpm desktop:dev`。
 
 

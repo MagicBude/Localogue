@@ -2,9 +2,11 @@
 
 ## 当前阶段
 
-**V1-13：Tauri Desktop Alpha。**
+**V1-14：Desktop Runtime Integration。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
+
+V1-14 已让 Tauri Desktop 复用 V1-12 的增量媒体扫描 Application Core：FileSystem、FileHash、MediaProbe 与扫描专用 Repository 由受限 Native Adapter 实现，Desktop 可启动、观察和取消扫描。Web / Desktop 的实例设置字段语义已经统一，运行入口仍各自保存本机配置。
 
 ## 已完成
 

@@ -142,6 +142,7 @@
 - [Tauri Desktop 开发前置环境](desktop/tauri-prerequisites.md)
 - [Desktop Runtime 架构](architecture/desktop-runtime.md)
 - [V1-13 Tauri Desktop Alpha 实现导读](development/v1-13-tauri-desktop-alpha-walkthrough.md)
+- [V1-14 Desktop Runtime Integration 实现导读](development/v1-14-desktop-runtime-integration-walkthrough.md)
 
 ## 开发
 
@@ -274,4 +275,3 @@
 - [local-javlibrary 对 Localogue 的参考价值](research/local-javlibrary-reference.md)
 - [ADR-025：先建立 Platform Ports，再引入 Tauri Shell](decisions/ADR-025-platform-ports-before-tauri-shell.md)
 - [ADR-026：Snapshot Diff 是扫描基线，Filesystem Watcher 只是增强](decisions/ADR-026-snapshot-diff-before-filesystem-watcher.md)
-

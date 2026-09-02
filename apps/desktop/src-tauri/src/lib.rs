@@ -1,7 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sha2::{Digest, Sha256};
 use std::{
-    fs,
+    collections::HashSet,
+    fs::{self, File},
+    io::Read,
     path::{Path, PathBuf},
     process::Command,
     time::{SystemTime, UNIX_EPOCH},
@@ -10,6 +13,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_opener::OpenerExt;
 use url::Url;
+use walkdir::WalkDir;
 
 const PROGRESS_EVENT: &str = "localogue://desktop-task-progress";
 const SETTINGS_FILE: &str = "desktop-settings.json";
@@ -38,6 +42,8 @@ struct DesktopBootstrapSettings {
     library_path: Option<String>,
     #[serde(default)]
     media_scan_paths: Vec<String>,
+    #[serde(default)]
+    shared_pack_paths: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     ffprobe_path: Option<String>,
     web_url: String,
@@ -51,6 +57,7 @@ impl Default for DesktopBootstrapSettings {
             schema_version: 1,
             library_path: None,
             media_scan_paths: Vec::new(),
+            shared_pack_paths: Vec::new(),
             ffprobe_path: None,
             web_url: "http://127.0.0.1:3000".into(),
             updated_at: None,
@@ -80,6 +87,36 @@ struct MediaProbeResult {
     audio_codec: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     container: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopFileStat {
+    is_file: bool,
+    is_directory: bool,
+    size: u64,
+    modified_at: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopFileEntry {
+    path: String,
+    name: String,
+    extension: String,
+    size: u64,
+    modified_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct WalkFilesRequest {
+    root: String,
+    #[serde(default)]
+    extensions: Vec<String>,
+    #[serde(default)]
+    include_hidden: bool,
+    max_files: Option<usize>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -192,10 +229,10 @@ async fn probe_media(app: AppHandle, request: MediaProbeRequest) -> Result<Media
     emit_progress(&app, &task_id, "preparing", "正在验证媒体与 ffprobe。", Some(&request.file_path));
 
     let file_path = require_existing_file(&request.file_path)?;
-    let executable = validate_ffprobe_executable(&request.executable)?;
+    let executable = resolve_ffprobe_executable(&request.executable)?;
     emit_progress(&app, &task_id, "probing", "正在通过 Rust Command 调用 ffprobe。", Some(&request.file_path));
 
-    let output = Command::new(executable)
+    let output = Command::new(&executable)
         .args([
             "-v", "error",
             "-show_entries", "format=format_name,duration:stream=codec_type,codec_name,width,height",
@@ -231,6 +268,116 @@ async fn probe_media(app: AppHandle, request: MediaProbeRequest) -> Result<Media
     Ok(result)
 }
 
+#[tauri::command]
+fn resolve_path(path: String) -> Result<String, String> {
+    validate_text_path(&path)?;
+    let input = PathBuf::from(path);
+    let resolved = if input.is_absolute() { input } else { std::env::current_dir().map_err(display_error)?.join(input) };
+    Ok(path_to_string(&normalize_lexical(&resolved)))
+}
+
+#[tauri::command]
+fn stat_path(path: String) -> Result<DesktopFileStat, String> {
+    validate_text_path(&path)?;
+    let metadata = fs::metadata(&path).map_err(display_error)?;
+    Ok(DesktopFileStat {
+        is_file: metadata.is_file(),
+        is_directory: metadata.is_dir(),
+        size: metadata.len(),
+        modified_at: modified_marker(&metadata)?,
+    })
+}
+
+#[tauri::command]
+fn path_exists(path: String) -> Result<bool, String> {
+    validate_text_path(&path)?;
+    Ok(Path::new(&path).exists())
+}
+
+#[tauri::command]
+fn walk_files(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry>, String> {
+    let root = PathBuf::from(&request.root);
+    validate_text_path(&request.root)?;
+    if !root.is_dir() { return Err("媒体扫描根路径不是可读取目录。".into()); }
+    let allowed: HashSet<String> = request.extensions.into_iter()
+        .map(|value| value.trim_start_matches('.').to_ascii_lowercase()).collect();
+    let limit = request.max_files.unwrap_or(25_000).min(25_000);
+    let mut output = Vec::new();
+    for item in WalkDir::new(&root).follow_links(false).into_iter().filter_map(Result::ok) {
+        if output.len() >= limit { break; }
+        if !item.file_type().is_file() { continue; }
+        let path = item.path();
+        let has_hidden_component = path.strip_prefix(&root).ok()
+            .map(|relative| relative.components().any(|part| part.as_os_str().to_string_lossy().starts_with('.')))
+            .unwrap_or(false);
+        if !request.include_hidden && has_hidden_component { continue; }
+        let extension = path.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+        if !allowed.is_empty() && !allowed.contains(&extension) { continue; }
+        let metadata = item.metadata().map_err(display_error)?;
+        output.push(DesktopFileEntry {
+            path: path_to_string(path),
+            name: item.file_name().to_string_lossy().into_owned(),
+            extension: format!(".{extension}"),
+            size: metadata.len(),
+            modified_at: modified_marker(&metadata)?,
+        });
+    }
+    Ok(output)
+}
+
+#[tauri::command]
+fn sha256_text(value: String) -> String { format!("{:x}", Sha256::digest(value.as_bytes())) }
+
+#[tauri::command]
+fn sha256_file(path: String) -> Result<String, String> {
+    let file_path = require_existing_file(&path)?;
+    let mut file = File::open(file_path).map_err(display_error)?;
+    let mut digest = Sha256::new();
+    let mut buffer = [0_u8; 1024 * 1024];
+    loop {
+        let count = file.read(&mut buffer).map_err(display_error)?;
+        if count == 0 { break; }
+        digest.update(&buffer[..count]);
+    }
+    Ok(format!("{:x}", digest.finalize()))
+}
+
+#[tauri::command]
+fn read_library_collection(library_path: String, collection: String) -> Result<Vec<Value>, String> {
+    let directory = safe_collection_directory(&library_path, &collection)?;
+    if !directory.exists() { return Ok(Vec::new()); }
+    let mut values = Vec::new();
+    for item in fs::read_dir(directory).map_err(display_error)? {
+        let path = item.map_err(display_error)?.path();
+        if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
+        let raw = fs::read_to_string(&path).map_err(display_error)?;
+        values.push(serde_json::from_str(&raw).map_err(display_error)?);
+    }
+    Ok(values)
+}
+
+#[tauri::command]
+fn write_library_entity(library_path: String, collection: String, entity: Value) -> Result<(), String> {
+    let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "实体缺少稳定 id。".to_string())?;
+    if !is_safe_id(id) { return Err("实体 id 包含不安全字符。".into()); }
+    let directory = safe_collection_directory(&library_path, &collection)?;
+    fs::create_dir_all(&directory).map_err(display_error)?;
+    let target = directory.join(format!("{id}.json"));
+    let temporary = directory.join(format!("{id}.json.tmp"));
+    let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
+    fs::write(&temporary, body).map_err(display_error)?;
+    if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+    fs::rename(temporary, target).map_err(display_error)
+}
+
+#[tauri::command]
+fn delete_library_entity(library_path: String, collection: String, id: String) -> Result<(), String> {
+    if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
+    let target = safe_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
+    if target.exists() { fs::remove_file(target).map_err(display_error)?; }
+    Ok(())
+}
+
 fn emit_progress(app: &AppHandle, task_id: &str, stage: &'static str, message: &str, current_path: Option<&str>) {
     let _ = app.emit(PROGRESS_EVENT, DesktopTaskProgress {
         task_id: task_id.into(),
@@ -250,6 +397,7 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.library_path = clean_optional_path(value.library_path)?;
     value.ffprobe_path = clean_optional_path(value.ffprobe_path)?;
     value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
+    value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
     let web_url = value.web_url.trim();
     value.web_url = if web_url.is_empty() { "http://127.0.0.1:3000".into() } else { web_url.into() };
     Ok(value)
@@ -317,6 +465,46 @@ fn validate_ffprobe_executable(value: &str) -> Result<&str, String> {
     Ok(trimmed)
 }
 
+fn resolve_ffprobe_executable(value: &str) -> Result<PathBuf, String> {
+    let validated = validate_ffprobe_executable(value)?;
+    let requested = PathBuf::from(validated);
+    if requested.components().count() > 1 { return Ok(requested); }
+
+    // Release 包可把 target-triple ffprobe 放到主程序旁的 resources/bin。
+    // 没有随包二进制时继续回退 PATH，开发环境和发行包使用同一安全白名单。
+    if let Ok(current) = std::env::current_exe() {
+        let binary = if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" };
+        if let Some(parent) = current.parent() {
+            for candidate in [parent.join("resources").join("bin").join(binary), parent.join(binary)] {
+                if candidate.is_file() { return Ok(candidate); }
+            }
+        }
+    }
+    Ok(requested)
+}
+
+fn safe_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
+    validate_text_path(root)?;
+    if !matches!(collection, "works" | "media-files") { return Err("Desktop Scan 只允许访问 works / media-files 集合。".into()); }
+    Ok(PathBuf::from(root).join(collection))
+}
+
+fn is_safe_id(value: &str) -> bool { !value.is_empty() && value.chars().all(|ch| ch.is_ascii_alphanumeric() || ch == '_' || ch == '-') }
+
+fn modified_marker(metadata: &fs::Metadata) -> Result<String, String> {
+    let millis = metadata.modified().map_err(display_error)?.duration_since(UNIX_EPOCH).map_err(display_error)?.as_millis();
+    Ok(millis.to_string())
+}
+
+fn normalize_lexical(path: &Path) -> PathBuf {
+    use std::path::Component;
+    let mut result = PathBuf::new();
+    for component in path.components() {
+        match component { Component::CurDir => {}, Component::ParentDir => { result.pop(); }, other => result.push(other.as_os_str()) }
+    }
+    result
+}
+
 fn path_to_string(path: &Path) -> String { path.to_string_lossy().into_owned() }
 fn display_error(error: impl std::fmt::Display) -> String { error.to_string() }
 fn now_marker() -> String {
@@ -338,6 +526,15 @@ pub fn run() {
             reveal_in_folder,
             open_web_url,
             probe_media,
+            resolve_path,
+            stat_path,
+            path_exists,
+            walk_files,
+            sha256_text,
+            sha256_file,
+            read_library_collection,
+            write_library_entity,
+            delete_library_entity,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Localogue Desktop");

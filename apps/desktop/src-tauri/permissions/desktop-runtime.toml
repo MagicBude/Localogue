@@ -1,6 +1,6 @@
 [[permission]]
 identifier = "desktop-runtime"
-description = "允许 Localogue 主窗口调用 V1-13 明确暴露的桌面 Runtime 命令；不包含通用 shell execute/spawn。"
+description = "允许 Localogue 主窗口调用 V1-14 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。"
 commands.allow = [
   "get_runtime_info",
   "load_desktop_settings",
@@ -10,5 +10,14 @@ commands.allow = [
   "open_path",
   "reveal_in_folder",
   "open_web_url",
-  "probe_media"
+  "probe_media",
+  "resolve_path",
+  "stat_path",
+  "path_exists",
+  "walk_files",
+  "sha256_text",
+  "sha256_file",
+  "read_library_collection",
+  "write_library_entity",
+  "delete_library_entity"
 ]

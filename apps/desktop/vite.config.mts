@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
 
 type DesktopPlatform = "windows" | "macos" | "linux";
 
@@ -37,6 +38,7 @@ const webviewTarget = desktopPlatform === "windows" ? "chrome105" : "safari14.1"
 
 export default defineConfig({
   plugins: [react()],
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "../../src") } },
   clearScreen: false,
   server: {
     port: 1420,

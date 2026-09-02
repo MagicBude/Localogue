@@ -47,3 +47,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-13
 - [ADR-027：Web 与 Tauri Desktop 并存，而不是互相替代](ADR-027-web-and-desktop-coexist.md)
 - [ADR-028：Tauri Webview 只获得最小业务命令，不开放通用 Shell](ADR-028-tauri-minimal-command-surface.md)
+
+### V1-14
+- [ADR-029：Desktop 复用 Media Scan Application Core](ADR-029-desktop-reuses-media-scan-core.md)

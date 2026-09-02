@@ -6,6 +6,8 @@ import type {
   DesktopMediaProbeResult,
   DesktopRuntimeInfo,
   DesktopTaskProgress,
+  DesktopFileEntry,
+  DesktopFileStat,
 } from "./contracts";
 
 const PROGRESS_EVENT = "localogue://desktop-task-progress";
@@ -22,6 +24,18 @@ export const desktopBridge = {
   openWebUrl: (url: string) => invoke<void>("open_web_url", { url }),
   probeMedia: (executable: string, filePath: string) =>
     invoke<DesktopMediaProbeResult>("probe_media", { request: { executable, filePath } }),
+  resolvePath: (path: string) => invoke<string>("resolve_path", { path }),
+  statPath: (path: string) => invoke<DesktopFileStat>("stat_path", { path }),
+  pathExists: (path: string) => invoke<boolean>("path_exists", { path }),
+  walkFiles: (request: { root: string; extensions?: string[]; includeHidden?: boolean; maxFiles?: number }) =>
+    invoke<DesktopFileEntry[]>("walk_files", { request }),
+  sha256File: (path: string) => invoke<string>("sha256_file", { path }),
+  readLibraryCollection: <T>(libraryPath: string, collection: "works" | "media-files") =>
+    invoke<T[]>("read_library_collection", { libraryPath, collection }),
+  writeLibraryEntity: (libraryPath: string, collection: "media-files", entity: unknown) =>
+    invoke<void>("write_library_entity", { libraryPath, collection, entity }),
+  deleteLibraryEntity: (libraryPath: string, collection: "media-files", id: string) =>
+    invoke<void>("delete_library_entity", { libraryPath, collection, id }),
   listenProgress: (handler: (payload: DesktopTaskProgress) => void): Promise<UnlistenFn> =>
     listen<DesktopTaskProgress>(PROGRESS_EVENT, (event) => handler(event.payload)),
 };

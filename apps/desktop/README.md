@@ -1,6 +1,8 @@
 # Localogue Desktop
 
-V1-13 的 Tauri 2 Desktop Alpha。
+V1-14 的 Tauri 2 Desktop Runtime Integration。
+
+Desktop 已通过受限 FileSystem / FileHash / Repository Commands 复用主项目的增量 Media Scan Application Core，支持进度、取消和结果统计。
 
 它不是 Localogue Web 的替代品，也不是第二套业务实现。当前职责是验证 Desktop Runtime：
 

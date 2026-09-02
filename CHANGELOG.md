@@ -211,6 +211,29 @@
 
 # 变更记录
 
+## V1-14 — 2026-09-02
+
+### 新增
+
+- Desktop 新增 TauriFileSystemAdapter 与 TauriFileHashAdapter；
+- Desktop 复用共享 MediaScanCoordinator / scanMediaLibrary，支持增量扫描、进度、结果统计与取消；
+- Rust Runtime 新增受限目录遍历、文件状态、SHA-256 与扫描专用 Repository Commands；
+- Desktop 可从 Private Library 读取 works，并只向 media-files 私人层原子写入；
+- ffprobe 支持用户路径、发行包 resources/bin 和 PATH 的安全解析顺序。
+
+### 调整
+
+- Web / Desktop Instance Settings 统一 libraryPath、sharedPackPaths、mediaScanPaths、ffprobePath 字段语义；
+- Desktop Runtime 权限与校验脚本加入 V1-14 扫描边界；
+- 项目、Desktop Workspace、Rust Crate 与 Tauri 配置版本升级至 0.1.14。
+- 修复 Rust 文件 SHA-256 将哈希器状态直接按 LowerHex 格式化导致的 Cargo E0277；现在先 finalize 摘要再输出十六进制字符串。
+
+### 安全
+
+- Webview 仍不获得通用 shell、任意集合访问或任意文件写入能力；
+- Repository Commands 只允许 works / media-files，实体文件名只接受安全稳定 ID；
+- 目录扫描不跟随符号链接，最多返回 25000 个相关文件。
+
 ## V1-01 — 2026-09-01
 
 ### 新增

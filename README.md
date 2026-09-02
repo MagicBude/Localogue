@@ -11,6 +11,8 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
+当前实现已推进到 **V1-14 Desktop Runtime Integration**：Tauri Desktop 复用共享增量媒体扫描核心，并通过最小原生命令实现 FileSystem、FileHash、ffprobe 与私人 MediaFile 持久化。
+
 当前处于 **V1-11：MediaFile 绑定治理与 Portable Pack 阶段**。
 
 当前 V1 已完成：

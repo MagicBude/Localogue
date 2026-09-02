@@ -10,3 +10,18 @@ export type {
   DesktopTaskProgress,
   DesktopTaskStage,
 } from "../../../src/application/platform/desktop-runtime-contract";
+
+export interface DesktopFileStat {
+  isFile: boolean;
+  isDirectory: boolean;
+  size: number;
+  modifiedAt: string;
+}
+
+export interface DesktopFileEntry {
+  path: string;
+  name: string;
+  extension: string;
+  size: number;
+  modifiedAt: string;
+}

@@ -34,7 +34,7 @@ V1-13 先落地最短但真实的一条桌面纵向链路。
 
 它们实现 V1-12 已冻结的 Platform Port 形状。
 
-FileSystemPort / FileHashPort 尚未在 V1-13 完整迁入 Desktop，因为完整 MediaScanService 仍运行在 Web/Node Runtime。V1-14 再继续。
+V1-14 已通过 TauriFileSystemAdapter / TauriFileHashAdapter 完整实现扫描需要的平台端口，并让 Desktop 直接复用 MediaScanCoordinator / scanMediaLibrary。扫描专用 Repository 只开放 works 与私人 media-files。
 
 ## Rust Command 边界
 
@@ -80,7 +80,7 @@ V1-14 会复用这个思路映射完整 MediaScanCoordinator。
 
 ## Settings
 
-V1-13 Desktop Settings 是 Bootstrap 设置，位于 Tauri App Config。
+V1-14 Desktop Settings 位于 Tauri App Config；其 libraryPath、sharedPackPaths、mediaScanPaths、ffprobePath 与 Web Instance Settings 使用相同字段语义，但两个运行入口仍各自保存本机配置。
 
 它暂时与 Web：
 

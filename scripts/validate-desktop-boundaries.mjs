@@ -41,7 +41,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  for (const command of ["pick_directory", "open_path", "reveal_in_folder", "probe_media"]) {
+  for (const command of ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "sha256_file", "read_library_collection", "write_library_entity", "delete_library_entity"]) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
   if (/shell:allow-(execute|spawn)/.test(capability + permission)) {
@@ -74,6 +74,20 @@ if (!errors.length) {
   if (!desktopPackage.scripts?.dev?.includes("--config vite.config.mts") || !desktopPackage.scripts?.["build:webview"]?.includes("--config vite.config.mts")) {
     errors.push("Desktop Vite 命令必须显式使用 vite.config.mts，禁止重新依赖 Vite 自动配置发现。");
   }
+  const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
+  const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
+  if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriScanRepository")) {
+    errors.push("V1-14 Desktop 必须复用共享 MediaScanCoordinator 与受限 Repository Adapter。");
+  }
+  if (!adapters.includes("class TauriFileSystemAdapter") || !adapters.includes("class TauriFileHashAdapter")) {
+    errors.push("V1-14 Desktop 必须实现 FileSystemPort / FileHashPort。");
+  }
+  if (!rust.includes("safe_collection_directory") || !rust.includes('"works" | "media-files"')) {
+    errors.push("Desktop Repository Command 必须保持 works / media-files 集合白名单。");
+  }
+  if (!rust.includes('format!("{:x}", digest.finalize())')) {
+    errors.push("Rust 文件 SHA-256 必须先 finalize 摘要再执行十六进制格式化。");
+  }
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -91,7 +105,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：Dev/Release 隔离、CSP、Shell 边界与 Web/Tauri 分层均符合 V1-13 规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-14 扫描端口、最小 Repository、CSP、Shell 边界与 Web/Tauri 分层均符合规则。");
 }
 
 function walkTextFiles(directory) {
