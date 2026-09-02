@@ -259,3 +259,13 @@
 - [教材：Portable Pack 与 MediaFile 绑定](development/v1-11-packs-and-media-binding-walkthrough.md)
 - [ADR-023：Portable Pack 是传输容器](decisions/ADR-023-portable-pack-is-transport-container.md)
 - [ADR-024：MediaFile 人工绑定必须审计](decisions/ADR-024-mediafile-manual-binding-is-audited.md)
+
+## V1-12 · Platform Abstraction / Incremental Media Scan
+
+- [Platform Abstraction：从 Next.js Web 走向 Tauri Desktop](architecture/platform-abstraction.md)
+- [增量媒体扫描架构](architecture/incremental-media-scan.md)
+- [教材：从“能扫描”到“平台无关的增量扫描”](development/v1-12-platform-and-incremental-scan-walkthrough.md)
+- [local-javlibrary 对 Localogue 的参考价值](research/local-javlibrary-reference.md)
+- [ADR-025：先建立 Platform Ports，再引入 Tauri Shell](decisions/ADR-025-platform-ports-before-tauri-shell.md)
+- [ADR-026：Snapshot Diff 是扫描基线，Filesystem Watcher 只是增强](decisions/ADR-026-snapshot-diff-before-filesystem-watcher.md)
+

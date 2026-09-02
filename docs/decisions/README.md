@@ -38,3 +38,8 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-11
 - [ADR-023：Portable Pack 是传输容器，不是新的资料模型](ADR-023-portable-pack-is-transport-container.md)
 - [ADR-024：MediaFile 人工绑定必须显式并保留审计记录](ADR-024-mediafile-manual-binding-is-audited.md)
+
+### V1-12
+- [ADR-025：先建立 Platform Ports，再引入 Tauri Shell](ADR-025-platform-ports-before-tauri-shell.md)
+- [ADR-026：Snapshot Diff 是扫描基线，Filesystem Watcher 只是增强](ADR-026-snapshot-diff-before-filesystem-watcher.md)
+

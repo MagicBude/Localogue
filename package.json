@@ -1,6 +1,6 @@
 {
   "name": "localogue",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -12,11 +12,12 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm validate:data && pnpm validate:audit && pnpm lint && pnpm typecheck && pnpm build",
+    "check": "pnpm validate:data && pnpm validate:audit && pnpm validate:platform && pnpm lint && pnpm typecheck && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
     "validate:audit": "node scripts/validate-audit.mjs",
-    "library:init:demo": "node scripts/init-private-library.mjs --demo"
+    "library:init:demo": "node scripts/init-private-library.mjs --demo",
+    "validate:platform": "node scripts/validate-platform-boundaries.mjs"
   },
   "dependencies": {
     "next": "16.3.3",

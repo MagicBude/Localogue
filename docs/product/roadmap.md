@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理增强
 
-已进入此阶段。V1-11 已完成 MediaFile 人工绑定与 Portable Pack 导入导出基础。
+已进入此阶段。V1-12 已完成 Platform Abstraction 与增量媒体扫描基础，下一阶段正式进入 Tauri Desktop Alpha。
 
 后续重点：
 
@@ -38,6 +38,10 @@
 - Asset 图集、孤儿资源和安全删除治理；
 - Community Pack 更新检查、版本升级与冲突预览；
 - ~~Shared / Personal Pack 打包导入导出~~（V1-11）；
+- ~~Media Scan Platform Ports 与 Node/Web Adapter~~（V1-12）；
+- ~~size + mtime 增量扫描、Sidecar Observation 与可取消 Scan Job~~（V1-12）；
+- Tauri 2 Desktop Alpha（V1-13）；
+- 原生 Folder Picker / Open / Reveal / ffprobe Sidecar（V1-13）；
 - 更安全的实体 Merge Plan；
 - CSV / XLSX 更完整的批量编辑回写。
 

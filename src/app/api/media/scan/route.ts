@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 
-import { scanConfiguredMedia } from "@/application/media/media-scan-service";
-import { isPrivateLibraryConfigured, libraryRepository } from "@/infrastructure/repositories/repository-provider";
+import { mediaScanCoordinator, startConfiguredMediaScan } from "@/infrastructure/media/media-scan-runtime";
+import { isPrivateLibraryConfigured } from "@/infrastructure/repositories/repository-provider";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  return NextResponse.json({ job: mediaScanCoordinator.getSnapshot() });
+}
 
 export async function POST(request: Request) {
   try {
@@ -13,8 +18,18 @@ export async function POST(request: Request) {
       probeMedia?: boolean;
       pruneMissing?: boolean;
     };
-    return NextResponse.json(await scanConfiguredMedia(libraryRepository, body));
+    const job = startConfiguredMediaScan(body);
+    return NextResponse.json({ job }, { status: 202 });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : String(error) }, { status: 400 });
+    return NextResponse.json({ error: message(error), job: mediaScanCoordinator.getSnapshot() }, { status: 400 });
   }
+}
+
+export async function DELETE() {
+  const job = mediaScanCoordinator.cancel();
+  return NextResponse.json({ job });
+}
+
+function message(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

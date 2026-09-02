@@ -206,3 +206,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Shared Portable Pack 安装必须先写临时目录并通过 Community Validator，校验失败不得进入正式 Shared Pack 路径。
 - `localogue-community-data` 的仓库 CI 是 Community Data 发布最终权威；Localogue 内置 Validator 是安装前防线，规则应保持兼容但不要擅自放宽正式社区约束。
 - V1-11 Portable Pack 当前为内存型、单包 256 MB 上限；不要通过简单放大限制代替未来流式 Job / Archive 实现。
+
+## V1-12 实现约束补充
+
+- Media Scan Application Core 不得直接依赖 `node:fs`、`node:path`、`child_process` 或其它平台专用模块；必须通过 Platform Ports。
+- `pnpm validate:platform` 用于防止 Media Scan 平台边界回退，新增扫描能力时必须保持该检查通过。
+- 自动扫描使用 `fileSize + fileModifiedAt` 作为 V1 廉价变化指纹；未变化视频不得重复执行 ffprobe、完整 SHA-256 或无意义 JSON 重写。
+- 视频文件改变但没有成功重新分析时，旧技术参数必须标记为 stale；旧 SHA-256 不得继续冒充当前文件 Hash。
+- `matchMethod=manual` 表示人工治理决定，自动扫描不得覆盖人工 Work 绑定。
+- NFO / Poster / Fanart 只能作为 Sidecar Observation；扫描器不得绕过 Evidence / Asset 治理直接修改 Canonical Work。
+- Snapshot Diff / Reconcile 是本地媒体同步基线；未来 FileSystem Watcher 只能作为实时增强，不得成为唯一真相来源。
+- 同一运行时同时只允许一个 Media Scan Job；重复触发必须拒绝或复用，不得并发启动多轮 ffprobe / Hash。
+- Media Scan Job 必须支持可观察状态和取消；不要重新退回“一个 HTTP 请求同步等待整个大目录扫描”的模式。
+- V1-13 Tauri Desktop 应实现已有 Platform Ports，而不是在 UI 组件中直接调用 Tauri API 重写业务规则。

@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-11：MediaFile 绑定治理与 Portable Pack。**
+**V1-12：Platform Abstraction 与增量媒体扫描。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -130,16 +130,36 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 安装成功后自动加入 `sharedPackPaths`；
 - Community Validator 与 `MagicBude/localogue-community-data` V0-01 的 typed UUIDv4、Source Record 和私人数据隔离规则对齐。
 
+### V1-12 Platform Abstraction 与增量媒体扫描
+
+- 新增 FileSystem / MediaProbe / FileHash / FileDialog / FileOpener Platform Ports；
+- Node/Web 平台能力集中到 Infrastructure Adapter；
+- Media Scan Application Core 不再直接 import Node 文件系统、路径或 child_process；
+- 新增 `pnpm validate:platform` 防止平台边界回退；
+- 媒体扫描升级为 size + mtime 增量 Fast Path；
+- unchanged 视频不重复 ffprobe、Hash 或 JSON 写入；
+- 视频改变但未成功重新分析时标记 `analysisStale`；
+- 视频改变但未重新计算 Hash 时清除旧 SHA-256；
+- 自动扫描明确保留 `matchMethod=manual` 的人工绑定；
+- 新增 NFO / Poster / Fanart / extrafanart Sidecar Observation；
+- Sidecar 变化可以独立更新，不要求视频重新分析；
+- 新增 `MediaScanCoordinator` 单例后台 Job；
+- `/api/media/scan` 支持 start / status / cancel；
+- `/media` 显示阶段进度、增量统计、取消操作；
+- 设置页显示当前 Web Runtime 原生能力缺口，为 V1-13 Tauri Adapter 做准备；
+- 新增 local-javlibrary 研究记录，吸收增量扫描、单例任务和大库优化经验，但不复制 GPL 实现代码。
+
 ## 下一阶段建议
 
-**V1-12：Community Pack 更新、Asset 治理与平台抽象前置。**
+**V1-13：Tauri Desktop Alpha。**
 
-1. Community Pack 版本更新检测、升级预览与回滚边界；
-2. Asset 图集排序、孤儿资源、安全删除和二进制 GC；
-3. Shared Community Asset Pack 协议初版；
-4. Local Field Override 模型前置，避免整实体 Override 长期挡住社区字段更新；
-5. Platform Abstraction：Folder Picker / File System / ffprobe / Pack Installer 接口，为 Tauri Desktop 做准备；
-6. V2 SQLite Schema 与 JSON→SQLite 迁移准备。
+1. 创建 `apps/desktop` Tauri 2 Desktop Alpha；
+2. 原生 Folder / File Picker Adapter；
+3. Open / Reveal File Adapter，并允许调用系统默认播放器；
+4. ffprobe Sidecar / Desktop Media Probe Adapter；
+5. Desktop Dev / Release AppData 隔离；
+6. 将扫描 Job Progress 映射为 Tauri Event；
+7. 保留 Next.js Web 版，与 Desktop 共享 Domain / Application 规则。
 
 ## 当前不做
 

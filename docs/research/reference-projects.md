@@ -96,3 +96,18 @@ Localogue 不尝试成为“第 N 个 MDCx”。
                        ↓
        浏览 / 筛选 / 时间线 / 导出 / 未来 AI
 ```
+
+## Achaiccccc/local-javlibrary
+
+Electron + Vue 3 的本地 NFO 影视库。Localogue 主要参考其后续版本在以下方面的工程经验：
+
+- 增量扫描与数据同步重构；
+- 单例扫描任务，避免重复触发；
+- NFO / Poster / Fanart 伴随文件发现；
+- 大数据量下的后端分页、懒加载与虚拟列表；
+- 演员外挂头像和本地选择；
+- Desktop Main / IPC / UI 分层。
+
+Localogue 不采用“NFO 直接成为数据库真相”的模型，仍保持 Evidence → Review → Canonical；也不复制该 GPL-3.0 项目的具体实现代码。
+
+详见：[local-javlibrary 对 Localogue 的参考价值](local-javlibrary-reference.md)。

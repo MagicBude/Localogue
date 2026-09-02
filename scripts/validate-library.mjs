@@ -208,6 +208,24 @@ function validateMediaFiles() {
     if (media.workId) requireReference(prefix, "work", media.workId, indexes.works);
     if (media.fileSize !== undefined && media.fileSize < 0) errors.push(`${prefix}: fileSize 不能小于 0`);
     if (media.durationSeconds !== undefined && media.durationSeconds < 0) errors.push(`${prefix}: durationSeconds 不能小于 0`);
+    if (media.matchMethod !== undefined && !["code", "manual"].includes(media.matchMethod)) {
+      errors.push(`${prefix}: matchMethod 必须是 code / manual`);
+    }
+    if (media.analysisStale !== undefined && typeof media.analysisStale !== "boolean") {
+      errors.push(`${prefix}: analysisStale 必须是 boolean`);
+    }
+    if (media.sidecars !== undefined) {
+      if (!media.sidecars || typeof media.sidecars !== "object" || Array.isArray(media.sidecars)) {
+        errors.push(`${prefix}: sidecars 必须是对象`);
+      } else {
+        for (const field of ["nfoPaths", "posterPaths", "fanartPaths"]) {
+          const value = media.sidecars[field];
+          if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
+            errors.push(`${prefix}: sidecars.${field} 必须是字符串数组`);
+          }
+        }
+      }
+    }
   }
 }
 

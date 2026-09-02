@@ -1,5 +1,25 @@
 # 更新日志
 
+## V1-12 · Platform Abstraction 与增量媒体扫描
+
+- 新增 FileSystem、MediaProbe、FileHash、FileDialog、FileOpener Platform Ports。
+- 新增 Node/Web Platform Adapter 与 Runtime Capabilities。
+- Media Scan Application Core 移除对 Node fs/path/child_process/crypto 的直接依赖。
+- 新增 `pnpm validate:platform` 架构边界校验。
+- 媒体扫描升级为 `size + mtime` 增量 Fast Path。
+- unchanged 视频不重复执行 ffprobe、完整 SHA-256 或 JSON 写入。
+- 文件改变但未成功重新 ffprobe 时标记 `analysisStale`，避免旧技术参数被误认为当前值。
+- 文件改变但未重新计算 Hash 时清除旧 SHA-256。
+- 自动扫描不会覆盖 `matchMethod=manual` 的人工 Work 绑定。
+- 新增 NFO / Poster / Fanart / extrafanart Sidecar Observation。
+- Sidecar 变化可单独更新 MediaFile，不触发视频重新分析。
+- 新增 MediaScanCoordinator，限制同时只有一个扫描 Job。
+- `/api/media/scan` 改为 start / status / cancel 后台任务模型。
+- `/media` 新增分阶段 Progress、取消按钮和 added/updated/unchanged/probed/hashed/sidecar 统计。
+- 设置页显示 Web Runtime 与 V1-13 Tauri 原生能力差异。
+- 新增 ADR-025 / ADR-026、Platform Abstraction、增量扫描教材和 local-javlibrary 参考研究文档。
+- 修复 React 19 / eslint-plugin-react-hooks 对媒体扫描初始状态加载的 set-state-in-effect 校验问题，Effect 仅负责调度异步状态同步任务。
+
 ## V1-11 · MediaFile 绑定治理与 Portable Pack
 
 - 新增 `/media/[id]`，支持未识别 MediaFile 的候选查看、番号/标题搜索和人工绑定。

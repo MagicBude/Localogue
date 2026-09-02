@@ -47,3 +47,23 @@ V1-10 使用保守的文件名规范化匹配：
 - 将 Work 番号与文件名比较。
 
 只用于生成 `matchMethod=code` 的本地关联。未来更复杂的目录/文件名规则应先产生候选，再进入人工确认。
+
+## 5. V1-12 增量扫描与人工绑定优先级
+
+自动扫描只允许维护自动关系：
+
+```text
+matchMethod = code
+```
+
+如果用户通过 `/media/[id]` 明确绑定：
+
+```text
+matchMethod = manual
+```
+
+后续扫描必须保留该 Work 关系，不能重新用文件名番号覆盖人工决策。
+
+媒体技术信息使用 `fileSize + fileModifiedAt` 判断是否需要重新 ffprobe。视频改变但无法重新分析时通过 `analysisStale=true` 暴露不确定性，而不是静默展示旧技术参数。
+
+NFO / Poster / Fanart 作为 `sidecars` 记录在 Private MediaFile 上，仅用于后续 Evidence / Asset Candidate，不改变 Community Work。

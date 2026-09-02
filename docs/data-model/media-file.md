@@ -49,3 +49,22 @@ V1 可先只记录路径、存在状态、大小、可选的基础信息。Media
 - `fileModifiedAt / analyzedAt`。
 
 MediaFile 只属于 Private Layer，Shared Pack 中的 `media-files/` 不参与读取。
+
+## V1-12 增量扫描字段
+
+新增：
+
+- `analysisStale`：视频文件已经改变，但当前技术参数尚未成功重新分析；
+- `sidecars.nfoPaths`：NFO Observation；
+- `sidecars.posterPaths`：Poster / Cover Observation；
+- `sidecars.fanartPaths`：Fanart / Background / extrafanart Observation。
+
+V1-12 直接复用：
+
+```text
+fileSize + fileModifiedAt
+```
+
+作为文件变化 Fast Path，因此暂时不再创建一份重复的 ScanIndex JSON。
+
+注意：`sidecars` 是本地观察，不是 Canonical Work 字段。NFO 仍应进入 Evidence；图片仍应进入 Asset 治理。

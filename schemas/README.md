@@ -34,3 +34,8 @@
 
 - `media-binding-receipt.schema.example.json`：MediaFile 人工绑定 / 改绑 / 解绑审计示例；
 - `portable-pack.schema.example.json`：`.localogue-pack` 解压后的 Envelope 示例。实际文件是该 JSON 的 gzip 压缩结果。
+
+## V1-12
+
+- `media-file.schema.example.json` 增加 `analysisStale` 与 NFO / Poster / Fanart `sidecars` Observation 示例。
+

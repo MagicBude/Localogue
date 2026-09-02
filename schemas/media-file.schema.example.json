@@ -16,5 +16,11 @@
   "scanRoot": "D:\\Media",
   "matchMethod": "code",
   "fileModifiedAt": "2026-09-02T00:00:00.000Z",
+  "analysisStale": false,
+  "sidecars": {
+    "nfoPaths": ["D:\\Media\\ABC-123.nfo"],
+    "posterPaths": ["D:\\Media\\ABC-123-poster.jpg"],
+    "fanartPaths": ["D:\\Media\\fanart.jpg"]
+  },
   "analyzedAt": "2026-09-02T00:05:00.000Z"
 }

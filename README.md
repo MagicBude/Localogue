@@ -543,3 +543,73 @@ Personal Pack 故意不包含 `media-files/` 和 `.localogue/settings.json`：�
 3. `src/infrastructure/packs/portable-pack-codec.ts`
 4. `src/infrastructure/packs/community-pack-validator.ts`
 5. `src/application/media/media-binding-service.ts`
+
+## V1-12：Platform Abstraction 与增量媒体扫描
+
+V1-12 开始为 Tauri Desktop 做正式架构准备，但 Web 版继续作为完整可运行产品保留。
+
+媒体扫描从：
+
+```text
+每次扫描
+→ 全部重新 ffprobe / 可选 Hash
+```
+
+升级为：
+
+```text
+Disk Snapshot
+    ↓
+MediaFile Snapshot
+    ↓
+size + mtime + Sidecar Diff
+    ↓
+只处理新增 / 修改 / 删除
+```
+
+未改变视频会直接走 Fast Path，不重复执行 ffprobe、SHA-256 或 JSON 写入。
+
+扫描同时观察：
+
+```text
+NFO
+Poster / Cover / ps
+Fanart / Background / pl
+extrafanart/
+```
+
+这些内容目前只保存为 `MediaFile.sidecars` Observation，不会自动改 Canonical Work。
+
+新增平台边界：
+
+```text
+Application
+    ↓
+Platform Ports
+    ↑
+Node/Web Adapter
+
+V1-13：
+Tauri Adapter
+```
+
+当前已经冻结：
+
+- FileSystemPort；
+- MediaProbePort；
+- FileHashPort；
+- FileDialogPort；
+- FileOpenerPort；
+- PlatformCapabilities。
+
+新增 `MediaScanCoordinator` 后，`/media` 的扫描成为后台 Job：支持阶段进度、单例保护和取消，不再要求一个 HTTP 请求等待整个扫描完成。
+
+推荐学习：
+
+1. `docs/development/v1-12-platform-and-incremental-scan-walkthrough.md`
+2. `docs/architecture/platform-abstraction.md`
+3. `docs/architecture/incremental-media-scan.md`
+4. `src/application/platform/platform-ports.ts`
+5. `src/application/media/media-scan-service.ts`
+6. `src/application/media/media-scan-coordinator.ts`
+7. `src/infrastructure/platform/node-platform-adapters.ts`

@@ -2777,3 +2777,14 @@ code {
   .media-binding-search { grid-template-columns: 1fr; }
   .candidate-card { align-items: flex-start; flex-direction: column; }
 }
+
+/* V1-12 incremental media scan */
+.media-scan-actions { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
+.scan-progress-panel { display: grid; gap: .65rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.scan-progress-row { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.scan-progress-track { height: .55rem; overflow: hidden; border-radius: 999px; background: var(--surface-soft); border: 1px solid var(--border); }
+.scan-progress-track > span { display: block; height: 100%; background: currentColor; transition: width .25s ease; }
+.scan-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .55rem; }
+.scan-result-grid small { display: flex; justify-content: space-between; gap: .6rem; padding: .55rem .65rem; border: 1px solid var(--border); border-radius: .65rem; }
+.sidecar-path-list { display: grid; gap: .25rem; margin-top: .45rem; min-width: 0; }
+.sidecar-path-list .path-text { overflow-wrap: anywhere; }

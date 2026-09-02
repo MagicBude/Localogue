@@ -42,14 +42,15 @@ export default async function MediaPage() {
 
     <section className="detail-section">
       <div className="section-heading-row"><div><span className="eyebrow">MEDIA FILES</span><h2>{dictionary.localFiles}</h2></div></div>
-      {mediaFiles.length ? <div className="media-file-table-wrap"><table className="data-table media-file-table"><thead><tr><th>File</th><th>Work</th><th>Size</th><th>Media</th><th>Codec</th><th>SHA-256</th></tr></thead><tbody>
+      {mediaFiles.length ? <div className="media-file-table-wrap"><table className="data-table media-file-table"><thead><tr><th>File</th><th>Work</th><th>Size</th><th>Media</th><th>Sidecars</th><th>Codec</th><th>SHA-256</th></tr></thead><tbody>
         {mediaFiles.map((file) => {
           const work = file.workId ? workMap.get(file.workId) : undefined;
           return <tr key={file.id}>
             <td><strong>{file.fileName}</strong><small className="path-text">{file.path}</small></td>
             <td>{work ? <><Link href={`/works/${work.id}`}>{work.code}</Link><small><Link href={`/media/${file.id}`}>管理绑定</Link></small></> : <Link className="status-chip status-chip--warn" href={`/media/${file.id}`}>治理 / 绑定</Link>}</td>
             <td>{formatBytes(file.fileSize ?? 0)}</td>
-            <td>{file.width && file.height ? `${file.width}×${file.height}` : "—"}{file.durationSeconds ? <small>{formatDuration(file.durationSeconds)}</small> : null}</td>
+            <td>{file.width && file.height ? `${file.width}×${file.height}` : "—"}{file.durationSeconds ? <small>{formatDuration(file.durationSeconds)}</small> : null}{file.analysisStale ? <small className="status-chip status-chip--warn">stale</small> : null}</td>
+            <td>{sidecarCount(file.sidecars)}<small>{file.sidecars?.nfoPaths.length ? `NFO ${file.sidecars.nfoPaths.length}` : ""}{file.sidecars?.posterPaths.length ? ` · Poster ${file.sidecars.posterPaths.length}` : ""}{file.sidecars?.fanartPaths.length ? ` · Fanart ${file.sidecars.fanartPaths.length}` : ""}</small></td>
             <td>{[file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ") || "—"}</td>
             <td><code>{file.sha256 ? `${file.sha256.slice(0, 12)}…` : "—"}</code></td>
           </tr>;
@@ -57,6 +58,10 @@ export default async function MediaPage() {
       </tbody></table></div> : <p className="muted">尚未扫描本地媒体文件。先在设置页添加扫描目录。</p>}
     </section>
   </div>;
+}
+
+function sidecarCount(sidecars: import("@/domain/entities/media-file").MediaSidecarObservation | undefined): number {
+  return (sidecars?.nfoPaths.length ?? 0) + (sidecars?.posterPaths.length ?? 0) + (sidecars?.fanartPaths.length ?? 0);
 }
 
 function formatBytes(value: number): string {
