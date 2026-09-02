@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "work_demo_001",
+  "workId": "work_demo_001",
+  "events": [
+    {
+      "schemaVersion": 1,
+      "id": "prov_example_001",
+      "workId": "work_demo_001",
+      "field": "durationMinutes",
+      "eventType": "adopted",
+      "evidenceId": "evidence_example_001",
+      "sourceType": "localogue_json",
+      "sourceName": "sample-existing-work.json",
+      "commitId": "commit_example_001",
+      "recordedAt": "2026-09-02T00:00:00.000Z",
+      "value": 130
+    }
+  ]
+}

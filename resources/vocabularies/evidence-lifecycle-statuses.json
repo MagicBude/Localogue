@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "evidence-lifecycle-statuses",
+  "items": [
+    { "id": "pending", "ja": "レビュー待ち", "zh-CN": "待审核", "en": "Pending" },
+    { "id": "committed", "ja": "コミット済み", "zh-CN": "已归档", "en": "Committed" },
+    { "id": "ignored", "ja": "無視", "zh-CN": "已忽略", "en": "Ignored" }
+  ]
+}

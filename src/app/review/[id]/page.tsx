@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { analyzeSingleEvidenceRecord } from "@/application/review/entity-resolution-service";
+import { EvidenceLifecycleActions } from "@/components/evidence-lifecycle-actions";
 import { ReviewCommitWorkbench } from "@/components/review-commit-workbench";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
 import type {
@@ -12,7 +13,8 @@ import type {
 import { formatImportWarning } from "@/i18n/import-warnings";
 import { formatReviewField, getReviewDictionary } from "@/i18n/review";
 import { findEvidenceRecordById } from "@/infrastructure/evidence/evidence-store";
-import { findLatestCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
+import { getEvidenceLifecycle } from "@/infrastructure/evidence/evidence-lifecycle-store";
+import { findLatestActiveCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
 import {
   isPrivateLibraryConfigured,
   libraryRepository,
@@ -33,12 +35,13 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
 
   const preferences = await getUserPreferences();
   const text = getReviewDictionary(preferences.uiLanguage);
-  const [analysis, workStatusLabels, entityStatusLabels, comparisonStatusLabels, receipt] = await Promise.all([
+  const [analysis, workStatusLabels, entityStatusLabels, comparisonStatusLabels, receipt, lifecycle] = await Promise.all([
     analyzeSingleEvidenceRecord(evidence, libraryRepository, vocabularyRepository),
     getVocabularyLabelMap(vocabularyRepository, "review-work-statuses", preferences.uiLanguage),
     getVocabularyLabelMap(vocabularyRepository, "entity-resolution-statuses", preferences.uiLanguage),
     getVocabularyLabelMap(vocabularyRepository, "field-comparison-statuses", preferences.uiLanguage),
-    findLatestCommitReceiptByEvidenceId(evidence.id),
+    findLatestActiveCommitReceiptByEvidenceId(evidence.id),
+    getEvidenceLifecycle(evidence.id),
   ]);
 
   return (
@@ -139,11 +142,18 @@ export default async function ReviewDetailPage({ params }: ReviewDetailPageProps
         </div>
       </section>
 
+      <EvidenceLifecycleActions
+        evidenceId={evidence.id}
+        status={lifecycle.status}
+        language={preferences.uiLanguage}
+      />
+
       <ReviewCommitWorkbench
         analysis={analysis}
         language={preferences.uiLanguage}
         privateLibraryConfigured={isPrivateLibraryConfigured()}
         existingReceipt={receipt}
+        lifecycleStatus={lifecycle.status}
       />
 
       <section className="detail-section review-raw-data">

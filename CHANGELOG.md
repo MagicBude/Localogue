@@ -1,5 +1,25 @@
 # 更新日志
 
+## V1-07 · Provenance、Commit History 与 Snapshot Recovery
+
+- 新增 Work 字段级 append-only Provenance，记录字段采用 Evidence 与 Snapshot Restore 的历史。
+- 作品详情页新增 Provenance 区域，可查看当前字段来源、时间和对应 Commit。
+- 新增 `/history` Canonical Commit History 与 `/history/[id]` 提交详情页。
+- Commit Receipt 升级为 schemaVersion 2，保存完整 operations 与 snapshotId，同时兼容 V1-06 旧 Receipt。
+- 每次正式 Commit 前创建最小 Canonical Snapshot，仅保存本次即将触碰的文件 before-image。
+- Commit 中途失败时自动尝试恢复 Snapshot，降低 JSON 多文件半提交风险。
+- 新增受控 Snapshot Restore；只允许恢复同一 Work 的最新有效 Commit。
+- 恢复前检查本次 Commit 创建的新实体是否已被其他 Work 引用，存在引用时阻止恢复。
+- 用户主动恢复保留 Commit / Provenance 历史，并新增 Restore Receipt 与 restored Provenance Event。
+- 恢复后对应 Evidence 生命周期重新变为 pending，可以重新审核和再次 Commit。
+- Evidence 生命周期与 Evidence 本体分离，新增 pending / committed / ignored。
+- Evidence Inbox 默认只看待审核项，并支持待审核 / 已归档 / 已忽略 / 全部筛选。
+- ignored Evidence 禁止生成 Commit Plan 或正式归档，可随时恢复为 pending。
+- 新增 `pnpm validate:audit`，检查 Commit、Snapshot、Restore、Provenance、Lifecycle 与 Evidence 的引用完整性。
+- `pnpm check` 增加 Audit 数据校验。
+- 新增 Evidence Lifecycle、Provenance Event 中日英受控词表和 V1-07 Schema 示例。
+- 新增 Provenance/History 架构、Snapshot Recovery、Evidence 生命周期、教材导读和 ADR-015 / ADR-016。
+
 ## V1-06 · Review Decision 与 Canonical Commit
 
 - 新增字段级 `keep_library / use_evidence` 审核决策。

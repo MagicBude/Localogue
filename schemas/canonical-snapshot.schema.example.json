@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "snapshot_example_001",
+  "createdAt": "2026-09-02T00:00:00.000Z",
+  "evidenceId": "evidence_example_001",
+  "targetWorkId": "work_demo_001",
+  "targetWorkCode": "DEMO-001",
+  "fingerprint": "sha256-example",
+  "entries": [
+    {
+      "relativePath": "works/work_demo_001.json",
+      "existed": true,
+      "content": "{\n  \"id\": \"work_demo_001\"\n}\n"
+    },
+    {
+      "relativePath": "evidence-lifecycle/evidence_example_001.json",
+      "existed": false
+    }
+  ]
+}

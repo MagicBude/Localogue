@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "restore_example_001",
+  "commitReceiptId": "commit_example_001",
+  "snapshotId": "snapshot_example_001",
+  "targetWorkId": "work_demo_001",
+  "targetWorkCode": "DEMO-001",
+  "restoredAt": "2026-09-02T00:10:00.000Z",
+  "restoredEntryCount": 3
+}

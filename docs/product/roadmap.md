@@ -23,6 +23,13 @@
 
 ## V1.x：资料治理增强
 
+已进入此阶段。V1-07 已完成 Provenance、Commit History、Evidence Lifecycle 与 JSON Snapshot Recovery。
+
+后续重点：
+
+- 资料完整度与治理队列；
+- 批量审核与批量编辑；
+- 人物资料手工维护；
 - 重复作品检测；
 - 人物别名匹配；
 - 资料完整度；

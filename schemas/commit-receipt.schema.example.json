@@ -1,10 +1,21 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "commit_example_001",
   "evidenceId": "evidence_example_001",
-  "committedAt": "2026-09-01T15:01:00.000Z",
+  "committedAt": "2026-09-02T00:00:00.000Z",
   "fingerprint": "sha256-example",
   "targetWorkId": "work_demo_001",
   "targetWorkCode": "DEMO-001",
-  "operationCount": 1
+  "operationCount": 1,
+  "operations": [
+    {
+      "kind": "update_work",
+      "entityId": "work_demo_001",
+      "label": "DEMO-001",
+      "detail": "更新 Work：时长",
+      "before": { "durationMinutes": 128 },
+      "after": { "durationMinutes": 130 }
+    }
+  ],
+  "snapshotId": "snapshot_example_001"
 }

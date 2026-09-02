@@ -59,3 +59,24 @@ Commit Plan 回答：
 真正写入只能通过 `commit-executor.ts`。
 
 这是一条重要架构边界。
+
+## V1-07：Commit Plan 与 Snapshot
+
+V1-07 保留 V1-06 的 Plan/fingerprint 语义，并在真正执行前增加：
+
+```text
+validated Commit Plan
+        ↓
+Canonical Snapshot
+        ↓
+Commit Executor
+```
+
+Snapshot 不参与 fingerprint：fingerprint 判断的是“计划是否仍然有效”，Snapshot 则保存“执行前真实文件状态”。两者解决不同问题。
+
+成功 Receipt 从 schemaVersion 2 起同时保存：
+
+- `operations`：最终执行计划的操作摘要；
+- `snapshotId`：提交前 Snapshot。
+
+因此历史页无需重新推断当时做过什么，也能定位可恢复 before-image。

@@ -18,3 +18,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-013：V1 实体匹配采用保守的规范化精确匹配](ADR-013-conservative-exact-entity-resolution.md)
 - [ADR-014：正式写入前必须经过 Commit Plan](ADR-014-explicit-commit-plan-before-canonical-write.md)
+
+- [ADR-015：Evidence 生命周期与 Evidence 本体分离](ADR-015-evidence-lifecycle-separate-from-evidence.md)
+- [ADR-016：最小 Snapshot 与最新提交优先恢复](ADR-016-minimal-snapshot-and-latest-first-restore.md)

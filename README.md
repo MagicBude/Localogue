@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前处于 **V1-06：Review Decision、Commit Plan 与 Canonical JSON 正式归档阶段**。
+当前处于 **V1-07：Provenance、Commit History、Evidence 生命周期与 JSON Snapshot 恢复阶段**。
 
 当前 V1 已完成：
 
@@ -44,7 +44,13 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 - Commit Plan 预览；
 - fingerprint 过期计划保护；
 - 私人 JSON Canonical Library 正式写入；
-- Commit Receipt 留痕。
+- Commit Receipt 留痕；
+- Work 字段级 Provenance；
+- Commit History 与历史详情；
+- Commit 前最小 Snapshot；
+- 失败自动恢复与受控人工恢复；
+- Evidence 生命周期 pending / committed / ignored；
+- Audit 数据完整性校验。
 
 ## 技术栈
 
@@ -82,7 +88,7 @@ pnpm check
 它依次执行：
 
 ```text
-validate:data → lint → typecheck → build
+validate:data → validate:audit → lint → typecheck → build
 ```
 
 ## 推荐学习顺序
@@ -163,7 +169,7 @@ data/demo-library/
 
 真实个人资料使用 Git 忽略的 `data/library/` 或仓库外 `LOCALOGUE_LIBRARY_PATH`。
 
-V1-06 起，默认 Demo 模式是只读的。要练习正式归档，可以先执行：
+V1-06 起，默认 Demo 模式是只读的；V1-07 又在正式 Commit 前增加 Snapshot 与 Provenance。要练习正式归档，可以先执行：
 
 ```bash
 pnpm library:init
@@ -380,3 +386,61 @@ V1-06 第一次允许审核后的 Evidence 正式进入 Canonical Library，但�
 4. `src/application/review/commit-plan-service.ts`
 5. `src/application/review/commit-executor.ts`
 6. `src/components/review-commit-workbench.tsx`
+
+
+## V1-07：Provenance、历史与可恢复性
+
+V1-07 开始回答“资料为什么是现在这样”和“如果审核错了怎么办”。
+
+新的正式写入链路：
+
+```text
+Evidence
+  ↓
+Review Decisions
+  ↓
+Commit Plan + fingerprint
+  ↓
+Canonical Snapshot
+  ↓
+Canonical Write
+  ↓
+Field Provenance
+  ↓
+Evidence Lifecycle = committed
+  ↓
+Commit Receipt
+```
+
+新增入口：
+
+```text
+/history
+/history/[commitId]
+```
+
+在作品详情页还可以直接看到当前字段的 Provenance，例如某个时长、标题或演员关系最近由哪条 Evidence 采用。
+
+如果需要撤销成功 Commit，不能任意覆盖旧版本。Localogue 会：
+
+1. 确认目标是该 Work 最新的有效 Commit；
+2. 检查本次创建的新实体有没有被其它 Work 使用；
+3. 恢复提交前 Snapshot；
+4. 保留原 Commit 历史；
+5. 写入 Restore Receipt；
+6. 追加 `restored` Provenance Event；
+7. 把对应 Evidence 恢复为 `pending`。
+
+审计数据可以单独检查：
+
+```bash
+pnpm validate:audit
+```
+
+推荐学习：
+
+1. `docs/development/v1-07-provenance-history-walkthrough.md`；
+2. `src/application/review/commit-executor.ts`；
+3. `src/infrastructure/history/canonical-snapshot-store.ts`；
+4. `src/application/history/restore-service.ts`；
+5. `src/infrastructure/provenance/work-provenance-store.ts`。

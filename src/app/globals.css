@@ -2111,3 +2111,192 @@ code {
     flex-direction: column;
   }
 }
+
+/* --------------------------------------------------------------------------
+ * V1-07 · Provenance / History / Snapshot Recovery / Evidence Lifecycle
+ * -------------------------------------------------------------------------- */
+.history-list {
+  display: grid;
+  gap: 12px;
+}
+
+.history-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 16px;
+}
+
+.history-card__main {
+  min-width: 0;
+}
+
+.history-card h2 {
+  margin: 8px 0 10px;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.history-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.history-status--restored,
+.history-status--ignored {
+  border-style: dashed;
+  color: var(--text-soft);
+}
+
+.history-status--committed,
+.history-status--active {
+  border-style: double;
+}
+
+.history-status--legacy {
+  opacity: 0.75;
+}
+
+.history-metadata code,
+.history-provenance-table code {
+  overflow-wrap: anywhere;
+}
+
+.restore-workbench {
+  display: grid;
+  gap: 14px;
+}
+
+.restore-workbench h2,
+.restore-workbench h3 {
+  margin: 4px 0 0;
+}
+
+.restore-confirm-panel {
+  display: grid;
+  gap: 12px;
+  max-width: 620px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  padding: 14px;
+}
+
+.restore-confirm-panel label {
+  display: grid;
+  gap: 7px;
+}
+
+.restore-confirm-panel input {
+  min-width: 0;
+  width: 100%;
+}
+
+.lifecycle-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lifecycle-filter-bar .chip {
+  text-decoration: none;
+}
+
+.lifecycle-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lifecycle-panel > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lifecycle-panel p {
+  margin: 0;
+}
+
+.section-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.section-heading-row h2 {
+  margin: 4px 0 0;
+}
+
+.provenance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.provenance-card {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  padding: 11px;
+}
+
+.provenance-card span,
+.provenance-card small,
+.provenance-card a {
+  overflow-wrap: anywhere;
+}
+
+.provenance-card span,
+.provenance-card small {
+  color: var(--text-soft);
+}
+
+.provenance-card small {
+  font-size: 0.7rem;
+}
+
+.provenance-card a {
+  font-size: 0.72rem;
+}
+
+@media (max-width: 900px) {
+  .provenance-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .history-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .provenance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lifecycle-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

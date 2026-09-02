@@ -77,7 +77,8 @@ export interface CanonicalCommitPlan {
 
 /** 正式执行后的留痕记录。 */
 export interface CanonicalCommitReceipt {
-  schemaVersion: 1;
+  /** V1-06 历史记录为 1；V1-07 新记录升级为 2，并保留向后读取能力。 */
+  schemaVersion: 1 | 2;
   id: string;
   evidenceId: string;
   committedAt: string;
@@ -85,4 +86,8 @@ export interface CanonicalCommitReceipt {
   targetWorkId: string;
   targetWorkCode: string;
   operationCount: number;
+  /** V1-07 起保存完整操作摘要，历史页无需重新推断当时做过什么。 */
+  operations?: CommitOperation[];
+  /** Commit 前最小快照，可用于受控恢复。 */
+  snapshotId?: string;
 }

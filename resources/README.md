@@ -5,3 +5,8 @@
 当前主要是 `vocabularies/` 受控词表。词表 JSON 与 `docs/vocabulary/` 的中文说明应保持一致。
 V1-06 新增 `review-field-decisions` 与 `entity-review-actions`，用于记录审核选择的稳定中日英术语。
 
+
+V1-07 新增：
+
+- `evidence-lifecycle-statuses`：Evidence 的待审核 / 已归档 / 已忽略状态；
+- `provenance-event-types`：字段采用 Evidence 与 Snapshot 恢复事件。

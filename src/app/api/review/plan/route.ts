@@ -4,7 +4,8 @@ import { buildCanonicalCommitPlan } from "@/application/review/commit-plan-servi
 import { analyzeSingleEvidenceRecord } from "@/application/review/entity-resolution-service";
 import type { ReviewDecisions } from "@/domain/entities/commit-plan";
 import { findEvidenceRecordById } from "@/infrastructure/evidence/evidence-store";
-import { findLatestCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
+import { getEvidenceLifecycle } from "@/infrastructure/evidence/evidence-lifecycle-store";
+import { findLatestActiveCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
 import {
   isPrivateLibraryConfigured,
   libraryRepository,
@@ -27,9 +28,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Evidence 不存在。" }, { status: 404 });
   }
 
+  const lifecycle = await getEvidenceLifecycle(evidence.id);
+  if (lifecycle.status === "ignored") {
+    return NextResponse.json({ error: "这条 Evidence 已被忽略。请先恢复为待审核状态。" }, { status: 409 });
+  }
+
   const [analysis, receipt] = await Promise.all([
     analyzeSingleEvidenceRecord(evidence, libraryRepository, vocabularyRepository),
-    findLatestCommitReceiptByEvidenceId(evidence.id),
+    findLatestActiveCommitReceiptByEvidenceId(evidence.id),
   ]);
 
   const built = await buildCanonicalCommitPlan(

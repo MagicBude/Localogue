@@ -1,68 +1,77 @@
 # Review 审核流程
 
-Review 是 Localogue 的核心页面之一。
+Review 是 Localogue 的资料治理核心，而不是 Importer 的附属确认框。
 
-## 列表状态
+## 当前 V1-07 完整链路
 
-- 可直接确认；
-- 有字段冲突；
-- 疑似重复作品；
-- 新人物；
-- 人物匹配不确定；
-- 未映射 Genre；
-- 缺少必要字段；
-- 资源文件异常。
+```text
+External Metadata
+      ↓
+Importer
+      ↓
+Evidence（不可变来源记录）
+      ↓
+Evidence Lifecycle = pending
+      ↓
+Entity Resolution
+      ↓
+Field Comparison
+      ↓
+Review Decisions
+      ↓
+Commit Plan
+      ↓
+fingerprint 复核
+      ↓
+Canonical Snapshot
+      ↓
+Canonical Commit
+      ↓
+Field Provenance
+      ↓
+Lifecycle = committed
+      ↓
+Commit Receipt / History
+```
+
+如果用户决定暂时不处理：
+
+```text
+pending → ignored
+```
+
+Evidence 本身不会被删除或重写。
 
 ## 单项审核
 
-应至少展示：
+至少展示：
 
 - 当前 Canonical 值；
-- 本次导入值；
+- 本次 Evidence 值；
 - 来源；
-- 差异；
-- 推荐操作。
+- 字段差异；
+- 实体匹配状态；
+- 明确的字段和实体决策。
 
 操作包括：
 
 - 保留现有；
-- 采用导入值；
-- 合并；
+- 采用 Evidence；
 - 新建实体；
 - 关联已有实体；
-- 忽略。
+- 跳过来源值；
+- 忽略整条 Evidence。
+
+## 安全边界
+
+- ambiguous / unresolved 没有自动默认绑定；
+- ignored Evidence 不能 Commit；
+- Demo Library 不能正式写入；
+- Commit 前必须生成 Plan；
+- 执行前必须重新验证 fingerprint；
+- Commit 前必须创建 Snapshot；
+- 成功历史不能直接删除，只能通过受控 Restore 产生新的历史事件。
 
 ## 批量审核
 
-对于完全无冲突的新数据，可以支持批量确认，但仍需有导入记录可追溯。
-
-
-## V1-05 已实现部分
-
-当前代码已经实现：
-
-```text
-Evidence Store
-  ↓
-Evidence Inbox
-  ↓
-Work 番号匹配
-  ↓
-Entity Resolution
-  ↓
-Field Comparison
-  ↓
-只读 Review 页面
-```
-
-尚未实现：
-
-```text
-Review Decision
-  ↓
-Commit Plan
-  ↓
-Canonical Write
-```
-
-因此 V1-05 是“看清差异”的阶段，V1-06 才是“做出并执行决策”的阶段。
+尚未实现。V1-08 开始考虑批量治理，但必须复用同一套 Review Decision / Commit Plan 规则，不得新增绕过单条安全边界的“批量强制覆盖”。

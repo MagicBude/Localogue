@@ -6,7 +6,10 @@ import { notFound } from "next/navigation";
 import { localizeText } from "@/application/services/localization-service";
 import { presentWorkDetail } from "@/application/services/work-presentation-service";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
+import { getHistoryDictionary } from "@/i18n/history";
+import { formatReviewField } from "@/i18n/review";
 import { getUiDictionary } from "@/i18n/ui";
+import { listLatestWorkFieldProvenance } from "@/infrastructure/provenance/work-provenance-store";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import { vocabularyRepository } from "@/infrastructure/repositories/vocabulary-provider";
 import { getUserPreferences } from "@/lib/preferences";
@@ -29,7 +32,8 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   if (!work) notFound();
 
   const dictionary = getUiDictionary(preferences.uiLanguage);
-  const [view, workTypeLabels, genres, tags] = await Promise.all([
+  const historyText = getHistoryDictionary(preferences.uiLanguage);
+  const [view, workTypeLabels, genres, tags, provenance] = await Promise.all([
     presentWorkDetail(libraryRepository, work, preferences.metadataLanguage),
     getVocabularyLabelMap(
       vocabularyRepository,
@@ -38,6 +42,7 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
     ),
     libraryRepository.listGenres(),
     libraryRepository.listTags(),
+    listLatestWorkFieldProvenance(work.id),
   ]);
 
   const poster = view.assets.find(
@@ -171,6 +176,28 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
         <p>{view.description}</p>
       </section>
 
+      {provenance.size ? (
+        <section className="detail-section">
+          <div className="section-heading-row">
+            <div>
+              <span className="eyebrow">PROVENANCE</span>
+              <h2>{historyText.provenance}</h2>
+            </div>
+            <Link className="secondary-button" href="/history">{historyText.title}</Link>
+          </div>
+          <div className="provenance-grid">
+            {[...provenance.values()].map((event) => (
+              <article className="provenance-card" key={event.id}>
+                <strong>{formatReviewField(event.field, preferences.uiLanguage)}</strong>
+                <span>{event.sourceName ?? (event.eventType === "restored" ? historyText.restoredEvent : event.evidenceId ?? "—")}</span>
+                <small>{formatTimestamp(event.recordedAt, preferences.uiLanguage)}</small>
+                {event.commitId ? <Link href={`/history/${event.commitId}`}>{event.commitId.slice(0, 24)}…</Link> : null}
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="detail-section detail-section--split">
         <div>
           <h2>{dictionary.genres}</h2>
@@ -204,4 +231,10 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
       </section>
     </article>
   );
+}
+
+function formatTimestamp(value: string, language: "ja" | "zh-CN" | "en") {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(language === "ja" ? "ja-JP" : language === "zh-CN" ? "zh-CN" : "en-US");
 }

@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-06 File-backed Library / Canonical Commit 开发**。
+当前阶段：**V1-07 File-backed Library / Provenance、History 与 Snapshot Recovery 开发**。
 
 V1 当前约束：
 
@@ -136,3 +136,18 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Commit 执行前必须重新生成 Plan 并比较 fingerprint，不能信任浏览器持有的旧计划。
 - JSON V1 跨文件写入不具备 ACID Transaction；写入顺序必须优先保证引用安全，并保存 Commit Receipt。
 - 新增正式写入能力时必须同步 `docs/architecture/commit-plan.md`、相关 ADR 和教材文档。
+
+
+## V1-07 实现约束补充
+
+- Evidence Raw / Normalized 内容视为不可变来源记录；审核生命周期必须使用独立 `evidence-lifecycle` 状态，不得为了“已忽略”直接改写 Evidence。
+- Provenance 使用追加式事件历史，不得只保存一个可被覆盖的“当前来源”字段。
+- Commit Receipt 属于审计日志；成功 Commit 即使以后恢复也不能删除 Receipt。
+- V1-07 新 Commit 必须在正式写入前创建最小 Snapshot，并把 `snapshotId` 写入 Receipt。
+- Commit 中途失败时必须尝试自动恢复 Snapshot；不能留下明知不完整的半提交状态后仍返回成功。
+- 用户主动恢复与失败自动回滚语义不同：主动恢复必须保留原 Provenance，并追加 restored 事件和 Restore Receipt。
+- 历史恢复只能从同一 Work 的最新有效 Commit 开始；不得直接恢复较旧版本覆盖后续修改。
+- 恢复将删除本次 Commit 新建实体前，必须检查它们是否已被其他 Work 引用；存在引用时必须阻塞恢复。
+- Snapshot 中的 relativePath 必须经过路径越界检查，禁止绝对路径和 `..`。
+- 审计数据变化必须同步 `pnpm validate:audit` 规则、Schema 示例和中文文档。
+- JSON Snapshot 只是 V1 的补偿式恢复机制，不得把它描述成 SQLite/数据库 ACID Transaction。

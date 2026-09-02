@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-06：Review Decision、Commit Plan 与 Canonical JSON 正式归档。**
+**V1-07：Provenance、Commit History、Evidence 生命周期与 JSON Snapshot 恢复。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
@@ -24,47 +24,53 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 筛选侧栏响应式修复；
 - 视图切换和“应用筛选”均保持合理滚动位置。
 
-### 资料导入
+### 资料导入与治理
 
-- `/import` 导入工作台；
-- JSON 文件 / 粘贴 JSON 预览；
-- NFO 文件预览；
-- CSV 文件预览；
-- XLSX 文件预览；
-- Importer Registry；
-- Parser → Normalizer → Validator 分层；
-- Raw / Normalized 对照预览；
-- 解析警告；
+- `/import` JSON / NFO / CSV / XLSX 导入工作台；
+- Importer Registry 与 Parser → Normalizer → Validator 分层；
+- Raw / Normalized 对照预览与解析警告；
 - Evidence 文件写入；
-- 真实导入默认写入 `data/library`，不修改 Demo Library；
-- Importer 不直接修改 Canonical Work / Person；
 - `/review` Evidence Inbox；
-- 单条 Evidence 审核详情；
-- 按番号精确识别已有 Work；
+- Work 番号精确识别；
 - Person 全姓名类型精确匹配；
 - Maker / Label / Series / Genre / Tag / Work Type 匹配；
 - 字段级 `same / different / evidence_only / library_only` 对照；
-- Review Analysis 本身保持只读；
 - 字段级 `保留 Library / 采用 Evidence` 决策；
 - 实体级 `使用匹配 / 绑定已有 / 创建新实体 / 跳过` 决策；
-- 歧义实体无默认决策，未处理时阻塞 Commit；
-- Commit Plan 预览；
-- SHA-256 fingerprint 过期计划检查；
+- Commit Plan 与 SHA-256 fingerprint 过期计划检查；
 - 默认 Demo 模式禁止正式写库；
-- 私人 Library 模式可正式创建/更新 Canonical JSON；
-- 写入顺序采用“依赖实体 → Work → Commit Receipt”；
-- Evidence 已归档状态留痕。
+- 私人 Library 模式可创建 / 更新 Canonical JSON；
+- Evidence 生命周期 `pending / committed / ignored`，生命周期与 Evidence 本体分离；
+- Inbox 支持按生命周期筛选；
+- ignored Evidence 禁止生成或执行 Canonical Commit。
+
+### Provenance、历史与恢复
+
+- Work 字段级 append-only Provenance；
+- 作品详情页显示当前字段来源；
+- `/history` Canonical Commit History；
+- `/history/[id]` 查看完整 Operations、Evidence、fingerprint、Snapshot 与 Provenance；
+- V1-07 Commit Receipt 升级为 schemaVersion 2，保存 `operations` 与 `snapshotId`；
+- 正式 Commit 前创建最小 Canonical Snapshot（before-image）；
+- Commit 中途失败自动恢复 Snapshot；
+- 用户主动恢复时保留审计历史并新增 Restore Receipt；
+- 恢复后 Evidence 自动回到 pending，可重新审核；
+- 只允许按同一 Work 的最新有效 Commit 逐步恢复；
+- 新建实体若已被其他 Work 引用，则阻止危险恢复；
+- Snapshot 路径校验防止目录穿越；
+- 新增 `pnpm validate:audit` 检查审计数据引用完整性；
+- `pnpm check` 同时执行 Canonical 数据与 Audit 数据检查。
 
 ## 下一阶段建议
 
-**V1-07：Provenance、提交历史与可恢复性。**
+**V1-08：资料完整度、批量治理与人物资料补全。**
 
-1. 保存字段级 Provenance / Field Resolution；
-2. Commit Receipt 展示与历史页；
-3. JSON Commit 前快照与恢复工具；
-4. Evidence 生命周期状态（待审核 / 已归档 / 已忽略）；
-5. 批量审核基础；
-6. Canonical Library 资料完整度重新计算。
+1. Canonical Work / Person 资料完整度评分；
+2. 缺封面、缺演员、缺系列、缺日期等治理队列；
+3. Evidence Inbox 批量选择与安全批量动作；
+4. 人物资料手工编辑与多语言名称维护；
+5. 人物旧艺名 / 别名合并辅助；
+6. 重复作品与重复人物候选基础。
 
 ## 当前不做
 
@@ -75,4 +81,5 @@ V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonic
 - 浏览器播放器；
 - 自动搬移用户媒体文件；
 - Importer 绕过 Review 直接修改正式资料；
-- 绕过 Commit Plan / fingerprint 的直接 Canonical 写入。
+- 绕过 Commit Plan / fingerprint 的直接 Canonical 写入；
+- 把 JSON Snapshot 宣称为真正 ACID Transaction。

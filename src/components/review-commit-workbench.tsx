@@ -7,6 +7,7 @@ import {
   createDefaultReviewDecisions,
   entityDecisionKey,
 } from "@/application/review/review-decision-service";
+import type { EvidenceLifecycleStatus } from "@/domain/entities/evidence-lifecycle";
 import type {
   CanonicalCommitPlan,
   CanonicalCommitReceipt,
@@ -26,6 +27,7 @@ interface ReviewCommitWorkbenchProps {
   language: SupportedLanguage;
   privateLibraryConfigured: boolean;
   existingReceipt: CanonicalCommitReceipt | null;
+  lifecycleStatus: EvidenceLifecycleStatus;
 }
 
 type ResolutionKind =
@@ -49,6 +51,7 @@ export function ReviewCommitWorkbench({
   language,
   privateLibraryConfigured,
   existingReceipt,
+  lifecycleStatus,
 }: ReviewCommitWorkbenchProps) {
   const text = getCommitDictionary(language);
   const [decisions, setDecisions] = useState<ReviewDecisions>(() =>
@@ -177,6 +180,9 @@ export function ReviewCommitWorkbench({
           <Link className="secondary-button" href={`/works/${receipt.targetWorkId}`}>
             {text.openWork}
           </Link>
+          <Link className="secondary-button" href={`/history/${receipt.id}`}>
+            {text.openHistory}
+          </Link>
         </div>
       ) : null}
 
@@ -258,7 +264,7 @@ export function ReviewCommitWorkbench({
           className="primary-button"
           type="button"
           onClick={generatePlan}
-          disabled={loading !== null || Boolean(receipt)}
+          disabled={loading !== null || Boolean(receipt) || lifecycleStatus === "ignored"}
         >
           {loading === "plan" ? text.generating : text.generatePlan}
         </button>

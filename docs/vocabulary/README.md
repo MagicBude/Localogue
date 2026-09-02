@@ -31,3 +31,5 @@ solo
 - `resources/vocabularies/` 中的 JSON 用于未来程序读取。
 - [Review 字段决策](review-field-decisions.md)
 - [实体审核动作](entity-review-actions.md)
+- [Evidence 生命周期状态](evidence-lifecycle-statuses.md)
+- [Provenance 事件类型](provenance-event-types.md)

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "provenance-event-types",
+  "items": [
+    { "id": "adopted", "ja": "Evidence 採用", "zh-CN": "采用 Evidence", "en": "Evidence adopted" },
+    { "id": "restored", "ja": "Snapshot 復元", "zh-CN": "快照恢复", "en": "Snapshot restored" }
+  ]
+}

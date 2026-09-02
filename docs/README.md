@@ -21,6 +21,7 @@
 - [存储演进](architecture/storage-evolution.md)
 - [查询引擎](architecture/query-engine.md)
 - [Commit Plan 架构](architecture/commit-plan.md)
+- [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
 
 ## 数据模型
 
@@ -56,6 +57,8 @@
 - [字段比较状态](vocabulary/field-comparison-statuses.md)
 - [Review 字段决策](vocabulary/review-field-decisions.md)
 - [实体审核动作](vocabulary/entity-review-actions.md)
+- [Evidence 生命周期状态](vocabulary/evidence-lifecycle-statuses.md)
+- [Provenance 事件类型](vocabulary/provenance-event-types.md)
 
 ## 资料治理
 
@@ -65,6 +68,7 @@
 - [实体匹配](curation/entity-resolution.md)
 - [字段冲突](curation/conflict-resolution.md)
 - [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
+- [Evidence 生命周期](curation/evidence-lifecycle.md)
 
 ## 导入
 
@@ -113,6 +117,7 @@
 - [文件存储模式](storage/storage-modes.md)
 - [SQLite 迁移](storage/sqlite-migration.md)
 - [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
+- [V1 JSON Snapshot 与恢复策略](storage/snapshot-recovery.md)
 
 ## 开发
 
@@ -162,8 +167,23 @@
 ## V1-06 新增实现文档
 
 - [V1-06 字段与实体审核决策](curation/v1-06-review-decisions.md)
+- [Evidence 生命周期](curation/evidence-lifecycle.md)
 - [Commit Plan 架构](architecture/commit-plan.md)
+- [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
 - [教材：从 Review 到 Commit Plan](development/v1-06-commit-plan-walkthrough.md)
 - [教材：Demo 与私人可写 Library](development/v1-06-private-library-mode.md)
 - [V1 JSON Commit 安全策略](storage/v1-json-commit-safety.md)
+- [V1 JSON Snapshot 与恢复策略](storage/snapshot-recovery.md)
 - [ADR-014：正式写入前必须经过 Commit Plan](decisions/ADR-014-explicit-commit-plan-before-canonical-write.md)
+
+
+## V1-07 新增实现文档
+
+- [Provenance、Commit History 与恢复架构](architecture/provenance-history.md)
+- [Evidence 生命周期](curation/evidence-lifecycle.md)
+- [教材：从写文件到可审计资料库](development/v1-07-provenance-history-walkthrough.md)
+- [V1 JSON Snapshot 与恢复策略](storage/snapshot-recovery.md)
+- [Evidence 生命周期状态词表](vocabulary/evidence-lifecycle-statuses.md)
+- [Provenance 事件类型词表](vocabulary/provenance-event-types.md)
+- [ADR-015：Evidence 生命周期与 Evidence 本体分离](decisions/ADR-015-evidence-lifecycle-separate-from-evidence.md)
+- [ADR-016：最小 Snapshot 与最新提交优先恢复](decisions/ADR-016-minimal-snapshot-and-latest-first-restore.md)

@@ -1,0 +1,4 @@
+id,ja,zh-CN,en
+pending,レビュー待ち,待审核,Pending
+committed,コミット済み,已归档,Committed
+ignored,無視,已忽略,Ignored

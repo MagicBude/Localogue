@@ -51,7 +51,7 @@ export class JsonFileStore {
   }
 }
 
-function toSafeFileName(value: string): string {
+export function toSafeFileName(value: string): string {
   return value.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 

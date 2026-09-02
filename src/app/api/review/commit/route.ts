@@ -5,7 +5,8 @@ import { executeCanonicalCommit } from "@/application/review/commit-executor";
 import { analyzeSingleEvidenceRecord } from "@/application/review/entity-resolution-service";
 import type { ReviewDecisions } from "@/domain/entities/commit-plan";
 import { findEvidenceRecordById } from "@/infrastructure/evidence/evidence-store";
-import { findLatestCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
+import { getEvidenceLifecycle } from "@/infrastructure/evidence/evidence-lifecycle-store";
+import { findLatestActiveCommitReceiptByEvidenceId } from "@/infrastructure/evidence/review-commit-store";
 import {
   isPrivateLibraryConfigured,
   libraryRepository,
@@ -34,7 +35,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const previousReceipt = await findLatestCommitReceiptByEvidenceId(body.evidenceId);
+  const lifecycle = await getEvidenceLifecycle(body.evidenceId);
+  if (lifecycle.status === "ignored") {
+    return NextResponse.json(
+      { error: "这条 Evidence 已被标记为忽略。请先恢复为待审核状态。" },
+      { status: 409 },
+    );
+  }
+
+  const previousReceipt = await findLatestActiveCommitReceiptByEvidenceId(body.evidenceId);
   if (previousReceipt) {
     return NextResponse.json(
       { error: "这条 Evidence 已经执行过 Canonical Commit。", receipt: previousReceipt },
@@ -78,6 +87,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const receipt = await executeCanonicalCommit(built, libraryRepository);
+  const receipt = await executeCanonicalCommit(built, evidence, libraryRepository);
   return NextResponse.json({ receipt, plan: built.plan });
 }
