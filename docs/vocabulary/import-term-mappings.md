@@ -89,8 +89,8 @@ Localogue 的 Tag 定义是“用户自己的整理标签”。来源 NFO 的 `<
 
 禁止只在某一个 Importer 中硬编码临时映射。
 
-## Source Genre Catalog（V1-22）
+## Approved Genre Source Aliases（V1-22 Hotfix 3）
 
-`source-genre-catalog.{csv,json}` 提供 1271 条跨站 Genre 名称及中 / 日 / 英翻译。它只是一层 reference/localization catalog。
+完整外部 `genre.csv` 不再进入仓库。仅将人工确认的来源别名提取到 `genre-source-aliases.{csv,json}`，并要求每条记录指向 `genres.{csv,json}` 中真实存在的 Canonical Genre。
 
-新增自动映射时，必须从 catalog 中选词后 **显式** 加入本映射协议；不能因为一个来源站把词放在 Genre 分类中，就自动创建 Canonical Genre。
+`デビュー作 / 周年 / ハイビジョン / 有码 / Blu-ray` 等不再作为 Genre，保持 source-only / 后续专门字段候选。

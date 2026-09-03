@@ -12,7 +12,7 @@ import {
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
 import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
-import { findSourceGenreCatalogItem, localizeGenre } from "@/application/services/genre-localization-service";
+import { findApprovedGenreAlias, localizeGenre } from "@/application/services/genre-localization-service";
 import {
   getPreferredPersonName,
   localizeText,
@@ -656,7 +656,14 @@ function WorkAssetGallery({
 }) {
   const { t } = useDesktopI18n();
   const imageAssets = useMemo(
-    () => sortWorkAssets(assets).filter((asset) => asset.mimeType?.startsWith("image/") ?? ["poster", "fanart", "screenshot", "cover", "portrait", "gallery", "logo"].includes(asset.type)),
+    () => sortWorkAssets(assets).filter((asset) => {
+      const isImage = asset.mimeType?.startsWith("image/") ?? ["poster", "fanart", "screenshot", "cover", "portrait", "gallery", "logo"].includes(asset.type);
+      if (!isImage) return false;
+      // Poster is intentionally excluded from the detail Hero Gallery. It is
+      // optimized for vertical library cards, while the detail Hero is a wide
+      // preview surface for fanart / screenshots / gallery imagery.
+      return asset.type !== "poster" && asset.type !== "portrait" && asset.type !== "logo";
+    }),
     [assets],
   );
   const [index, setIndex] = useState(0);
@@ -673,7 +680,7 @@ function WorkAssetGallery({
       setOrientation("landscape");
       return;
     }
-    if (current.type === "poster" || current.type === "cover" || current.type === "portrait") {
+    if (current.type === "cover") {
       setOrientation("portrait");
       return;
     }
@@ -682,6 +689,8 @@ function WorkAssetGallery({
   const canNavigate = imageAssets.length > 1;
   const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
   const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
+
+  if (!imageAssets.length) return null;
 
   return (
     <section className="desktop-work-gallery" aria-label={t("作品媒体画廊")}>
@@ -1228,9 +1237,9 @@ function MediaPage({
             <MiniStat label={t("Unmapped 来源词")} value={vocabularyPreview.unmappedTerms.length} />
           </div>
           {vocabularyPreview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{vocabularyPreview.unmappedTerms.slice(0, 200).map((term) => {
-            const reference = findSourceGenreCatalogItem(term);
+            const reference = findApprovedGenreAlias(term);
             const localized = reference ? (metadataLanguage === "zh-CN" ? reference["zh-CN"] : metadataLanguage === "en" ? reference.en : reference.ja) : undefined;
-            return <code key={term} title={reference ? `${reference.sources.join(" / ")} · ${reference.note ?? "source genre catalog"}` : undefined}>{localized && localized !== term ? `${term} → ${localized}` : term}{reference ? ` · ${t("词表参考")}` : ""}</code>;
+            return <code key={term} title={reference ? `${reference.sources.join(" / ")} · ${reference.note ?? "approved genre alias"}` : undefined}>{localized && localized !== term ? `${term} → ${localized}` : term}{reference ? ` · ${t("词表参考")}` : ""}</code>;
           })}</div></details> : null}
           <p className="muted">{t("将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。", { genres: vocabularyPreview.removedImportedGenres, tags: vocabularyPreview.removedImportedTags })}</p>
         </> : <p className="muted">{t("尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。")}</p>}

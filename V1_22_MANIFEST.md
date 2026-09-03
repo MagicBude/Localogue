@@ -51,3 +51,12 @@ V1-23 继续 Desktop Governance Parity：Evidence / Review / Commit Plan / Curat
 ## Hotfix 2 · Adaptive Gallery & Fluid Layout
 
 实机继续验证后，V1-22 增加第二个 Presentation Hotfix：Work Media Gallery 依据真实图片宽高比使用 portrait / landscape / square 三种展示策略；Desktop `.content-shell` 取消固定最大宽度，让 Works / People / Browse / Detail 在 2K / 4K 与全屏窗口下使用完整可用空间。产品版本仍保持 `0.1.22`。
+
+
+## Hotfix 3 修订
+
+- Work Detail Hero Gallery 排除 poster，poster 回归作品墙/列表封面职责；
+- 完整 1271 条 Source Genre Catalog 方案撤回，不再作为仓库 Runtime Resource；
+- Canonical Genre 校正并扩充为 33 个明确内容题材；
+- 从外部参考中仅提取 67 条人工批准来源别名；
+- 旧 `source-genre-catalog.csv/json` 与文档需在覆盖后手工删除，见 `V1_22_HOTFIX3_DELETE_FILES.txt`。

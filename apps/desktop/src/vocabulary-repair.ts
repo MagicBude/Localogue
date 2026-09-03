@@ -12,6 +12,8 @@ import type { LocalizedText } from "@/domain/value-objects/localized-text";
 
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 
+const DEPRECATED_GENRE_IDS = new Set(["first_work", "anniversary", "high_definition"]);
+
 export interface VocabularyRepairPreview {
   scannedWorks: number;
   affectedWorks: number;
@@ -77,8 +79,10 @@ export async function previewVocabularyRepair(repository: TauriLibraryRepository
     if (!(await repository.isPrivateEntity("works", work.id))) continue;
 
     const importedGenreIds = work.genreIds.filter((id) => id.startsWith("genre_nfo_"));
+    const deprecatedGenreIds = work.genreIds.filter((id) => DEPRECATED_GENRE_IDS.has(id));
+    const removableGenreIds = unique([...importedGenreIds, ...deprecatedGenreIds]);
     const importedTagIds = work.tagIds.filter((id) => id.startsWith("tag_nfo_"));
-    if (!importedGenreIds.length && !importedTagIds.length) continue;
+    if (!removableGenreIds.length && !importedTagIds.length) continue;
 
     const rawGenreTerms = importedGenreIds.map((id) => entityName(genreMap.get(id))).filter(Boolean) as string[];
     const rawTagTerms = importedTagIds.map((id) => entityName(tagMap.get(id))).filter(Boolean) as string[];
@@ -107,7 +111,7 @@ export async function previewVocabularyRepair(repository: TauriLibraryRepository
     });
     normalized.unmappedTerms.forEach((term) => allUnmapped.add(term));
 
-    const preservedGenreIds = work.genreIds.filter((id) => !id.startsWith("genre_nfo_"));
+    const preservedGenreIds = work.genreIds.filter((id) => !id.startsWith("genre_nfo_") && !DEPRECATED_GENRE_IDS.has(id));
     const preservedTagIds = work.tagIds.filter((id) => !id.startsWith("tag_nfo_"));
     const normalizedGenreIds = normalized.candidate.genres
       .map((value) => controlledGenreDefinition(value)?.id)
@@ -120,7 +124,7 @@ export async function previewVocabularyRepair(repository: TauriLibraryRepository
     const addedWorkTypes = normalizedWorkTypes.filter((id) => !work.workTypeIds.includes(id));
     const addedGenres = normalizedGenreIds.filter((id) => !preservedGenreIds.includes(id));
 
-    removedImportedGenres += importedGenreIds.length;
+    removedImportedGenres += removableGenreIds.length;
     removedImportedTags += importedTagIds.length;
     movedToSeries += newSeriesNames.length;
     movedToWorkTypes += addedWorkTypes.length;
@@ -203,7 +207,7 @@ export async function applyVocabularyRepair(
     updatedWorks += 1;
   }
 
-  const importedGenreIds = unique(preview.changes.flatMap((change) => change.before.genreIds.filter((id) => id.startsWith("genre_nfo_"))));
+  const importedGenreIds = unique(preview.changes.flatMap((change) => change.before.genreIds.filter((id) => id.startsWith("genre_nfo_") || DEPRECATED_GENRE_IDS.has(id))));
   const importedTagIds = unique(preview.changes.flatMap((change) => change.before.tagIds.filter((id) => id.startsWith("tag_nfo_"))));
   for (const id of importedGenreIds) {
     try { await repository.deletePrivateGenre(id); deletedImportedGenres += 1; } catch { /* still referenced or not private: keep safely */ }

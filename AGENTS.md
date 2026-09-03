@@ -336,8 +336,9 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Desktop 已有查询结果在筛选、分页或语言刷新时必须使用 stale-while-refresh；不得重新用矮 LoadingState 替换整块结果导致 WebView 滚动位置被夹回顶部。
 - UI 主语言切换默认同时更新 Metadata Language；高级 Metadata Language 仍允许独立覆盖。语言变化只影响 Presentation，不得写 Canonical。
 - Work Type、Person Activity Status 等受控枚举必须显示受控三语名称，不得直接向用户暴露 raw stable id。
-- Genre 显示优先使用 Canonical 当前语言名称；缺失时可通过 `source-genre-catalog` 做翻译补全，但 Source Genre Catalog 不是 Canonical Genre 白名单。
-- 用户提供的 Source Genre Catalog 必须保留来源、原始 ID/URL 与 note；任何“晋升为 Canonical Genre”的自动映射仍必须显式进入 `import-term-mappings`。
+- Genre 显示优先使用 Canonical 当前语言名称；缺失时只能通过 `genre-source-aliases` 中人工批准的来源别名回落。
+- 完整外部 `genre.csv` 只作为一次性人工参考，不进入仓库；任何新增来源别名必须明确指向 `genres.*` 中存在的 Canonical Genre，并同步 `genre-source-aliases.*` / `import-term-mappings.*` / docs。
 - Work Detail 的核心事实、人物关系、组织关系、Series、Work Type、题材和标签必须位于同一高密度主信息区；不得把分类信息再次拆到页面最底部的大卡片。
+- Work Detail 顶部 Hero Gallery 不展示 poster；poster 用于作品墙/列表封面，Hero 优先 fanart / screenshot / gallery / cover。
 - V1-18 Hotfix 3 Native I/O / Unified Library 稳定实现继续冻结；本阶段不得因 Presentation 修改扩大 Native 文件权限。
 - V1-23 再继续 Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack 等完整治理链。

@@ -1,37 +1,36 @@
-# Genre 初始词表
+# Genre 受控词表
 
-Genre 是可扩展受控词表。V0 只提供常见初始集合，后续以实际资料为依据扩充。
+Genre 是 Localogue 的**内容题材 / 表现主题**受控词表，不等于来源网站所有名为 genre/tag 的分类桶。
 
-| ID | 日本語 | 简体中文 | English |
-|---|---|---|---|
-| `uniform` | 制服 | 制服 | Uniform |
-| `office_lady` | OL | OL / 职场女性 | Office Lady |
-| `married_woman` | 人妻 | 人妻 | Married Woman |
-| `mature` | 熟女 | 熟女 | Mature |
-| `amateur` | 素人 | 素人 | Amateur |
-| `big_bust` | 巨乳 | 巨乳 | Big Bust |
-| `small_bust` | 貧乳 | 贫乳 | Small Bust |
-| `slender` | スレンダー | 苗条 | Slender |
-| `cosplay` | コスプレ | 角色扮演 | Cosplay |
-| `drama` | ドラマ | 剧情 | Drama |
-| `documentary` | ドキュメンタリー | 纪录 | Documentary |
-| `lesbian` | レズ | 女同性题材 | Lesbian |
-| `first_work` | デビュー作 | 出道作 | Debut Work |
-| `anniversary` | 周年 | 周年企划 | Anniversary |
-| `high_definition` | ハイビジョン | 高清 | High Definition |
+V1-22 Hotfix 3 根据实际 NFO 与用户提供的跨站参考表进行了保守扩充：只保留语义明确、适合作为内容题材筛选的项目。当前共 **33 个 Canonical Genre**，完整机器可读版本见：
+
+- `resources/vocabularies/genres.csv`
+- `resources/vocabularies/genres.json`
+
+来源站的已批准同义词见：
+
+- `resources/vocabularies/genre-source-aliases.csv`
+- `resources/vocabularies/genre-source-aliases.json`
+
+## 语义原则
+
+适合进入 Genre 的例子：
+
+- 人物/角色题材：制服、OL、人妻、熟女、女仆、护士、女教师；
+- 身体/风格：巨乳、贫乳、苗条、美少女；
+- 表现形式/主题：Cosplay、剧情、纪录片、女同性题材、主观视角；
+- 明确内容行为：口交、自慰、潮吹、内射、接吻、乳交、骑乘位、手交、颜射、吞精、肛交、拘束、SM、偷窥等。
+
+不应进入 Genre：
+
+- `solo` / `VR` / `image_video`：Work Type；
+- `デビュー作`：发行/生命周期属性；
+- `周年`：活动/企划属性；
+- `ハイビジョン` / `4K` / `Blu-ray`：技术/载体属性；
+- `有码`：发行/审查属性；
+- 用户收藏、待补封面：Tag；
+- 厂商、系列、演员、导演：已有独立实体或关系。
 
 ## Raw Term
 
-导入遇到未知词时，例如：
-
-```text
-sourceTerm = "某来源自己的分类名称"
-```
-
-先保留原值，标记 `unmapped`，经过人工映射后再关联到 Canonical Genre。
-
-## 不应混入的内容
-
-- `solo` / `vr` 等属于 Work Type；
-- `favorite` / `待补封面` 等属于 Tag；
-- `active` / `retired` 属于人物状态。
+未知来源词先进入 `unmapped` 审计，不允许猜测式创建 Canonical Genre。只有经过明确映射后才进入受控词表。

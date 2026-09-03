@@ -1,6 +1,8 @@
-# V1-22 Hotfix 2 覆盖包说明
+# V1-22 Hotfix 3 覆盖说明
 
-覆盖当前 V1-22 / V1-22 Hotfix 后运行：
+1. 将 ZIP 内容解压覆盖仓库根目录。
+2. **必须手工删除** `V1_22_HOTFIX3_DELETE_FILES.txt` 中列出的三个旧 Source Genre Catalog 文件；ZIP 覆盖无法自动删除已有文件。
+3. 运行：
 
 ```bash
 pnpm install
@@ -9,22 +11,12 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-本 Hotfix 不改资料库与扫描链，只修 Desktop Presentation：
+## 本次变化
 
-1. Work Detail Gallery 会根据当前图片真实宽高比自动选择纵向 / 横向 / 方形 Stage；
-2. poster / cover 为纵向图片时会获得更高的展示区域，继续完整显示，不通过 `cover` 裁切；
-3. fanart / screenshot 等横向图片继续使用横向大画布；
-4. 切换 Asset 后 Gallery 会根据新图片宽高比调整展示高度；
-5. Desktop 主内容区取消固定最大宽度，全屏或 2K / 4K 窗口会真正使用右侧空间；
-6. Works Table / 海报墙 / 列表 / Facet、People、Browse 与详情页都会随窗口一起扩展；
-7. 阅读型简介等长文本仍保留自身阅读宽度，不会为了“铺满屏幕”变成超长单行；
-8. 顶栏版本信息从 Runtime 读取，不再显示历史硬编码 `V1-20`。
-
-重点验收：
-
-- 打开一部拥有纵向 poster 的作品，poster 应完整且明显地展示，而不是缩在横向画布中央；
-- 左右切换 poster / fanart / thumb 时 Gallery 应根据实际方向改变高度；
-- Desktop 全屏后 Works 页面右侧不应再出现由固定 `1460px` 内容宽度产生的大块空白；
-- 将 Sidebar 收起后，释放出的宽度应直接进入主内容区和结果区。
-
-产品版本继续保持 `0.1.22`。
+- Work Detail 顶部 Hero Gallery 不再显示 poster；
+- poster 继续用于作品墙 / 列表封面；
+- 完整 1271 条外部 Genre 参考表不再进入 Runtime；
+- Canonical Genre 收敛为 33 项；
+- 新增 67 条人工批准来源别名；
+- `デビュー作 / 周年 / ハイビジョン` 等从 Genre 维度移除；
+- 重新运行“分类词表审计”可以清理历史误建分类。

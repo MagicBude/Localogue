@@ -1,34 +1,466 @@
 {
-  "vocabularyVersion": 1,
+  "vocabularyVersion": 2,
   "scope": "nfo-classification-routing",
   "rules": [
-    { "source": "系列: <value>", "aliases": ["シリーズ: <value>", "Series: <value>"], "target": "series", "action": "extract-value" },
-    { "source": "片商: <value>", "aliases": ["メーカー: <value>", "Maker: <value>", "Studio: <value>"], "target": "maker", "action": "fallback-only" },
-    { "source": "厂牌: <value>", "aliases": ["レーベル: <value>", "Label: <value>"], "target": "label", "action": "fallback-only" },
-    { "source": "发行: <value>", "aliases": ["配給: <value>", "Publisher: <value>"], "target": "source-only", "action": "do-not-promote" },
-    { "source": "标签: <value>", "aliases": ["タグ: <value>", "Tag: <value>"], "target": "tag", "action": "explicit-tag" },
-    { "source": "单体作品", "aliases": ["単体作品", "単体", "Solo"], "target": "workType:solo", "action": "controlled" },
-    { "source": "共演作品", "aliases": ["共演", "Co-starring"], "target": "workType:co_starring", "action": "controlled" },
-    { "source": "VR作品", "aliases": ["VR", "VR動画", "VR Video"], "target": "workType:vr", "action": "controlled" },
-    { "source": "イメージビデオ", "aliases": ["イメージDVD", "写真影像", "Image Video"], "target": "workType:image_video", "action": "controlled" },
-    { "source": "総集編", "aliases": ["合辑", "Compilation"], "target": "workType:compilation", "action": "controlled" },
-    { "source": "オムニバス", "aliases": ["单元合集", "Omnibus"], "target": "workType:omnibus", "action": "controlled" },
-    { "source": "ベスト", "aliases": ["精选集", "Best Of"], "target": "workType:best_of", "action": "controlled" },
-    { "source": "制服", "aliases": ["Uniform"], "target": "genre:uniform", "action": "controlled" },
-    { "source": "OL", "aliases": ["Office Lady", "职场女性"], "target": "genre:office_lady", "action": "controlled" },
-    { "source": "人妻", "aliases": ["Married Woman"], "target": "genre:married_woman", "action": "controlled" },
-    { "source": "熟女", "aliases": ["Mature"], "target": "genre:mature", "action": "controlled" },
-    { "source": "素人", "aliases": ["Amateur"], "target": "genre:amateur", "action": "controlled" },
-    { "source": "巨乳", "aliases": ["Big Bust"], "target": "genre:big_bust", "action": "controlled" },
-    { "source": "貧乳", "aliases": ["贫乳", "Small Bust"], "target": "genre:small_bust", "action": "controlled" },
-    { "source": "スレンダー", "aliases": ["苗条", "Slender"], "target": "genre:slender", "action": "controlled" },
-    { "source": "コスプレ", "aliases": ["角色扮演", "Cosplay"], "target": "genre:cosplay", "action": "controlled" },
-    { "source": "ドラマ", "aliases": ["剧情", "Drama"], "target": "genre:drama", "action": "controlled" },
-    { "source": "ドキュメンタリー", "aliases": ["纪录", "Documentary"], "target": "genre:documentary", "action": "controlled" },
-    { "source": "レズ", "aliases": ["女同性题材", "Lesbian"], "target": "genre:lesbian", "action": "controlled" },
-    { "source": "デビュー作", "aliases": ["出道作", "Debut Work"], "target": "genre:first_work", "action": "controlled" },
-    { "source": "周年", "aliases": ["周年企划", "Anniversary"], "target": "genre:anniversary", "action": "controlled" },
-    { "source": "ハイビジョン", "aliases": ["高清", "High Definition"], "target": "genre:high_definition", "action": "controlled" }
+    {
+      "source": "系列: <value>",
+      "aliases": [
+        "シリーズ: <value>",
+        "Series: <value>"
+      ],
+      "target": "series",
+      "action": "extract-value"
+    },
+    {
+      "source": "片商: <value>",
+      "aliases": [
+        "メーカー: <value>",
+        "Maker: <value>",
+        "Studio: <value>"
+      ],
+      "target": "maker",
+      "action": "fallback-only"
+    },
+    {
+      "source": "厂牌: <value>",
+      "aliases": [
+        "レーベル: <value>",
+        "Label: <value>"
+      ],
+      "target": "label",
+      "action": "fallback-only"
+    },
+    {
+      "source": "发行: <value>",
+      "aliases": [
+        "配給: <value>",
+        "Publisher: <value>"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    },
+    {
+      "source": "标签: <value>",
+      "aliases": [
+        "タグ: <value>",
+        "Tag: <value>"
+      ],
+      "target": "tag",
+      "action": "explicit-tag"
+    },
+    {
+      "source": "单体作品",
+      "aliases": [
+        "単体作品",
+        "単体",
+        "Solo"
+      ],
+      "target": "workType:solo",
+      "action": "controlled"
+    },
+    {
+      "source": "共演作品",
+      "aliases": [
+        "共演",
+        "Co-starring"
+      ],
+      "target": "workType:co_starring",
+      "action": "controlled"
+    },
+    {
+      "source": "VR作品",
+      "aliases": [
+        "VR",
+        "VR動画",
+        "VR Video"
+      ],
+      "target": "workType:vr",
+      "action": "controlled"
+    },
+    {
+      "source": "イメージビデオ",
+      "aliases": [
+        "イメージDVD",
+        "写真影像",
+        "Image Video"
+      ],
+      "target": "workType:image_video",
+      "action": "controlled"
+    },
+    {
+      "source": "総集編",
+      "aliases": [
+        "合辑",
+        "Compilation"
+      ],
+      "target": "workType:compilation",
+      "action": "controlled"
+    },
+    {
+      "source": "オムニバス",
+      "aliases": [
+        "单元合集",
+        "Omnibus"
+      ],
+      "target": "workType:omnibus",
+      "action": "controlled"
+    },
+    {
+      "source": "ベスト",
+      "aliases": [
+        "精选集",
+        "Best Of"
+      ],
+      "target": "workType:best_of",
+      "action": "controlled"
+    },
+    {
+      "source": "制服",
+      "aliases": [
+        "制服",
+        "Uniform"
+      ],
+      "target": "genre:uniform",
+      "action": "controlled"
+    },
+    {
+      "source": "OL",
+      "aliases": [
+        "OL / 职场女性",
+        "Office Lady"
+      ],
+      "target": "genre:office_lady",
+      "action": "controlled"
+    },
+    {
+      "source": "人妻",
+      "aliases": [
+        "人妻",
+        "Married Woman"
+      ],
+      "target": "genre:married_woman",
+      "action": "controlled"
+    },
+    {
+      "source": "熟女",
+      "aliases": [
+        "熟女",
+        "Mature"
+      ],
+      "target": "genre:mature",
+      "action": "controlled"
+    },
+    {
+      "source": "素人",
+      "aliases": [
+        "素人",
+        "Amateur"
+      ],
+      "target": "genre:amateur",
+      "action": "controlled"
+    },
+    {
+      "source": "巨乳",
+      "aliases": [
+        "巨乳",
+        "Big Bust"
+      ],
+      "target": "genre:big_bust",
+      "action": "controlled"
+    },
+    {
+      "source": "貧乳",
+      "aliases": [
+        "贫乳",
+        "Small Bust"
+      ],
+      "target": "genre:small_bust",
+      "action": "controlled"
+    },
+    {
+      "source": "スレンダー",
+      "aliases": [
+        "苗条",
+        "Slender"
+      ],
+      "target": "genre:slender",
+      "action": "controlled"
+    },
+    {
+      "source": "コスプレ",
+      "aliases": [
+        "角色扮演",
+        "Cosplay"
+      ],
+      "target": "genre:cosplay",
+      "action": "controlled"
+    },
+    {
+      "source": "ドラマ",
+      "aliases": [
+        "剧情",
+        "Drama"
+      ],
+      "target": "genre:drama",
+      "action": "controlled"
+    },
+    {
+      "source": "ドキュメンタリー",
+      "aliases": [
+        "纪录片",
+        "Documentary"
+      ],
+      "target": "genre:documentary",
+      "action": "controlled"
+    },
+    {
+      "source": "レズ",
+      "aliases": [
+        "女同性题材",
+        "Lesbian"
+      ],
+      "target": "genre:lesbian",
+      "action": "controlled"
+    },
+    {
+      "source": "美少女",
+      "aliases": [
+        "美少女",
+        "Beautiful Girl"
+      ],
+      "target": "genre:beautiful_girl",
+      "action": "controlled"
+    },
+    {
+      "source": "主観",
+      "aliases": [
+        "主观视角",
+        "POV"
+      ],
+      "target": "genre:pov",
+      "action": "controlled"
+    },
+    {
+      "source": "潮吹き",
+      "aliases": [
+        "潮吹",
+        "Squirting"
+      ],
+      "target": "genre:squirting",
+      "action": "controlled"
+    },
+    {
+      "source": "フェラ",
+      "aliases": [
+        "口交",
+        "Blowjob"
+      ],
+      "target": "genre:blowjob",
+      "action": "controlled"
+    },
+    {
+      "source": "オナニー",
+      "aliases": [
+        "自慰",
+        "Masturbation"
+      ],
+      "target": "genre:masturbation",
+      "action": "controlled"
+    },
+    {
+      "source": "アクメ・オーガズム",
+      "aliases": [
+        "绝顶高潮",
+        "Orgasm"
+      ],
+      "target": "genre:orgasm",
+      "action": "controlled"
+    },
+    {
+      "source": "中出し",
+      "aliases": [
+        "内射",
+        "Creampie"
+      ],
+      "target": "genre:creampie",
+      "action": "controlled"
+    },
+    {
+      "source": "メイド",
+      "aliases": [
+        "女仆",
+        "Maid"
+      ],
+      "target": "genre:maid",
+      "action": "controlled"
+    },
+    {
+      "source": "看護婦・ナース",
+      "aliases": [
+        "护士",
+        "Nurse"
+      ],
+      "target": "genre:nurse",
+      "action": "controlled"
+    },
+    {
+      "source": "女教師",
+      "aliases": [
+        "女教师",
+        "Female Teacher"
+      ],
+      "target": "genre:female_teacher",
+      "action": "controlled"
+    },
+    {
+      "source": "凌辱",
+      "aliases": [
+        "凌辱",
+        "Abuse"
+      ],
+      "target": "genre:abuse",
+      "action": "controlled"
+    },
+    {
+      "source": "キス・接吻",
+      "aliases": [
+        "接吻",
+        "Kissing"
+      ],
+      "target": "genre:kissing",
+      "action": "controlled"
+    },
+    {
+      "source": "パイズリ",
+      "aliases": [
+        "乳交",
+        "Titjob"
+      ],
+      "target": "genre:titjob",
+      "action": "controlled"
+    },
+    {
+      "source": "騎乗位",
+      "aliases": [
+        "骑乘位",
+        "Cowgirl"
+      ],
+      "target": "genre:cowgirl",
+      "action": "controlled"
+    },
+    {
+      "source": "手コキ",
+      "aliases": [
+        "手交",
+        "Handjob"
+      ],
+      "target": "genre:handjob",
+      "action": "controlled"
+    },
+    {
+      "source": "顔射",
+      "aliases": [
+        "颜射",
+        "Facial"
+      ],
+      "target": "genre:facial",
+      "action": "controlled"
+    },
+    {
+      "source": "ごっくん",
+      "aliases": [
+        "吞精",
+        "Cum Swallowing"
+      ],
+      "target": "genre:cum_swallowing",
+      "action": "controlled"
+    },
+    {
+      "source": "アナル",
+      "aliases": [
+        "肛交",
+        "Anal"
+      ],
+      "target": "genre:anal",
+      "action": "controlled"
+    },
+    {
+      "source": "拘束",
+      "aliases": [
+        "捆绑",
+        "Bondage"
+      ],
+      "target": "genre:bondage",
+      "action": "controlled"
+    },
+    {
+      "source": "SM",
+      "aliases": [
+        "SM",
+        "S&M"
+      ],
+      "target": "genre:sm",
+      "action": "controlled"
+    },
+    {
+      "source": "盗撮・のぞき",
+      "aliases": [
+        "偷窥",
+        "Voyeurism"
+      ],
+      "target": "genre:voyeurism",
+      "action": "controlled"
+    },
+    {
+      "source": "デビュー作",
+      "aliases": [
+        "デビュー作品",
+        "出道作",
+        "Debut Work",
+        "Debut"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    },
+    {
+      "source": "周年",
+      "aliases": [
+        "周年企划",
+        "Anniversary"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    },
+    {
+      "source": "ハイビジョン",
+      "aliases": [
+        "高清",
+        "High Definition",
+        "Hi-Def"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    },
+    {
+      "source": "有码",
+      "aliases": [
+        "Censored"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    },
+    {
+      "source": "Blu-ray",
+      "aliases": [
+        "ブルーレイ"
+      ],
+      "target": "source-only",
+      "action": "do-not-promote"
+    }
   ],
-  "unmappedPolicy": "Unknown source classification terms stay unmapped and are not auto-created as Canonical Genre or Tag."
+  "unmappedPolicy": {
+    "action": "preserve-as-unmapped",
+    "promoteToCanonical": false,
+    "note": "Unknown mixed source classifications remain audit-visible until explicitly mapped to a Domain dimension."
+  }
 }

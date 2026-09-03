@@ -1,3 +1,5 @@
+> **状态更新（V1-22 Hotfix 3）**：其中“完整 Source Genre Catalog 进入仓库”的部分已被 ADR-038 取代；stale-while-refresh 决策仍有效。
+
 # ADR-037：Desktop Stable Refresh 与 Source Genre Localization
 
 ## 状态

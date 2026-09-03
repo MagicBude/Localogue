@@ -10,14 +10,14 @@ V1-22 来自 V1-21 实机体验反馈：筛选或切语言时旧结果被短暂 
 - 筛选、分页和语言变化时保留旧结果与 DOM 高度，在原位置显示轻量刷新状态；
 - 主语言选择默认同时切 UI + Metadata，仍保留 Metadata Language 高级独立覆盖；
 - Work Type Facet / Table 改为受控三语名称，Person Activity Status 改为受控三语名称；
-- 新增 `Source Genre Catalog`，接入用户提供的 1271 条日文 / 简中 / 繁中 / 英文 Genre 参考数据；
-- Source Genre Catalog 仅做翻译、来源参考和映射候选，不自动晋升 1271 条为 Canonical Genre；
+- Hotfix 3 移除完整 1271 条外部 Genre Catalog 的 Runtime 依赖，只保留从参考表人工筛选的 67 条来源别名；
+- Canonical Genre 扩充并校正为 33 个明确内容题材；`デビュー作 / 周年 / ハイビジョン` 等发行/技术属性不再属于 Genre；
 - Desktop / Web 的 Genre 展示统一经过 `localizeGenre`；
 - 中文 UI 的 Genre / Tag 用户标签统一为“题材 / 标签”；
 - Work Detail 重构为“顶部媒体画廊 + 下方全宽高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
-- V1-22 Hotfix 2 将媒体画廊升级为真实宽高比自适应：纵向 poster / cover、横向 fanart / screenshot 与近方形图片使用不同 Stage 高度；
+- V1-22 Hotfix 2 将媒体画廊升级为真实宽高比自适应；Hotfix 3 进一步将 poster 从详情 Hero Gallery 排除，避免纵向封面与宽屏预览区域冲突；
 - Desktop 主内容区取消历史固定 max-width，2K / 4K 与宽窗口下 Works / Browse / People / Detail 会使用完整可用宽度；
-- Vocabulary Audit 的 unmapped 来源词若命中 Source Genre Catalog，会显示当前元数据语言的参考翻译；
+- Vocabulary Audit 只使用正式映射与人工批准来源别名，不再依赖完整外部参考表；
 - V1-18 Hotfix 3 Unified Library / Native I/O 稳定链保持不变。
 
 ### 明确留到 V1-23

@@ -63,3 +63,8 @@ Hotfix 2 不改变 Asset / Work 数据模型，而把 Presentation 改成：
 5. 长简介等阅读内容继续由自身 `max-width` 控制可读性，而不是通过整个应用固定宽度来限制。
 
 这样 Gallery 后续接入视频截图、预览图或其他不同宽高比媒体时，不需要再重新设计详情页骨架。
+
+
+## Hotfix 3 修订
+
+完整 1271 条 Source Genre Catalog 已移出仓库，只保留 67 条人工批准来源别名，并将 Canonical Genre 收敛为 33 个明确题材。Work Detail 顶部 Hero Gallery 同时不再展示 poster，poster 继续服务作品墙/列表封面。

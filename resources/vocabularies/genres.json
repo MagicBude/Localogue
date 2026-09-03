@@ -1,5 +1,5 @@
 {
-  "vocabularyVersion": 1,
+  "vocabularyVersion": 2,
   "items": [
     {
       "id": "uniform",
@@ -64,7 +64,7 @@
     {
       "id": "documentary",
       "ja": "ドキュメンタリー",
-      "zh-CN": "纪录",
+      "zh-CN": "纪录片",
       "en": "Documentary"
     },
     {
@@ -74,22 +74,130 @@
       "en": "Lesbian"
     },
     {
-      "id": "first_work",
-      "ja": "デビュー作",
-      "zh-CN": "出道作",
-      "en": "Debut Work"
+      "id": "beautiful_girl",
+      "ja": "美少女",
+      "zh-CN": "美少女",
+      "en": "Beautiful Girl"
     },
     {
-      "id": "anniversary",
-      "ja": "周年",
-      "zh-CN": "周年企划",
-      "en": "Anniversary"
+      "id": "pov",
+      "ja": "主観",
+      "zh-CN": "主观视角",
+      "en": "POV"
     },
     {
-      "id": "high_definition",
-      "ja": "ハイビジョン",
-      "zh-CN": "高清",
-      "en": "High Definition"
+      "id": "squirting",
+      "ja": "潮吹き",
+      "zh-CN": "潮吹",
+      "en": "Squirting"
+    },
+    {
+      "id": "blowjob",
+      "ja": "フェラ",
+      "zh-CN": "口交",
+      "en": "Blowjob"
+    },
+    {
+      "id": "masturbation",
+      "ja": "オナニー",
+      "zh-CN": "自慰",
+      "en": "Masturbation"
+    },
+    {
+      "id": "orgasm",
+      "ja": "アクメ・オーガズム",
+      "zh-CN": "绝顶高潮",
+      "en": "Orgasm"
+    },
+    {
+      "id": "creampie",
+      "ja": "中出し",
+      "zh-CN": "内射",
+      "en": "Creampie"
+    },
+    {
+      "id": "maid",
+      "ja": "メイド",
+      "zh-CN": "女仆",
+      "en": "Maid"
+    },
+    {
+      "id": "nurse",
+      "ja": "看護婦・ナース",
+      "zh-CN": "护士",
+      "en": "Nurse"
+    },
+    {
+      "id": "female_teacher",
+      "ja": "女教師",
+      "zh-CN": "女教师",
+      "en": "Female Teacher"
+    },
+    {
+      "id": "abuse",
+      "ja": "凌辱",
+      "zh-CN": "凌辱",
+      "en": "Abuse"
+    },
+    {
+      "id": "kissing",
+      "ja": "キス・接吻",
+      "zh-CN": "接吻",
+      "en": "Kissing"
+    },
+    {
+      "id": "titjob",
+      "ja": "パイズリ",
+      "zh-CN": "乳交",
+      "en": "Titjob"
+    },
+    {
+      "id": "cowgirl",
+      "ja": "騎乗位",
+      "zh-CN": "骑乘位",
+      "en": "Cowgirl"
+    },
+    {
+      "id": "handjob",
+      "ja": "手コキ",
+      "zh-CN": "手交",
+      "en": "Handjob"
+    },
+    {
+      "id": "facial",
+      "ja": "顔射",
+      "zh-CN": "颜射",
+      "en": "Facial"
+    },
+    {
+      "id": "cum_swallowing",
+      "ja": "ごっくん",
+      "zh-CN": "吞精",
+      "en": "Cum Swallowing"
+    },
+    {
+      "id": "anal",
+      "ja": "アナル",
+      "zh-CN": "肛交",
+      "en": "Anal"
+    },
+    {
+      "id": "bondage",
+      "ja": "拘束",
+      "zh-CN": "捆绑",
+      "en": "Bondage"
+    },
+    {
+      "id": "sm",
+      "ja": "SM",
+      "zh-CN": "SM",
+      "en": "S&M"
+    },
+    {
+      "id": "voyeurism",
+      "ja": "盗撮・のぞき",
+      "zh-CN": "偷窥",
+      "en": "Voyeurism"
     }
   ]
 }

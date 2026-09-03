@@ -1,3 +1,6 @@
+import genreVocabulary from "../../../resources/vocabularies/genres.json";
+import genreSourceAliases from "../../../resources/vocabularies/genre-source-aliases.json";
+
 import type { NormalizedImportCandidate } from "@/domain/entities/evidence";
 import type { LocalizedText } from "@/domain/value-objects/localized-text";
 
@@ -39,23 +42,30 @@ export const WORK_TYPE_DEFINITIONS: readonly WorkTypeDefinition[] = [
   { id: "other", names: { ja: "その他", "zh-CN": "其他", en: "Other" }, aliases: ["その他", "其他", "other"] },
 ] as const;
 
-export const CONTROLLED_GENRE_DEFINITIONS: readonly ControlledGenreDefinition[] = [
-  { id: "uniform", names: { ja: "制服", "zh-CN": "制服", en: "Uniform" }, aliases: ["制服", "uniform"] },
-  { id: "office_lady", names: { ja: "OL", "zh-CN": "OL / 职场女性", en: "Office Lady" }, aliases: ["ol", "office lady", "职场女性", "職場女性"] },
-  { id: "married_woman", names: { ja: "人妻", "zh-CN": "人妻", en: "Married Woman" }, aliases: ["人妻", "married woman"] },
-  { id: "mature", names: { ja: "熟女", "zh-CN": "熟女", en: "Mature" }, aliases: ["熟女", "mature"] },
-  { id: "amateur", names: { ja: "素人", "zh-CN": "素人", en: "Amateur" }, aliases: ["素人", "amateur"] },
-  { id: "big_bust", names: { ja: "巨乳", "zh-CN": "巨乳", en: "Big Bust" }, aliases: ["巨乳", "big bust"] },
-  { id: "small_bust", names: { ja: "貧乳", "zh-CN": "贫乳", en: "Small Bust" }, aliases: ["貧乳", "贫乳", "small bust"] },
-  { id: "slender", names: { ja: "スレンダー", "zh-CN": "苗条", en: "Slender" }, aliases: ["スレンダー", "苗条", "slender"] },
-  { id: "cosplay", names: { ja: "コスプレ", "zh-CN": "角色扮演", en: "Cosplay" }, aliases: ["コスプレ", "角色扮演", "cosplay"] },
-  { id: "drama", names: { ja: "ドラマ", "zh-CN": "剧情", en: "Drama" }, aliases: ["ドラマ", "剧情", "劇情", "drama"] },
-  { id: "documentary", names: { ja: "ドキュメンタリー", "zh-CN": "纪录", en: "Documentary" }, aliases: ["ドキュメンタリー", "纪录", "紀錄", "documentary"] },
-  { id: "lesbian", names: { ja: "レズ", "zh-CN": "女同性题材", en: "Lesbian" }, aliases: ["レズ", "女同性题材", "lesbian"] },
-  { id: "first_work", names: { ja: "デビュー作", "zh-CN": "出道作", en: "Debut Work" }, aliases: ["デビュー作", "出道作", "debut work"] },
-  { id: "anniversary", names: { ja: "周年", "zh-CN": "周年企划", en: "Anniversary" }, aliases: ["周年", "周年企划", "anniversary"] },
-  { id: "high_definition", names: { ja: "ハイビジョン", "zh-CN": "高清", en: "High Definition" }, aliases: ["ハイビジョン", "高清", "high definition"] },
-] as const;
+interface GenreVocabularyRow { id: string; ja: string; "zh-CN": string; en: string; }
+interface GenreSourceAliasRow { canonicalId: string; sourceId: string; ja: string; "zh-CN": string; en: string; sources: string[]; note?: string; }
+
+const GENRE_SOURCE_ALIASES = genreSourceAliases.items as GenreSourceAliasRow[];
+const SOURCE_ALIASES_BY_GENRE = new Map<string, string[]>();
+for (const item of GENRE_SOURCE_ALIASES) {
+  const values = SOURCE_ALIASES_BY_GENRE.get(item.canonicalId) ?? [];
+  values.push(item.ja, item["zh-CN"], item.en);
+  SOURCE_ALIASES_BY_GENRE.set(item.canonicalId, values);
+}
+
+/**
+ * Canonical Genre is defined by resources/vocabularies/genres.*.
+ * Only the curated genre-source-aliases subset may extend importer matching.
+ * The original 1,271-row user reference is intentionally not shipped or used
+ * as a Canonical allowlist because it mixes themes, technical flags, campaigns
+ * and other source-specific dimensions.
+ */
+export const CONTROLLED_GENRE_DEFINITIONS: readonly ControlledGenreDefinition[] =
+  (genreVocabulary.items as GenreVocabularyRow[]).map((item) => ({
+    id: item.id,
+    names: { ja: item.ja, "zh-CN": item["zh-CN"], en: item.en },
+    aliases: uniqueClean([item.ja, item["zh-CN"], item.en, ...(SOURCE_ALIASES_BY_GENRE.get(item.id) ?? [])]),
+  }));
 
 const WORK_TYPE_BY_ALIAS = aliasIndex(WORK_TYPE_DEFINITIONS);
 const GENRE_BY_ALIAS = aliasIndex(CONTROLLED_GENRE_DEFINITIONS);
@@ -111,6 +121,11 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
       continue;
     }
 
+    if (isSourceOnlyClassification(term)) {
+      structuralTerms.push(term);
+      continue;
+    }
+
     const workType = workTypeFor(term);
     if (workType) {
       workTypes.add(workType.id);
@@ -153,6 +168,18 @@ export function workTypeDefinition(id: string): WorkTypeDefinition | undefined {
 
 export function controlledGenreDefinition(idOrAlias: string): ControlledGenreDefinition | undefined {
   return CONTROLLED_GENRE_DEFINITIONS.find((item) => item.id === idOrAlias) ?? GENRE_BY_ALIAS.get(termKey(idOrAlias));
+}
+
+const SOURCE_ONLY_CLASSIFICATION_KEYS = new Set([
+  "デビュー作", "デビュー作品", "出道作", "debut work", "debut",
+  "周年", "周年企划", "anniversary",
+  "ハイビジョン", "高清", "high definition", "hi def",
+  "有码", "censored",
+  "blu ray", "ブルーレイ",
+].map(termKey));
+
+function isSourceOnlyClassification(value: string): boolean {
+  return SOURCE_ONLY_CLASSIFICATION_KEYS.has(termKey(value));
 }
 
 function parseStructuralPrefix(value: string): { kind: "series" | "maker" | "label" | "publisher" | "tag"; value: string } | undefined {

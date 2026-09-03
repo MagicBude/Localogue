@@ -72,7 +72,7 @@
 - ~~早期 NFO Genre / Tag 污染 Preview → Explicit Repair~~（V1-21）；
 - ~~Desktop Work Detail 分开展示 Work Type / Genre / Tag~~（V1-21）；
 - ~~Desktop stale-while-refresh，筛选 / 分页 / 切语言保持滚动位置~~（V1-22）；
-- ~~Source Genre Catalog 1271 条多语参考与 Web/Desktop Genre 本地化补全~~（V1-22）；
+- ~~Genre 多语与来源别名治理~~（V1-22；Hotfix 3 改为 33 个 Canonical Genre + 67 条 Approved Source Aliases，不保留完整 1271 条参考表）；
 - ~~Desktop Work Detail 高密度“海报 + Metadata Table”信息架构~~（V1-22）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
@@ -89,7 +89,7 @@
 
 ### V1-22：Desktop Information Architecture & Metadata Localization
 
-本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。Source Genre Catalog 只作为翻译 / 来源参考，不绕过 Canonical Vocabulary 映射边界。
+本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。完整外部 Genre 参考表不进入仓库；仅保留人工批准来源别名，不绕过 Canonical Vocabulary 映射边界。
 
 ### V1-23：Desktop Governance Parity
 

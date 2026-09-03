@@ -1,0 +1,767 @@
+{
+  "vocabularyVersion": 1,
+  "kind": "approved-source-genre-aliases",
+  "description": "Curated subset extracted from the user-provided genre reference. Only aliases explicitly approved for Localogue Canonical Genre are retained.",
+  "items": [
+    {
+      "canonicalId": "uniform",
+      "sourceId": "3i",
+      "ja": "制服",
+      "zh-CN": "制服",
+      "en": "Uniform",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "uniform",
+      "sourceId": "tags?c3=58",
+      "ja": "Uniform",
+      "zh-CN": "制服",
+      "en": "Uniform",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "office_lady",
+      "sourceId": "tags?c3=114",
+      "ja": "OL",
+      "zh-CN": "白领",
+      "en": "OL",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javdb",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "married_woman",
+      "sourceId": "uncensored-gre024",
+      "ja": "人妻",
+      "zh-CN": "人妻",
+      "en": "人妻",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "married_woman",
+      "sourceId": "uncensored?c3=87",
+      "ja": "Married woman",
+      "zh-CN": "人妻",
+      "en": "Married woman",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "mature",
+      "sourceId": "13",
+      "ja": "熟女",
+      "zh-CN": "熟女",
+      "en": "Mature Woman",
+      "sources": [
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "mature",
+      "sourceId": "tags?c4=15",
+      "ja": "Mature Woman",
+      "zh-CN": "熟女",
+      "en": "Mature Woman",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "amateur",
+      "sourceId": "uncensored-gre023",
+      "ja": "素人",
+      "zh-CN": "素人",
+      "en": "素人",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "amateur",
+      "sourceId": "tags?c7=88",
+      "ja": "Amateur",
+      "zh-CN": "业余",
+      "en": "Amateur",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "big_bust",
+      "sourceId": "e",
+      "ja": "巨乳",
+      "zh-CN": "巨乳",
+      "en": "Big Tits",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "big_bust",
+      "sourceId": "tags?c4=17",
+      "ja": "Big Tits",
+      "zh-CN": "巨乳",
+      "en": "Big Tits",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "small_bust",
+      "sourceId": "t",
+      "ja": "貧乳・微乳",
+      "zh-CN": "贫乳・微乳",
+      "en": "Small Tits",
+      "sources": [
+        "jav321",
+        "javbus"
+      ]
+    },
+    {
+      "canonicalId": "small_bust",
+      "sourceId": "western?c1=2",
+      "ja": "Small Tits",
+      "zh-CN": "贫乳",
+      "en": "Small Tits",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "slender",
+      "sourceId": "1f",
+      "ja": "スレンダー",
+      "zh-CN": "苗条",
+      "en": "Slender",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "slender",
+      "sourceId": "tags?c4=65",
+      "ja": "Slender",
+      "zh-CN": "苗条",
+      "en": "Slender",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "cosplay",
+      "sourceId": "1",
+      "ja": "コスプレ",
+      "zh-CN": "角色扮演",
+      "en": "Cosplay",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "cosplay",
+      "sourceId": "tags?c3=43",
+      "ja": "Cosplay",
+      "zh-CN": "角色扮演",
+      "en": "Cosplay",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "drama",
+      "sourceId": "4u",
+      "ja": "ドラマ",
+      "zh-CN": "戏剧",
+      "en": "Drama",
+      "sources": [
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "drama",
+      "sourceId": "uncensored-gre004",
+      "ja": "ドラマ・ストーリー",
+      "zh-CN": "剧情",
+      "en": "Drama",
+      "sources": [
+        "avsox",
+        "javbus"
+      ]
+    },
+    {
+      "canonicalId": "drama",
+      "sourceId": "tags?c7=11",
+      "ja": "Drama",
+      "zh-CN": "戏剧",
+      "en": "Drama",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "documentary",
+      "sourceId": "2n",
+      "ja": "ドキュメンタリー",
+      "zh-CN": "纪录片",
+      "en": "Documentary",
+      "sources": [
+        "jav321",
+        "javbus"
+      ]
+    },
+    {
+      "canonicalId": "documentary",
+      "sourceId": "arda",
+      "ja": "ドキュメント",
+      "zh-CN": "纪录片",
+      "en": "Documentary",
+      "sources": [
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "documentary",
+      "sourceId": "tags?c7=97",
+      "ja": "Documentary",
+      "zh-CN": "纪录片",
+      "en": "Documentary",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "lesbian",
+      "sourceId": "1d",
+      "ja": "レズ",
+      "zh-CN": "女同性恋",
+      "en": "Lesbian",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "lesbian",
+      "sourceId": "tags?c1=64",
+      "ja": "Lesbian",
+      "zh-CN": "女同性恋",
+      "en": "Lesbian",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "beautiful_girl",
+      "sourceId": "30",
+      "ja": "美少女",
+      "zh-CN": "美少女",
+      "en": "Beautiful Girl",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "beautiful_girl",
+      "sourceId": "tags?c2=5",
+      "ja": "Beautiful Girl",
+      "zh-CN": "美少女",
+      "en": "Beautiful Girl",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "pov",
+      "sourceId": "4m",
+      "ja": "主観",
+      "zh-CN": "主观视角",
+      "en": "POV",
+      "sources": [
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "pov",
+      "sourceId": "1g",
+      "ja": "ハメ撮り",
+      "zh-CN": "第一人称摄影",
+      "en": "POV",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "pov",
+      "sourceId": "tags?c7=45",
+      "ja": "POV",
+      "zh-CN": "第一人称摄影",
+      "en": "POV",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "squirting",
+      "sourceId": "1z",
+      "ja": "潮吹き",
+      "zh-CN": "潮吹",
+      "en": "Squirting",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "squirting",
+      "sourceId": "tags?c5=68",
+      "ja": "Squirting",
+      "zh-CN": "潮吹",
+      "en": "Squirting",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "blowjob",
+      "sourceId": "1o",
+      "ja": "フェラ",
+      "zh-CN": "口交",
+      "en": "Blowjob",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "blowjob",
+      "sourceId": "uncensored?c2=66",
+      "ja": "Blowjob",
+      "zh-CN": "口交",
+      "en": "Blowjob",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "masturbation",
+      "sourceId": "h",
+      "ja": "オナニー",
+      "zh-CN": "自慰",
+      "en": "Masturbation",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "masturbation",
+      "sourceId": "western?c2=28",
+      "ja": "Masturbation",
+      "zh-CN": "手淫",
+      "en": "Masturbation",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "orgasm",
+      "sourceId": "e3",
+      "ja": "アクメ・オーガズム",
+      "zh-CN": "绝顶高潮",
+      "en": "アクメ・オーガズム",
+      "sources": [
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "orgasm",
+      "sourceId": "tags?c1=360",
+      "ja": "Climax",
+      "zh-CN": "绝顶高潮",
+      "en": "Climax",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "creampie",
+      "sourceId": "uncensored-gre084",
+      "ja": "中出し",
+      "zh-CN": "内射",
+      "en": "Creampie",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "creampie",
+      "sourceId": "tags?c5=18",
+      "ja": "Creampie",
+      "zh-CN": "中出",
+      "en": "Creampie",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "maid",
+      "sourceId": "uncensored-13",
+      "ja": "メイド",
+      "zh-CN": "女仆",
+      "en": "Maid",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "maid",
+      "sourceId": "tags?c3=113",
+      "ja": "Maid",
+      "zh-CN": "女佣",
+      "en": "Maid",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "nurse",
+      "sourceId": "17",
+      "ja": "看護婦・ナース",
+      "zh-CN": "护士",
+      "en": "Nurse",
+      "sources": [
+        "jav321",
+        "javbus"
+      ]
+    },
+    {
+      "canonicalId": "nurse",
+      "sourceId": "uncensored-gre035",
+      "ja": "看護婦",
+      "zh-CN": "护士",
+      "en": "Nurse",
+      "sources": [
+        "avsox",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "nurse",
+      "sourceId": "tags?c2=115",
+      "ja": "Nurse",
+      "zh-CN": "护士",
+      "en": "Nurse",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "female_teacher",
+      "sourceId": "1n",
+      "ja": "女教師",
+      "zh-CN": "女教师",
+      "en": "Female Teacher",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "female_teacher",
+      "sourceId": "tags?c2=158",
+      "ja": "Female Teacher",
+      "zh-CN": "女教师",
+      "en": "Female Teacher",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "abuse",
+      "sourceId": "b4",
+      "ja": "凌辱",
+      "zh-CN": "凌辱",
+      "en": "Abuse",
+      "sources": [
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "abuse",
+      "sourceId": "tags?c6=21",
+      "ja": "Abuse",
+      "zh-CN": "凌辱",
+      "en": "Abuse",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "kissing",
+      "sourceId": "6v",
+      "ja": "キス・接吻",
+      "zh-CN": "接吻",
+      "en": "Kiss Kiss",
+      "sources": [
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "kissing",
+      "sourceId": "tags?c5=124",
+      "ja": "Kiss",
+      "zh-CN": "接吻",
+      "en": "Kiss",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "titjob",
+      "sourceId": "1s",
+      "ja": "パイズリ",
+      "zh-CN": "乳交",
+      "en": "Titty Fuck",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "titjob",
+      "sourceId": "tags?c5=14",
+      "ja": "Titty Fuck",
+      "zh-CN": "乳交",
+      "en": "Titty Fuck",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "cowgirl",
+      "sourceId": "42",
+      "ja": "騎乗位",
+      "zh-CN": "骑乘位",
+      "en": "Cowgirl",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "cowgirl",
+      "sourceId": "tags?c5=37",
+      "ja": "Cowgirl",
+      "zh-CN": "骑乘位",
+      "en": "Cowgirl",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "handjob",
+      "sourceId": "x",
+      "ja": "手コキ",
+      "zh-CN": "打手枪",
+      "en": "Handjob",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "handjob",
+      "sourceId": "tags?c5=102",
+      "ja": "Handjob",
+      "zh-CN": "手淫",
+      "en": "Handjob",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "facial",
+      "sourceId": "5",
+      "ja": "顔射",
+      "zh-CN": "颜射",
+      "en": "Facial",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "facial",
+      "sourceId": "uncensored?c2=8",
+      "ja": "Facial",
+      "zh-CN": "颜射",
+      "en": "Facial",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "cum_swallowing",
+      "sourceId": "u",
+      "ja": "ごっくん",
+      "zh-CN": "吞精",
+      "en": "Cum Swallowing",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "anal",
+      "sourceId": "r",
+      "ja": "アナル",
+      "zh-CN": "肛交",
+      "en": "Anal",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "anal",
+      "sourceId": "western?c2=23",
+      "ja": "Anal",
+      "zh-CN": "肛交",
+      "en": "Anal",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "bondage",
+      "sourceId": "3p",
+      "ja": "拘束",
+      "zh-CN": "拘束",
+      "en": "Tied Up",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "bondage",
+      "sourceId": "uncensored?c2=14",
+      "ja": "Tied up",
+      "zh-CN": "捆绑",
+      "en": "Tied up",
+      "sources": [
+        "javdb"
+      ]
+    },
+    {
+      "canonicalId": "sm",
+      "sourceId": "tags?c6=60",
+      "ja": "SM",
+      "zh-CN": "SM",
+      "en": "SM",
+      "sources": [
+        "avsox",
+        "jav321",
+        "javbus",
+        "javdb",
+        "javlib"
+      ]
+    },
+    {
+      "canonicalId": "voyeurism",
+      "sourceId": "2v",
+      "ja": "盗撮・のぞき",
+      "zh-CN": "偷窥",
+      "en": "Voyeur",
+      "sources": [
+        "jav321",
+        "javbus"
+      ]
+    },
+    {
+      "canonicalId": "voyeurism",
+      "sourceId": "tags?c1=145",
+      "ja": "Voyeur",
+      "zh-CN": "偷窥",
+      "en": "Voyeur",
+      "sources": [
+        "javdb"
+      ]
+    }
+  ]
+}

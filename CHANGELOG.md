@@ -1,5 +1,19 @@
 # Changelog
 
+## V1-22 Hotfix 3 - Detail Hero Cleanup & Curated Genre Vocabulary
+
+- Work Detail 顶部 Hero Gallery 不再展示 poster；poster 继续用于作品墙、列表、首页与人物相关作品封面。
+- Hero Gallery 仅展示更适合宽屏浏览的 fanart / screenshot / gallery / cover 等图片；如果没有兼容资产则直接进入 Metadata，不强制创建空画廊。
+- 移除完整 `source-genre-catalog.{csv,json}` Runtime 方案，不再把用户提供的 1271 条混合来源分类原样固化进仓库。
+- 从参考表中人工提取 67 条明确来源别名，新增 `genre-source-aliases.{csv,json}`，所有别名必须指向现有 Canonical Genre。
+- Canonical Genre 从旧 15 项校正并扩充为 33 个明确内容题材。
+- `デビュー作 / 周年 / ハイビジョン` 从 Genre 移除，`有码 / Blu-ray` 等也保持 source-only，不进入题材 Facet。
+- 新增美少女、主观视角、潮吹、口交、自慰、绝顶高潮、内射、女仆、护士、女教师、凌辱、接吻、乳交、骑乘位、手交、颜射、吞精、肛交、拘束、SM、偷窥等受控 Genre。
+- Import Classification Normalizer 改为读取 `genres.*` + `genre-source-aliases.*`，避免代码/资源双重真相。
+- Vocabulary Repair 会移除早期误建的 `first_work / anniversary / high_definition` Genre 引用。
+- 新增 ADR-038 与 Approved Genre Source Aliases 文档，并要求删除旧 Source Genre Catalog 文件。
+- 产品版本继续保持 `0.1.22`，作为 V1-22 Vocabulary / Presentation Hotfix。
+
 ## V1-22 Hotfix 2 - Adaptive Work Media Gallery & Fluid Desktop Layout
 
 - 修复纵向 poster / cover 在固定横向 Gallery Stage 中显示过小的问题。

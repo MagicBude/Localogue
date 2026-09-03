@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-22 Desktop Information Architecture & Metadata Localization**：在 V1-21 Vocabulary Governance 基础上，V1-22 修复筛选 / 分页 / 切语言时页面回跳顶部的问题，统一采用保留旧结果的 stale-while-refresh；同时把用户提供的 1271 条 Genre 多语词表接入 Source Genre Catalog，并将 Work Detail 重构为更高信息密度的“海报 + 字段表”布局。
+当前实现已推进到 **V1-22 Desktop Information Architecture & Metadata Localization** 并完成三轮实机热修：筛选 / 分页 / 切语言采用 stale-while-refresh；Work Detail 使用顶部宽屏媒体画廊 + 下方高密度字段表；Hotfix 3 不再保存完整外部 Genre 参考表，而是收敛为 **33 个 Canonical Genre + 67 条人工批准来源别名**。详情页 Hero Gallery 同时不再展示纵向 poster，poster 继续服务作品墙 / 列表封面。
 
 Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset → Media** 编排：先让 NFO 创建或补充 Work，再关联 poster / fanart / thumb，最后运行既有增量媒体扫描重新匹配 Work。高级用户仍可分别执行视频扫描与 NFO/图片 Preview / Import。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
