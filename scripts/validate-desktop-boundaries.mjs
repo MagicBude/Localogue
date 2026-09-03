@@ -14,6 +14,9 @@ const required = [
   "apps/desktop/src/local-asset-import.ts",
   "apps/desktop/src/desktop-asset-image.tsx",
   "apps/desktop/src/desktop-work-results.tsx",
+  "apps/desktop/src/desktop-work-explorer.tsx",
+  "apps/desktop/src/desktop-person-explorer.tsx",
+  "apps/desktop/src/desktop-catalog-browser.tsx",
   "apps/desktop/src/desktop-management.tsx",
   "src/application/library/library-query.ts",
   "src/application/importers/nfo-filename-metadata.ts",
@@ -111,6 +114,27 @@ if (!errors.length) {
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
   if (!desktopWorkResults.includes('"grid" | "list" | "table"') || !desktopWorkResults.includes("DesktopWorkViewSwitcher")) {
     errors.push("V1-18 Desktop Works 必须对齐 Web 的海报墙 / 列表 / 表格三种表现视图。");
+  }
+  const desktopWorkExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-work-explorer.tsx"), "utf8");
+  const desktopPersonExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-person-explorer.tsx"), "utf8");
+  const desktopCatalogBrowser = readFileSync(path.join(root, "apps/desktop/src/desktop-catalog-browser.tsx"), "utf8");
+  for (const token of ["personIds", "directorIds", "makerIds", "labelIds", "seriesIds", "genreIds", "workTypeIds", "tagIds", "releaseYears", "releaseFrom", "releaseTo", "durationMin", "durationMax", "hasCover", "hasMedia"]) {
+    if (!desktopWorkExplorer.includes(token)) errors.push(`V1-19 Desktop Work 多维筛选缺少 WorkQuery 条件：${token}`);
+  }
+  if (!desktopWorkExplorer.includes("DesktopWorkFilterChips") || !desktopWorkExplorer.includes("DesktopWorkViewSwitcher")) {
+    errors.push("V1-19 Desktop Work Explorer 必须同时保留已选筛选 Chips 与三视图切换。");
+  }
+  for (const token of ["statuses", "birthYears", "debutYears", "retirementYears", "heightMin", "heightMax", "PersonSort"]) {
+    if (!desktopPersonExplorer.includes(token)) errors.push(`V1-19 Desktop 人物高级筛选缺少条件：${token}`);
+  }
+  if (!desktopApp.includes("fixedPersonId={id}") || !desktopApp.includes("recentCards") || !desktopApp.includes('view="grid"')) {
+    errors.push("V1-19 首页最近作品与 Person 相关作品必须复用真实海报 Work Explorer / Work Results，而不是旧占位 Tile。");
+  }
+  for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
+    if (!desktopCatalogBrowser.includes(token)) errors.push(`V1-19 Desktop 分类浏览缺少目录维度：${token}`);
+  }
+  if (!desktopApp.includes('{ id: "browse", label: "浏览"')) {
+    errors.push("V1-19 Desktop 主导航必须提供分类浏览入口。");
   }
   if (!desktopAssetImage.includes("readPrivateAssetBytes") || !rust.includes("read_private_asset_bytes")) {
     errors.push("V1-18 Desktop 必须通过受限 Private Asset Reader 显示本地图片，不能继续只画占位符。");
@@ -210,7 +234,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-18 Unified Library Sync、Private Asset 安全读取、Works 三视图、Desktop CRUD、Media 手工绑定审计、Shared Pack 管理，以及 Hotfix 迭代目录扫描 / junction 防环边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-19 首页/人物关联作品海报、多维 Work Facet、人物高级筛选、分类浏览、三视图，以及 V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
 }
 
 function walkTextFiles(directory) {

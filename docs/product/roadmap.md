@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-18 Desktop Presentation Parity & Unified Library Sync**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 解决独立 NFO 存量资料迁移，V1-17 建立 Unified Library Source 与 Desktop 日常管理闭环，V1-18 再补齐真实本地图片展示、Works 三视图和一键同步编排。
+当前已推进到 **V1-19 Desktop Discovery & Presentation Parity**。V1-18 补齐真实本地图片展示、Works 三视图和 Unified Library 同步；V1-19 继续关闭 Web/Desktop 日常浏览差距，把首页海报、完整 Work Facet、People 高级筛选、Person 相关作品二次筛选和分类浏览接入 Desktop。
 
 已完成重点：
 
@@ -58,18 +58,26 @@
 - ~~MediaFile bind / rebind / unbind 与审计 Receipt~~（V1-17）；
 - ~~Desktop Works 海报墙 / 列表 / 表格三视图~~（V1-18）；
 - ~~Private poster / cover 受限 Native IPC 实际展示~~（V1-18）；
-- ~~Unified Library NFO → Asset → Media 一键显式同步~~（V1-18）。
+- ~~Unified Library NFO → Asset → Media 一键显式同步~~（V1-18）；
+- ~~Desktop 首页最近作品真实海报~~（V1-19）；
+- ~~Desktop Works 完整多维 Facet 与已选筛选 Chips~~（V1-19）；
+- ~~Desktop People 高级筛选~~（V1-19）；
+- ~~Person Detail 相关作品海报 / 三视图 / 二次 Facet~~（V1-19）；
+- ~~Desktop Maker / Label / Series / Genre / Director / Work Type / Tag 分类浏览~~（V1-19）。
 
-### V1-19：Desktop Governance & Native Enhancement
+### V1-19：Desktop Discovery & Presentation Parity
+
+本阶段完成日常浏览对齐：完整 Work Facet、People 高级筛选、Person 相关作品二次筛选、首页/关联作品海报和分类浏览。
+
+### V1-20：Desktop Governance Parity
 
 下一阶段重点：
 
-- Desktop 高级 Works / People Facet、排序、分页与更多实体浏览；
-- 将 V1-17 Desktop Private CRUD 进一步接入既有 Commit Plan / Audit / History 治理规则；
+- 将 Desktop Private CRUD 接入既有 Commit Plan / Audit / History 治理规则；
 - Evidence / Review / Curation / History Desktop 交互；
-- 将 V1-16/V1-17 Bootstrap Ingest 中的冲突型更新继续收敛到完整治理链；
+- Bootstrap Ingest 冲突型更新收敛到完整治理链；
 - Shared / Personal Portable Pack Desktop 导入导出；
-- Person 头像实际展示与更完整 Presentation Preference 对齐；
+- Presentation Preference Workbench 与更多人物 Asset 管理；
 - 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复业务规则。
 
 ### 后续 Desktop Native Enhancement

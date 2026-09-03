@@ -1,0 +1,155 @@
+import { useEffect, useState, type ReactNode } from "react";
+
+import {
+  getPreferredPersonName,
+  localizeText,
+} from "@/application/services/localization-service";
+import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
+
+import { DesktopWorkExplorer } from "./desktop-work-explorer";
+import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+
+type CatalogKind = "makers" | "labels" | "series" | "genres" | "directors" | "workTypes" | "tags";
+
+interface CatalogSelection {
+  kind: CatalogKind;
+  id: string;
+  label: string;
+}
+
+interface CatalogItem {
+  id: string;
+  label: string;
+  count: number;
+}
+
+export function DesktopCatalogBrowser({
+  repository,
+  openWork,
+}: {
+  repository: TauriLibraryRepository;
+  openWork: (id: string) => void;
+}) {
+  const [selection, setSelection] = useState<CatalogSelection | null>(null);
+  const data = useAsyncCatalogData(async () => {
+    const [result, organizations, series, genres, tags, people] = await Promise.all([
+      repository.listWorks({ page: 1, pageSize: 1 }),
+      repository.listOrganizations(),
+      repository.listSeries(),
+      repository.listGenres(),
+      repository.listTags(),
+      repository.listPeople({ page: 1, pageSize: 100000 }),
+    ]);
+    const peopleById = new Map(people.items.map((person) => [person.id, person]));
+    return {
+      makers: organizations.filter((item) => item.kind === "maker").map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "makers", item.id) })).filter(hasCount).sort(catalogSort),
+      labels: organizations.filter((item) => item.kind === "label").map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "labels", item.id) })).filter(hasCount).sort(catalogSort),
+      series: series.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "series", item.id) })).filter(hasCount).sort(catalogSort),
+      genres: genres.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "genres", item.id) })).filter(hasCount).sort(catalogSort),
+      tags: tags.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "tags", item.id) })).filter(hasCount).sort(catalogSort),
+      directors: result.facets.directors.map((facet) => ({ id: facet.id, label: peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, "ja") : facet.id, count: facet.count })).sort(catalogSort),
+      workTypes: result.facets.workTypes.map((facet) => ({ id: facet.id, label: friendlyId(facet.id), count: facet.count })).sort(catalogSort),
+    };
+  }, [repository]);
+
+  if (data.loading) return <BrowserState>正在生成分类索引…</BrowserState>;
+  if (data.error || !data.value) return <BrowserState error>{data.error ?? "无法读取分类索引。"}</BrowserState>;
+
+  if (selection) {
+    return (
+      <div className="page-stack">
+        <button className="back-button" onClick={() => setSelection(null)}>← 返回分类浏览</button>
+        <section className="page-title">
+          <span className="eyebrow">CATALOG · {catalogTitle(selection.kind).toUpperCase()}</span>
+          <h1>{selection.label}</h1>
+          <p>从分类索引进入后仍然可以继续组合其他 Facet；这一点与 Web 分类详情页保持一致。</p>
+        </section>
+        <DesktopWorkExplorer
+          key={`${selection.kind}:${selection.id}`}
+          repository={repository}
+          onOpen={openWork}
+          initialQuery={catalogQuery(selection)}
+          storageKey="localogue.desktop.catalog-work-view"
+        />
+      </div>
+    );
+  }
+
+  const sections: Array<{ kind: CatalogKind; title: string; eyebrow: string; items: CatalogItem[] }> = [
+    { kind: "makers", title: "厂商", eyebrow: "MAKERS", items: data.value.makers },
+    { kind: "labels", title: "厂牌", eyebrow: "LABELS", items: data.value.labels },
+    { kind: "series", title: "系列", eyebrow: "SERIES", items: data.value.series },
+    { kind: "genres", title: "Genre", eyebrow: "GENRES", items: data.value.genres },
+    { kind: "directors", title: "导演", eyebrow: "DIRECTORS", items: data.value.directors },
+    { kind: "workTypes", title: "作品类型", eyebrow: "WORK TYPES", items: data.value.workTypes },
+    { kind: "tags", title: "Tag", eyebrow: "TAGS", items: data.value.tags },
+  ];
+
+  return (
+    <div className="page-stack">
+      <section className="page-title">
+        <span className="eyebrow">EXPLORE · CATALOG INDEX</span>
+        <h1>分类浏览</h1>
+        <p>对齐 Web 的厂商、厂牌、系列、Genre、导演、作品类型和 Tag 索引；点击任意分类后继续使用完整作品多维筛选。</p>
+      </section>
+      <div className="desktop-catalog-sections">
+        {sections.map((section) => (
+          <section className="settings-card" key={section.kind}>
+            <div className="section-heading"><div><span className="eyebrow">{section.eyebrow}</span><h2>{section.title}</h2></div><small className="muted">{section.items.length} 项</small></div>
+            {section.items.length ? (
+              <div className="desktop-catalog-grid">
+                {section.items.slice(0, 120).map((item) => (
+                  <button key={item.id} onClick={() => setSelection({ kind: section.kind, id: item.id, label: item.label })} type="button">
+                    <strong>{item.label}</strong><small>{item.count} 部作品</small>
+                  </button>
+                ))}
+              </div>
+            ) : <p className="muted">当前资料源没有这个维度的数据。</p>}
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function catalogQuery(selection: CatalogSelection): WorkQuery {
+  switch (selection.kind) {
+    case "makers": return { sort: "release_desc", makerIds: [selection.id] };
+    case "labels": return { sort: "release_desc", labelIds: [selection.id] };
+    case "series": return { sort: "release_desc", seriesIds: [selection.id] };
+    case "genres": return { sort: "release_desc", genreIds: [selection.id] };
+    case "directors": return { sort: "release_desc", directorIds: [selection.id] };
+    case "workTypes": return { sort: "release_desc", workTypeIds: [selection.id] };
+    case "tags": return { sort: "release_desc", tagIds: [selection.id] };
+  }
+}
+
+function catalogTitle(kind: CatalogKind): string {
+  return ({ makers: "maker", labels: "label", series: "series", genres: "genre", directors: "director", workTypes: "work type", tags: "tag" } as const)[kind];
+}
+
+function facetCount(result: WorkSearchResult, key: "makers" | "labels" | "series" | "genres" | "tags", id: string): number {
+  return result.facets[key].find((facet) => facet.id === id)?.count ?? 0;
+}
+
+function hasCount(item: CatalogItem): boolean { return item.count > 0; }
+function catalogSort(a: CatalogItem, b: CatalogItem): number { return b.count - a.count || a.label.localeCompare(b.label, "ja"); }
+function friendlyId(value: string): string { return value.replace(/^work[-_]?type[-_:]?/i, "").replace(/[-_]/g, " ") || value; }
+
+function BrowserState({ children, error = false }: { children: ReactNode; error?: boolean }) {
+  return <div className={error ? "empty-state desktop-explorer-state error-state" : "empty-state desktop-explorer-state"}>{children}</div>;
+}
+
+function useAsyncCatalogData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
+  const [state, setState] = useState<{ loading: boolean; value?: T; error?: string }>({ loading: true });
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    let disposed = false;
+    setState((current) => ({ ...current, loading: true, error: undefined }));
+    void factory().then((value) => { if (!disposed) setState({ loading: false, value }); })
+      .catch((error: unknown) => { if (!disposed) setState({ loading: false, error: error instanceof Error ? error.message : String(error) }); });
+    return () => { disposed = true; };
+  }, dependencies);
+  /* eslint-enable react-hooks/exhaustive-deps */
+  return state;
+}

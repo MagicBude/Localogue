@@ -65,3 +65,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-18
 - [ADR-034：Desktop 本地 Asset 使用受限 IPC 读取，Unified Library 使用显式顺序同步](ADR-034-private-asset-ipc-and-unified-library-sync.md)
 
+
+### V1-19
+- [ADR-035：Desktop Discovery Parity 复用共享 Query Core](ADR-035-desktop-discovery-parity-reuses-shared-query-core.md)

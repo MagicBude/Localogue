@@ -435,3 +435,218 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .unified-sync-card { border-color: #465142; background: linear-gradient(135deg, rgba(31,43,30,.96), rgba(33,34,31,.96)); }
   .desktop-asset-preview { background: #292a26; }
 }
+
+/* V1-19: Desktop faceted browsing and presentation parity. */
+.desktop-library-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.desktop-facet-panel {
+  position: sticky;
+  top: 78px;
+  display: grid;
+  gap: 12px;
+  max-height: calc(100vh - 112px);
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+}
+.desktop-facet-panel__heading,
+.desktop-person-filter-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.desktop-facet-panel__heading > div,
+.desktop-person-filter-heading > div {
+  display: grid;
+  gap: 2px;
+}
+.desktop-facet-panel__heading small,
+.desktop-person-filter-heading small { color: var(--muted); }
+.desktop-filter-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.desktop-facet-group {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.desktop-facet-group summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.desktop-facet-group summary small { color: var(--muted); }
+.desktop-facet-options {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+  max-height: 230px;
+  overflow: auto;
+}
+.desktop-facet-options label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  font-size: 12px;
+}
+.desktop-facet-options label span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desktop-facet-options label small {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.desktop-results-panel { min-width: 0; }
+.desktop-active-filters {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel-soft);
+}
+.desktop-active-filters > strong {
+  flex: 0 0 auto;
+  padding-top: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.desktop-active-filters > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.desktop-active-filters button {
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+}
+.desktop-explorer-state { min-height: 110px; }
+.desktop-person-filter-panel {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
+}
+.desktop-person-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 1.6fr) repeat(4, minmax(130px, .7fr));
+  gap: 10px;
+}
+.desktop-person-search { grid-column: span 2; }
+.desktop-people-results { display: grid; gap: 14px; }
+.desktop-person-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 14px;
+}
+.desktop-person-card {
+  display: grid;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  text-align: left;
+}
+.desktop-person-card:hover { transform: translateY(-1px); }
+.desktop-person-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--panel-soft);
+}
+.desktop-person-portrait img,
+.desktop-person-detail-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.desktop-person-portrait .avatar-placeholder,
+.desktop-person-detail-portrait .avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
+}
+.desktop-person-card__body {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+}
+.desktop-person-card__body strong { font-size: 15px; }
+.desktop-person-card__body span,
+.desktop-person-card__body em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+}
+.desktop-home-people-grid { margin-bottom: 6px; }
+.desktop-person-detail-hero {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 22px;
+}
+.desktop-person-detail-portrait {
+  position: relative;
+  overflow: hidden;
+  min-height: 225px;
+  border-radius: 16px;
+  background: var(--panel-soft);
+}
+.desktop-person-detail-copy { align-self: center; }
+.desktop-person-detail-copy h1 { margin: 8px 0; }
+
+@media (max-width: 1180px) {
+  .desktop-library-layout { grid-template-columns: 230px minmax(0, 1fr); }
+  .desktop-person-filter-grid { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+  .desktop-person-search { grid-column: span 2; }
+}
+@media (max-width: 860px) {
+  .desktop-library-layout { grid-template-columns: 1fr; }
+  .desktop-facet-panel { position: static; max-height: none; }
+  .desktop-person-filter-grid { grid-template-columns: 1fr 1fr; }
+  .desktop-person-search { grid-column: 1 / -1; }
+  .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
+}
+.desktop-catalog-sections { display: grid; gap: 16px; }
+.desktop-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 9px;
+}
+.desktop-catalog-grid button {
+  display: grid;
+  gap: 5px;
+  min-height: 72px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-soft);
+  text-align: left;
+}
+.desktop-catalog-grid button:hover { border-color: var(--accent); }
+.desktop-catalog-grid button small { color: var(--muted); }

@@ -2,35 +2,20 @@
 
 ## 当前阶段
 
-**V1-18：Desktop Presentation Parity & Unified Library Sync。**
+**V1-19：Desktop Discovery & Presentation Parity。**
 
-V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
+V1-18 的 Unified Library、真实 Private Asset 展示与 Native I/O Hotfix 已通过实机同步验证。V1-19 根据实机验收继续关闭 Desktop 的浏览差距：
 
-V1-18 针对 V1-17 实机验收暴露的 Presentation 缺口收尾：已有 Asset 现在可以通过受限 Native IPC 真正显示在 Desktop Works / Work Detail；Works 对齐 Web 的海报墙、列表、表格三种视图。
+- 首页最近作品使用真实 poster / cover；
+- Works 对齐 Web 完整多维 Facet、self-excluding count、Chips、分页和三视图；
+- People 对齐姓名/别名、状态、出生/出道/引退年份、身高和排序；
+- Person Detail 的相关作品复用完整 Work Explorer，因此支持海报、三视图与二次筛选；
+- 新增 Browse 一级入口，覆盖 Maker / Label / Series / Genre / Director / Work Type / Tag；
+- Web/Desktop 继续共用 `library-query`，没有复制第二套查询算法。
 
-Unified Library 增加显式“一键同步资料库”，按 **NFO → Asset → Media** 固定顺序运行，避免只扫描出 MediaFile 而 Work / Asset 尚未同步的半完成状态。独立 Preview / Import 和“仅扫描视频”仍保留给高级排查；Shared Pack 继续只读。
+### 明确留到 V1-20
 
-### V1-18 实机稳定性 Hotfix 3
-
-- 修复 Asset SHA-256 的 1 MiB 固定栈缓冲导致 Windows `STATUS_STACK_OVERFLOW` 的高风险路径；
-- SHA-256 改为 256 KiB 堆缓冲；
-- 高频 Native 文件读写、Canonical 写入与删除迁移到 async blocking worker；
-- ffprobe 等待同样移出调用线程；
-- 新增 `native_io` 序列诊断日志；
-- Hotfix 1/2 的迭代目录扫描、防环与特殊卷兼容继续保留。
-
-## V1-18 Presentation Parity / Unified Sync
-
-- Desktop Works 新增海报墙 / 列表 / 表格三种展示方式，并共享同一查询结果；
-- 海报墙与列表实际显示 Private poster / cover，不再固定使用占位符；
-- Work Detail 显示首图和本地 Asset 图片预览；
-- Rust 新增 `read_private_asset_bytes`，只允许读取当前 Private Library 的 `asset-files/`；
-- Native Reader 拒绝绝对路径和 `..`，并限制图片扩展名、大小与 magic bytes；
-- 不为动态资料库开启宽泛 `asset://` scope；
-- Media 页面新增“一键同步 Unified Library”；
-- 同步顺序固定为 NFO → Asset → Media，新 Work 创建后会重新发现并关联图片；
-- 继续复用 V1-14 增量媒体扫描，未变化视频不因元数据同步而无条件重复 Probe / Hash；
-- V1-19 再继续 Evidence / Review / Curation / History、完整高级 Facet 与 Portable Pack Desktop 对齐。
+Evidence / Review / Curation / History/Restore、Portable Pack 完整导入导出和 Presentation Preference Workbench 仍属于治理对齐，不在 V1-19 冒充完成。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -239,7 +224,7 @@ Unified Library 增加显式“一键同步资料库”，按 **NFO → Asset �
 - 已有 Work 使用 fill / merge，不静默覆盖已有核心字段；
 - Rust NFO Reader 仅允许 `.nfo`、单文件 10 MB；
 - Desktop Canonical 写白名单扩大到明确 Private 集合，写根由 Rust 从 Desktop Settings 强制解析，Shared Pack 仍只读；
-- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-19；
+- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-20；
 - V1-16 当时仅允许删除 Private `media-files`；V1-17 已扩展为受引用保护的 Work / Person / Asset / MediaFile 删除。
 - `findWorkByCode` 兼容带 / 不带连字符番号。
 

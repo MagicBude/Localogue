@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-18 Desktop Presentation Parity & Unified Library Sync**：在 V1-17 Unified Library Root、NFO / 本地 Asset 汇聚和 Desktop CRUD 基础上，Desktop Works 现在补齐与 Web 对齐的海报墙 / 列表 / 表格三种展示方式，并能通过受限 Native IPC 真正读取 Private `asset-files/` 中的 poster / cover。
+当前实现已推进到 **V1-19 Desktop Discovery & Presentation Parity**：在 V1-18 真实本地图片展示、Works 三视图与 Unified Library 同步稳定后，V1-19 继续补齐 Web/Desktop 日常浏览差距：首页最近作品和 Person 相关作品使用真实海报，Works 提供完整多维 Facet 与 Chips，People 提供高级筛选，并新增 Maker / Label / Series / Genre / Director / Work Type / Tag 分类浏览。
 
 Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset → Media** 编排：先让 NFO 创建或补充 Work，再关联 poster / fanart / thumb，最后运行既有增量媒体扫描重新匹配 Work。高级用户仍可分别执行视频扫描与 NFO/图片 Preview / Import。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
@@ -81,7 +81,12 @@ Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset 
 - Native Asset 导入执行扩展名 / 大小 / magic bytes 校验与 SHA-256 内容寻址，原始文件不移动；
 - Desktop Works 海报墙 / 列表 / 表格三种 Presentation 视图；
 - Desktop Private poster / cover 通过受限 Native Asset Reader 实际显示；
-- Desktop Unified Library 一键按 NFO → Asset → Media 顺序显式同步。
+- Desktop Unified Library 一键按 NFO → Asset → Media 顺序显式同步；
+- Desktop 首页最近作品真实海报；
+- Desktop Works 完整多维 Facet、self-excluding count 与已选筛选 Chips；
+- Desktop People 状态 / 出生 / 出道 / 引退年份 / 身高高级筛选；
+- Desktop Person Detail 相关作品海报、三视图、分页与二次 Facet；
+- Desktop Maker / Label / Series / Genre / Director / Work Type / Tag 分类浏览。
 
 ## 技术栈
 
@@ -269,7 +274,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-18 已提供正式 Home / Works / People / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap、Unified Library Root、本地 Asset 汇聚，以及 Works 海报墙 / 列表 / 表格三视图和真实 Private poster 展示。Evidence / Review / Curation / History、完整高级 Facet 与 Portable Pack 等重治理工作台将在 V1-19 继续对齐。
+Desktop V1-19 已提供正式 Home / Works / People / Browse / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap、Unified Library Root、本地 Asset 汇聚，以及 Works 海报墙 / 列表 / 表格三视图和真实 Private poster 展示。Evidence / Review / Curation / History、Portable Pack 完整交互与 Presentation Preference Workbench 等重治理能力将在 V1-20 继续对齐。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 

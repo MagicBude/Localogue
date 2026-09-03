@@ -1,8 +1,8 @@
 # Localogue Desktop
 
-V1-18：**Desktop Presentation Parity & Unified Library Sync**。
+V1-19：**Desktop Discovery & Presentation Parity**。
 
-Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-18 在 Unified Library Root 和日常 CRUD 基线上补齐 Works 海报墙 / 列表 / 表格三视图、Private poster 实际渲染，以及 NFO → Asset → Media 一键显式同步。它与 Next.js Web 共享 Domain / Application 规则，但使用 Tauri/Rust 作为本地平台适配层。
+Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-18 建立 Works 三视图、Private poster 实际渲染和 Unified Library 同步；V1-19 继续对齐 Web 日常探索能力：首页/Person 相关作品真实海报、完整 Work Facet、People 高级筛选和 Catalog Browse。它与 Next.js Web 共享 Domain / Application Query Core，但使用 Tauri/Rust 作为本地平台适配层。
 
 当前提供：
 
@@ -46,7 +46,7 @@ works / people / organizations / series / genres / tags / assets / media-files
 - Work 详情可先解除 / 删除 Private Asset 元数据，再完成受保护的 Work 删除；原始图片不会被自动物理删除；
 - NFO 导入已有 Work 只能 fill / merge，不静默覆盖已有核心事实。
 
-完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-19。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
+完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-20。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
 
 ## 开发
 

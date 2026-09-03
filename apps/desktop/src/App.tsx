@@ -15,14 +15,12 @@ import {
   getPreferredPersonName,
   localizeText,
 } from "@/application/services/localization-service";
+import type { Asset } from "@/domain/entities/asset";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
-import type { PersonSort } from "@/domain/queries/person-query";
-import type { WorkSort } from "@/domain/queries/work-query";
-import type { LibraryRepository } from "@/domain/repositories/library-repository";
 
 import type {
   DesktopBootstrapSettings,
@@ -46,9 +44,10 @@ import {
   buildDesktopWorkCards,
   chooseWorkPoster,
   DesktopWorkResults,
-  DesktopWorkViewSwitcher,
-  type DesktopWorkViewMode,
 } from "./desktop-work-results";
+import { DesktopWorkExplorer } from "./desktop-work-explorer";
+import { DesktopPersonCard, DesktopPersonExplorer } from "./desktop-person-explorer";
+import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
 import {
   importLocalAssetPreview,
   previewLocalAssetImport,
@@ -85,13 +84,14 @@ const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   webUrl: "http://127.0.0.1:3000",
 };
 
-type DesktopPage = "home" | "works" | "people" | "media" | "packs" | "settings";
+type DesktopPage = "home" | "works" | "people" | "browse" | "media" | "packs" | "settings";
 type DetailTarget = { kind: "work" | "person"; id: string } | null;
 
 const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string }> = [
   { id: "home", label: "首页", eyebrow: "HOME" },
   { id: "works", label: "作品", eyebrow: "WORKS" },
   { id: "people", label: "人物", eyebrow: "PEOPLE" },
+  { id: "browse", label: "浏览", eyebrow: "BROWSE" },
   { id: "media", label: "媒体", eyebrow: "MEDIA" },
   { id: "packs", label: "资料包", eyebrow: "PACKS" },
   { id: "settings", label: "设置", eyebrow: "SETTINGS" },
@@ -211,7 +211,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span>
             <strong>Localogue</strong>
-            <small>Desktop · V1-18</small>
+            <small>Desktop · V1-19</small>
           </span>
         </button>
 
@@ -246,7 +246,7 @@ export default function App() {
       <main className="content-shell">
         <header className="topbar">
           <div>
-            <span className="eyebrow">NFO LIBRARY INGEST · FEATURE PARITY II</span>
+            <span className="eyebrow">DESKTOP FEATURE PARITY · FACETED BROWSE · V1-19</span>
             <strong>{NAV_ITEMS.find((item) => item.id === page)?.label}</strong>
           </div>
           <div className="topbar-actions">
@@ -287,6 +287,8 @@ export default function App() {
           ) : (
             <PeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
+        ) : page === "browse" ? (
+          <DesktopCatalogBrowser repository={repository} openWork={openWork} />
         ) : page === "media" ? (
           <MediaPage
             repository={repository}
@@ -341,17 +343,18 @@ function HomePage({
   openWork,
   openPerson,
 }: {
-  repository: LibraryRepository;
+  repository: TauriLibraryRepository;
   openWork: (id: string) => void;
   openPerson: (id: string) => void;
 }) {
   const data = useAsyncData(async () => {
-    const [works, people, organizations, series, media] = await Promise.all([
+    const [works, people, organizations, series, media, assets] = await Promise.all([
       repository.listWorks({ page: 1, pageSize: 6, sort: "release_desc" }),
       repository.listPeople({ page: 1, pageSize: 9999, sort: "name_asc" }),
       repository.listOrganizations(),
       repository.listSeries(),
       repository.listMediaFiles(),
+      repository.listAssets(),
     ]);
     const performerIds = new Set(
       works.items.flatMap((work) =>
@@ -360,20 +363,37 @@ function HomePage({
           .map((relation) => relation.personId),
       ),
     );
+    const featuredPeople = people.items.filter((person) => performerIds.has(person.id)).slice(0, 6);
+    const workCounts = new Map<string, number>();
+    for (const work of (await repository.listWorks({ page: 1, pageSize: 100000 })).items) {
+      for (const personId of new Set(work.personRelations.filter((relation) => relation.role === "performer").map((relation) => relation.personId))) {
+        workCounts.set(personId, (workCounts.get(personId) ?? 0) + 1);
+      }
+    }
+    const portraitByPersonId = new Map<string, Asset>();
+    const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
+    for (const person of featuredPeople) {
+      const portrait = (person.portraitAssetId ? assetsById.get(person.portraitAssetId) : undefined)
+        ?? assets.find((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "portrait");
+      if (portrait) portraitByPersonId.set(person.id, portrait);
+    }
     return {
       works,
       people,
       organizations,
       series,
       media,
-      featuredPeople: people.items.filter((person) => performerIds.has(person.id)).slice(0, 6),
+      featuredPeople,
+      workCounts,
+      portraitByPersonId,
+      recentCards: buildDesktopWorkCards(works.items, people.items, organizations, assets),
     };
   }, [repository]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return <ErrorState error={data.error} />;
 
-  const { works, people, organizations, series, media, featuredPeople } = data.value;
+  const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
   const workCount = works.total;
   const peopleCount = people.total;
 
@@ -383,8 +403,7 @@ function HomePage({
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>你的 Localogue，现在就在桌面端。</h1>
         <p>
-          V1-18 已进入 Presentation Parity 与 Unified Library Sync 阶段。作品页已对齐海报墙 / 列表 / 表格三视图，本地 poster / cover 可直接显示；本地资料支持一键按 NFO → Asset → Media 顺序同步。首页、作品、人物、媒体、资料包与设置
-          直接读取和 Web 相同的数据模型，并共享查询规则；视频、NFO 与本地海报可以跨子目录按 Work 汇聚。
+          V1-19 继续做 Web → Desktop 的浏览与展示对齐：首页最近作品直接使用真实海报，作品库和人物详情共享完整 Facet 查询，人物库也对齐状态、年份、身高与排序筛选。
         </p>
       </section>
 
@@ -397,18 +416,20 @@ function HomePage({
       </section>
 
       <SectionTitle eyebrow="RECENT WORKS" title="最近作品" />
-      <div className="work-grid">
-        {works.items.map((work) => (
-          <WorkTile key={work.id} work={work} onOpen={() => openWork(work.id)} />
-        ))}
-      </div>
+      <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} />
 
       {featuredPeople.length ? (
         <>
           <SectionTitle eyebrow="PEOPLE" title="相关人物" />
-          <div className="people-grid">
+          <div className="desktop-person-grid desktop-home-people-grid">
             {featuredPeople.map((person) => (
-              <PersonTile key={person.id} person={person} onOpen={() => openPerson(person.id)} />
+              <DesktopPersonCard
+                key={person.id}
+                person={person}
+                portrait={portraitByPersonId.get(person.id)}
+                workCount={workCounts.get(person.id) ?? 0}
+                onOpen={() => openPerson(person.id)}
+              />
             ))}
           </div>
         </>
@@ -428,72 +449,15 @@ function WorksPage({
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
 }) {
-  const [text, setText] = useState("");
-  const [sort, setSort] = useState<WorkSort>("release_desc");
-  const [mediaFilter, setMediaFilter] = useState<"all" | "yes" | "no">("all");
-  const [page, setPage] = useState(1);
-  const [view, setView] = useState<DesktopWorkViewMode>(() => {
-    const saved = window.localStorage.getItem("localogue.desktop.work-view");
-    return saved === "list" || saved === "table" ? saved : "grid";
-  });
-  const pageSize = 24;
-
-  useEffect(() => setPage(1), [text, sort, mediaFilter]);
-
-  const data = useAsyncData(async () => {
-    const result = await repository.listWorks({
-      text: text || undefined,
-      page,
-      pageSize,
-      sort,
-      ...(mediaFilter === "all" ? {} : { hasMedia: mediaFilter === "yes" }),
-    });
-    const [people, organizations, assets] = await Promise.all([
-      repository.listPeople({ page: 1, pageSize: 100000 }),
-      repository.listOrganizations(),
-      repository.listAssets(),
-    ]);
-    return {
-      result,
-      cards: buildDesktopWorkCards(result.items, people.items, organizations, assets),
-    };
-  }, [repository, text, sort, mediaFilter, page]);
-
-  function changeView(next: DesktopWorkViewMode): void {
-    setView(next);
-    window.localStorage.setItem("localogue.desktop.work-view", next);
-  }
-
   return (
     <div className="page-stack">
       <PageTitle
-        eyebrow="CANONICAL WORKS · PRESENTATION PARITY"
+        eyebrow="CANONICAL WORKS · FACETED SEARCH · PRESENTATION PARITY"
         title="作品库"
-        description="Desktop 与 Web 共用 WorkQuery，并对齐海报墙 / 列表 / 表格三种作品视图；Private poster / cover 会通过受限 Native Asset Reader 直接显示。"
+        description="对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。"
       />
       <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      <section className="filter-bar">
-        <label className="search-box"><span>搜索番号或标题</span><input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="例如 MIDV-077 / タイトル" /></label>
-        <label><span>排序</span><select value={sort} onChange={(event) => setSort(event.target.value as WorkSort)}><option value="release_desc">发行日期 ↓</option><option value="release_asc">发行日期 ↑</option><option value="code_asc">番号 A→Z</option><option value="code_desc">番号 Z→A</option><option value="title_asc">标题 A→Z</option><option value="updated_desc">最近更新</option></select></label>
-        <label><span>本地媒体</span><select value={mediaFilter} onChange={(event) => setMediaFilter(event.target.value as "all" | "yes" | "no")}><option value="all">全部</option><option value="yes">已有媒体</option><option value="no">无媒体</option></select></label>
-      </section>
-      {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
-        <>
-          <div className="desktop-results-toolbar">
-            <div className="result-meta"><strong>{data.value.result.total}</strong> 项作品 · 第 {data.value.result.page} 页</div>
-            <DesktopWorkViewSwitcher current={view} onChange={changeView} />
-          </div>
-          <DesktopWorkResults cards={data.value.cards} view={view} onOpen={openWork} />
-          {!data.value.cards.length ? <EmptyResults /> : null}
-          {data.value.result.total > pageSize ? (
-            <div className="desktop-pagination" aria-label="作品分页">
-              <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← 上一页</button>
-              <span>{page} / {Math.max(1, Math.ceil(data.value.result.total / pageSize))}</span>
-              <button disabled={page * pageSize >= data.value.result.total} onClick={() => setPage((value) => value + 1)}>下一页 →</button>
-            </div>
-          ) : null}
-        </>
-      )}
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} storageKey="localogue.desktop.work-view" />
     </div>
   );
 }
@@ -548,7 +512,7 @@ function WorkDetailPage({
         setMessage("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。");
         return;
       }
-      if (!window.confirm(`从 ${work.code} 解除并删除这个 Private Asset 元数据？\n\n${storagePath}\n\n原始图片与 content-addressed 文件不会在 V1-18 自动物理删除。`)) return;
+      if (!window.confirm(`从 ${work.code} 解除并删除这个 Private Asset 元数据？\n\n${storagePath}\n\n原始图片与 content-addressed 文件不会由 Desktop 自动物理删除。`)) return;
       const nextWork: Work = {
         ...work,
         assetIds: work.assetIds.filter((value) => value !== assetId),
@@ -637,38 +601,15 @@ function PeoplePage({
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
 }) {
-  const [text, setText] = useState("");
-  const [sort, setSort] = useState<PersonSort>("name_asc");
-  const [status, setStatus] = useState("all");
-  const data = useAsyncData(
-    () => repository.listPeople({
-      text: text || undefined,
-      page: 1,
-      pageSize: 1000,
-      sort,
-      ...(status === "all" ? {} : { statuses: [status] }),
-    }),
-    [repository, text, sort, status],
-  );
-
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="CANONICAL PEOPLE" title="人物库" description="正式名、译名、罗马字、别名和旧艺名进入共享查询范围；Private Person 可在 Desktop 新建、编辑与安全删除。" />
+      <PageTitle
+        eyebrow="PEOPLE · PROFILE · ADVANCED FILTER"
+        title="人物库"
+        description="对齐 Web 的人物高级筛选：姓名 / 别名、活动状态、出道年份、引退年份、出生年份、身高区间和排序；人物库仍按有 performer 作品关系的人物收口。"
+      />
       <CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />
-      <section className="filter-bar">
-        <label className="search-box"><span>搜索人物</span><input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="姓名 / 别名 / 旧艺名" /></label>
-        <label><span>排序</span><select value={sort} onChange={(event) => setSort(event.target.value as PersonSort)}><option value="name_asc">名称 A→Z</option><option value="name_desc">名称 Z→A</option><option value="birth_desc">出生日期 ↓</option><option value="debut_desc">出道日期 ↓</option><option value="height_desc">身高 ↓</option></select></label>
-        <label><span>状态</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">全部</option><option value="active">active</option><option value="retired">retired</option><option value="hiatus">hiatus</option><option value="inactive">inactive</option><option value="unknown">unknown</option></select></label>
-      </section>
-      {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
-        <>
-          <div className="result-meta"><strong>{data.value.total}</strong> 项人物</div>
-          <div className="people-grid">
-            {data.value.items.map((person) => <PersonTile key={person.id} person={person} onOpen={() => openPerson(person.id)} />)}
-          </div>
-          {!data.value.items.length ? <EmptyResults /> : null}
-        </>
-      )}
+      <DesktopPersonExplorer repository={repository} onOpen={openPerson} />
     </div>
   );
 }
@@ -691,21 +632,33 @@ function PersonDetailPage({
   const data = useAsyncData(async () => {
     const person = await repository.findPersonById(id);
     if (!person) return null;
-    const works = await repository.listWorks({ personIds: [id], page: 1, pageSize: 9999, sort: "release_desc" });
-    return { person, works };
+    const [workCount, assets] = await Promise.all([
+      repository.listWorks({ personIds: [id], page: 1, pageSize: 1 }),
+      repository.listAssets(),
+    ]);
+    const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
+    const portrait = (person.portraitAssetId ? assetsById.get(person.portraitAssetId) : undefined)
+      ?? assets.find((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "portrait");
+    return { person, workCount: workCount.total, portrait };
   }, [repository, id]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error="人物不存在。" /> : <ErrorState error={data.error} />;
-  const { person, works } = data.value;
+  const { person, workCount, portrait } = data.value;
+  const displayName = getPreferredPersonName(person, "ja");
 
   return (
     <div className="page-stack">
       <button className="back-button" onClick={onBack}>← 返回人物库</button>
-      <section className="detail-hero person-detail-hero">
-        <span className="status-chip">{person.activityStatus}</span>
-        <h1>{getPreferredPersonName(person, "ja")}</h1>
-        <p>{localizeText(person.biographies, "zh-CN", "暂无人物简介")}</p>
+      <section className="detail-hero person-detail-hero desktop-person-detail-hero">
+        <div className="desktop-person-detail-portrait">
+          <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />
+        </div>
+        <div className="desktop-person-detail-copy">
+          <span className="status-chip">{person.activityStatus}</span>
+          <h1>{displayName}</h1>
+          <p>{localizeText(person.biographies, "zh-CN", "暂无人物简介")}</p>
+        </div>
       </section>
       <PersonEditor
         repository={repository}
@@ -718,7 +671,7 @@ function PersonDetailPage({
         <InfoCard label="出生日期" value={person.birthDate?.value} />
         <InfoCard label="出生地" value={localizeText(person.birthPlace, "zh-CN")} />
         <InfoCard label="身高" value={person.heightCm ? `${person.heightCm} cm` : undefined} />
-        <InfoCard label="作品数" value={String(works.total)} />
+        <InfoCard label="作品数" value={String(workCount)} />
       </section>
       <section className="settings-card">
         <span className="eyebrow">NAMES</span>
@@ -732,10 +685,13 @@ function PersonDetailPage({
           ))}
         </div>
       </section>
-      <SectionTitle eyebrow="RELATED WORKS" title="相关作品" />
-      <div className="work-grid">
-        {works.items.map((work) => <WorkTile key={work.id} work={work} onOpen={() => openWork(work.id)} />)}
-      </div>
+      <SectionTitle eyebrow="RELATED WORKS · FACETED SEARCH" title="相关作品" />
+      <DesktopWorkExplorer
+        repository={repository}
+        onOpen={openWork}
+        fixedPersonId={id}
+        storageKey="localogue.desktop.person-related-work-view"
+      />
     </div>
   );
 }
@@ -1281,28 +1237,6 @@ function SettingsPage({
         <code className="path-block">{runtime?.settingsPath ?? "—"}</code>
       </section>
     </div>
-  );
-}
-
-function WorkTile({ work, onOpen }: { work: Work; onOpen: () => void }) {
-  return (
-    <button className="work-tile" onClick={onOpen}>
-      <span className="work-poster-placeholder"><span>{work.code.slice(0, 2)}</span></span>
-      <span className="work-tile-body">
-        <small>{work.releaseDate?.value ?? "DATE UNKNOWN"}</small>
-        <strong>{work.code}</strong>
-        <span>{localizeText(work.titles, "ja")}</span>
-      </span>
-    </button>
-  );
-}
-
-function PersonTile({ person, onOpen }: { person: Person; onOpen: () => void }) {
-  return (
-    <button className="person-tile" onClick={onOpen}>
-      <span className="avatar-placeholder">{getPreferredPersonName(person, "ja").slice(0, 1)}</span>
-      <span><strong>{getPreferredPersonName(person, "ja")}</strong><small>{person.activityStatus}</small></span>
-    </button>
   );
 }
 

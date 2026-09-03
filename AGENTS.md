@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-18 Desktop Presentation Parity & Unified Library Sync**。
+当前阶段：**V1-19 Desktop Discovery & Presentation Parity**。
 
 V1 当前约束：
 
@@ -255,7 +255,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Rust 写集合白名单必须继续只有 `media-files`。扩大读取能力不等于扩大写权限，更不得演变成 Webview 可指定任意目录/集合的通用文件 API。
 - Desktop 媒体扫描必须使用与浏览页面相同的合并 Repository，使 Shared Pack Work 能参与番号匹配，但扫描产生的 MediaFile 只能写入 Private Library。
 - V1-15 的 Home / Works / People / Media / Packs / Settings 是正式 Desktop 产品壳，不再把 Desktop 视为 Runtime 测试控制台。
-- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-19。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
+- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-20。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
 
 
 ## V1-17 实现约束补充
@@ -280,7 +280,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Works 海报墙 / 列表 / 表格只能是同一查询结果的 Presentation 切换，不得为三个视图复制三套 Repository 查询和过滤逻辑。
 - Unified Library 一键同步顺序固定为 NFO → Asset → Media；Asset 必须在 NFO Import 后重新发现，确保新建 Work 可立即成为图片关联目标。
 - 一键同步仍然是用户显式操作；不得把 NFO / Asset Canonical 写入改成后台静默扫描。高级 Preview / Import 入口必须保留。
-- V1-18 解决 Presentation 与同步编排，不代表 Evidence / Review / Curation / History、完整高级 Facet 或 Portable Pack Desktop 已完成；这些继续进入 V1-19。
+- V1-18 解决 Presentation 与同步编排；V1-19 已补完整高级 Facet / People Filter / Catalog Browse。Evidence / Review / Curation / History 与 Portable Pack 完整治理继续进入 V1-20。
 
 
 
@@ -297,3 +297,13 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Tauri Native Command 调用链禁止使用数百 KiB/1 MiB 级固定栈数组处理文件；流式文件缓冲必须优先使用堆分配。
 - 高频文件 I/O、Hash、Canonical JSON 读写必须使用 async command + blocking worker，不得重新压回 Tauri main thread。
 - `scripts/validate-desktop-boundaries.mjs` 对以上边界有自动回归检查。
+
+
+## V1-19 Desktop Discovery Parity 约束
+
+- 首页、Works、Person Detail 相关作品必须复用 `DesktopWorkResults` / `DesktopWorkExplorer`，禁止重新引入无 Asset 的占位 WorkTile。
+- Desktop Work 多维筛选必须通过 `TauriLibraryRepository -> queryWorks`，禁止在组件里重新实现匹配业务规则。
+- Person Detail 的人物条件是固定查询上下文，其余 Work Facet 可继续组合。
+- People 高级筛选继续复用 `queryPeople`；Desktop UI state 可以不同于 Web URL，但 Query 语义必须一致。
+- Browse 目录只负责生成 WorkQuery 入口，不建立第二套 Catalog 数据模型。
+- Evidence / Review / Curation / History / Portable Pack 完整治理继续进入 V1-20。

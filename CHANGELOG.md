@@ -1,3 +1,16 @@
+# Changelog
+
+## V1-19 - Desktop Discovery & Presentation Parity
+
+- 首页最近作品改用真实 poster / cover 卡片。
+- 新增 `DesktopWorkExplorer`，对齐 Web 完整 Work Facet、动态计数、Chips、分页和三视图。
+- Person Detail 相关作品复用完整 Work Explorer，解决无图和不能二次筛选的问题。
+- 新增 `DesktopPersonExplorer`，对齐人物状态、出生/出道/引退年份、身高与排序筛选。
+- 人物卡和 Person Detail 支持已存在 portrait Asset 的安全显示。
+- 新增 Desktop Browse：Maker / Label / Series / Genre / Director / Work Type / Tag 分类索引，并可继续组合 Work Facet。
+- 保持 Web/Desktop 共用 `library-query` Query Core。
+- V1-18 Native I/O Stack Safety、Unified Sync 和 Shared Pack 只读边界保持不变。
+
 # 更新日志
 
 ## V1-18 Hotfix 3 · Native I/O Stack Safety
