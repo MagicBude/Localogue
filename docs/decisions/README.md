@@ -71,3 +71,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 ### V1-20
 - [ADR-036：Desktop 将 UI 语言与元数据语言作为独立展示偏好](ADR-036-desktop-ui-and-metadata-language-preferences.md)
+
+
+### V1-22
+- [ADR-037：Desktop Stable Refresh 与 Source Genre Localization](ADR-037-desktop-stable-refresh-and-source-genre-localization.md)

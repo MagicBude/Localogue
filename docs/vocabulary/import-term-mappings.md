@@ -88,3 +88,9 @@ Localogue 的 Tag 定义是“用户自己的整理标签”。来源 NFO 的 `<
 5. 对应的自动校验 / 测试。
 
 禁止只在某一个 Importer 中硬编码临时映射。
+
+## Source Genre Catalog（V1-22）
+
+`source-genre-catalog.{csv,json}` 提供 1271 条跨站 Genre 名称及中 / 日 / 英翻译。它只是一层 reference/localization catalog。
+
+新增自动映射时，必须从 catalog 中选词后 **显式** 加入本映射协议；不能因为一个来源站把词放在 Genre 分类中，就自动创建 Canonical Genre。

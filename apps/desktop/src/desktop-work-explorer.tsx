@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useMemo,
   useState,
   type ChangeEvent,
@@ -10,10 +9,13 @@ import {
   getPreferredPersonName,
   localizeText,
 } from "@/application/services/localization-service";
+import { localizeGenre } from "@/application/services/genre-localization-service";
+import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 import type { WorkQuery, WorkSearchResult, WorkSort } from "@/domain/queries/work-query";
 
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
+import { useStableAsyncData } from "./use-stable-async-data";
 import {
   buildDesktopWorkCards,
   DesktopWorkResults,
@@ -63,8 +65,6 @@ export function DesktopWorkExplorer({
     const saved = window.localStorage.getItem(storageKey);
     return saved === "list" || saved === "table" ? saved : "grid";
   });
-
-  useEffect(() => setPage(1), [query, fixedPersonId]);
 
   const data = useAsyncExplorerData(async () => {
     const effectiveQuery: WorkQuery = {
@@ -136,7 +136,7 @@ export function DesktopWorkExplorer({
     const genreOptions = genres
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, metadataLanguage, item.id),
+        label: localizeGenre(item, metadataLanguage, item.id),
         count: result.facets.genres.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.genreIds?.includes(item.id))
@@ -158,7 +158,7 @@ export function DesktopWorkExplorer({
     const workTypes = [...workTypeIds]
       .map((id) => ({
         id,
-        label: friendlyId(id),
+        label: workTypeDefinition(id) ? localizeText(workTypeDefinition(id)!.names, metadataLanguage, id) : friendlyId(id),
         count: result.facets.workTypes.find((facet) => facet.id === id)?.count ?? 0,
       }))
       .sort(optionSort);
@@ -184,6 +184,11 @@ export function DesktopWorkExplorer({
     };
   }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage]);
 
+  function changeQuery(next: WorkQuery): void {
+    setPage(1);
+    setQuery(next);
+  }
+
   function changeView(next: DesktopWorkViewMode): void {
     setView(next);
     window.localStorage.setItem(storageKey, next);
@@ -199,16 +204,17 @@ export function DesktopWorkExplorer({
     <div className="desktop-library-layout">
       <WorkFacetPanel
         query={query}
-        onChange={setQuery}
+        onChange={changeQuery}
         fixedPersonId={fixedPersonId}
         data={data.value}
       />
 
       <section className="desktop-results-panel">
-        <DesktopWorkFilterChips query={query} data={data.value} onChange={setQuery} />
+        <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
             {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
+            {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
           <DesktopWorkViewSwitcher current={view} onChange={changeView} />
         </div>
@@ -292,8 +298,8 @@ function WorkFacetPanel({
       <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
       <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
       <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("Genre")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("Tag")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
     </aside>
   );
 }
@@ -327,9 +333,9 @@ function DesktopWorkFilterChips({
   pushArrayChips(chips, "makerIds", t("厂商"), query.makerIds, maps.makerIds);
   pushArrayChips(chips, "labelIds", t("厂牌"), query.labelIds, maps.labelIds);
   pushArrayChips(chips, "seriesIds", t("系列"), query.seriesIds, maps.seriesIds);
-  pushArrayChips(chips, "genreIds", "Genre", query.genreIds, maps.genreIds);
+  pushArrayChips(chips, "genreIds", t("题材"), query.genreIds, maps.genreIds);
   pushArrayChips(chips, "workTypeIds", t("类型"), query.workTypeIds, maps.workTypeIds);
-  pushArrayChips(chips, "tagIds", "Tag", query.tagIds, maps.tagIds);
+  pushArrayChips(chips, "tagIds", t("标签"), query.tagIds, maps.tagIds);
   pushArrayChips(chips, "releaseYears", t("年份"), query.releaseYears, maps.releaseYears);
   if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `${t("发行日期")} ≥ ${query.releaseFrom}` });
   if (query.releaseTo) chips.push({ key: "releaseTo", label: `${t("发行日期")} ≤ ${query.releaseTo}` });
@@ -411,20 +417,7 @@ function ExplorerState({ children, error = false }: { children: ReactNode; error
 }
 
 function useAsyncExplorerData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
-  const [state, setState] = useState<{ loading: boolean; value?: T; error?: string }>({ loading: true });
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    let disposed = false;
-    setState((current) => ({ ...current, loading: true, error: undefined }));
-    void factory().then((value) => {
-      if (!disposed) setState({ loading: false, value });
-    }).catch((error: unknown) => {
-      if (!disposed) setState({ loading: false, error: error instanceof Error ? error.message : String(error) });
-    });
-    return () => { disposed = true; };
-  }, dependencies);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  return state;
+  return useStableAsyncData(factory, dependencies, (error) => error instanceof Error ? error.message : String(error));
 }
 
 function optionSort(a: FilterOption, b: FilterOption): number {

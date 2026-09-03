@@ -41,3 +41,5 @@ solo
 - `duplicate-confidence-levels`：重复候选用于排序和提示的置信级别。
 
 两者都只表达治理信号，不表达“资料正确”或“已经确认重复”。
+
+- [Source Genre Catalog](./source-genre-catalog.md)：跨站 Genre 中 / 日 / 英参考词典；仅用于展示、审计和映射候选，不自动晋升 Canonical。

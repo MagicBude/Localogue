@@ -151,6 +151,7 @@
 - [V1-18 Desktop Presentation Parity 与 Unified Library 同步实现导读](development/v1-18-desktop-presentation-parity-and-unified-sync-walkthrough.md)
 - [V1-19 Desktop Discovery Parity 实现导读](development/v1-19-desktop-discovery-parity-walkthrough.md)
 - [V1-20 Desktop UX & I18N Parity 实现导读](development/v1-20-desktop-ux-and-i18n-parity-walkthrough.md)
+- [V1-22 Desktop Information Architecture & Metadata Localization 实现导读](development/v1-22-desktop-information-architecture-and-metadata-localization-walkthrough.md)
 
 ## 开发
 

@@ -783,3 +783,142 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .vocabulary-unmapped-list { margin-top: 10px; max-height: 240px; overflow: auto; }
 @media (max-width: 760px) { .classification-group { grid-template-columns: 1fr; gap: 6px; } }
 @media (prefers-color-scheme: dark) { .classification-chip { background: #22231f; } }
+
+/* V1-22: stable refresh, denser work detail and metadata-first information architecture. */
+.desktop-refresh-indicator {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.desktop-work-detail-page { gap: 14px; }
+.desktop-work-record {
+  display: grid;
+  grid-template-columns: minmax(210px, 250px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.desktop-work-record__visual {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 9px;
+}
+.desktop-work-record__poster {
+  overflow: hidden;
+  aspect-ratio: 640 / 900;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.desktop-work-record__poster > img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.desktop-work-record__counts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.desktop-work-record__counts span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+.desktop-work-record__counts strong { color: var(--text); font-size: 13px; }
+.desktop-work-record__content {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.desktop-work-record__header {
+  padding: 17px 20px 15px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel-soft);
+}
+.desktop-work-record__header h1 {
+  margin: 8px 0 7px;
+  font-size: clamp(25px, 2.6vw, 38px);
+  line-height: 1.18;
+  letter-spacing: -.025em;
+}
+.desktop-work-record__header p {
+  margin: 0;
+  max-width: none;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.desktop-metadata-table { margin: 0; }
+.desktop-metadata-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  min-height: 44px;
+  border-bottom: 1px solid var(--border);
+}
+.desktop-metadata-row:last-child { border-bottom: 0; }
+.desktop-metadata-row dt,
+.desktop-metadata-row dd { margin: 0; padding: 10px 14px; }
+.desktop-metadata-row dt {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border);
+  background: rgba(0,0,0,.025);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+.desktop-metadata-row dd {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.desktop-inline-entity-links,
+.desktop-dense-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.desktop-inline-entity-links button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #1670c8;
+  font-weight: 680;
+}
+.desktop-inline-entity-links button:hover { text-decoration: underline; }
+.desktop-dense-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  font-size: 10px;
+  line-height: 1.25;
+}
+.desktop-dense-chip.is-strong { font-weight: 800; background: rgba(0,0,0,.055); }
+.desktop-local-assets-section { padding: 16px; }
+.desktop-local-assets-section .desktop-asset-gallery {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 9px;
+}
+.desktop-local-assets-section .desktop-asset-card-body { padding: 8px; }
+
+@media (max-width: 1050px) {
+  .desktop-work-record { grid-template-columns: 180px minmax(0, 1fr); }
+  .desktop-metadata-row { grid-template-columns: 112px minmax(0, 1fr); }
+}
+
+@media (prefers-color-scheme: dark) {
+  .desktop-metadata-row dt { background: rgba(255,255,255,.025); }
+  .desktop-dense-chip.is-strong { background: rgba(255,255,255,.07); }
+  .desktop-inline-entity-links button { color: #65a8ff; }
+}

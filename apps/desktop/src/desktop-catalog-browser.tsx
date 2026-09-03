@@ -1,21 +1,23 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
   getPreferredPersonName,
   localizeText,
 } from "@/application/services/localization-service";
+import { localizeGenre } from "@/application/services/genre-localization-service";
+import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
 
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
+import { useStableAsyncData } from "./use-stable-async-data";
 
 type CatalogKind = "makers" | "labels" | "series" | "genres" | "directors" | "workTypes" | "tags";
 
 interface CatalogSelection {
   kind: CatalogKind;
   id: string;
-  label: string;
 }
 
 interface CatalogItem {
@@ -47,10 +49,10 @@ export function DesktopCatalogBrowser({
       makers: organizations.filter((item) => item.kind === "maker").map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "makers", item.id) })).filter(hasCount).sort(catalogSort),
       labels: organizations.filter((item) => item.kind === "label").map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "labels", item.id) })).filter(hasCount).sort(catalogSort),
       series: series.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "series", item.id) })).filter(hasCount).sort(catalogSort),
-      genres: genres.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "genres", item.id) })).filter(hasCount).sort(catalogSort),
+      genres: genres.map((item) => ({ id: item.id, label: localizeGenre(item, metadataLanguage, item.id), count: facetCount(result, "genres", item.id) })).filter(hasCount).sort(catalogSort),
       tags: tags.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "tags", item.id) })).filter(hasCount).sort(catalogSort),
       directors: result.facets.directors.map((facet) => ({ id: facet.id, label: peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, metadataLanguage) : facet.id, count: facet.count })).sort(catalogSort),
-      workTypes: result.facets.workTypes.map((facet) => ({ id: facet.id, label: friendlyId(facet.id), count: facet.count })).sort(catalogSort),
+      workTypes: result.facets.workTypes.map((facet) => ({ id: facet.id, label: workTypeDefinition(facet.id) ? localizeText(workTypeDefinition(facet.id)!.names, metadataLanguage, facet.id) : friendlyId(facet.id), count: facet.count })).sort(catalogSort),
     };
   }, [repository, metadataLanguage]);
 
@@ -58,12 +60,13 @@ export function DesktopCatalogBrowser({
   if (data.error || !data.value) return <BrowserState error>{data.error ?? t("无法读取分类索引。")}</BrowserState>;
 
   if (selection) {
+    const selectionLabel = data.value[selection.kind].find((item) => item.id === selection.id)?.label ?? selection.id;
     return (
       <div className="page-stack">
         <button className="back-button" onClick={() => setSelection(null)}>← {t("返回分类浏览")}</button>
         <section className="page-title">
           <span className="eyebrow">CATALOG · {catalogTitle(selection.kind).toUpperCase()}</span>
-          <h1>{selection.label}</h1>
+          <h1>{selectionLabel}</h1>
           <p>{t("从分类索引进入后仍然可以继续组合其他 Facet；这一点与 Web 分类详情页保持一致。")}</p>
         </section>
         <DesktopWorkExplorer
@@ -81,10 +84,10 @@ export function DesktopCatalogBrowser({
     { kind: "makers", title: t("厂商"), eyebrow: "MAKERS", items: data.value.makers },
     { kind: "labels", title: t("厂牌"), eyebrow: "LABELS", items: data.value.labels },
     { kind: "series", title: t("系列"), eyebrow: "SERIES", items: data.value.series },
-    { kind: "genres", title: "Genre", eyebrow: "GENRES", items: data.value.genres },
+    { kind: "genres", title: t("题材"), eyebrow: "GENRES", items: data.value.genres },
     { kind: "directors", title: t("导演"), eyebrow: "DIRECTORS", items: data.value.directors },
     { kind: "workTypes", title: t("作品类型"), eyebrow: "WORK TYPES", items: data.value.workTypes },
-    { kind: "tags", title: "Tag", eyebrow: "TAGS", items: data.value.tags },
+    { kind: "tags", title: t("标签"), eyebrow: "TAGS", items: data.value.tags },
   ];
 
   return (
@@ -101,7 +104,7 @@ export function DesktopCatalogBrowser({
             {section.items.length ? (
               <div className="desktop-catalog-grid">
                 {section.items.slice(0, 120).map((item) => (
-                  <button key={item.id} onClick={() => setSelection({ kind: section.kind, id: item.id, label: item.label })} type="button">
+                  <button key={item.id} onClick={() => setSelection({ kind: section.kind, id: item.id })} type="button">
                     <strong>{item.label}</strong><small>{t("{count} 部作品", { count: item.count })}</small>
                   </button>
                 ))}
@@ -143,15 +146,5 @@ function BrowserState({ children, error = false }: { children: ReactNode; error?
 }
 
 function useAsyncCatalogData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
-  const [state, setState] = useState<{ loading: boolean; value?: T; error?: string }>({ loading: true });
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    let disposed = false;
-    setState((current) => ({ ...current, loading: true, error: undefined }));
-    void factory().then((value) => { if (!disposed) setState({ loading: false, value }); })
-      .catch((error: unknown) => { if (!disposed) setState({ loading: false, error: error instanceof Error ? error.message : String(error) }); });
-    return () => { disposed = true; };
-  }, dependencies);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  return state;
+  return useStableAsyncData(factory, dependencies, (error) => error instanceof Error ? error.message : String(error));
 }

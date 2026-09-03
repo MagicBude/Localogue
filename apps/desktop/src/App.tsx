@@ -12,6 +12,7 @@ import {
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
 import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
+import { findSourceGenreCatalogItem, localizeGenre } from "@/application/services/genre-localization-service";
 import {
   getPreferredPersonName,
   localizeText,
@@ -71,6 +72,7 @@ import {
   type NfoImportItemStatus,
 } from "./nfo-library-import";
 import { applyVocabularyRepair, previewVocabularyRepair, type VocabularyRepairPreview, type VocabularyRepairResult } from "./vocabulary-repair";
+import { useStableAsyncData } from "./use-stable-async-data";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -557,19 +559,57 @@ function WorkDetailPage({
     }
   }
 
+  const makerName = work.makerId ? localizeText(organizations.get(work.makerId)?.names, metadataLanguage, work.makerId) : undefined;
+  const labelName = work.labelId ? localizeText(organizations.get(work.labelId)?.names, metadataLanguage, work.labelId) : undefined;
+  const seriesNames = work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, metadataLanguage, seriesId));
+  const workTypeNames = work.workTypeIds.map((workTypeId) => {
+    const definition = workTypeDefinition(workTypeId);
+    return definition ? localizeText(definition.names, metadataLanguage, workTypeId) : workTypeId;
+  });
+  const genreNames = work.genreIds.map((genreId) => localizeGenre(genres.get(genreId), metadataLanguage, genreId));
+  const tagNames = work.tagIds.map((tagId) => localizeText(tags.get(tagId)?.names, metadataLanguage, tagId));
+
   return (
-    <div className="page-stack">
+    <div className="page-stack desktop-work-detail-page">
       <button className="back-button" onClick={onBack}>← {t("返回作品库")}</button>
-      <section className="detail-hero desktop-work-detail-hero">
-        <div className="desktop-work-detail-poster">
-          <DesktopAssetImage asset={poster} alt={`${work.code} poster`} fallback={<span className="desktop-poster-placeholder"><b>{work.code}</b></span>} />
-        </div>
-        <div className="desktop-work-detail-copy">
-          <div className="code-badge">{work.code}</div>
-          <h1>{localizeText(work.titles, metadataLanguage)}</h1>
-          <p>{localizeText(work.descriptions, metadataLanguage, t("暂无简介"))}</p>
+
+      <section className="desktop-work-record">
+        <aside className="desktop-work-record__visual">
+          <div className="desktop-work-record__poster">
+            <DesktopAssetImage asset={poster} alt={`${work.code} poster`} fallback={<span className="desktop-poster-placeholder"><b>{work.code}</b></span>} />
+          </div>
+          <div className="desktop-work-record__counts">
+            <span>{t("本地媒体")} <strong>{media.length}</strong></span>
+            <span>{t("本地图片")} <strong>{assets.length}</strong></span>
+          </div>
+        </aside>
+
+        <div className="desktop-work-record__content">
+          <header className="desktop-work-record__header">
+            <span className="code-badge">{work.code}</span>
+            <h1>{localizeText(work.titles, metadataLanguage, work.code)}</h1>
+            <p>{localizeText(work.descriptions, metadataLanguage, t("暂无简介"))}</p>
+          </header>
+
+          <dl className="desktop-metadata-table">
+            <DenseDetailRow label={t("发行日期")} value={work.releaseDate?.value} />
+            <DenseDetailRow label={t("时长")} value={work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : undefined} />
+            <DenseDetailRow label={t("演员")}>
+              <DensePersonLinks relations={performers} people={people} language={metadataLanguage} onOpen={openPerson} />
+            </DenseDetailRow>
+            <DenseDetailRow label={t("导演")}>
+              <DensePersonLinks relations={directors} people={people} language={metadataLanguage} onOpen={openPerson} />
+            </DenseDetailRow>
+            <DenseDetailRow label={t("厂商")} value={makerName} />
+            <DenseDetailRow label={t("厂牌")} value={labelName} />
+            <DenseDetailRow label={t("系列")}><DenseChips values={seriesNames} /></DenseDetailRow>
+            <DenseDetailRow label={t("作品类型")}><DenseChips values={workTypeNames} emphasis /></DenseDetailRow>
+            <DenseDetailRow label={t("题材")}><DenseChips values={genreNames} /></DenseDetailRow>
+            <DenseDetailRow label={t("标签")}><DenseChips values={tagNames} /></DenseDetailRow>
+          </dl>
         </div>
       </section>
+
       <WorkEditor
         repository={repository}
         work={work}
@@ -577,27 +617,19 @@ function WorkDetailPage({
         onDeleted={() => { onLibraryChanged(); onBack(); }}
         setMessage={setMessage}
       />
-      <section className="detail-grid">
-        <InfoCard label={t("发行日期")} value={work.releaseDate?.value} />
-        <InfoCard label={t("时长")} value={work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : undefined} />
-        <InfoCard label={t("厂商")} value={organizations.get(work.makerId ?? "") ? localizeText(organizations.get(work.makerId ?? "")!.names, metadataLanguage) : undefined} />
-        <InfoCard label={t("厂牌")} value={organizations.get(work.labelId ?? "") ? localizeText(organizations.get(work.labelId ?? "")!.names, metadataLanguage) : undefined} />
-        <InfoCard label={t("系列")} value={work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, metadataLanguage)).filter((value) => value !== "—").join(" · ") || undefined} />
-        <InfoCard label={t("本地媒体")} value={t("{count} 个文件", { count: media.length })} />
-        <InfoCard label={t("本地图片")} value={t("{count} 个资产", { count: assets.length })} />
-      </section>
-      <DetailPeople title={t("演员")} relations={performers} people={people} onOpen={openPerson} />
-      <DetailPeople title={t("导演")} relations={directors} people={people} onOpen={openPerson} />
-      <section className="settings-card">
-        <span className="eyebrow">LOCAL ASSETS</span>
-        <h2>{t("本地图片资产")}</h2>
+
+      <section className="settings-card desktop-local-assets-section">
+        <div className="section-heading">
+          <div><span className="eyebrow">LOCAL ASSETS</span><h2>{t("本地图片资产")}</h2></div>
+          <small className="muted">{t("{count} 个资产", { count: assets.length })}</small>
+        </div>
         {assets.length ? (
           <div className="desktop-asset-gallery">
             {sortWorkAssets(assets).map((asset) => (
               <article className="desktop-asset-card" key={asset.id}>
                 <div className="desktop-asset-preview"><DesktopAssetImage asset={asset} alt={`${work.code} ${asset.type}`} fallback={<span className="desktop-poster-placeholder"><b>{asset.type}</b></span>} /></div>
                 <div className="desktop-asset-card-body">
-                  <span>{assetTypeLabel(asset.type)} · <code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span>
+                  <span>{assetTypeLabel(asset.type)} <code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span>
                   <code>{asset.storagePath}</code>
                   <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除")}</button>
                 </div>
@@ -606,29 +638,27 @@ function WorkDetailPage({
           </div>
         ) : <p className="muted">{t("尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / fanart / thumb 导入。")}</p>}
       </section>
-      <section className="settings-card">
-        <span className="eyebrow">CLASSIFICATION</span>
-        <h2>{t("分类与标签")}</h2>
-        <div className="classification-groups">
-          <ClassificationGroup
-            label={t("作品类型")}
-            values={work.workTypeIds.map((id) => {
-              const definition = workTypeDefinition(id);
-              return definition ? localizeText(definition.names, metadataLanguage, id) : id;
-            })}
-          />
-          <ClassificationGroup
-            label={t("Genre")}
-            values={work.genreIds.map((id) => localizeText(genres.get(id)?.names, metadataLanguage, id))}
-          />
-          <ClassificationGroup
-            label={t("Tag")}
-            values={work.tagIds.map((id) => localizeText(tags.get(id)?.names, metadataLanguage, id))}
-          />
-        </div>
-      </section>
     </div>
   );
+}
+
+function DenseDetailRow({ label, value, children }: { label: string; value?: string; children?: ReactNode }) {
+  return <div className="desktop-metadata-row"><dt>{label}</dt><dd>{children ?? (value && value !== "—" ? value : "—")}</dd></div>;
+}
+
+function DenseChips({ values, emphasis = false }: { values: string[]; emphasis?: boolean }) {
+  const visible = values.filter((value) => value && value !== "—");
+  if (!visible.length) return <>—</>;
+  return <span className="desktop-dense-chips">{visible.map((value) => <span className={emphasis ? "desktop-dense-chip is-strong" : "desktop-dense-chip"} key={value}>{value}</span>)}</span>;
+}
+
+function DensePersonLinks({ relations, people, language, onOpen }: { relations: Work["personRelations"]; people: Map<string, Person>; language: "ja" | "zh-CN" | "en"; onOpen: (id: string) => void }) {
+  if (!relations.length) return <>—</>;
+  return <span className="desktop-inline-entity-links">{relations.map((relation) => {
+    const person = people.get(relation.personId);
+    const label = person ? getPreferredPersonName(person, language) : relation.personId;
+    return <button key={`${relation.role}:${relation.personId}`} onClick={() => onOpen(relation.personId)} type="button">{label}</button>;
+  })}</span>;
 }
 
 function PeoplePage({
@@ -1106,7 +1136,11 @@ function MediaPage({
             <MiniStat label={t("移入 Genre")} value={vocabularyPreview.movedToGenres} />
             <MiniStat label={t("Unmapped 来源词")} value={vocabularyPreview.unmappedTerms.length} />
           </div>
-          {vocabularyPreview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{vocabularyPreview.unmappedTerms.slice(0, 200).map((term) => <code key={term}>{term}</code>)}</div></details> : null}
+          {vocabularyPreview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{vocabularyPreview.unmappedTerms.slice(0, 200).map((term) => {
+            const reference = findSourceGenreCatalogItem(term);
+            const localized = reference ? (metadataLanguage === "zh-CN" ? reference["zh-CN"] : metadataLanguage === "en" ? reference.en : reference.ja) : undefined;
+            return <code key={term} title={reference ? `${reference.sources.join(" / ")} · ${reference.note ?? "source genre catalog"}` : undefined}>{localized && localized !== term ? `${term} → ${localized}` : term}{reference ? ` · ${t("词表参考")}` : ""}</code>;
+          })}</div></details> : null}
           <p className="muted">{t("将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。", { genres: vocabularyPreview.removedImportedGenres, tags: vocabularyPreview.removedImportedTags })}</p>
         </> : <p className="muted">{t("尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。")}</p>}
         {vocabularyResult ? <p className="success-message">{t("上次修复：更新 {works} 个 Work · 新建 Series {series} · 新建 Genre {genres}", { works: vocabularyResult.updatedWorks, series: vocabularyResult.createdSeries, genres: vocabularyResult.createdGenres })}</p> : null}
@@ -1350,37 +1384,6 @@ function SettingsPage({
 }
 
 
-function ClassificationGroup({ label, values }: { label: string; values: string[] }) {
-  const { t } = useDesktopI18n();
-  const clean = values.filter((value) => value && value !== "—");
-  return <div className="classification-group"><strong>{label}</strong>{clean.length ? <div className="classification-chip-row">{clean.map((value) => <span className="classification-chip" key={`${label}:${value}`}>{value}</span>)}</div> : <span className="muted">{t("未设置")}</span>}</div>;
-}
-
-function DetailPeople({
-  title,
-  relations,
-  people,
-  onOpen,
-}: {
-  title: string;
-  relations: Work["personRelations"];
-  people: Map<string, Person>;
-  onOpen: (id: string) => void;
-}) {
-  const { metadataLanguage } = useDesktopI18n();
-  if (!relations.length) return null;
-  return (
-    <section className="settings-card">
-      <span className="eyebrow">RELATIONS</span><h2>{title}</h2>
-      <div className="people-inline">
-        {relations.map((relation) => {
-          const person = people.get(relation.personId);
-          return <button key={`${relation.personId}-${relation.role}`} onClick={() => onOpen(relation.personId)}>{person ? getPreferredPersonName(person, metadataLanguage) : relation.personId}</button>;
-        })}
-      </div>
-    </section>
-  );
-}
 
 function sortWorkAssets(assets: Asset[]): Asset[] {
   const rank: Record<string, number> = {
@@ -1488,22 +1491,7 @@ function EmptyResults() {
 }
 
 function useAsyncData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
-  const [state, setState] = useState<{ loading: boolean; value?: T; error?: unknown }>({ loading: true });
-  // Callers explicitly provide the stable dependency contract. The async factory itself is
-  // intentionally recreated by page components, so exhaustive-deps is disabled only here.
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    let disposed = false;
-    setState({ loading: true });
-    void factory().then((value) => {
-      if (!disposed) setState({ loading: false, value });
-    }).catch((error: unknown) => {
-      if (!disposed) setState({ loading: false, error });
-    });
-    return () => { disposed = true; };
-  }, dependencies);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  return state;
+  return useStableAsyncData(factory, dependencies);
 }
 
 

@@ -70,7 +70,10 @@
 - ~~Desktop UI / Metadata 中日英独立语言偏好~~（V1-20）；
 - ~~NFO 混合分类 Vocabulary Routing 与 unmapped policy~~（V1-21）；
 - ~~早期 NFO Genre / Tag 污染 Preview → Explicit Repair~~（V1-21）；
-- ~~Desktop Work Detail 分开展示 Work Type / Genre / Tag~~（V1-21）。
+- ~~Desktop Work Detail 分开展示 Work Type / Genre / Tag~~（V1-21）；
+- ~~Desktop stale-while-refresh，筛选 / 分页 / 切语言保持滚动位置~~（V1-22）；
+- ~~Source Genre Catalog 1271 条多语参考与 Web/Desktop Genre 本地化补全~~（V1-22）；
+- ~~Desktop Work Detail 高密度“海报 + Metadata Table”信息架构~~（V1-22）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
 
@@ -84,7 +87,11 @@
 
 本阶段先修复真实来源词表问题：受控 NFO 分类映射、历史分类审计/修复、Work Detail 分类展示。
 
-### V1-22：Desktop Governance Parity
+### V1-22：Desktop Information Architecture & Metadata Localization
+
+本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。Source Genre Catalog 只作为翻译 / 来源参考，不绕过 Canonical Vocabulary 映射边界。
+
+### V1-23：Desktop Governance Parity
 
 下一阶段重点：
 

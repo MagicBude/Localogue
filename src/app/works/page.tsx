@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
+import { localizeGenre } from "@/application/services/genre-localization-service";
 import { presentWorkCard } from "@/application/services/work-presentation-service";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
 import { EmptyState } from "@/components/empty-state";
@@ -102,7 +103,7 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
 
   const genreOptions = genres.map((item) => ({
     id: item.id,
-    label: localizeText(item.names, preferences.metadataLanguage, item.id),
+    label: localizeGenre(item, preferences.metadataLanguage, item.id),
     count: result.facets.genres.find((facet) => facet.id === item.id)?.count ?? 0,
   }));
 

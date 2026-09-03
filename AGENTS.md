@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-21 Vocabulary Governance & Work Metadata Visibility**。
+当前阶段：**V1-22 Desktop Information Architecture & Metadata Localization**。
 
 V1 当前约束：
 
@@ -255,7 +255,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Rust 写集合白名单必须继续只有 `media-files`。扩大读取能力不等于扩大写权限，更不得演变成 Webview 可指定任意目录/集合的通用文件 API。
 - Desktop 媒体扫描必须使用与浏览页面相同的合并 Repository，使 Shared Pack Work 能参与番号匹配，但扫描产生的 MediaFile 只能写入 Private Library。
 - V1-15 的 Home / Works / People / Media / Packs / Settings 是正式 Desktop 产品壳，不再把 Desktop 视为 Runtime 测试控制台。
-- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-22。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
+- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-23。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
 
 
 ## V1-17 实现约束补充
@@ -264,7 +264,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - NFO 识别必须优先使用 XML 内可验证的番号；XML 缺失或只有无关数字 ID 时，才从文件名保守识别番号。日期和片名只能作为缺失字段 fallback。
 - Desktop 批量 NFO 必须保持 **Preview -> Explicit Import**。扫描预览本身不得写 Canonical。
 - V1-16/V1-17 的 NFO / Local Asset Bootstrap Ingest 是对“所有外部导入先持久化 Evidence 再 Review”的一个**窄范围迁移例外**：只服务用户明确确认的本地存量资料打底；已有 Work 只能 fill / merge 缺失字段和精确关系，不得静默覆盖已有核心事实。不要把这个例外推广到在线 Provider、普通 Importer 或一般编辑。
-- V1-22 再把更广泛的冲突修改、Evidence / Review / Commit Plan / History 与 Portable Pack 治理链迁入 Desktop；V1-17/V1-18 的直接 Private CRUD 是本地私人层日常维护能力，不等价于完整 Evidence 审核治理。
+- V1-23 再把更广泛的冲突修改、Evidence / Review / Commit Plan / History 与 Portable Pack 治理链迁入 Desktop；V1-17/V1-18 的直接 Private CRUD 是本地私人层日常维护能力，不等价于完整 Evidence 审核治理。
 - Native Canonical Writer 的根目录必须由 Rust 从当前 Desktop Settings 自行解析，只能是已配置的 Private Library；Webview 不得传入任意写根目录。Shared Pack 必须在 Rust 边界保持只读。
 - V1-17 允许写 `works / people / organizations / series / genres / tags / assets / media-files`；Asset 二进制只能通过受限 Native 图片导入写入 Private `asset-files/`，不得接受任意写根。删除仅开放 `works / people / assets / media-files` 且必须通过 Native 引用检查；另有独立 Audit Writer 只允许 `media-binding-receipts`。
 - `libraryRoots` 是统一资料源的首选配置；`mediaScanPaths / nfoScanPaths` 只作为高级兼容补充。目录位置不得成为 Work/NFO/Media/Asset 的关系主键，可靠关联优先使用规范化作品番号。
@@ -280,7 +280,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Works 海报墙 / 列表 / 表格只能是同一查询结果的 Presentation 切换，不得为三个视图复制三套 Repository 查询和过滤逻辑。
 - Unified Library 一键同步顺序固定为 NFO → Asset → Media；Asset 必须在 NFO Import 后重新发现，确保新建 Work 可立即成为图片关联目标。
 - 一键同步仍然是用户显式操作；不得把 NFO / Asset Canonical 写入改成后台静默扫描。高级 Preview / Import 入口必须保留。
-- V1-18 解决 Presentation 与同步编排；V1-19 已补完整高级 Facet / People Filter / Catalog Browse。Evidence / Review / Curation / History 与 Portable Pack 完整治理继续进入 V1-22。
+- V1-18 解决 Presentation 与同步编排；V1-19 已补完整高级 Facet / People Filter / Catalog Browse。Evidence / Review / Curation / History 与 Portable Pack 完整治理继续进入 V1-23。
 
 
 
@@ -306,7 +306,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Person Detail 的人物条件是固定查询上下文，其余 Work Facet 可继续组合。
 - People 高级筛选继续复用 `queryPeople`；Desktop UI state 可以不同于 Web URL，但 Query 语义必须一致。
 - Browse 目录只负责生成 WorkQuery 入口，不建立第二套 Catalog 数据模型。
-- Evidence / Review / Curation / History / Portable Pack 完整治理继续进入 V1-22。
+- Evidence / Review / Curation / History / Portable Pack 完整治理继续进入 V1-23。
 
 ## V1-20 Desktop UX / I18N Parity 约束
 
@@ -318,7 +318,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Work Asset 展示顺序固定为 `poster -> fanart -> screenshot -> cover -> others`；poster/fanart/thumb 不允许再出现标签与图片顺序错位。
 - Sidebar 折叠和语言偏好都是 Desktop 本机 Presentation Preference；不得进入 Canonical Library。
 - Facet Rail 可以为可读性加宽、换行和响应式重排，但不得改变 WorkQuery / self-excluding Facet Count 的业务规则。
-- V1-20 不修改已通过 Windows 实机验证的 V1-18 Hotfix 3 Native I/O / Unified Library 链；Governance Parity 进入 V1-22。
+- V1-20 不修改已通过 Windows 实机验证的 V1-18 Hotfix 3 Native I/O / Unified Library 链；Governance Parity 进入 V1-23。
 
 
 ## V1-21 Vocabulary Governance 约束
@@ -329,3 +329,15 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Desktop 历史修复只自动处理 `genre_nfo_* / tag_nfo_*`，用户手工 Tag 不在自动修复范围。
 - Work Detail 必须分开展示 Work Type / Genre / Tag 的用户可见名称，不显示混合内部 ID 列表。
 - V1-18 Hotfix 3 Native I/O / Unified Library 扫描链继续冻结，除非有独立实机问题证据。
+
+
+## V1-22 Information Architecture / Metadata Localization 约束
+
+- Desktop 已有查询结果在筛选、分页或语言刷新时必须使用 stale-while-refresh；不得重新用矮 LoadingState 替换整块结果导致 WebView 滚动位置被夹回顶部。
+- UI 主语言切换默认同时更新 Metadata Language；高级 Metadata Language 仍允许独立覆盖。语言变化只影响 Presentation，不得写 Canonical。
+- Work Type、Person Activity Status 等受控枚举必须显示受控三语名称，不得直接向用户暴露 raw stable id。
+- Genre 显示优先使用 Canonical 当前语言名称；缺失时可通过 `source-genre-catalog` 做翻译补全，但 Source Genre Catalog 不是 Canonical Genre 白名单。
+- 用户提供的 Source Genre Catalog 必须保留来源、原始 ID/URL 与 note；任何“晋升为 Canonical Genre”的自动映射仍必须显式进入 `import-term-mappings`。
+- Work Detail 的核心事实、人物关系、组织关系、Series、Work Type、题材和标签必须位于同一高密度主信息区；不得把分类信息再次拆到页面最底部的大卡片。
+- V1-18 Hotfix 3 Native I/O / Unified Library 稳定实现继续冻结；本阶段不得因 Presentation 修改扩大 Native 文件权限。
+- V1-23 再继续 Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack 等完整治理链。

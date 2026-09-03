@@ -27,6 +27,11 @@ const required = [
   "resources/vocabularies/import-term-mappings.json",
   "resources/vocabularies/import-term-mappings.csv",
   "docs/vocabulary/import-term-mappings.md",
+  "resources/vocabularies/source-genre-catalog.json",
+  "resources/vocabularies/source-genre-catalog.csv",
+  "docs/vocabulary/source-genre-catalog.md",
+  "src/application/services/genre-localization-service.ts",
+  "apps/desktop/src/use-stable-async-data.ts",
   "src/infrastructure/importers/nfo-importer.ts",
   "apps/desktop/src-tauri/Cargo.toml",
   "apps/desktop/src-tauri/tauri.conf.json",
@@ -309,8 +314,45 @@ if (!errors.length) {
   if (!vocabularyRepair.includes('isPrivateEntity("works", work.id)')) {
     errors.push("V1-21 历史 Vocabulary Repair 必须显式限制为 Private Work，不能因为 Shared ID 恰好匹配旧 NFO 前缀而创建 Override。");
   }
-  if (!desktopApp.includes("分类词表审计") || !desktopApp.includes("ClassificationGroup") || !desktopApp.includes("workTypeDefinition")) {
-    errors.push("V1-21 Desktop 必须在 Work Detail 分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
+  if (!desktopApp.includes("分类词表审计") || !desktopApp.includes("workTypeDefinition") || !desktopApp.includes("DenseDetailRow") || !desktopApp.includes('label={t("作品类型")}') || !desktopApp.includes('label={t("题材")}') || !desktopApp.includes('label={t("标签")}')) {
+    errors.push("V1-21/V1-22 Desktop 必须在 Work Detail 主信息区分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
+  }
+
+  const sourceGenreCatalog = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/source-genre-catalog.json"), "utf8"));
+  const sourceGenreCsv = readFileSync(path.join(root, "resources/vocabularies/source-genre-catalog.csv"), "utf8").replace(/\r/g, "").trim();
+  const genreLocalization = readFileSync(path.join(root, "src/application/services/genre-localization-service.ts"), "utf8");
+  const stableAsync = readFileSync(path.join(root, "apps/desktop/src/use-stable-async-data.ts"), "utf8");
+  const sourceGenreDocs = readFileSync(path.join(root, "docs/vocabulary/source-genre-catalog.md"), "utf8");
+  if (!Array.isArray(sourceGenreCatalog.items) || sourceGenreCatalog.items.length !== 1271) {
+    errors.push(`V1-22 Source Genre Catalog 必须保持用户提供的 1271 条记录，当前 ${sourceGenreCatalog.items?.length ?? 0} 条。`);
+  } else {
+    const ids = new Set();
+    for (const item of sourceGenreCatalog.items) {
+      if (!item.sourceId || ids.has(item.sourceId)) errors.push(`V1-22 Source Genre Catalog sourceId 缺失或重复：${item.sourceId}`);
+      ids.add(item.sourceId);
+      for (const field of ["ja", "zh-CN", "en"]) if (!String(item[field] ?? "").trim()) errors.push(`V1-22 Source Genre Catalog ${item.sourceId} 缺少 ${field}`);
+    }
+  }
+  if (sourceGenreCsv.split("\n").filter(Boolean).length !== 1272) {
+    errors.push("V1-22 Source Genre Catalog CSV 必须包含表头 + 1271 条数据。 ");
+  }
+  for (const token of ["localizeGenre", "findSourceGenreCatalogItem", "does NOT automatically promote", "getLanguageFallback"]) {
+    if (!genreLocalization.includes(token)) errors.push(`V1-22 Genre 本地化服务缺少安全语义：${token}`);
+  }
+  for (const token of ["1271", "不是 1271 条 Canonical Genre", "import-term-mappings"]) {
+    if (!sourceGenreDocs.includes(token)) errors.push(`V1-22 Source Genre Catalog 文档缺少边界说明：${token}`);
+  }
+  if (!stableAsync.includes("stale-while-refresh") || !stableAsync.includes("refreshing") || !stableAsync.includes("current.value !== undefined")) {
+    errors.push("V1-22 Desktop 异步数据必须保持 stale-while-refresh，禁止筛选/切语言时用矮 LoadingState 替换整页导致 scrollTop 回跳。 ");
+  }
+  if (!desktopWorkExplorer.includes("useStableAsyncData") || !desktopPersonExplorer.includes("useStableAsyncData") || !desktopCatalogBrowser.includes("useStableAsyncData")) {
+    errors.push("V1-22 Works / People / Catalog 必须统一使用 Stable Async Refresh。 ");
+  }
+  for (const token of ["desktop-work-record", "desktop-metadata-table", "DenseDetailRow", "DenseChips", 't("题材")', 't("标签")']) {
+    if (!desktopApp.includes(token) && !desktopStyles.includes(token)) errors.push(`V1-22 Work Detail 高密度信息架构缺少：${token}`);
+  }
+  if (!desktopI18n.includes("语言（界面 + 元数据）") || !desktopI18n.includes("setMetadataLanguage(language)")) {
+    errors.push("V1-22 顶部主语言切换必须默认联动 UI + Metadata，保留 Metadata Advanced 独立覆盖。 ");
   }
 
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
@@ -330,7 +372,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-21 Vocabulary Routing / Repair、Work Metadata Visibility，以及 V1-20 UX/I18N、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-22 Stable Refresh / Dense Work Detail / Source Genre Localization，以及 V1-21 Vocabulary Governance、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

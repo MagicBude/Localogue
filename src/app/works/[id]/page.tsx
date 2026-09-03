@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { assetDisplayUrl, listWorkAssets } from "@/application/assets/presentation-asset-service";
 import { localizeText } from "@/application/services/localization-service";
+import { localizeGenre } from "@/application/services/genre-localization-service";
 import { presentWorkDetail } from "@/application/services/work-presentation-service";
 import { AssetPreferenceWorkbench } from "@/components/asset-preference-workbench";
 import { getVocabularyLabelMap } from "@/application/services/vocabulary-service";
@@ -53,7 +54,7 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   const genreMap = new Map(
     genres.map((item) => [
       item.id,
-      localizeText(item.names, preferences.metadataLanguage, item.id),
+      localizeGenre(item, preferences.metadataLanguage, item.id),
     ]),
   );
   const tagMap = new Map(

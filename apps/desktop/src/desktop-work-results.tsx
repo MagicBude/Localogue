@@ -4,6 +4,7 @@ import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
+import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -16,6 +17,7 @@ export interface DesktopWorkCardViewModel {
   releaseDate: string;
   performerNames: string[];
   makerName?: string;
+  workTypeNames: string[];
   poster?: Asset;
 }
 
@@ -55,6 +57,7 @@ export function buildDesktopWorkCards(
       releaseDate: work.releaseDate?.value ?? "—",
       performerNames,
       makerName: maker ? localizeText(maker.names, metadataLanguage) : undefined,
+      workTypeNames: work.workTypeIds.map((id) => { const definition = workTypeDefinition(id); return definition ? localizeText(definition.names, metadataLanguage, id) : id; }),
       poster,
     };
   });
@@ -152,7 +155,7 @@ export function DesktopWorkResults({
                 <td>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} ${t("分钟")}` : "—"}</td>
                 <td>{card.performerNames.join(" · ") || "—"}</td>
                 <td>{card.makerName ?? "—"}</td>
-                <td>{card.work.workTypeIds.join(" · ") || "—"}</td>
+                <td>{card.workTypeNames.join(" · ") || "—"}</td>
               </tr>
             ))}
           </tbody>

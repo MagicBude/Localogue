@@ -62,6 +62,9 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "展开侧边栏": "サイドバーを展開",
     "界面语言": "UI言語",
     "元数据语言": "メタデータ言語",
+    "语言（界面 + 元数据）": "言語（UI + メタデータ）",
+    "元数据语言（高级）": "メタデータ言語（詳細）",
+    "优先显示所选语言；实体没有对应翻译时保留来源原文。": "選択した言語を優先し、翻訳がないエンティティはソース原文を保持します。",
     "资料源": "ライブラリソース",
     "Private + {count} Shared": "Private + {count} Shared",
     "{count} Shared": "{count} Shared",
@@ -100,6 +103,8 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "系列": "シリーズ",
     "Genre": "ジャンル",
     "Tag": "タグ",
+    "题材": "ジャンル",
+    "标签": "タグ",
     "已选筛选": "適用中の条件",
     "关键词": "キーワード",
     "类型": "タイプ",
@@ -110,6 +115,7 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "{count} 项": "{count} 件",
     "当前显示前 80 项；可先组合其他维度缩小范围。": "先頭80件を表示しています。他の条件を組み合わせて絞り込めます。",
     "正在读取作品与 Facet…": "作品と Facet を読み込み中…",
+    "正在刷新…": "更新中…",
     "无法读取作品。": "作品を読み込めません。",
     "{count} 项作品 · 第 {page} / {pages} 页": "{count} 作品 · {page} / {pages} ページ",
     "没有符合当前筛选条件的作品。": "現在の条件に一致する作品はありません。",
@@ -174,6 +180,7 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "移入作品类型": "作品タイプへ移動",
     "移入 Genre": "Genre へ移動",
     "Unmapped 来源词": "未マッピングのソース語",
+    "词表参考": "語彙参照",
     "查看 unmapped 来源词（不会自动进入 Canonical）": "未マッピングのソース語を表示（Canonical へ自動登録しません）",
     "将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。": "初期 NFO Genre 参照 {genres} 件と Tag 参照 {tags} 件を外し、マッピング表に従って再分類します。",
     "尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。": "分類監査はまだ実行されていません。このツールは初期 Desktop NFO Bootstrap の分類混入を修復します。",
@@ -271,6 +278,9 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "展开侧边栏": "Expand sidebar",
     "界面语言": "UI language",
     "元数据语言": "Metadata language",
+    "语言（界面 + 元数据）": "Language (UI + metadata)",
+    "元数据语言（高级）": "Metadata language (advanced)",
+    "优先显示所选语言；实体没有对应翻译时保留来源原文。": "Prefer the selected language; entities without that translation keep their source-language text.",
     "资料源": "Library sources",
     "Private + {count} Shared": "Private + {count} Shared",
     "{count} Shared": "{count} Shared",
@@ -309,6 +319,8 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "系列": "Series",
     "Genre": "Genre",
     "Tag": "Tag",
+    "题材": "Genre",
+    "标签": "Tag",
     "已选筛选": "Active filters",
     "关键词": "Keyword",
     "类型": "Type",
@@ -319,6 +331,7 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "{count} 项": "{count} items",
     "当前显示前 80 项；可先组合其他维度缩小范围。": "Showing the first 80 items. Combine other facets to narrow the set.",
     "正在读取作品与 Facet…": "Loading works and facets…",
+    "正在刷新…": "Refreshing…",
     "无法读取作品。": "Could not load works.",
     "{count} 项作品 · 第 {page} / {pages} 页": "{count} works · page {page} / {pages}",
     "没有符合当前筛选条件的作品。": "No works match the current filters.",
@@ -383,6 +396,7 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "移入作品类型": "Move to work types",
     "移入 Genre": "Move to Genre",
     "Unmapped 来源词": "Unmapped source terms",
+    "词表参考": "Vocabulary reference",
     "查看 unmapped 来源词（不会自动进入 Canonical）": "View unmapped source terms (not auto-promoted to Canonical)",
     "将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。": "Removes {genres} early NFO Genre references and {tags} early NFO Tag references, then routes them again using the mapping table.",
     "尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。": "No classification audit has run yet. This tool repairs classification pollution created by early Desktop NFO bootstrap imports.",
@@ -878,15 +892,19 @@ export function DesktopLanguageControls() {
   return (
     <div className="desktop-language-controls" aria-label="Localogue language preferences">
       <label>
-        <span>{t("界面语言")}</span>
-        <select value={uiLanguage} onChange={(event) => setUiLanguage(event.target.value as SupportedLanguage)}>
+        <span>{t("语言（界面 + 元数据）")}</span>
+        <select value={uiLanguage} onChange={(event) => {
+          const language = event.target.value as SupportedLanguage;
+          setUiLanguage(language);
+          setMetadataLanguage(language);
+        }}>
           <option value="zh-CN">简体中文</option>
           <option value="ja">日本語</option>
           <option value="en">English</option>
         </select>
       </label>
-      <label>
-        <span>{t("元数据语言")}</span>
+      <label title={t("优先显示所选语言；实体没有对应翻译时保留来源原文。")}>
+        <span>{t("元数据语言（高级）")}</span>
         <select value={metadataLanguage} onChange={(event) => setMetadataLanguage(event.target.value as SupportedLanguage)}>
           <option value="ja">日本語</option>
           <option value="zh-CN">简体中文</option>

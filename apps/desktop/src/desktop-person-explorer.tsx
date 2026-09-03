@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type ReactNode } from "react";
+import { useState, type ChangeEvent, type ReactNode } from "react";
 
 import { getPreferredPersonName } from "@/application/services/localization-service";
 import type { Asset } from "@/domain/entities/asset";
@@ -8,6 +8,7 @@ import type { PersonQuery, PersonSort } from "@/domain/queries/person-query";
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
+import { useStableAsyncData } from "./use-stable-async-data";
 
 const PAGE_SIZE = 24;
 
@@ -21,8 +22,6 @@ export function DesktopPersonExplorer({
   const { t } = useDesktopI18n();
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
   const [page, setPage] = useState(1);
-  useEffect(() => setPage(1), [query]);
-
   const data = useAsyncPersonData(async () => {
     const [filteredPeople, allPeople, allWorks, assets] = await Promise.all([
       repository.listPeople({ ...query, page: 1, pageSize: 100000 }),
@@ -64,12 +63,17 @@ export function DesktopPersonExplorer({
   const currentPage = Math.min(page, pageCount);
   const visible = data.value.filteredPerformers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+  function changeQuery(next: PersonQuery): void {
+    setPage(1);
+    setQuery(next);
+  }
+
   return (
     <>
-      <PersonFilterPanel query={query} onChange={setQuery} data={data.value} />
+      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} />
       <section className="desktop-results-panel desktop-people-results">
         <div className="desktop-results-toolbar">
-          <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}</div>
+          <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
         </div>
         <div className="desktop-person-grid">
           {visible.map((person) => (
@@ -115,7 +119,7 @@ export function DesktopPersonCard({
         <DesktopAssetImage asset={portrait} alt={`${name} portrait`} fallback={<span className="avatar-placeholder">{name.slice(0, 1)}</span>} />
       </span>
       <span className="desktop-person-card__body">
-        <small className="status-chip">{person.activityStatus}</small>
+        <small className="status-chip">{personActivityStatusLabel(person.activityStatus, t)}</small>
         <strong>{name}</strong>
         {romanized ? <span>{romanized}</span> : null}
         <em>{t("{count} 部作品", { count: workCount })}</em>
@@ -152,7 +156,7 @@ function PersonFilterPanel({
       </div>
       <div className="desktop-person-filter-grid">
         <label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
-        <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
+        <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
         <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
         <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
         <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
@@ -169,9 +173,20 @@ function PersonFilterPanel({
   );
 }
 
-function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {
   const { t } = useDesktopI18n();
-  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
+  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{getOptionLabel ? getOptionLabel(option) : option}</option>)}</select></label>;
+}
+
+function personActivityStatusLabel(value: string, t: (source: string) => string): string {
+  switch (value) {
+    case "active": return t("活动中");
+    case "retired": return t("已引退");
+    case "hiatus": return t("暂停活动");
+    case "inactive": return t("不活跃");
+    case "unknown": return t("未知");
+    default: return value;
+  }
 }
 
 function buildPortraitMap(assets: Asset[], people: Person[]): Map<string, Asset> {
@@ -204,15 +219,5 @@ function ExplorerState({ children, error = false }: { children: ReactNode; error
 }
 
 function useAsyncPersonData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
-  const [state, setState] = useState<{ loading: boolean; value?: T; error?: string }>({ loading: true });
-  /* eslint-disable react-hooks/exhaustive-deps */
-  useEffect(() => {
-    let disposed = false;
-    setState((current) => ({ ...current, loading: true, error: undefined }));
-    void factory().then((value) => { if (!disposed) setState({ loading: false, value }); })
-      .catch((error: unknown) => { if (!disposed) setState({ loading: false, error: error instanceof Error ? error.message : String(error) }); });
-    return () => { disposed = true; };
-  }, dependencies);
-  /* eslint-enable react-hooks/exhaustive-deps */
-  return state;
+  return useStableAsyncData(factory, dependencies, (error) => error instanceof Error ? error.message : String(error));
 }

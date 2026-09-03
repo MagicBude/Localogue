@@ -2,25 +2,23 @@
 
 ## 当前阶段
 
-**V1-21：Vocabulary Governance & Work Metadata Visibility。**
+**V1-22：Desktop Information Architecture & Metadata Localization。**
 
-V1-21 来自真实 NFO 实机数据反馈：部分刮削器会把 Series、Maker、Work Type、Genre、技术规格和活动词同时写入 `<genre>/<tag>`，早期 Desktop Bootstrap 因此会把同一“系列”同时建立成 Series / Genre / Tag。当前阶段已：
+V1-22 来自 V1-21 实机体验反馈：筛选或切语言时旧结果被短暂 LoadingState 替换，导致页面高度骤降并把滚动位置夹回顶部；部分 Facet 词条仍显示 raw stable id / 单语来源文本；Work Detail 则把分类信息放在页面底部，信息密度明显低于资料站常见详情布局。当前阶段已：
 
-- 新增共享 Import Classification Normalizer；
-- `系列:` 路由到 Series；`单体作品 / イメージビデオ / VR` 等路由到 Work Type；
-- 只有受控词表命中的来源词自动进入 Genre；
-- 只有明确 `标签:/タグ:/Tag:` 前缀的来源词自动进入 Tag；
-- 番号前缀、演员名、片商、发行、技术规格和未知来源词不再自动污染 Genre / Tag；
-- 未知来源词作为 `unmapped_classification` warning 保留；
-- 新增 `docs/vocabulary/import-term-mappings.md` 与 resources JSON/CSV 镜像；
-- Desktop “本地资料”新增分类词表审计 Preview → Explicit Repair；
-- Repair 只处理早期 `genre_nfo_* / tag_nfo_*` 自动生成实体，不删除用户手工 Tag；
-- Work Detail 分开展示作品类型 / Genre / Tag 本地化名称；
-- Work Editor 新增 Work Type 编辑；
-- 无引用早期 NFO Genre / Tag 允许在 Rust 引用保护下清理；
-- V1-18 Hotfix 3 Unified Library / Native I/O 扫描链保持不变。
+- 新增 `useStableAsyncData`，Works / People / Browse / Detail 首次加载后统一采用 stale-while-refresh；
+- 筛选、分页和语言变化时保留旧结果与 DOM 高度，在原位置显示轻量刷新状态；
+- 主语言选择默认同时切 UI + Metadata，仍保留 Metadata Language 高级独立覆盖；
+- Work Type Facet / Table 改为受控三语名称，Person Activity Status 改为受控三语名称；
+- 新增 `Source Genre Catalog`，接入用户提供的 1271 条日文 / 简中 / 繁中 / 英文 Genre 参考数据；
+- Source Genre Catalog 仅做翻译、来源参考和映射候选，不自动晋升 1271 条为 Canonical Genre；
+- Desktop / Web 的 Genre 展示统一经过 `localizeGenre`；
+- 中文 UI 的 Genre / Tag 用户标签统一为“题材 / 标签”；
+- Work Detail 重构为“左侧海报 + 右侧高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
+- Vocabulary Audit 的 unmapped 来源词若命中 Source Genre Catalog，会显示当前元数据语言的参考翻译；
+- V1-18 Hotfix 3 Unified Library / Native I/O 稳定链保持不变。
 
-### 明确留到 V1-22
+### 明确留到 V1-23
 
 Evidence / Review / Commit Plan、Curation、History/Restore、Portable Pack 完整导入导出与 Presentation Preference Workbench 继续进入 Desktop Governance Parity。
 
@@ -231,13 +229,13 @@ Evidence / Review / Commit Plan、Curation、History/Restore、Portable Pack 完
 - 已有 Work 使用 fill / merge，不静默覆盖已有核心字段；
 - Rust NFO Reader 仅允许 `.nfo`、单文件 10 MB；
 - Desktop Canonical 写白名单扩大到明确 Private 集合，写根由 Rust 从 Desktop Settings 强制解析，Shared Pack 仍只读；
-- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-22；
+- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-23；
 - V1-16 当时仅允许删除 Private `media-files`；V1-17 已扩展为受引用保护的 Work / Person / Asset / MediaFile 删除。
 - `findWorkByCode` 兼容带 / 不带连字符番号。
 
 ## 下一阶段建议
 
-**V1-22：Desktop Governance Parity。**
+**V1-23：Desktop Governance Parity。**
 
 1. 将现有 Desktop Private CRUD 接入 Commit Plan / Audit / History，补齐 Evidence / Review / Curation 等治理交互；
 2. 接入 Shared / Personal Portable Pack Desktop 导入导出，而不是仅管理已挂载目录；

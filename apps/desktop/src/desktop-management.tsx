@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { inferCatalogFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import { WORK_TYPE_DEFINITIONS } from "@/application/importers/import-classification-normalizer";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
+import { localizeGenre } from "@/application/services/genre-localization-service";
 import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
@@ -133,7 +134,7 @@ export function WorkEditor({
       setPeople(peopleResult.items);
       setOrganizations(organizationResult);
       setSeriesOptions(seriesResult.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage) })));
-      setGenreOptions(genreResult.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage) })));
+      setGenreOptions(genreResult.map((item) => ({ id: item.id, label: localizeGenre(item, metadataLanguage, item.id) })));
       setTagOptions(tagResult.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage) })));
     }).catch((error) => setMessage(t("无法读取编辑选项：{error}", { error: message(error) })));
     return () => { disposed = true; };
@@ -206,7 +207,7 @@ export function WorkEditor({
     }
   }
 
-  return <section className="settings-card">
+  return <section className="settings-card compact-management-card">
     <div className="section-heading">
       <div><span className="eyebrow">DESKTOP EDIT</span><h2>{t("编辑作品")}</h2><p className="muted">{isPrivate ? t("当前实体来自 Private Library，可直接编辑。") : t("当前来自 Shared Pack；保存会建立同 ID 的 Private Override，不修改 Shared Pack。")}</p></div>
       <div className="button-row"><button onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Work")}</button> : null}</div>
@@ -223,8 +224,8 @@ export function WorkEditor({
       <MultiSelect label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
       <MultiSelect label={t("作品类型")} values={workTypeIds} onChange={setWorkTypeIds} options={WORK_TYPE_DEFINITIONS.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id) }))} />
       <MultiSelect label={t("系列")} values={seriesIds} onChange={setSeriesIds} options={seriesOptions} />
-      <MultiSelect label={t("Genre")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
-      <MultiSelect label={t("Tag")} values={tagIds} onChange={setTagIds} options={tagOptions} />
+      <MultiSelect label={t("题材")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
+      <MultiSelect label={t("标签")} values={tagIds} onChange={setTagIds} options={tagOptions} />
       <div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
     </div> : null}
   </section>;

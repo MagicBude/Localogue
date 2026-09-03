@@ -1,5 +1,22 @@
 # Changelog
 
+## V1-22 - Desktop Information Architecture & Metadata Localization
+
+- 修复 Desktop 选择 Facet、分页或切换语言时页面回跳顶部的问题，结果刷新改为 stale-while-refresh。
+- Works / People / Browse / Detail 刷新时保留旧 DOM 高度，并在原位置显示轻量“正在刷新”状态。
+- Query 更新与 page=1 合并为单次状态切换，减少无意义的连续 Repository 请求。
+- 主语言控制默认同时切换 UI Language 与 Metadata Language，并保留高级 Metadata Language 独立覆盖。
+- Work Type 和 Person Activity Status 等受控枚举改为三语用户名称，不再暴露 raw stable id。
+- 中文 UI 的 Genre / Tag 业务标签统一为“题材 / 标签”。
+- 新增用户提供的 1271 条 Source Genre Catalog（ja / zh-CN / zh-TW / en），保留来源、URL/ID 与 note。
+- Source Genre Catalog 只用于翻译补全、来源参考和映射候选，不自动将来源站混合分类晋升为 Canonical Genre。
+- Desktop / Web Genre Facet、索引和详情统一使用 `localizeGenre`。
+- Vocabulary Audit 的 unmapped 来源词命中 Source Genre Catalog 时显示当前 Metadata Language 的词表参考。
+- Work Detail 重构为左侧海报 + 右侧高密度 Metadata Table，将发行日期、时长、演员、导演、Maker、Label、Series、Work Type、题材和标签放在同一主信息区。
+- Work 编辑器默认收紧闭合空间，本地 Asset 区域减少卡片尺寸与间距。
+- 新增 Source Genre Catalog 文档、ADR 与 V1-22 实现导读，并扩展 Desktop Boundary Validator。
+- 保持 V1-18 Hotfix 3 Unified Library / Native I/O / SHA-256 稳定修复不变。
+
 ## V1-21 - Vocabulary Governance & Work Metadata Visibility
 
 - 修复 NFO `<genre>/<tag>` 混合桶被直接复制到 Canonical Genre / Tag 的问题。
