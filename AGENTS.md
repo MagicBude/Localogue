@@ -290,3 +290,10 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - `open_path` 当前只允许 Localogue 支持的视频扩展名，避免 Webview 将“默认程序打开”能力扩大成打开 `.exe` / 脚本等任意可执行目标。
 - `reveal_in_folder` 只负责在系统文件管理器中定位已经存在的路径，不执行目标。
 - 通用 Shell execute/spawn 仍不向 Webview 暴露。
+
+
+## V1-18 Hotfix 3 Native I/O 约束
+
+- Tauri Native Command 调用链禁止使用数百 KiB/1 MiB 级固定栈数组处理文件；流式文件缓冲必须优先使用堆分配。
+- 高频文件 I/O、Hash、Canonical JSON 读写必须使用 async command + blocking worker，不得重新压回 Tauri main thread。
+- `scripts/validate-desktop-boundaries.mjs` 对以上边界有自动回归检查。

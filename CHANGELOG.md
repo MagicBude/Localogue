@@ -1,5 +1,40 @@
 # 更新日志
 
+## V1-18 Hotfix 3 · Native I/O Stack Safety
+
+- 修复 Unified Library 第一次真正导入本地 poster / fanart / thumb 时可能因 `sha256_path()` 在 Native Command 栈上分配 1 MiB 固定数组而触发 `STATUS_STACK_OVERFLOW` 的问题。
+- SHA-256 流式缓冲从 `[0_u8; 1024 * 1024]` 改为堆分配 `vec![0_u8; 256 * 1024]`，Native 栈占用保持常量级。
+- `stat_path`、`path_exists`、`read_nfo_text`、`import_private_asset_file`、`read_private_asset_bytes`、`sha256_file`、`read_library_collection`、Canonical/Audit Writer 与 Delete 改为 async + blocking worker。
+- ffprobe 进程等待也移出 async command 调用线程，避免阻塞 Runtime。
+- 新增 `native_io #N ... queued/start/ok/error` 终端诊断，可精确定位高频 Native I/O 的最后成功阶段。
+- Desktop 关闭旧式图片 sidecar observation 时，媒体 discovery 只请求视频扩展名，不再额外把 NFO 混入“仅扫描视频”的返回集合。
+- Desktop Boundary Validator 新增大固定栈缓冲禁令与高频 Native I/O async 回归规则。
+- Hotfix 1/2 的迭代目录扫描、junction/reparse 防环与 Windows 特殊卷兼容继续保留。
+- 产品版本继续保持 `0.1.18`。
+
+## V1-18 Hotfix 2 · Windows Volume Scan Compatibility
+
+- 修复第一版扫描 Hotfix 在部分 Windows 卷、虚拟盘、网络/挂载卷上因 `fs::canonicalize(root)` 返回 `os error 1005`，导致“同步资料库”和“仅扫描视频”在 discovering 阶段直接失败的问题。
+- 扫描根改为以 `metadata + read_dir` 判断真实可读性，不再要求卷必须支持 canonical final path。
+- 使用词法绝对路径作为扫描期 visited key；Windows 下按大小写不敏感方式去重。
+- 继续拒绝 symlink 与 reparse/junction 目录下钻，保持目录环防护。
+- 仅对 reparse 目录做阻断，普通 reparse 文件继续允许进入扩展名筛选，兼容 Cloud Files / 虚拟卷文件。
+- 根目录不可枚举时返回包含实际扫描根的明确错误，子目录不可读仍采用记录并跳过策略。
+- 保持 `VecDeque` 迭代扫描、`spawn_blocking` 后台 I/O、100000 目录上限和 V1-18 数据模型不变。
+- 产品版本继续保持 `0.1.18`，作为 V1-18 第二个实机兼容性补丁。
+
+## V1-18 Hotfix · Unified Library Scan Stack Overflow
+
+- 修复 Windows 实机执行“同步资料库”时可能出现 `STATUS_STACK_OVERFLOW (0xc00000fd)` 并导致 Desktop 进程直接退出的问题。
+- `walk_files` 从同步主线程扫描改为 `async command + spawn_blocking`，目录枚举不再占用 Tauri 主线程。
+- 移除 `walk_files` 对 `WalkDir` 的直接使用，改为 `VecDeque` 显式迭代目录队列，目录深度不再消耗 Rust 调用栈。
+- 使用 canonical path `visited` 集合去重已访问目录，防止路径别名重复遍历。
+- Windows 明确拒绝符号链接、junction 与其他 `FILE_ATTRIBUTE_REPARSE_POINT` 子目录继续下钻，阻断目录环。
+- 增加 100000 个目录的安全上限，并对不可读目录/条目采用跳过 + 终端诊断，而不是使整次同步崩溃。
+- Native 终端新增 `walk_files start/completed/reached file limit` 诊断日志，后续可精确判断 NFO、Asset 或 Media 哪一轮目录枚举发生异常。
+- 不改变 Unified Root、NFO → Asset → Media 顺序、Work/Asset 数据结构和现有媒体增量扫描语义。
+- 本 Hotfix 保持产品版本 `0.1.18`，作为 V1-18 的稳定性补丁，不占用后续 V1-19 路线版本。
+
 ## V1-18 · Desktop Presentation Parity & Unified Library Sync
 
 - Desktop Works 对齐 Web 的海报墙 / 列表 / 表格三种展示方式；三种模式共享同一 Repository 查询结果。

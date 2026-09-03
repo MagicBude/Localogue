@@ -169,6 +169,30 @@ if (!errors.length) {
   if (!rust.includes('format!("{:x}", digest.finalize())')) {
     errors.push("Rust 文件 SHA-256 必须先 finalize 摘要再执行十六进制格式化。");
   }
+  if (!rust.includes("async fn walk_files") || !rust.includes("spawn_blocking") || !rust.includes("VecDeque")) {
+    errors.push("V1-18 Hotfix 的目录扫描必须在后台 worker 使用显式迭代队列，禁止重新退化为主线程递归式扫描。");
+  }
+  if (rust.includes("WalkDir::new") || rust.includes("use walkdir::WalkDir")) {
+    errors.push("V1-18 Hotfix 不允许 walk_files 重新使用 WalkDir；需要保持可审计的迭代队列扫描实现。");
+  }
+  if (!rust.includes("is_filesystem_reparse_point") || !rust.includes("FILE_ATTRIBUTE_REPARSE_POINT") || !rust.includes("visited.insert") || !rust.includes("scan_visit_key")) {
+    errors.push("V1-18 Hotfix 必须拒绝 Windows junction/reparse point，并以词法绝对路径 visited 去重目录，防止目录环。");
+  }
+  if (rust.includes("fs::canonicalize(&configured_root)")) {
+    errors.push("V1-18 Hotfix 2 禁止把 fs::canonicalize(configured_root) 作为资料扫描前提；部分 Windows 可读卷会返回 OS 1005。");
+  }
+  if (!rust.includes("resolve_scan_root") || !rust.includes("fs::read_dir(&root)")) {
+    errors.push("V1-18 Hotfix 2 必须以 metadata/read_dir 验证扫描根可读性，并允许不支持 canonicalize 的 Windows 卷正常扫描。");
+  }
+  if (rust.includes("[0_u8; 1024 * 1024]") || /\[0_u8;\s*[5-9][0-9]{5,}\]/.test(rust)) {
+    errors.push("V1-18 Hotfix 3 禁止在 Native Command 调用链上分配超大固定栈缓冲；SHA-256 必须使用堆缓冲或小型流式缓冲。");
+  }
+  if (!rust.includes("vec![0_u8; 256 * 1024]") || !rust.includes("spawn_native_io")) {
+    errors.push("V1-18 Hotfix 3 必须使用堆分配 SHA-256 缓冲，并把高频阻塞 Native I/O 移出 Tauri main thread。");
+  }
+  for (const command of ["stat_path", "path_exists", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"]) {
+    if (!rust.includes(`async fn ${command}`)) errors.push(`V1-18 Hotfix 3 高频 Native I/O 命令必须为 async：${command}`);
+  }
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -186,7 +210,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-18 Unified Library Sync、Private Asset 安全读取、Works 三视图、Desktop CRUD、Media 手工绑定审计、Shared Pack 管理与 Native 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-18 Unified Library Sync、Private Asset 安全读取、Works 三视图、Desktop CRUD、Media 手工绑定审计、Shared Pack 管理，以及 Hotfix 迭代目录扫描 / junction 防环边界均符合规则。");
 }
 
 function walkTextFiles(directory) {

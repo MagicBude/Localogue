@@ -95,7 +95,7 @@ export async function scanMediaLibrary(
       const info = await fileSystem.stat(root, signal);
       if (!info.isDirectory) throw new Error("不是目录");
       const entries = await fileSystem.walkFiles(root, {
-        extensions: request.observeImageSidecars === false ? [...videoExtensions, ".nfo"] : discoveryExtensions,
+        extensions: request.observeImageSidecars === false ? [...videoExtensions] : discoveryExtensions,
         includeHidden: false,
         maxFiles: MAX_DISCOVERED_ENTRIES,
         signal,

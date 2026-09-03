@@ -10,6 +10,15 @@ V1-18 针对 V1-17 实机验收暴露的 Presentation 缺口收尾：已有 Asse
 
 Unified Library 增加显式“一键同步资料库”，按 **NFO → Asset → Media** 固定顺序运行，避免只扫描出 MediaFile 而 Work / Asset 尚未同步的半完成状态。独立 Preview / Import 和“仅扫描视频”仍保留给高级排查；Shared Pack 继续只读。
 
+### V1-18 实机稳定性 Hotfix 3
+
+- 修复 Asset SHA-256 的 1 MiB 固定栈缓冲导致 Windows `STATUS_STACK_OVERFLOW` 的高风险路径；
+- SHA-256 改为 256 KiB 堆缓冲；
+- 高频 Native 文件读写、Canonical 写入与删除迁移到 async blocking worker；
+- ffprobe 等待同样移出调用线程；
+- 新增 `native_io` 序列诊断日志；
+- Hotfix 1/2 的迭代目录扫描、防环与特殊卷兼容继续保留。
+
 ## V1-18 Presentation Parity / Unified Sync
 
 - Desktop Works 新增海报墙 / 列表 / 表格三种展示方式，并共享同一查询结果；
@@ -267,3 +276,8 @@ Desktop 独立 Vite Check 已支持 Host Platform fallback：在非 Tauri CLI �
 Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来源，所有 Vite 命令显式使用 `--config`。根 `pnpm check` 会先执行 `desktop:clean:legacy`，清理早期版本曾由 `tsc -b` 误生成的 `vite.config.js/.d.ts` 与旧 `vite.config.ts`。这解决了 ZIP 覆盖升级不会删除历史文件、导致 Validator 读取新配置而 Vite 实际执行旧配置的问题。
 
 - V1-13 Desktop 开发服务器已按 Tauri 推荐配置忽略 `src-tauri/**`，避免 Windows Cargo/MSVC 产物与 Vite watcher 竞争导致 EBUSY。
+### V1-18 实机 Hotfix 2
+
+- Windows 扫描根不再依赖 `fs::canonicalize`，兼容可 `read_dir` 但 canonical final path 返回 OS 1005 的卷。
+- 迭代扫描、junction/reparse 目录防环和后台 worker 继续保留。
+

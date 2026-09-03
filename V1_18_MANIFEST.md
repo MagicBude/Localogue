@@ -49,3 +49,32 @@
 ## 后续
 
 V1-19 再继续 Desktop Evidence / Review / Curation / History、完整高级 Facet、Portable Pack 等治理与功能对齐。V1-18 不把这些重治理能力声明为已完成。
+## Hotfix：Unified Library Scan Stack Overflow
+
+实机验收发现 Windows 在“同步资料库”阶段可能直接以 `STATUS_STACK_OVERFLOW (0xc00000fd)` 退出。Hotfix 对 Native `walk_files` 做如下收紧：
+
+- Tauri Command 改为 async，并使用 `spawn_blocking` 执行目录 I/O；
+- 使用 `VecDeque` 显式迭代，不以目录深度消耗调用栈；
+- canonical path `visited` 去重；
+- Windows 子目录若为 symlink / junction / reparse point 则不跟随；
+- 不可读目录只记录诊断并跳过；
+- 增加终端 start/completed 日志和目录数量安全上限。
+
+Hotfix 不改变 V1-18 数据模型、同步顺序或产品版本号。
+## Hotfix 2：Windows Volume Scan Compatibility
+
+第一版 Hotfix 在部分可正常 `read_dir` 的 Windows 卷上仍会因为 `fs::canonicalize(root)` 返回 OS 1005 而阻止扫描。第二版 Hotfix 调整为：
+
+- 扫描根只要求 `metadata + read_dir` 可用，不再要求 canonical final path；
+- visited 使用词法绝对路径 key；
+- Windows symlink 不跟随，junction / reparse 目录不下钻；
+- 普通 reparse 文件仍可以作为媒体/NFO/图片候选；
+- 保持后台 worker、迭代队列、目录数量上限和所有数据模型不变。
+
+Hotfix 2 同样保持产品版本 `0.1.18`。
+
+
+
+## Post-release Hotfix 3 — Native I/O Stack Safety
+
+V1-18 实机同步确认存在 Native 栈安全问题：`sha256_path()` 曾在调用栈放置 1 MiB 固定数组。Hotfix 3 改用 256 KiB heap buffer，并把高频 Native 文件 I/O/Canonical 写入迁移到 blocking worker。详细见 `V1_18_HOTFIX3_MANIFEST.md`。

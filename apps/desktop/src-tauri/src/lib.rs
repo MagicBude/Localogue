@@ -2,21 +2,22 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
-    collections::HashSet,
+    collections::{HashSet, VecDeque},
     fs::{self, File},
     io::Read,
     path::{Path, PathBuf},
     process::Command,
+    sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_opener::OpenerExt;
 use url::Url;
-use walkdir::WalkDir;
 
 const PROGRESS_EVENT: &str = "localogue://desktop-task-progress";
 const SETTINGS_FILE: &str = "desktop-settings.json";
+static NATIVE_IO_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 const SAFE_MEDIA_EXTENSIONS: &[&str] = &[
     "mp4", "mkv", "avi", "mov", "wmv", "m4v", "ts", "mts", "m2ts", "webm", "flv",
 ];
@@ -270,18 +271,22 @@ async fn probe_media(app: AppHandle, request: MediaProbeRequest) -> Result<Media
     let executable = resolve_ffprobe_executable(&request.executable)?;
     emit_progress(&app, &task_id, "probing", "正在通过 Rust Command 调用 ffprobe。", Some(&request.file_path));
 
-    let output = Command::new(&executable)
-        .args([
-            "-v", "error",
-            "-show_entries", "format=format_name,duration:stream=codec_type,codec_name,width,height",
-            "-of", "json",
-        ])
-        .arg(&file_path)
-        .output()
-        .map_err(|error| {
-            emit_progress(&app, &task_id, "failed", &format!("ffprobe 启动失败：{error}"), Some(&request.file_path));
-            format!("无法启动 ffprobe：{error}")
-        })?;
+    let output = spawn_native_io("probe_media", move || {
+        Command::new(&executable)
+            .args([
+                "-v", "error",
+                "-show_entries", "format=format_name,duration:stream=codec_type,codec_name,width,height",
+                "-of", "json",
+            ])
+            .arg(&file_path)
+            .output()
+            .map_err(|error| format!("无法启动 ffprobe：{error}"))
+    })
+    .await
+    .map_err(|error| {
+        emit_progress(&app, &task_id, "failed", &format!("ffprobe 启动失败：{error}"), Some(&request.file_path));
+        error
+    })?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
@@ -315,7 +320,11 @@ fn resolve_path(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn stat_path(path: String) -> Result<DesktopFileStat, String> {
+async fn stat_path(path: String) -> Result<DesktopFileStat, String> {
+    spawn_native_io("stat_path", move || stat_path_blocking(path)).await
+}
+
+fn stat_path_blocking(path: String) -> Result<DesktopFileStat, String> {
     validate_text_path(&path)?;
     let metadata = fs::metadata(&path).map_err(display_error)?;
     Ok(DesktopFileStat {
@@ -327,48 +336,208 @@ fn stat_path(path: String) -> Result<DesktopFileStat, String> {
 }
 
 #[tauri::command]
-fn path_exists(path: String) -> Result<bool, String> {
+async fn path_exists(path: String) -> Result<bool, String> {
+    spawn_native_io("path_exists", move || path_exists_blocking(path)).await
+}
+
+fn path_exists_blocking(path: String) -> Result<bool, String> {
     validate_text_path(&path)?;
     Ok(Path::new(&path).exists())
 }
 
 #[tauri::command]
-fn walk_files(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry>, String> {
-    let root = PathBuf::from(&request.root);
+async fn walk_files(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry>, String> {
+    // 目录枚举属于可能耗时的阻塞 I/O。不要让它占用 Tauri 主线程；同时把真正的遍历
+    // 放到显式迭代队列中，避免任何目录深度或目录环把调用栈压爆。
+    spawn_native_io("walk_files", move || walk_files_blocking(request)).await
+}
+
+fn walk_files_blocking(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry>, String> {
+    const MAX_VISITED_DIRECTORIES: usize = 100_000;
+
     validate_text_path(&request.root)?;
-    if !root.is_dir() { return Err("媒体扫描根路径不是可读取目录。".into()); }
+    let configured_root = PathBuf::from(&request.root);
+    let root = resolve_scan_root(&configured_root)?;
     let allowed: HashSet<String> = request.extensions.into_iter()
         .map(|value| value.trim_start_matches('.').to_ascii_lowercase()).collect();
     let limit = request.max_files.unwrap_or(25_000).min(25_000);
+
+    eprintln!(
+        "[Localogue Desktop] walk_files start root={} extensions={} limit={}",
+        path_to_string(&root),
+        allowed.len(),
+        limit
+    );
+
     let mut output = Vec::new();
-    for item in WalkDir::new(&root).follow_links(false).into_iter().filter_map(Result::ok) {
-        if output.len() >= limit { break; }
-        if !item.file_type().is_file() { continue; }
-        let path = item.path();
-        let has_hidden_component = path.strip_prefix(&root).ok()
-            .map(|relative| relative.components().any(|part| part.as_os_str().to_string_lossy().starts_with('.')))
-            .unwrap_or(false);
-        if !request.include_hidden && has_hidden_component { continue; }
-        let extension = path.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
-        if !allowed.is_empty() && !allowed.contains(&extension) { continue; }
-        let metadata = item.metadata().map_err(display_error)?;
-        output.push(DesktopFileEntry {
-            path: path_to_string(path),
-            name: item.file_name().to_string_lossy().into_owned(),
-            extension: format!(".{extension}"),
-            size: metadata.len(),
-            modified_at: modified_marker(&metadata)?,
-        });
+    let mut pending = VecDeque::from([root.clone()]);
+    let mut visited = HashSet::from([scan_visit_key(&root)]);
+
+    while let Some(directory) = pending.pop_front() {
+        let entries = match fs::read_dir(&directory) {
+            Ok(entries) => entries,
+            Err(error) if directory == root => {
+                return Err(format!(
+                    "无法读取资料扫描根路径 {}：{error}",
+                    path_to_string(&directory)
+                ));
+            }
+            Err(error) => {
+                eprintln!(
+                    "[Localogue Desktop] walk_files skip unreadable directory={} error={}",
+                    path_to_string(&directory),
+                    error
+                );
+                continue;
+            }
+        };
+
+        for entry in entries {
+            if output.len() >= limit {
+                eprintln!(
+                    "[Localogue Desktop] walk_files reached file limit root={} files={} dirs={}",
+                    path_to_string(&root),
+                    output.len(),
+                    visited.len()
+                );
+                return Ok(output);
+            }
+
+            let entry = match entry {
+                Ok(entry) => entry,
+                Err(error) => {
+                    eprintln!("[Localogue Desktop] walk_files skip unreadable entry error={error}");
+                    continue;
+                }
+            };
+            let path = entry.path();
+
+            if !request.include_hidden && is_hidden_relative_path(&root, &path) { continue; }
+
+            // symlink_metadata 不跟随符号链接。Windows 下对目录额外拒绝 Reparse Point
+            // （包括 junction），避免资料库目录通过挂载点重新指回祖先目录形成环。
+            let metadata = match fs::symlink_metadata(&path) {
+                Ok(metadata) => metadata,
+                Err(error) => {
+                    eprintln!(
+                        "[Localogue Desktop] walk_files skip metadata path={} error={}",
+                        path_to_string(&path),
+                        error
+                    );
+                    continue;
+                }
+            };
+            let file_type = metadata.file_type();
+            if file_type.is_symlink() { continue; }
+
+            if metadata.is_dir() {
+                // 只阻止 Reparse Point 目录继续下钻。Windows Cloud Files / 虚拟卷可能把
+                // 普通文件也标记为 reparse point；那些文件仍应允许进入扩展名筛选。
+                if is_filesystem_reparse_point(&metadata) { continue; }
+                // 不把 fs::canonicalize 作为扫描前提。部分 Windows 卷、虚拟盘、网络/挂载卷
+                // 可以正常 read_dir，却会让 canonicalize/GetFinalPathNameByHandle 返回 OS 1005。
+                // 由于子目录 symlink/junction/reparse point 已经明确不跟随，普通目录树不会产生环；
+                // visited 只需对当前逻辑绝对路径做词法归一化即可。
+                let visit_key = scan_visit_key(&path);
+                if visited.insert(visit_key) {
+                    if visited.len() > MAX_VISITED_DIRECTORIES {
+                        return Err(format!(
+                            "资料扫描目录数量超过安全上限 {MAX_VISITED_DIRECTORIES}；请缩小 Unified Library Root。"
+                        ));
+                    }
+                    pending.push_back(path);
+                }
+                continue;
+            }
+
+            if !metadata.is_file() { continue; }
+            let extension = path.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+            if !allowed.is_empty() && !allowed.contains(&extension) { continue; }
+            output.push(DesktopFileEntry {
+                path: path_to_string(&path),
+                name: entry.file_name().to_string_lossy().into_owned(),
+                extension: format!(".{extension}"),
+                size: metadata.len(),
+                modified_at: modified_marker(&metadata)?,
+            });
+        }
     }
+
+    eprintln!(
+        "[Localogue Desktop] walk_files completed root={} files={} dirs={}",
+        path_to_string(&root),
+        output.len(),
+        visited.len()
+    );
     Ok(output)
 }
+
+fn resolve_scan_root(configured_root: &Path) -> Result<PathBuf, String> {
+    // Windows 的某些可读卷/虚拟盘不支持 fs::canonicalize，但 read_dir 完全可用。
+    // 扫描只需要一个稳定的绝对词法路径，不应把“能否取得最终设备路径”当成可扫描条件。
+    let root = if configured_root.is_absolute() {
+        normalize_lexical(configured_root)
+    } else {
+        let current = std::env::current_dir().map_err(|error| format!("无法解析当前工作目录：{error}"))?;
+        normalize_lexical(&current.join(configured_root))
+    };
+
+    let metadata = fs::metadata(&root)
+        .map_err(|error| format!("无法读取资料扫描根路径 {}：{error}", path_to_string(&root)))?;
+    if !metadata.is_dir() {
+        return Err(format!("资料扫描根路径不是目录：{}", path_to_string(&root)));
+    }
+    // 主动 probe 一次根目录。这里失败才说明这个根确实不可枚举；子目录失败仍采用跳过策略。
+    fs::read_dir(&root)
+        .map_err(|error| format!("无法枚举资料扫描根路径 {}：{error}", path_to_string(&root)))?;
+    Ok(root)
+}
+
+fn scan_visit_key(path: &Path) -> String {
+    let normalized = normalize_lexical(path);
+    #[cfg(windows)]
+    {
+        // Windows 路径比较通常不区分大小写。这里仅用于同一次扫描的 visited 去重，
+        // 不把这个字符串重新用于文件系统访问。
+        return path_to_string(&normalized).replace('/', "\\").to_ascii_lowercase();
+    }
+    #[cfg(not(windows))]
+    {
+        path_to_string(&normalized)
+    }
+}
+
+fn is_hidden_relative_path(root: &Path, path: &Path) -> bool {
+    path.strip_prefix(root)
+        .ok()
+        .map(|relative| {
+            relative.components().any(|part| {
+                part.as_os_str().to_string_lossy().starts_with('.')
+            })
+        })
+        .unwrap_or(false)
+}
+
+#[cfg(windows)]
+fn is_filesystem_reparse_point(metadata: &fs::Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+    const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0400;
+    metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0
+}
+
+#[cfg(not(windows))]
+fn is_filesystem_reparse_point(_metadata: &fs::Metadata) -> bool { false }
 
 #[tauri::command]
 fn sha256_text(value: String) -> String { format!("{:x}", Sha256::digest(value.as_bytes())) }
 
 
 #[tauri::command]
-fn read_nfo_text(path: String) -> Result<String, String> {
+async fn read_nfo_text(path: String) -> Result<String, String> {
+    spawn_native_io("read_nfo_text", move || read_nfo_text_blocking(path)).await
+}
+
+fn read_nfo_text_blocking(path: String) -> Result<String, String> {
     let file = require_existing_file(&path)?;
     let extension = file.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
     if extension != "nfo" {
@@ -383,7 +552,11 @@ fn read_nfo_text(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn import_private_asset_file(app: AppHandle, path: String) -> Result<DesktopImportedAssetFile, String> {
+async fn import_private_asset_file(app: AppHandle, path: String) -> Result<DesktopImportedAssetFile, String> {
+    spawn_native_io("import_private_asset_file", move || import_private_asset_file_blocking(app, path)).await
+}
+
+fn import_private_asset_file_blocking(app: AppHandle, path: String) -> Result<DesktopImportedAssetFile, String> {
     const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
     let source = require_existing_file(&path)?;
     let extension = source.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
@@ -432,7 +605,12 @@ fn import_private_asset_file(app: AppHandle, path: String) -> Result<DesktopImpo
 ///
 /// 返回 tauri::ipc::Response 可避免 Vec<u8> 被 JSON 数组展开，适合海报缩略图。
 #[tauri::command]
-fn read_private_asset_bytes(app: AppHandle, storage_path: String) -> Result<tauri::ipc::Response, String> {
+async fn read_private_asset_bytes(app: AppHandle, storage_path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = spawn_native_io("read_private_asset_bytes", move || read_private_asset_bytes_blocking(app, storage_path)).await?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+fn read_private_asset_bytes_blocking(app: AppHandle, storage_path: String) -> Result<Vec<u8>, String> {
     const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
     validate_text_path(&storage_path)?;
     let relative = Path::new(&storage_path);
@@ -469,20 +647,24 @@ fn read_private_asset_bytes(app: AppHandle, storage_path: String) -> Result<taur
     if metadata.len() == 0 { return Err("Private Asset 文件为空。".into()); }
     if metadata.len() > MAX_IMAGE_BYTES { return Err("Private Asset 超过 25 MB 安全上限。".into()); }
     validate_image_signature(&canonical_target, canonical_extension)?;
-    let bytes = fs::read(canonical_target).map_err(display_error)?;
-    Ok(tauri::ipc::Response::new(bytes))
+    fs::read(canonical_target).map_err(display_error)
 }
 
 #[tauri::command]
-fn sha256_file(path: String) -> Result<String, String> {
-    let file_path = require_existing_file(&path)?;
-    sha256_path(&file_path)
+async fn sha256_file(path: String) -> Result<String, String> {
+    spawn_native_io("sha256_file", move || {
+        let file_path = require_existing_file(&path)?;
+        sha256_path(&file_path)
+    }).await
 }
 
 fn sha256_path(file_path: &Path) -> Result<String, String> {
     let mut file = File::open(file_path).map_err(display_error)?;
     let mut digest = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    // 不要在 Tauri / async worker 栈上放 1 MiB 固定数组。Windows GUI 主线程栈通常较小，
+    // Asset Import 第一次进入 SHA-256 时就可能因为这块局部数组直接触发 STATUS_STACK_OVERFLOW。
+    // 使用堆分配的 256 KiB 流式缓冲，吞吐足够，同时让栈占用保持常量级。
+    let mut buffer = vec![0_u8; 256 * 1024];
     loop {
         let count = file.read(&mut buffer).map_err(display_error)?;
         if count == 0 { break; }
@@ -577,7 +759,11 @@ fn inspect_shared_pack(pack_path: String) -> Result<DesktopSharedPackInfo, Strin
 }
 
 #[tauri::command]
-fn read_library_collection(library_path: String, collection: String) -> Result<Vec<Value>, String> {
+async fn read_library_collection(library_path: String, collection: String) -> Result<Vec<Value>, String> {
+    spawn_native_io("read_library_collection", move || read_library_collection_blocking(library_path, collection)).await
+}
+
+fn read_library_collection_blocking(library_path: String, collection: String) -> Result<Vec<Value>, String> {
     let directory = safe_collection_directory(&library_path, &collection)?;
     if !directory.exists() { return Ok(Vec::new()); }
     let mut values = Vec::new();
@@ -591,7 +777,11 @@ fn read_library_collection(library_path: String, collection: String) -> Result<V
 }
 
 #[tauri::command]
-fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+async fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+    spawn_native_io("write_library_entity", move || write_library_entity_blocking(app, collection, entity)).await
+}
+
+fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
     validate_writable_entity(&collection, &entity)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "实体缺少稳定 id。".to_string())?;
     if !is_safe_id(id) { return Err("实体 id 包含不安全字符。".into()); }
@@ -610,7 +800,11 @@ fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Re
 }
 
 #[tauri::command]
-fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+async fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+    spawn_native_io("write_private_audit_entity", move || write_private_audit_entity_blocking(app, collection, entity)).await
+}
+
+fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
     if collection != "media-binding-receipts" {
         return Err("V1-18 Desktop Audit Writer 只开放 media-binding-receipts。".into());
     }
@@ -629,7 +823,11 @@ fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value)
 }
 
 #[tauri::command]
-fn delete_library_entity(app: AppHandle, collection: String, id: String) -> Result<(), String> {
+async fn delete_library_entity(app: AppHandle, collection: String, id: String) -> Result<(), String> {
+    spawn_native_io("delete_library_entity", move || delete_library_entity_blocking(app, collection, id)).await
+}
+
+fn delete_library_entity_blocking(app: AppHandle, collection: String, id: String) -> Result<(), String> {
     if !matches!(collection.as_str(), "works" | "people" | "assets" | "media-files") {
         return Err("V1-18 Desktop 删除只开放 works / people / assets / media-files；其它 Canonical 集合仍需后续治理流程。".into());
     }
@@ -698,6 +896,31 @@ fn read_json_objects(directory: &Path) -> Result<Vec<Value>, String> {
         }
     }
     Ok(output)
+}
+
+async fn spawn_native_io<T, F>(label: &'static str, operation: F) -> Result<T, String>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, String> + Send + 'static,
+{
+    let sequence = NATIVE_IO_SEQUENCE.fetch_add(1, Ordering::Relaxed);
+    eprintln!("[Localogue Desktop] native_io #{sequence} {label} queued");
+    let joined = tauri::async_runtime::spawn_blocking(move || {
+        eprintln!(
+            "[Localogue Desktop] native_io #{sequence} {label} start worker={:?}",
+            std::thread::current().id()
+        );
+        let result = operation();
+        eprintln!(
+            "[Localogue Desktop] native_io #{sequence} {label} {} worker={:?}",
+            if result.is_ok() { "ok" } else { "error" },
+            std::thread::current().id()
+        );
+        result
+    })
+    .await
+    .map_err(|error| format!("Native I/O 后台任务 {label} 异常结束：{error}"))?;
+    joined
 }
 
 fn emit_progress(app: &AppHandle, task_id: &str, stage: &'static str, message: &str, current_path: Option<&str>) {
