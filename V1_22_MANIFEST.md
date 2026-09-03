@@ -47,3 +47,7 @@ Source Genre Catalog
 ## 下一阶段
 
 V1-23 继续 Desktop Governance Parity：Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack / Presentation Preference Workbench。
+
+## Hotfix 2 · Adaptive Gallery & Fluid Layout
+
+实机继续验证后，V1-22 增加第二个 Presentation Hotfix：Work Media Gallery 依据真实图片宽高比使用 portrait / landscape / square 三种展示策略；Desktop `.content-shell` 取消固定最大宽度，让 Works / People / Browse / Detail 在 2K / 4K 与全屏窗口下使用完整可用空间。产品版本仍保持 `0.1.22`。

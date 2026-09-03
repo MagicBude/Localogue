@@ -1,6 +1,6 @@
-# V1-22 Hotfix 覆盖包说明
+# V1-22 Hotfix 2 覆盖包说明
 
-覆盖 V1-21 后运行：
+覆盖当前 V1-22 / V1-22 Hotfix 后运行：
 
 ```bash
 pnpm install
@@ -9,25 +9,22 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-本 Hotfix 先修复 `genres / tags` 删除类型白名单未同步造成的 Desktop TypeScript 编译失败，并调整 Work Detail 媒体布局。
+本 Hotfix 不改资料库与扫描链，只修 Desktop Presentation：
+
+1. Work Detail Gallery 会根据当前图片真实宽高比自动选择纵向 / 横向 / 方形 Stage；
+2. poster / cover 为纵向图片时会获得更高的展示区域，继续完整显示，不通过 `cover` 裁切；
+3. fanart / screenshot 等横向图片继续使用横向大画布；
+4. 切换 Asset 后 Gallery 会根据新图片宽高比调整展示高度；
+5. Desktop 主内容区取消固定最大宽度，全屏或 2K / 4K 窗口会真正使用右侧空间；
+6. Works Table / 海报墙 / 列表 / Facet、People、Browse 与详情页都会随窗口一起扩展；
+7. 阅读型简介等长文本仍保留自身阅读宽度，不会为了“铺满屏幕”变成超长单行；
+8. 顶栏版本信息从 Runtime 读取，不再显示历史硬编码 `V1-20`。
 
 重点验收：
 
-1. 在 Works 页面滚动到中段，勾选 / 取消任意 Facet，页面不再跳回顶部；
-2. 在人物库、分类浏览中改变筛选也保持当前滚动位置；
-3. 顶部主语言选择“简体中文 / 日本語 / English”时，UI 与 Metadata 默认一起切换；如需要“中文 UI + 日文 Metadata”，再使用第二个高级 Metadata Language 控件覆盖；
-4. 中文 UI 中显示“题材 / 标签”，不再直接显示 Genre / Tag 英文业务标题；
-5. Work Type Facet 显示“单体作品 / 写真影像 / VR …”等三语名称，不再显示 raw stable id；
-6. Genre 若 Canonical 实体缺少当前语言，但能与 Source Genre Catalog 匹配，应从 1271 条参考表补全显示；
-7. Work Detail 顶部应为全宽媒体画廊，可用左右箭头切换 poster / fanart / thumb / cover；下方为全宽高密度字段表，不再出现固定左图下方大块空白；
-8. “分类词表审计”的 unmapped 词若命中 Source Genre Catalog，会显示当前元数据语言的参考名称，但不会自动晋升 Canonical Genre；
-9. V1-18 Hotfix 3 Unified Library / Native I/O 扫描链继续正常。
+- 打开一部拥有纵向 poster 的作品，poster 应完整且明显地展示，而不是缩在横向画布中央；
+- 左右切换 poster / fanart / thumb 时 Gallery 应根据实际方向改变高度；
+- Desktop 全屏后 Works 页面右侧不应再出现由固定 `1460px` 内容宽度产生的大块空白；
+- 将 Sidebar 收起后，释放出的宽度应直接进入主内容区和结果区。
 
-新增 Genre 参考资料：
-
-- `resources/vocabularies/source-genre-catalog.csv`
-- `resources/vocabularies/source-genre-catalog.json`
-- `docs/vocabulary/source-genre-catalog.md`
-- `src/application/services/genre-localization-service.ts`
-
-Source Genre Catalog 共有 1271 条，仅用于语言补全、审计与人工映射参考。真正自动进入 Canonical Genre 的来源词仍必须在 `import-term-mappings` 中明确批准。
+产品版本继续保持 `0.1.22`。

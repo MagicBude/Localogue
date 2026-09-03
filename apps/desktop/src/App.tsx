@@ -268,7 +268,7 @@ export default function App() {
       <main className="content-shell">
         <header className="topbar">
           <div>
-            <span className="eyebrow">DESKTOP UX · I18N · PRESENTATION · V1-20</span>
+            <span className="eyebrow">{`LOCAL FIRST · DESKTOP · ${runtime?.version ?? "…"}`}</span>
             <strong>{t(NAV_ITEMS.find((item) => item.id === page)?.label ?? "首页")}</strong>
           </div>
           <div className="topbar-actions">
@@ -660,21 +660,43 @@ function WorkAssetGallery({
     [assets],
   );
   const [index, setIndex] = useState(0);
+  const [orientation, setOrientation] = useState<"portrait" | "landscape" | "square">("landscape");
 
   useEffect(() => {
     setIndex((current) => imageAssets.length ? Math.min(current, imageAssets.length - 1) : 0);
   }, [imageAssets.length, workCode]);
 
   const current = imageAssets[index];
+
+  useEffect(() => {
+    if (!current) {
+      setOrientation("landscape");
+      return;
+    }
+    if (current.type === "poster" || current.type === "cover" || current.type === "portrait") {
+      setOrientation("portrait");
+      return;
+    }
+    setOrientation("landscape");
+  }, [current?.id, current?.type]);
   const canNavigate = imageAssets.length > 1;
   const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
   const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
 
   return (
     <section className="desktop-work-gallery" aria-label={t("作品媒体画廊")}>
-      <div className="desktop-work-gallery__stage">
+      <div className={`desktop-work-gallery__stage is-${orientation}`}>
         {current ? (
-          <DesktopAssetImage asset={current} alt={`${workCode} ${current.type}`} fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>} />
+          <DesktopAssetImage
+            asset={current}
+            alt={`${workCode} ${current.type}`}
+            fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>}
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              const ratio = image.naturalWidth / Math.max(image.naturalHeight, 1);
+              setOrientation(ratio < 0.88 ? "portrait" : ratio > 1.12 ? "landscape" : "square");
+            }}
+          />
         ) : (
           <span className="desktop-work-gallery__empty"><b>{workCode}</b><small>{t("暂无本地图片")}</small></span>
         )}

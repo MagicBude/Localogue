@@ -49,3 +49,17 @@ V1-22 将 Work Detail 改为：
 - Genre 若 Canonical 缺少翻译但 Source Genre Catalog 有翻译，应显示目标语言；
 - Work Detail 首屏应直接看到作品类型、题材和标签；
 - Source Genre Catalog 命中的 unmapped term 只能显示“词表参考”，不能自动创建 Genre。
+
+## Hotfix 2：自适应媒体画廊与流式桌面宽度
+
+实机在宽屏窗口继续暴露两个 Presentation 问题：纵向 poster 在固定横向 Gallery Stage 中视觉占比过小，以及 `.content-shell` 的历史固定最大宽度让 2K / 4K 桌面右侧产生无效空白。
+
+Hotfix 2 不改变 Asset / Work 数据模型，而把 Presentation 改成：
+
+1. 当前图片加载完成后读取 `naturalWidth / naturalHeight`；
+2. 根据真实宽高比切换 `portrait / landscape / square` Stage；
+3. portrait 使用更高的视口高度，保持 `object-fit: contain` 完整展示；
+4. Desktop 主内容区取消固定最大宽度，结果区使用 Grid Track 的全部可用空间；
+5. 长简介等阅读内容继续由自身 `max-width` 控制可读性，而不是通过整个应用固定宽度来限制。
+
+这样 Gallery 后续接入视频截图、预览图或其他不同宽高比媒体时，不需要再重新设计详情页骨架。

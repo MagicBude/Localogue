@@ -130,6 +130,9 @@ if (!errors.length) {
   if (!desktopApp.includes("function WorkAssetGallery") || !desktopApp.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
     errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
+  if (!desktopApp.includes('setOrientation(ratio < 0.88 ? "portrait" : ratio > 1.12 ? "landscape" : "square")')) {
+    errors.push("V1-22 Hotfix 2 Work Media Gallery 必须根据真实图片宽高比切换 portrait / landscape / square 展示策略，不能恢复固定横向画布。");
+  }
   const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
   if (!desktopWorkResults.includes('"grid" | "list" | "table"') || !desktopWorkResults.includes("DesktopWorkViewSwitcher")) {
@@ -140,6 +143,12 @@ if (!errors.length) {
   const desktopCatalogBrowser = readFileSync(path.join(root, "apps/desktop/src/desktop-catalog-browser.tsx"), "utf8");
   const desktopI18n = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n.tsx"), "utf8");
   const desktopStyles = readFileSync(path.join(root, "apps/desktop/src/styles.css"), "utf8");
+  if (!desktopStyles.includes(".desktop-work-gallery__stage.is-portrait") || !desktopStyles.includes(".desktop-work-gallery__stage.is-landscape") || !desktopStyles.includes(".desktop-work-gallery__stage.is-square")) {
+    errors.push("V1-22 Hotfix 2 Gallery 样式必须保留 portrait / landscape / square 三种真实宽高比策略。");
+  }
+  if (!desktopStyles.includes(".content-shell") || !desktopStyles.includes("max-width: none")) {
+    errors.push("V1-22 Hotfix 2 Desktop 主内容区必须保持流式宽度，不能恢复固定 1460px max-width 导致大屏右侧空白。");
+  }
   for (const token of ["personIds", "directorIds", "makerIds", "labelIds", "seriesIds", "genreIds", "workTypeIds", "tagIds", "releaseYears", "releaseFrom", "releaseTo", "durationMin", "durationMax", "hasCover", "hasMedia"]) {
     if (!desktopWorkExplorer.includes(token)) errors.push(`V1-19 Desktop Work 多维筛选缺少 WorkQuery 条件：${token}`);
   }

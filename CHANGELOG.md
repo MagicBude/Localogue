@@ -1,5 +1,18 @@
 # Changelog
 
+## V1-22 Hotfix 2 - Adaptive Work Media Gallery & Fluid Desktop Layout
+
+- 修复纵向 poster / cover 在固定横向 Gallery Stage 中显示过小的问题。
+- Work Media Gallery 根据图片真实宽高比切换 portrait / landscape / square 展示策略。
+- poster / cover / portrait 在首帧读取前采用纵向预判，图片加载后再以 naturalWidth / naturalHeight 校正。
+- portrait Gallery 使用更高的视口高度并继续 `object-fit: contain`，完整展示纵向海报而不裁切。
+- 移除 Desktop 主内容区固定 `max-width: 1460px` 思路，改为跟随窗口可用宽度流式伸展。
+- 2K / 4K 和宽屏窗口下 Works Table、Facet、Browse、People 与 Work Detail 可真正利用右侧空间。
+- 超宽屏仅增加响应式 padding / Facet Rail，不再通过固定 Content Max Width 制造右侧空白。
+- Desktop 顶栏阶段文本改为读取 Runtime Version，不再硬编码 V1-20。
+- Desktop Boundary Validator 新增 Gallery Orientation 与 Fluid Content Width 回归检查。
+- 产品版本继续保持 `0.1.22`，作为 V1-22 Presentation Hotfix。
+
 ## V1-22 Hotfix - Desktop Delete Type Sync & Work Media Gallery
 
 - 修复 `DesktopDeletableLibraryCollection` 未同步 Native `genres / tags` 受控删除白名单导致的 `TS2345` 编译失败。

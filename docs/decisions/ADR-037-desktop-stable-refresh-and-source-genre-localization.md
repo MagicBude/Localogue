@@ -45,3 +45,9 @@ V1-21 实机反馈暴露两个 Presentation 问题：
 - Source Genre Catalog 可以提升多语显示，但不会破坏 Canonical Vocabulary 边界；
 - Work Detail 更接近资料站的高密度信息架构；
 - V1-23 可在稳定的数据语义和 Presentation 基础上继续 Governance Parity。
+
+### V1-22 Hotfix 2 补充：Presentation 尺寸策略
+
+Desktop Work Gallery 不以 `poster / fanart` 的类型名称假定图片方向，最终以图片实际 `naturalWidth / naturalHeight` 决定 portrait / landscape / square Presentation。类型只用于图片读取前的首帧预判。
+
+Desktop 主内容区不再使用固定 `1460px` 最大宽度。Desktop 是可伸缩工作台而不是固定文章版心；Works Table、Facet、Browse 与 Detail 应使用窗口可用空间。需要控制阅读长度的字段由组件自身的内容宽度规则负责。

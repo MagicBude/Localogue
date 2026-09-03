@@ -15,6 +15,8 @@ V1-22 来自 V1-21 实机体验反馈：筛选或切语言时旧结果被短暂 
 - Desktop / Web 的 Genre 展示统一经过 `localizeGenre`；
 - 中文 UI 的 Genre / Tag 用户标签统一为“题材 / 标签”；
 - Work Detail 重构为“顶部媒体画廊 + 下方全宽高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
+- V1-22 Hotfix 2 将媒体画廊升级为真实宽高比自适应：纵向 poster / cover、横向 fanart / screenshot 与近方形图片使用不同 Stage 高度；
+- Desktop 主内容区取消历史固定 max-width，2K / 4K 与宽窗口下 Works / Browse / People / Detail 会使用完整可用宽度；
 - Vocabulary Audit 的 unmapped 来源词若命中 Source Genre Catalog，会显示当前元数据语言的参考翻译；
 - V1-18 Hotfix 3 Unified Library / Native I/O 稳定链保持不变。
 
