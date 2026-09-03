@@ -37,6 +37,7 @@ export const desktopBridge = {
     invoke<DesktopFileEntry[]>("walk_files", { request }),
   readNfoText: (path: string) => invoke<string>("read_nfo_text", { path }),
   importPrivateAssetFile: (path: string) => invoke<DesktopImportedAssetFile>("import_private_asset_file", { path }),
+  readPrivateAssetBytes: (storagePath: string) => invoke<ArrayBuffer>("read_private_asset_bytes", { storagePath }),
   sha256File: (path: string) => invoke<string>("sha256_file", { path }),
   inspectSharedPack: (packPath: string) =>
     invoke<DesktopSharedPackInfo>("inspect_shared_pack", { packPath }),

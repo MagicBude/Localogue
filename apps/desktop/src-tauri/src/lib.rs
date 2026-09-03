@@ -421,6 +421,58 @@ fn import_private_asset_file(app: AppHandle, path: String) -> Result<DesktopImpo
     })
 }
 
+/// 只读取当前 Private Library 中已经登记到 asset-files/ 的图片。
+///
+/// 不开放任意路径读取，也不启用全盘 asset:// scope。前端只能提交 Asset.storagePath
+/// 这类相对路径，Native Boundary 会重新绑定到当前 Settings 的 Private Library 并校验：
+/// - 必须位于 asset-files/ 下；
+/// - 禁止绝对路径和 .. 路径穿越；
+/// - 只允许受支持图片扩展名；
+/// - 单文件仍受 25 MB 上限约束。
+///
+/// 返回 tauri::ipc::Response 可避免 Vec<u8> 被 JSON 数组展开，适合海报缩略图。
+#[tauri::command]
+fn read_private_asset_bytes(app: AppHandle, storage_path: String) -> Result<tauri::ipc::Response, String> {
+    const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
+    validate_text_path(&storage_path)?;
+    let relative = Path::new(&storage_path);
+    if relative.is_absolute() { return Err("Asset storagePath 必须是 Private Library 内的相对路径。".into()); }
+    if relative.components().any(|component| matches!(component, std::path::Component::ParentDir)) {
+        return Err("Asset storagePath 不能包含 .. 路径穿越。".into());
+    }
+
+    let library_path = configured_private_library_path(&app)?;
+    let asset_root = normalize_lexical(&PathBuf::from(&library_path).join("asset-files"));
+    let target = normalize_lexical(&PathBuf::from(&library_path).join(relative));
+    if !target.starts_with(&asset_root) {
+        return Err("只允许读取当前 Private Library 的 asset-files。".into());
+    }
+
+    // 再做一次真实文件系统 canonicalize，防止 asset-files 内的符号链接逃逸到资料库外。
+    let canonical_root = fs::canonicalize(&asset_root).map_err(|error| format!("无法解析 Private asset-files：{error}"))?;
+    let canonical_target = fs::canonicalize(&target).map_err(|error| format!("无法解析 Private Asset：{error}"))?;
+    if !canonical_target.starts_with(&canonical_root) {
+        return Err("Private Asset 真实路径越过了 asset-files 边界。".into());
+    }
+
+    let extension = canonical_target.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+    let canonical_extension = match extension.as_str() {
+        "jpg" | "jpeg" => "jpg",
+        "png" => "png",
+        "webp" => "webp",
+        "gif" => "gif",
+        "avif" => "avif",
+        _ => return Err("当前只允许读取 JPEG、PNG、WebP、GIF、AVIF Private Asset。".into()),
+    };
+    let metadata = fs::metadata(&canonical_target).map_err(|error| format!("无法读取 Private Asset：{error}"))?;
+    if !metadata.is_file() { return Err("Asset storagePath 不是普通文件。".into()); }
+    if metadata.len() == 0 { return Err("Private Asset 文件为空。".into()); }
+    if metadata.len() > MAX_IMAGE_BYTES { return Err("Private Asset 超过 25 MB 安全上限。".into()); }
+    validate_image_signature(&canonical_target, canonical_extension)?;
+    let bytes = fs::read(canonical_target).map_err(display_error)?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
 #[tauri::command]
 fn sha256_file(path: String) -> Result<String, String> {
     let file_path = require_existing_file(&path)?;
@@ -560,7 +612,7 @@ fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Re
 #[tauri::command]
 fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
     if collection != "media-binding-receipts" {
-        return Err("V1-17 Desktop Audit Writer 只开放 media-binding-receipts。".into());
+        return Err("V1-18 Desktop Audit Writer 只开放 media-binding-receipts。".into());
     }
     validate_private_audit_entity(&collection, &entity)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "审计实体缺少稳定 id。".to_string())?;
@@ -579,7 +631,7 @@ fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value)
 #[tauri::command]
 fn delete_library_entity(app: AppHandle, collection: String, id: String) -> Result<(), String> {
     if !matches!(collection.as_str(), "works" | "people" | "assets" | "media-files") {
-        return Err("V1-17 Desktop 删除只开放 works / people / assets / media-files；其它 Canonical 集合仍需后续治理流程。".into());
+        return Err("V1-18 Desktop 删除只开放 works / people / assets / media-files；其它 Canonical 集合仍需后续治理流程。".into());
     }
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
@@ -819,7 +871,7 @@ fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(),
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
     validate_text_path(root)?;
     if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files") {
-        return Err("V1-17 Desktop 只允许写入明确白名单中的 Private Canonical / assets / media-files 集合。".into());
+        return Err("V1-18 Desktop 只允许写入明确白名单中的 Private Canonical / assets / media-files 集合。".into());
     }
     Ok(PathBuf::from(root).join(collection))
 }
@@ -867,6 +919,7 @@ pub fn run() {
             walk_files,
             read_nfo_text,
             import_private_asset_file,
+            read_private_asset_bytes,
             sha256_text,
             sha256_file,
             inspect_shared_pack,

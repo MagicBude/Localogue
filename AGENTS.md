@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-17 Unified Library Source & Desktop Interaction Parity II**。
+当前阶段：**V1-18 Desktop Presentation Parity & Unified Library Sync**。
 
 V1 当前约束：
 
@@ -255,7 +255,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Rust 写集合白名单必须继续只有 `media-files`。扩大读取能力不等于扩大写权限，更不得演变成 Webview 可指定任意目录/集合的通用文件 API。
 - Desktop 媒体扫描必须使用与浏览页面相同的合并 Repository，使 Shared Pack Work 能参与番号匹配，但扫描产生的 MediaFile 只能写入 Private Library。
 - V1-15 的 Home / Works / People / Media / Packs / Settings 是正式 Desktop 产品壳，不再把 Desktop 视为 Runtime 测试控制台。
-- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-18。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
+- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-19。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
 
 
 ## V1-17 实现约束补充
@@ -264,7 +264,7 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - NFO 识别必须优先使用 XML 内可验证的番号；XML 缺失或只有无关数字 ID 时，才从文件名保守识别番号。日期和片名只能作为缺失字段 fallback。
 - Desktop 批量 NFO 必须保持 **Preview -> Explicit Import**。扫描预览本身不得写 Canonical。
 - V1-16/V1-17 的 NFO / Local Asset Bootstrap Ingest 是对“所有外部导入先持久化 Evidence 再 Review”的一个**窄范围迁移例外**：只服务用户明确确认的本地存量资料打底；已有 Work 只能 fill / merge 缺失字段和精确关系，不得静默覆盖已有核心事实。不要把这个例外推广到在线 Provider、普通 Importer 或一般编辑。
-- V1-18 继续把更广泛的冲突修改、Evidence / Review / Commit Plan / History 与 Portable Pack 治理链迁入 Desktop；V1-17 的直接 Private CRUD 是本地私人层日常维护能力，不等价于完整 Evidence 审核治理。
+- V1-19 继续把更广泛的冲突修改、Evidence / Review / Commit Plan / History 与 Portable Pack 治理链迁入 Desktop；V1-17/V1-18 的直接 Private CRUD 是本地私人层日常维护能力，不等价于完整 Evidence 审核治理。
 - Native Canonical Writer 的根目录必须由 Rust 从当前 Desktop Settings 自行解析，只能是已配置的 Private Library；Webview 不得传入任意写根目录。Shared Pack 必须在 Rust 边界保持只读。
 - V1-17 允许写 `works / people / organizations / series / genres / tags / assets / media-files`；Asset 二进制只能通过受限 Native 图片导入写入 Private `asset-files/`，不得接受任意写根。删除仅开放 `works / people / assets / media-files` 且必须通过 Native 引用检查；另有独立 Audit Writer 只允许 `media-binding-receipts`。
 - `libraryRoots` 是统一资料源的首选配置；`mediaScanPaths / nfoScanPaths` 只作为高级兼容补充。目录位置不得成为 Work/NFO/Media/Asset 的关系主键，可靠关联优先使用规范化作品番号。
@@ -272,6 +272,15 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - 新建 Person / Organization / Series / Genre / Tag 只允许规范化精确复用或稳定 ID 创建，不做模糊别名自动合并。
 - NFO 创建 / 补充 Work 后，媒体关联仍走既有番号匹配器；不得为了 NFO 再写第二套 MediaFile 绑定规则。
 - 修改 NFO / Desktop Native 写边界后必须运行 `pnpm validate:platform` 与 `pnpm validate:desktop`；有 Rust/Tauri 环境时继续运行 `pnpm desktop:rust:check`。
+
+## V1-18 实现约束补充
+
+- Desktop 本地图片展示不得通过动态 Private Library 开启宽泛 `asset://` scope；必须使用受限 Native Reader，并由 Rust 从当前 Settings 解析 Private `asset-files/` 根。
+- `read_private_asset_bytes` 不得接受绝对路径、路径穿越或 Shared Pack 路径；扩展名、大小与 magic bytes 校验不能只放在 React。
+- Works 海报墙 / 列表 / 表格只能是同一查询结果的 Presentation 切换，不得为三个视图复制三套 Repository 查询和过滤逻辑。
+- Unified Library 一键同步顺序固定为 NFO → Asset → Media；Asset 必须在 NFO Import 后重新发现，确保新建 Work 可立即成为图片关联目标。
+- 一键同步仍然是用户显式操作；不得把 NFO / Asset Canonical 写入改成后台静默扫描。高级 Preview / Import 入口必须保留。
+- V1-18 解决 Presentation 与同步编排，不代表 Evidence / Review / Curation / History、完整高级 Facet 或 Portable Pack Desktop 已完成；这些继续进入 V1-19。
 
 
 

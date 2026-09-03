@@ -1,5 +1,21 @@
 # 更新日志
 
+## V1-18 · Desktop Presentation Parity & Unified Library Sync
+
+- Desktop Works 对齐 Web 的海报墙 / 列表 / 表格三种展示方式；三种模式共享同一 Repository 查询结果。
+- 新增 `DesktopWorkResults` / `DesktopWorkViewSwitcher`，视图偏好保存在 Desktop localStorage。
+- Work poster 解析同时兼容 `Work.assetIds` 与 `Asset.subjectId` 关系，优先 poster、其次 cover。
+- 新增 `DesktopAssetImage`，通过受限 Tauri IPC bytes + Blob URL 实际渲染 Private 本地图片。
+- Rust 新增 `read_private_asset_bytes`：写死当前 Private Library/asset-files 边界，拒绝绝对路径与 `..`，限制图片扩展名、大小并校验 magic bytes。
+- 不为动态 Private Library 开启宽泛 asset protocol scope，继续保持 WebView 最小本地文件读取面。
+- Work Detail 新增真实首图与关联 Asset 图片预览。
+- Media 页面新增“一键同步 Unified Library”，固定按 NFO → Asset → Media 顺序执行。
+- 一键同步会在 NFO 导入后重新扫描图片，使新建 Work 可以立即接收 poster / fanart / thumb。
+- 继续保留“仅扫描视频”和“NFO + 图片 Preview / Import”作为高级可控入口。
+- 既有 size + mtime 增量媒体扫描保持不变，元数据同步不会强制重复所有 ffprobe / SHA-256。
+- 新增 ADR-034、V1-18 实现导读与 Manifest。
+- 项目、Desktop Workspace、Rust Crate 与 Tauri 配置升级至 0.1.18。
+
 ## V1-17 · Unified Library Source & Desktop Interaction Parity II
 
 - Desktop Works 新增 Private Work 创建、详情编辑与受引用保护的 Private 删除；Shared Work 保存为同 ID Private Override。

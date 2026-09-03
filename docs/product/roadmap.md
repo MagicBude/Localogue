@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-17 Unified Library Source & Desktop Interaction Parity II**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 解决独立 NFO 存量资料迁移，V1-17 再把视频 / NFO / 本地图片提升为可跨子目录汇聚的统一资料源。
+当前已推进到 **V1-18 Desktop Presentation Parity & Unified Library Sync**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 解决独立 NFO 存量资料迁移，V1-17 建立 Unified Library Source 与 Desktop 日常管理闭环，V1-18 再补齐真实本地图片展示、Works 三视图和一键同步编排。
 
 已完成重点：
 
@@ -55,9 +55,12 @@
 - ~~Desktop Works / People 核心搜索、筛选、排序~~（V1-17）；
 - ~~Shared Pack 挂载、Native 校验、优先级调整、卸载~~（V1-17）；
 - ~~Work 元数据关系编辑~~（V1-17）；
-- ~~MediaFile bind / rebind / unbind 与审计 Receipt~~（V1-17）。
+- ~~MediaFile bind / rebind / unbind 与审计 Receipt~~（V1-17）；
+- ~~Desktop Works 海报墙 / 列表 / 表格三视图~~（V1-18）；
+- ~~Private poster / cover 受限 Native IPC 实际展示~~（V1-18）；
+- ~~Unified Library NFO → Asset → Media 一键显式同步~~（V1-18）。
 
-### V1-18：Desktop Governance & Native Enhancement
+### V1-19：Desktop Governance & Native Enhancement
 
 下一阶段重点：
 
@@ -66,7 +69,7 @@
 - Evidence / Review / Curation / History Desktop 交互；
 - 将 V1-16/V1-17 Bootstrap Ingest 中的冲突型更新继续收敛到完整治理链；
 - Shared / Personal Portable Pack Desktop 导入导出；
-- Asset 二进制读取、头像/封面实际展示与 Presentation Preference；
+- Person 头像实际展示与更完整 Presentation Preference 对齐；
 - 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复业务规则。
 
 ### 后续 Desktop Native Enhancement

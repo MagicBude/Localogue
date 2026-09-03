@@ -19,8 +19,8 @@ import { desktopBridge } from "../tauri-bridge";
  *
  * - Canonical 数据按 private > shared pack 1 > shared pack 2 的顺序合并；
  * - MediaFile 永远只从 private root 读取；
- * - V1-17 为 NFO / Local Asset Bootstrap 与 Desktop 交互开放受控 Private Canonical 写入；
- * - Shared Pack 始终只读；V1-17 只开放受引用检查保护的 Private Work / Person / Asset / MediaFile 删除；
+ * - V1-18 延续 NFO / Local Asset Bootstrap 与 Desktop 交互的受控 Private Canonical 写入；
+ * - Shared Pack 始终只读；V1-18 仍只开放受引用检查保护的 Private Work / Person / Asset / MediaFile 删除；
  * - 查询/排序/Facet 使用与 Web JsonLibraryRepository 完全相同的纯函数核心。
  */
 export class TauriLibraryRepository implements LibraryRepository {

@@ -12,6 +12,8 @@ const required = [
   "apps/desktop/src/platform/tauri-library-repository.ts",
   "apps/desktop/src/nfo-library-import.ts",
   "apps/desktop/src/local-asset-import.ts",
+  "apps/desktop/src/desktop-asset-image.tsx",
+  "apps/desktop/src/desktop-work-results.tsx",
   "apps/desktop/src/desktop-management.tsx",
   "src/application/library/library-query.ts",
   "src/application/importers/nfo-filename-metadata.ts",
@@ -49,13 +51,13 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"];
+  const runtimeCommands = ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
   const generatedAcl = readFileSync(path.join(root, "apps/desktop/src-tauri/gen/schemas/acl-manifests.json"), "utf8");
   for (const command of runtimeCommands) {
-    if (!generatedAcl.includes(`"${command}"`)) errors.push(`Tauri 生成 ACL Manifest 尚未同步 V1-17 命令：${command}`);
+    if (!generatedAcl.includes(`"${command}"`)) errors.push(`Tauri 生成 ACL Manifest 尚未同步 V1-18 命令：${command}`);
   }
   if (/shell:allow-(execute|spawn)/.test(capability + permission)) {
     errors.push("Desktop Capability 不允许向 Webview 暴露通用 shell execute/spawn。");
@@ -90,56 +92,70 @@ if (!errors.length) {
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
-    errors.push("V1-17 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
+    errors.push("V1-18 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
   }
   if (!desktopApp.includes("previewNfoImport") || !desktopApp.includes("importNfoPreview")) {
-    errors.push("V1-17 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
+    errors.push("V1-18 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
   }
   const desktopManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-management.tsx"), "utf8");
   for (const feature of ["CreateWorkPanel", "WorkEditor", "CreatePersonPanel", "PersonEditor", "MediaBindingPanel"]) {
-    if (!desktopManagement.includes(feature)) errors.push(`V1-17 Desktop 交互对齐缺少：${feature}`);
+    if (!desktopManagement.includes(feature)) errors.push(`V1-18 Desktop 交互对齐缺少：${feature}`);
   }
   if (!desktopManagement.includes("Private Override") || !desktopManagement.includes("saveMediaBindingReceipt")) {
-    errors.push("V1-17 Shared 实体编辑必须写 Private Override，Media 手工绑定必须保留审计 Receipt。");
+    errors.push("V1-18 Shared 实体编辑必须写 Private Override，Media 手工绑定必须保留审计 Receipt。");
   }
   if (!desktopApp.includes("removePrivateAsset") || !desktopApp.includes("deletePrivateAsset")) {
-    errors.push("V1-17 Work 详情必须提供显式 Private Asset 解除/删除入口，避免引用保护导致 Work 无法完成删除闭环。");
+    errors.push("V1-18 Work 详情必须提供显式 Private Asset 解除/删除入口，避免引用保护导致 Work 无法完成删除闭环。");
+  }
+  const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
+  const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
+  if (!desktopWorkResults.includes('"grid" | "list" | "table"') || !desktopWorkResults.includes("DesktopWorkViewSwitcher")) {
+    errors.push("V1-18 Desktop Works 必须对齐 Web 的海报墙 / 列表 / 表格三种表现视图。");
+  }
+  if (!desktopAssetImage.includes("readPrivateAssetBytes") || !rust.includes("read_private_asset_bytes")) {
+    errors.push("V1-18 Desktop 必须通过受限 Private Asset Reader 显示本地图片，不能继续只画占位符。");
+  }
+  if (!rust.includes('target.starts_with(&asset_root)') || !rust.includes('canonical_target.starts_with(&canonical_root)') || !rust.includes('Component::ParentDir')) {
+    errors.push("V1-18 Private Asset Reader 必须限制在当前 Private Library/asset-files 并拒绝路径穿越。");
+  }
+  if (!desktopApp.includes("syncUnifiedLibrary") || !desktopApp.includes("一键同步 Unified Library")) {
+    errors.push("V1-18 Desktop Media 必须提供 NFO -> Asset -> Media 的统一同步入口，避免半同步状态。");
   }
   if (!adapters.includes("class TauriFileSystemAdapter") || !adapters.includes("class TauriFileHashAdapter")) {
-    errors.push("V1-17 Desktop 必须继续实现 FileSystemPort / FileHashPort。");
+    errors.push("V1-18 Desktop 必须继续实现 FileSystemPort / FileHashPort。");
   }
   if (!rust.includes("safe_collection_directory") || !rust.includes('"people"') || !rust.includes('"organizations"') || !rust.includes('"assets"')) {
-    errors.push("V1-17 Desktop Repository 读取白名单必须覆盖 Canonical 浏览集合。");
+    errors.push("V1-18 Desktop Repository 读取白名单必须覆盖 Canonical 浏览集合。");
   }
   for (const collection of ["works", "people", "organizations", "series", "genres", "tags", "media-files"]) {
-    if (!rust.includes(`"${collection}"`)) errors.push(`V1-17 Private 写白名单缺少集合：${collection}`);
+    if (!rust.includes(`"${collection}"`)) errors.push(`V1-18 Private 写白名单缺少集合：${collection}`);
   }
   if (!rust.includes("safe_writable_collection_directory") || !rust.includes("validate_writable_entity")) {
-    errors.push("V1-17 Desktop Canonical 写入必须同时经过集合白名单与最小结构校验。");
+    errors.push("V1-18 Desktop Canonical 写入必须同时经过集合白名单与最小结构校验。");
   }
   if (!/safe_writable_collection_directory[\s\S]{0,900}"assets"/.test(rust) || !rust.includes("import_private_asset_file")) {
-    errors.push("V1-17 Desktop 必须允许受控写 Asset JSON，并通过专用 Native Command 把图片复制到 Private asset-files。");
+    errors.push("V1-18 Desktop 必须允许受控写 Asset JSON，并通过专用 Native Command 把图片复制到 Private asset-files。");
   }
   if (!rust.includes("configured_private_library_path") || /fn write_library_entity\([^)]*library_path/.test(rust)) {
-    errors.push("V1-17 写命令必须由 Rust 自己从 Desktop Settings 解析 Private Library，禁止 Webview 选择写根目录。");
+    errors.push("V1-18 写命令必须由 Rust 自己从 Desktop Settings 解析 Private Library，禁止 Webview 选择写根目录。");
   }
   if (!rust.includes('"works" | "people" | "assets" | "media-files"') || !rust.includes("ensure_private_delete_is_unreferenced")) {
-    errors.push("V1-17 Private 删除必须只开放 Work / Person / Asset / MediaFile，并执行引用检查。");
+    errors.push("V1-18 Private 删除必须只开放 Work / Person / Asset / MediaFile，并执行引用检查。");
   }
   if (!rust.includes("write_private_audit_entity") || !rust.includes('collection != "media-binding-receipts"')) {
-    errors.push("V1-17 Media 手工绑定必须通过受限 Private Audit Writer 保存 media-binding-receipts。");
+    errors.push("V1-18 Media 手工绑定必须通过受限 Private Audit Writer 保存 media-binding-receipts。");
   }
   if (!rust.includes("read_nfo_text") || !rust.includes('extension != "nfo"') || !rust.includes("MAX_NFO_BYTES")) {
-    errors.push("V1-17 NFO Reader 必须限制为 .nfo 普通文件，并保留单文件大小上限。");
+    errors.push("V1-18 NFO Reader 必须限制为 .nfo 普通文件，并保留单文件大小上限。");
   }
   if (!rust.includes("library_roots") || !desktopApp.includes("libraryRoots")) {
-    errors.push("V1-17 Desktop Settings 必须提供 Unified Library Roots。");
+    errors.push("V1-18 Desktop Settings 必须提供 Unified Library Roots。");
   }
   if (!rust.includes("nfo_scan_paths") || !desktopApp.includes("nfoScanPaths")) {
-    errors.push("V1-17 必须保留独立 NFO 根作为高级兼容路径。");
+    errors.push("V1-18 必须保留独立 NFO 根作为高级兼容路径。");
   }
   if (!rust.includes("inspect_shared_pack") || !rust.includes('localogue-pack.json') || !rust.includes('kind=shared-library')) {
-    errors.push("V1-17 Desktop 必须继续在 Rust 边界验证 Shared Pack manifest 与 library/ 目录。");
+    errors.push("V1-18 Desktop 必须继续在 Rust 边界验证 Shared Pack manifest 与 library/ 目录。");
   }
   const desktopRepository = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-library-repository.ts"), "utf8");
   const jsonRepository = readFileSync(path.join(root, "src/infrastructure/repositories/json-library-repository.ts"), "utf8");
@@ -170,7 +186,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-17 Unified Library Root、NFO/Asset 汇聚、Desktop CRUD、Media 手工绑定审计、Shared Pack 管理与 Native 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-18 Unified Library Sync、Private Asset 安全读取、Works 三视图、Desktop CRUD、Media 手工绑定审计、Shared Pack 管理与 Native 安全边界均符合规则。");
 }
 
 function walkTextFiles(directory) {

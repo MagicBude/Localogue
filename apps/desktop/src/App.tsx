@@ -41,6 +41,14 @@ import {
 } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
+import { DesktopAssetImage } from "./desktop-asset-image";
+import {
+  buildDesktopWorkCards,
+  chooseWorkPoster,
+  DesktopWorkResults,
+  DesktopWorkViewSwitcher,
+  type DesktopWorkViewMode,
+} from "./desktop-work-results";
 import {
   importLocalAssetPreview,
   previewLocalAssetImport,
@@ -203,7 +211,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span>
             <strong>Localogue</strong>
-            <small>Desktop · V1-17</small>
+            <small>Desktop · V1-18</small>
           </span>
         </button>
 
@@ -375,7 +383,7 @@ function HomePage({
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>你的 Localogue，现在就在桌面端。</h1>
         <p>
-          V1-17 已进入 Unified Library Source 与 Desktop 日常交互对齐阶段。首页、作品、人物、媒体、资料包与设置
+          V1-18 已进入 Presentation Parity 与 Unified Library Sync 阶段。作品页已对齐海报墙 / 列表 / 表格三视图，本地 poster / cover 可直接显示；本地资料支持一键按 NFO → Asset → Media 顺序同步。首页、作品、人物、媒体、资料包与设置
           直接读取和 Web 相同的数据模型，并共享查询规则；视频、NFO 与本地海报可以跨子目录按 Work 汇聚。
         </p>
       </section>
@@ -423,23 +431,45 @@ function WorksPage({
   const [text, setText] = useState("");
   const [sort, setSort] = useState<WorkSort>("release_desc");
   const [mediaFilter, setMediaFilter] = useState<"all" | "yes" | "no">("all");
-  const data = useAsyncData(
-    () => repository.listWorks({
+  const [page, setPage] = useState(1);
+  const [view, setView] = useState<DesktopWorkViewMode>(() => {
+    const saved = window.localStorage.getItem("localogue.desktop.work-view");
+    return saved === "list" || saved === "table" ? saved : "grid";
+  });
+  const pageSize = 24;
+
+  useEffect(() => setPage(1), [text, sort, mediaFilter]);
+
+  const data = useAsyncData(async () => {
+    const result = await repository.listWorks({
       text: text || undefined,
-      page: 1,
-      pageSize: 1000,
+      page,
+      pageSize,
       sort,
       ...(mediaFilter === "all" ? {} : { hasMedia: mediaFilter === "yes" }),
-    }),
-    [repository, text, sort, mediaFilter],
-  );
+    });
+    const [people, organizations, assets] = await Promise.all([
+      repository.listPeople({ page: 1, pageSize: 100000 }),
+      repository.listOrganizations(),
+      repository.listAssets(),
+    ]);
+    return {
+      result,
+      cards: buildDesktopWorkCards(result.items, people.items, organizations, assets),
+    };
+  }, [repository, text, sort, mediaFilter, page]);
+
+  function changeView(next: DesktopWorkViewMode): void {
+    setView(next);
+    window.localStorage.setItem("localogue.desktop.work-view", next);
+  }
 
   return (
     <div className="page-stack">
       <PageTitle
-        eyebrow="CANONICAL WORKS"
+        eyebrow="CANONICAL WORKS · PRESENTATION PARITY"
         title="作品库"
-        description="Desktop 与 Web 共用 WorkQuery；V1-17 增加 Private Work 新建与详情编辑，同时保持 Shared Pack 只读。"
+        description="Desktop 与 Web 共用 WorkQuery，并对齐海报墙 / 列表 / 表格三种作品视图；Private poster / cover 会通过受限 Native Asset Reader 直接显示。"
       />
       <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
       <section className="filter-bar">
@@ -449,11 +479,19 @@ function WorksPage({
       </section>
       {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
         <>
-          <div className="result-meta"><strong>{data.value.total}</strong> 项作品</div>
-          <div className="work-grid">
-            {data.value.items.map((work) => <WorkTile key={work.id} work={work} onOpen={() => openWork(work.id)} />)}
+          <div className="desktop-results-toolbar">
+            <div className="result-meta"><strong>{data.value.result.total}</strong> 项作品 · 第 {data.value.result.page} 页</div>
+            <DesktopWorkViewSwitcher current={view} onChange={changeView} />
           </div>
-          {!data.value.items.length ? <EmptyResults /> : null}
+          <DesktopWorkResults cards={data.value.cards} view={view} onOpen={openWork} />
+          {!data.value.cards.length ? <EmptyResults /> : null}
+          {data.value.result.total > pageSize ? (
+            <div className="desktop-pagination" aria-label="作品分页">
+              <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← 上一页</button>
+              <span>{page} / {Math.max(1, Math.ceil(data.value.result.total / pageSize))}</span>
+              <button disabled={page * pageSize >= data.value.result.total} onClick={() => setPage((value) => value + 1)}>下一页 →</button>
+            </div>
+          ) : null}
         </>
       )}
     </div>
@@ -498,6 +536,7 @@ function WorkDetailPage({
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error="作品不存在。" /> : <ErrorState error={data.error} />;
   const { work, people, organizations, series, media, assets } = data.value;
+  const poster = chooseWorkPoster(assets);
 
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -509,7 +548,7 @@ function WorkDetailPage({
         setMessage("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。");
         return;
       }
-      if (!window.confirm(`从 ${work.code} 解除并删除这个 Private Asset 元数据？\n\n${storagePath}\n\n原始图片与 content-addressed 文件不会在 V1-17 自动物理删除。`)) return;
+      if (!window.confirm(`从 ${work.code} 解除并删除这个 Private Asset 元数据？\n\n${storagePath}\n\n原始图片与 content-addressed 文件不会在 V1-18 自动物理删除。`)) return;
       const nextWork: Work = {
         ...work,
         assetIds: work.assetIds.filter((value) => value !== assetId),
@@ -532,10 +571,15 @@ function WorkDetailPage({
   return (
     <div className="page-stack">
       <button className="back-button" onClick={onBack}>← 返回作品库</button>
-      <section className="detail-hero">
-        <div className="code-badge">{work.code}</div>
-        <h1>{localizeText(work.titles, "ja")}</h1>
-        <p>{localizeText(work.descriptions, "zh-CN", "暂无简介")}</p>
+      <section className="detail-hero desktop-work-detail-hero">
+        <div className="desktop-work-detail-poster">
+          <DesktopAssetImage asset={poster} alt={`${work.code} poster`} fallback={<span className="desktop-poster-placeholder"><b>{work.code}</b></span>} />
+        </div>
+        <div className="desktop-work-detail-copy">
+          <div className="code-badge">{work.code}</div>
+          <h1>{localizeText(work.titles, "ja")}</h1>
+          <p>{localizeText(work.descriptions, "zh-CN", "暂无简介")}</p>
+        </div>
       </section>
       <WorkEditor
         repository={repository}
@@ -559,16 +603,19 @@ function WorkDetailPage({
         <span className="eyebrow">LOCAL ASSETS</span>
         <h2>本地海报 / 封面 / Fanart</h2>
         {assets.length ? (
-          <div className="name-list">
+          <div className="desktop-asset-gallery">
             {assets.map((asset) => (
-              <div key={asset.id}>
-                <span>{asset.type} · {asset.mimeType ?? "local asset"}</span>
-                <strong>{asset.storagePath}</strong>
-                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>解除 / 删除</button>
-              </div>
+              <article className="desktop-asset-card" key={asset.id}>
+                <div className="desktop-asset-preview"><DesktopAssetImage asset={asset} alt={`${work.code} ${asset.type}`} fallback={<span className="desktop-poster-placeholder"><b>{asset.type}</b></span>} /></div>
+                <div className="desktop-asset-card-body">
+                  <span>{asset.type} · {asset.mimeType ?? "local asset"}</span>
+                  <code>{asset.storagePath}</code>
+                  <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>解除 / 删除</button>
+                </div>
+              </article>
             ))}
           </div>
-        ) : <p className="muted">尚未关联本地图片资产。</p>}
+        ) : <p className="muted">尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / cover / fanart / thumb 导入。</p>}
       </section>
       <section className="settings-card">
         <span className="eyebrow">CLASSIFICATION</span>
@@ -839,6 +886,53 @@ function MediaPage({
     }
   }
 
+  async function syncUnifiedLibrary(): Promise<void> {
+    if (!settings.libraryPath) {
+      setMessage("请先在设置页选择 Private Library；统一同步需要写入 Work / Asset / MediaFile。");
+      return;
+    }
+    if (!unique([...nfoRoots, ...assetRoots, ...mediaRoots]).length) {
+      setMessage("请先添加 Unified Library Root，或配置高级扫描路径。");
+      return;
+    }
+    if (metadataBusy || scan?.status === "running" || scan?.status === "cancelling") return;
+
+    setMetadataBusy(true);
+    setNfoResult(null);
+    setAssetResult(null);
+    try {
+      setMessage("统一资料库同步：正在发现 NFO 与本地图片…");
+      const nfoPreviewNext = await previewNfoImport(nfoRoots, repository);
+      setNfoPreview(nfoPreviewNext);
+
+      let nfo: NfoImportResult | null = null;
+      if (nfoPreviewNext.importable) {
+        nfo = await importNfoPreview(nfoPreviewNext, repository, (value) => fileHash.sha256Text(value));
+        setNfoResult(nfo);
+      }
+
+      // NFO 可能刚创建 Work；因此图片 Preview 故意放在 NFO Import 之后重新计算，
+      // 让同一次“一键同步”里的 poster / cover 直接看到最新 Canonical Work。
+      const assetPreviewNext = await previewLocalAssetImport(assetRoots, repository, nfoPreviewNext);
+      setAssetPreview(assetPreviewNext);
+      let assets: LocalAssetImportResult | null = null;
+      if (assetPreviewNext.linkable) {
+        assets = await importLocalAssetPreview(assetPreviewNext, repository, (value) => fileHash.sha256Text(value));
+        setAssetResult(assets);
+      }
+
+      onLibraryChanged();
+      setMessage(`元数据与图片已同步：${nfo ? `NFO ${nfo.imported}，新建 Work ${nfo.createdWorks}` : "无 NFO 写入"}；${assets ? `图片 ${assets.imported}，Asset ${assets.createdAssets}` : `发现图片 ${assetPreviewNext.discovered}，可关联 ${assetPreviewNext.linkable}`}。正在继续启动媒体增量扫描…`);
+    } catch (error) {
+      setMessage(`统一资料库同步失败：${toMessage(error)}`);
+      return;
+    } finally {
+      setMetadataBusy(false);
+    }
+
+    await startScan();
+  }
+
   async function chooseAndProbe(): Promise<void> {
     const path = await fileDialog.pickFile();
     if (!path) return;
@@ -858,6 +952,19 @@ function MediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="LOCAL · MEDIA · METADATA · ASSET" title="本地资料" description="一个 Unified Library Root 可以同时发现视频、NFO、poster / fanart / thumb；它们最终按 Work 番号汇聚，而不依赖同目录。" />
+      <section className="settings-card unified-sync-card">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">ONE ROOT · ONE ACTION</span>
+            <h2>一键同步 Unified Library</h2>
+            <p className="muted">按固定顺序执行 NFO → poster / cover / fanart / thumb → Media。这样不会再出现“视频已经扫描，但 Work / Asset 还没导入”的半同步状态。</p>
+          </div>
+          <button className="primary-button sync-library-button" disabled={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void syncUnifiedLibrary()}>
+            {metadataBusy || scan?.status === "running" ? "同步中…" : "同步资料库"}
+          </button>
+        </div>
+        <code className="path-block">{unique([...settings.libraryRoots]).length ? unique([...settings.libraryRoots]).join("\n") : "尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。"}</code>
+      </section>
       <section className="settings-card">
         <div className="section-heading">
           <div>
@@ -866,7 +973,7 @@ function MediaPage({
             <p className="muted">递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。</p>
           </div>
           <div className="button-row">
-            <button className="primary-button" disabled={scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void startScan()}>开始扫描</button>
+            <button className="primary-button" disabled={scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void startScan()}>仅扫描视频</button>
             <button disabled={scan?.status !== "running"} onClick={() => setScan(scanCoordinator.current?.cancel() ?? null)}>取消</button>
           </div>
         </div>
@@ -889,8 +996,8 @@ function MediaPage({
             <p className="muted">推荐只配置一个大目录。Desktop 会递归发现子目录中的 NFO、poster、fanart、thumb，再按番号或同 stem 汇聚到同一个 Work；原始图片不会移动。</p>
           </div>
           <div className="button-row">
-            <button disabled={metadataBusy} onClick={() => void scanMetadataSource()}>{metadataBusy ? "处理中…" : "扫描资料源"}</button>
-            <button className="primary-button" disabled={metadataBusy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={() => void importMetadataSource()}>导入元数据与图片</button>
+            <button disabled={metadataBusy} onClick={() => void scanMetadataSource()}>{metadataBusy ? "处理中…" : "预览 NFO + 图片"}</button>
+            <button className="primary-button" disabled={metadataBusy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={() => void importMetadataSource()}>导入当前预览</button>
           </div>
         </div>
         <code className="path-block">{unique([...nfoRoots, ...assetRoots]).length ? unique([...nfoRoots, ...assetRoots]).join("\n") : "尚未配置 Unified Library Root / 兼容扫描路径"}</code>

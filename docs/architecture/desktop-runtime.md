@@ -15,7 +15,7 @@ Localogue 不把 Web “打包成 Desktop”，也不在 Tauri 里重新实现�
                Node / Server          Rust / OS
 ```
 
-V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest，V1-17 再把视频 / NFO / 本地图片统一成可跨子目录发现的 Library Source。
+V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest，V1-17 把视频 / NFO / 本地图片统一成可跨子目录发现的 Library Source，V1-18 再补齐 Works 三视图、Private Asset 实际展示与 Unified Library 顺序同步。
 
 ## V1-15 Desktop 产品壳
 
@@ -30,7 +30,7 @@ V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入
 - Packs；
 - Settings。
 
-这些页面从 V1-15 的浏览壳逐步演进：V1-16 解决独立 NFO 存量迁移，V1-17 增加 Unified Library Root、NFO Work Group、本地 Asset 汇聚，并补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理以及 Media bind/rebind/unbind 审计。Web 的全部高级 Facet、Evidence/Review/Curation/History、字段级冲突治理与 Portable Pack 完整交互继续进入 V1-18。
+这些页面从 V1-15 的浏览壳逐步演进：V1-16 解决独立 NFO 存量迁移，V1-17 增加 Unified Library Root、NFO Work Group、本地 Asset 汇聚，并补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理以及 Media bind/rebind/unbind 审计。V1-18 对齐 Works 海报墙 / 列表 / 表格并让 Private poster 真正可见；高级 Facet、Evidence/Review/Curation/History、字段级冲突治理与 Portable Pack 完整交互继续进入 V1-19。
 
 ## 共享查询核心
 
@@ -64,7 +64,7 @@ Private Library
 
 相同稳定 ID 使用靠前数据源的完整实体，V1 不做隐式字段级深度合并。
 
-Desktop V1-17 可读取：
+Desktop V1-18 可读取：
 
 - works；
 - people；
@@ -98,13 +98,13 @@ Desktop 设置保存的是 Shared Pack 根目录，而 Repository 实际需要�
 - Media：`probe_media`；
 - FileSystem / Hash：扫描需要的受限目录遍历、文件状态和 SHA-256；
 - NFO：受限 `.nfo` 文本读取（单文件上限 10 MB）；
-- Local Asset：受限本地图片导入，校验扩展名 / 大小 / magic bytes 后复制到 Private `asset-files/`；
-- Repository：`read_library_collection`、Private-only `write_library_entity`、media-only `delete_library_entity`；
+- Local Asset：受限本地图片导入，校验扩展名 / 大小 / magic bytes 后复制到 Private `asset-files/`；受限 `read_private_asset_bytes` 只从当前 Private `asset-files/` 返回图片 bytes；
+- Repository：`read_library_collection`、Private-only `write_library_entity`、受引用保护的 `delete_library_entity`；
 - Shared Pack：`inspect_shared_pack`。
 
 所有自定义命令都必须由 `desktop-runtime` Permission 显式授权。
 
-### V1-17：受控 Private Canonical / Asset Writer
+### V1-17+：受控 Private Canonical / Asset Writer
 
 V1-17 在 V1-16 NFO Bootstrap 基础上，为用户明确确认的本地 Asset Ingest 扩展受控写能力：
 
@@ -124,9 +124,24 @@ Rust load_desktop_settings()
 
 因此 Shared Pack 即使已经挂载，也不能借用该 Command 被写入。`assets` 元数据可以写 Private，但二进制必须经过专门的 `import_private_asset_file` 校验并写入内容寻址目录。
 
-删除边界更窄：`delete_library_entity` 在 V1-17 仍只允许 Private `media-files`，Canonical Entity / Asset 删除必须等待完整治理流程。
+V1-17 起删除边界扩展为受引用保护的 Private `works / people / assets / media-files`；其它 Canonical 集合仍不开放通用删除。删除 Canonical 元数据不会自动物理删除用户原始媒体或原始图片。
 
-NFO / Local Asset Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-18。
+NFO / Local Asset Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-19。
+
+## V1-18 Private Asset 展示边界
+
+Desktop 不为用户动态选择的 Private Library 开启宽泛 `asset://` scope。`DesktopAssetImage` 通过 `read_private_asset_bytes(storagePath)` 读取图片：
+
+```text
+WebView relative storagePath
+  -> Rust current Desktop Settings.libraryPath
+  -> Private asset-files/ containment check
+  -> extension / size / magic bytes validation
+  -> IPC bytes
+  -> Blob URL
+```
+
+这样 Works 海报墙、列表和 Work Detail 可以显示真实 poster，而 WebView 仍不能把任意本地路径当图片 URL 读取。Shared Pack 二进制展示的长期方案需要单独定义受信任 Pack 资源边界，V1-18 不扩大该能力。
 
 ## Media Scan
 
@@ -140,7 +155,7 @@ V1-14 已实现：
 
 V1-15 将扫描 Repository 与正式 Desktop Repository 合并。这样 Shared Pack 的 Work 可以参与番号匹配，但扫描结果生成的 MediaFile 仍只写 Private Library。
 
-V1-17 的 Unified Root 不重新实现媒体绑定：NFO 创建 / 补充 Canonical Work 后，再运行同一增量扫描，由既有番号匹配器重新判断 `MediaFile.workId`。本地 poster / fanart / thumb 则通过 Asset Ingest 按相同番号挂到 Work；视频 size / mtime 没变化时不会因此重复 ffprobe / SHA-256。
+V1-17 的 Unified Root 不重新实现媒体绑定：NFO 创建 / 补充 Canonical Work 后，再运行同一增量扫描，由既有番号匹配器重新判断 `MediaFile.workId`。本地 poster / fanart / thumb 通过 Asset Ingest 按相同番号挂到 Work。V1-18 新增一键同步，将这三段按 NFO → Asset → Media 顺序编排；视频 size / mtime 没变化时仍不会因此重复 ffprobe / SHA-256。
 
 ## 为什么不开放 Shell
 
@@ -181,7 +196,7 @@ Web 当前使用：
 .localogue/settings.json
 ```
 
-Desktop 使用 Tauri App Config。V1-17 仍不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
+Desktop 使用 Tauri App Config。V1-18 仍不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
 
 ## Open 边界
 
