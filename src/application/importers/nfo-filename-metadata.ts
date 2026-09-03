@@ -5,13 +5,13 @@ export interface NfoFilenameMetadata {
 }
 
 /**
- * 从 NFO 文件名中提取“辅助元数据”。
+ * 从任意本地资料文件名中提取“辅助元数据”。
  *
- * 重要：文件名永远只是 fallback，NFO XML 内明确字段优先。
- * 这个解析器故意只做保守识别，避免把日期、分辨率或普通数字误认成番号。
+ * V1-17 把 NFO、poster、fanart、thumb 等都视为同一资料源中的不同文件类型，
+ * 因此番号/日期/标题的文件名推断必须共用同一套保守规则。
  */
-export function inferNfoFilenameMetadata(fileName: string): NfoFilenameMetadata {
-  const stem = stripExtension(fileName.normalize("NFKC").trim());
+export function inferCatalogFilenameMetadata(fileName: string): NfoFilenameMetadata {
+  const stem = stripLastExtension(fileName.normalize("NFKC").trim());
   if (!stem) return {};
 
   const codeMatch = findCode(stem);
@@ -23,6 +23,14 @@ export function inferNfoFilenameMetadata(fileName: string): NfoFilenameMetadata 
     ...(dateMatch ? { releaseDate: dateMatch.date } : {}),
     ...(title ? { title } : {}),
   };
+}
+
+/**
+ * 兼容既有 NFO Importer 的命名入口。
+ * XML 内明确字段仍然优先，文件名永远只是 fallback。
+ */
+export function inferNfoFilenameMetadata(fileName: string): NfoFilenameMetadata {
+  return inferCatalogFilenameMetadata(fileName);
 }
 
 interface CodeMatch {
@@ -112,6 +120,10 @@ function cleanTitle(stem: string, codeRaw?: string, dateRaw?: string): string | 
   }
 
   value = value
+    // Local Asset 的角色后缀不是片名的一部分。
+    .replace(/(?:[-_.\s])(fanart|poster|thumb|thumbnail|cover|background|backdrop|screenshot|clearlogo|logo)(?:[-_.\s]?\d+)?$/iu, " ")
+    // 多分段 NFO：part1 / cd1 不应成为作品标题。
+    .replace(/(?:[-_.\s])(part|cd|disc|disk)[-_.\s]?\d+$/iu, " ")
     .replace(/[\[\]【】()（）]/g, " ")
     .replace(/(?:^|[\s._-])(1080p|2160p|4k|uhd|fhd|hevc|x265|x264)(?=$|[\s._-])/giu, " ")
     .replace(/[._]+/g, " ")
@@ -124,6 +136,8 @@ function cleanTitle(stem: string, codeRaw?: string, dateRaw?: string): string | 
   return value;
 }
 
-function stripExtension(value: string): string {
-  return value.toLowerCase().endsWith(".nfo") ? value.slice(0, -4) : value;
+function stripLastExtension(value: string): string {
+  const lastSlash = Math.max(value.lastIndexOf("/"), value.lastIndexOf("\\"));
+  const lastDot = value.lastIndexOf(".");
+  return lastDot > lastSlash ? value.slice(0, lastDot) : value;
 }

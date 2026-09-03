@@ -1,6 +1,7 @@
 import { queryPeople, queryWorks } from "@/application/library/library-query";
 import type { Asset } from "@/domain/entities/asset";
 import type { Genre, Tag } from "@/domain/entities/classification";
+import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
@@ -18,8 +19,8 @@ import { desktopBridge } from "../tauri-bridge";
  *
  * - Canonical 数据按 private > shared pack 1 > shared pack 2 的顺序合并；
  * - MediaFile 永远只从 private root 读取；
- * - V1-16 仅为“明确确认的 NFO Bootstrap Ingest”开放受控 Private Canonical 写入；
- * - Shared Pack 始终只读；Canonical 删除仍未开放，只有 MediaFile 可以删除；
+ * - V1-17 为 NFO / Local Asset Bootstrap 与 Desktop 交互开放受控 Private Canonical 写入；
+ * - Shared Pack 始终只读；V1-17 只开放受引用检查保护的 Private Work / Person / Asset / MediaFile 删除；
  * - 查询/排序/Facet 使用与 Web JsonLibraryRepository 完全相同的纯函数核心。
  */
 export class TauriLibraryRepository implements LibraryRepository {
@@ -124,13 +125,42 @@ export class TauriLibraryRepository implements LibraryRepository {
     return desktopBridge.deleteMediaFile(id);
   }
 
+  saveMediaBindingReceipt(receipt: MediaBindingReceipt): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    return desktopBridge.writePrivateAuditEntity("media-binding-receipts", receipt);
+  }
+
+  async isPrivateEntity(collection: Exclude<DesktopLibraryCollection, "media-files">, id: string): Promise<boolean> {
+    if (!this.privateRoot) return false;
+    const values = await desktopBridge.readLibraryCollection<{ id: string }>(this.privateRoot, collection);
+    return values.some((item) => item.id === id);
+  }
+
+  async deletePrivateWork(id: string): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    await desktopBridge.deleteLibraryEntity("works", id);
+    this.cache.delete("works");
+  }
+
+  async deletePrivatePerson(id: string): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    await desktopBridge.deleteLibraryEntity("people", id);
+    this.cache.delete("people");
+  }
+
+  async deletePrivateAsset(id: string): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    await desktopBridge.deleteLibraryEntity("assets", id);
+    this.cache.delete("assets");
+  }
+
   saveWork(work: Work): Promise<void> { return this.writePrivate("works", work); }
   savePerson(person: Person): Promise<void> { return this.writePrivate("people", person); }
   saveOrganization(organization: Organization): Promise<void> { return this.writePrivate("organizations", organization); }
   saveSeries(series: Series): Promise<void> { return this.writePrivate("series", series); }
   saveGenre(genre: Genre): Promise<void> { return this.writePrivate("genres", genre); }
   saveTag(tag: Tag): Promise<void> { return this.writePrivate("tags", tag); }
-  saveAsset(): Promise<void> { return readOnlyAssetGovernance(); }
+  saveAsset(asset: Asset): Promise<void> { return this.writePrivate("assets", asset); }
 
   private async readMerged<T extends { id: string }>(
     collection: Exclude<DesktopLibraryCollection, "media-files">,
@@ -167,10 +197,6 @@ function missingPrivateRoot<T = void>(): Promise<T> {
   return Promise.reject(
     new Error("当前没有配置 Private Library；Shared Pack 是只读基础资料。"),
   );
-}
-
-function readOnlyAssetGovernance<T = void>(): Promise<T> {
-  return Promise.reject(new Error("V1-16 的 NFO 导入暂不写 Asset；图片仍由 Asset 治理阶段处理。"));
 }
 
 

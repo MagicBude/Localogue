@@ -29,6 +29,7 @@ export function SettingsForm({
   const text = getSettingsDictionary(language);
   const [libraryPath, setLibraryPath] = useState(settings.libraryPath ?? "");
   const [sharedPackText, setSharedPackText] = useState(settings.sharedPackPaths.join("\n"));
+  const [libraryRootsText, setLibraryRootsText] = useState((settings.libraryRoots ?? []).join("\n"));
   const [mediaScanText, setMediaScanText] = useState((settings.mediaScanPaths ?? []).join("\n"));
   const [nfoScanText, setNfoScanText] = useState((settings.nfoScanPaths ?? []).join("\n"));
   const [ffprobePath, setFfprobePath] = useState(settings.ffprobePath ?? "");
@@ -47,6 +48,7 @@ export function SettingsForm({
         body: JSON.stringify({
           libraryPath,
           sharedPackPaths: sharedPackText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
+          libraryRoots: libraryRootsText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           mediaScanPaths: mediaScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           nfoScanPaths: nfoScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           ffprobePath,
@@ -130,7 +132,12 @@ export function SettingsForm({
 
 
       <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">MEDIA · SCAN · FFPROBE</span><h2>{text.mediaTitle}</h2></div></div>
+        <div className="section-heading"><div><span className="eyebrow">UNIFIED · SOURCE · DISCOVERY</span><h2>{text.mediaTitle}</h2></div></div>
+        <label className="settings-field">
+          <span>{text.libraryRoots}</span>
+          <textarea rows={5} value={libraryRootsText} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setLibraryRootsText(event.target.value)} placeholder="E:\\Library\\石川澪 DMM原档合集\nD:\\Another Library" />
+          <small>{text.libraryRootsHelp}</small>
+        </label>
         <label className="settings-field">
           <span>{text.mediaPaths}</span>
           <textarea rows={5} value={mediaScanText} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setMediaScanText(event.target.value)} placeholder="D:\\Media\\Movies\nE:\\Archive" />

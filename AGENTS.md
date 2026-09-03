@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-16 Desktop Feature Parity II — Independent NFO Library Ingest**。
+当前阶段：**V1-17 Unified Library Source & Desktop Interaction Parity II**。
 
 V1 当前约束：
 
@@ -255,18 +255,20 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Rust 写集合白名单必须继续只有 `media-files`。扩大读取能力不等于扩大写权限，更不得演变成 Webview 可指定任意目录/集合的通用文件 API。
 - Desktop 媒体扫描必须使用与浏览页面相同的合并 Repository，使 Shared Pack Work 能参与番号匹配，但扫描产生的 MediaFile 只能写入 Private Library。
 - V1-15 的 Home / Works / People / Media / Packs / Settings 是正式 Desktop 产品壳，不再把 Desktop 视为 Runtime 测试控制台。
-- V1-16 优先补独立 NFO Bootstrap Ingest；完整 Canonical 编辑、治理、Portable Pack 导入导出和更完整筛选交互继续留给 V1-17。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
+- V1-17 在 V1-16 NFO Bootstrap 上增加 Unified Library Root、NFO Work Group、本地 Asset Ingest，并完成 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 Media 人工绑定审计；Evidence/Review/History/Portable Pack 等重治理工作台继续留给 V1-18。不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
 
 
-## V1-16 实现约束补充
+## V1-17 实现约束补充
 
 - `mediaScanPaths` 与 `nfoScanPaths` 是两个独立概念：前者发现本地视频，后者提供 NFO 元数据；禁止重新引入“必须与视频同目录/同名”的假设。
 - NFO 识别必须优先使用 XML 内可验证的番号；XML 缺失或只有无关数字 ID 时，才从文件名保守识别番号。日期和片名只能作为缺失字段 fallback。
 - Desktop 批量 NFO 必须保持 **Preview -> Explicit Import**。扫描预览本身不得写 Canonical。
-- V1-16 的 NFO Bootstrap Ingest 是对“所有外部导入先持久化 Evidence 再 Review”的一个**窄范围迁移例外**：只服务用户明确确认的本地存量资料打底；已有 Work 只能 fill / merge 缺失字段和精确关系，不得静默覆盖已有核心事实。不要把这个例外推广到在线 Provider、普通 Importer 或一般编辑。
-- V1-17 起，冲突修改、人工编辑和更广泛导入仍应回到 Evidence / Review / Commit Plan / History 治理链；V1-16 不得伪装成已经完成完整审计治理。
+- V1-16/V1-17 的 NFO / Local Asset Bootstrap Ingest 是对“所有外部导入先持久化 Evidence 再 Review”的一个**窄范围迁移例外**：只服务用户明确确认的本地存量资料打底；已有 Work 只能 fill / merge 缺失字段和精确关系，不得静默覆盖已有核心事实。不要把这个例外推广到在线 Provider、普通 Importer 或一般编辑。
+- V1-18 继续把更广泛的冲突修改、Evidence / Review / Commit Plan / History 与 Portable Pack 治理链迁入 Desktop；V1-17 的直接 Private CRUD 是本地私人层日常维护能力，不等价于完整 Evidence 审核治理。
 - Native Canonical Writer 的根目录必须由 Rust 从当前 Desktop Settings 自行解析，只能是已配置的 Private Library；Webview 不得传入任意写根目录。Shared Pack 必须在 Rust 边界保持只读。
-- V1-16 允许写 `works / people / organizations / series / genres / tags / media-files`；`assets` 仍不可写。Canonical 删除继续关闭，`delete_library_entity` 只能删除 Private `media-files`。
+- V1-17 允许写 `works / people / organizations / series / genres / tags / assets / media-files`；Asset 二进制只能通过受限 Native 图片导入写入 Private `asset-files/`，不得接受任意写根。删除仅开放 `works / people / assets / media-files` 且必须通过 Native 引用检查；另有独立 Audit Writer 只允许 `media-binding-receipts`。
+- `libraryRoots` 是统一资料源的首选配置；`mediaScanPaths / nfoScanPaths` 只作为高级兼容补充。目录位置不得成为 Work/NFO/Media/Asset 的关系主键，可靠关联优先使用规范化作品番号。
+- 自动 Local Asset Import 必须保守：只有明确 poster / cover / fanart / thumb 等角色后缀时才自动导入，避免把截图、素材等普通 JPG 静默挂到 Work。目录名没有媒体语义，`写真/` 等分类目录中的受支持视频必须照常扫描。
 - 新建 Person / Organization / Series / Genre / Tag 只允许规范化精确复用或稳定 ID 创建，不做模糊别名自动合并。
 - NFO 创建 / 补充 Work 后，媒体关联仍走既有番号匹配器；不得为了 NFO 再写第二套 MediaFile 绑定规则。
 - 修改 NFO / Desktop Native 写边界后必须运行 `pnpm validate:platform` 与 `pnpm validate:desktop`；有 Rust/Tauri 环境时继续运行 `pnpm desktop:rust:check`。

@@ -24,6 +24,13 @@
     "updatedAt": {
       "type": "string"
     },
+    "libraryRoots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
     "mediaScanPaths": {
       "type": "array",
       "items": {

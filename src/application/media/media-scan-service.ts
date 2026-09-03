@@ -17,6 +17,8 @@ export interface MediaScanOptions {
   computeSha256?: boolean;
   probeMedia?: boolean;
   pruneMissing?: boolean;
+  /** Desktop Unified Root 可关闭旧式图片 sidecar discovery；图片改由 Asset Ingest 单独处理。目录名没有扫描语义，任何子目录中的受支持视频仍会被发现。 */
+  observeImageSidecars?: boolean;
 }
 
 export interface MediaScanRequest extends MediaScanOptions {
@@ -33,14 +35,15 @@ export interface MediaScanHooks {
  * 把实例设置转换为平台无关的扫描请求。
  *
  * 路径解析由 FileSystemPort 完成，因此 Application 层不需要依赖 node:path。
- * V1-13 Tauri 可以用自己的 FileSystem Adapter 产生相同请求。
+ * V1-17 中 libraryRoots 是首选统一资料源；mediaScanPaths 仍作为高级/兼容补充目录。
+ * Tauri 和 Web 都复用这一语义，避免两个端对同一设置字段产生不同理解。
  */
 export function createMediaScanRequestFromSettings(
   settings: InstanceSettings,
   platform: PlatformServices,
   options: MediaScanOptions = {},
 ): MediaScanRequest {
-  const roots = Array.from(new Map((settings.mediaScanPaths ?? [])
+  const roots = Array.from(new Map([...(settings.libraryRoots ?? []), ...(settings.mediaScanPaths ?? [])]
     .map((item) => platform.fileSystem.resolvePath(item))
     .map((item) => [platform.fileSystem.normalizePathForIdentity(item), item] as const)).values());
   return {
@@ -49,6 +52,7 @@ export function createMediaScanRequestFromSettings(
     probeMedia: options.probeMedia !== false,
     computeSha256: Boolean(options.computeSha256),
     pruneMissing: options.pruneMissing !== false,
+    observeImageSidecars: options.observeImageSidecars !== false,
   };
 }
 
@@ -91,7 +95,7 @@ export async function scanMediaLibrary(
       const info = await fileSystem.stat(root, signal);
       if (!info.isDirectory) throw new Error("不是目录");
       const entries = await fileSystem.walkFiles(root, {
-        extensions: discoveryExtensions,
+        extensions: request.observeImageSidecars === false ? [...videoExtensions, ".nfo"] : discoveryExtensions,
         includeHidden: false,
         maxFiles: MAX_DISCOVERED_ENTRIES,
         signal,

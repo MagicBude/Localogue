@@ -41,6 +41,8 @@ struct DesktopBootstrapSettings {
     #[serde(skip_serializing_if = "Option::is_none")]
     library_path: Option<String>,
     #[serde(default)]
+    library_roots: Vec<String>,
+    #[serde(default)]
     media_scan_paths: Vec<String>,
     #[serde(default)]
     nfo_scan_paths: Vec<String>,
@@ -58,6 +60,7 @@ impl Default for DesktopBootstrapSettings {
         Self {
             schema_version: 1,
             library_path: None,
+            library_roots: Vec::new(),
             media_scan_paths: Vec::new(),
             nfo_scan_paths: Vec::new(),
             shared_pack_paths: Vec::new(),
@@ -132,6 +135,15 @@ struct DesktopFileEntry {
     extension: String,
     size: u64,
     modified_at: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopImportedAssetFile {
+    storage_path: String,
+    mime_type: String,
+    file_size: u64,
+    sha256: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -371,8 +383,51 @@ fn read_nfo_text(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+fn import_private_asset_file(app: AppHandle, path: String) -> Result<DesktopImportedAssetFile, String> {
+    const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
+    let source = require_existing_file(&path)?;
+    let extension = source.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+    let (mime_type, canonical_extension) = match extension.as_str() {
+        "jpg" | "jpeg" => ("image/jpeg", "jpg"),
+        "png" => ("image/png", "png"),
+        "webp" => ("image/webp", "webp"),
+        "gif" => ("image/gif", "gif"),
+        "avif" => ("image/avif", "avif"),
+        _ => return Err("当前只允许导入 JPEG、PNG、WebP、GIF、AVIF 本地图片。".into()),
+    };
+    let metadata = fs::metadata(&source).map_err(display_error)?;
+    if metadata.len() == 0 { return Err("图片文件为空。".into()); }
+    if metadata.len() > MAX_IMAGE_BYTES { return Err("图片超过 25 MB 安全上限。".into()); }
+    validate_image_signature(&source, canonical_extension)?;
+
+    let sha256 = sha256_path(&source)?;
+    let library_path = configured_private_library_path(&app)?;
+    let directory = PathBuf::from(&library_path).join("asset-files");
+    fs::create_dir_all(&directory).map_err(display_error)?;
+    let file_name = format!("{sha256}.{canonical_extension}");
+    let target = directory.join(&file_name);
+    if !target.exists() {
+        let temporary = directory.join(format!("{file_name}.tmp"));
+        fs::copy(&source, &temporary).map_err(display_error)?;
+        if target.exists() { fs::remove_file(&temporary).map_err(display_error)?; }
+        else { fs::rename(&temporary, &target).map_err(display_error)?; }
+    }
+
+    Ok(DesktopImportedAssetFile {
+        storage_path: format!("asset-files/{file_name}"),
+        mime_type: mime_type.into(),
+        file_size: metadata.len(),
+        sha256,
+    })
+}
+
+#[tauri::command]
 fn sha256_file(path: String) -> Result<String, String> {
     let file_path = require_existing_file(&path)?;
+    sha256_path(&file_path)
+}
+
+fn sha256_path(file_path: &Path) -> Result<String, String> {
     let mut file = File::open(file_path).map_err(display_error)?;
     let mut digest = Sha256::new();
     let mut buffer = [0_u8; 1024 * 1024];
@@ -382,6 +437,24 @@ fn sha256_file(path: String) -> Result<String, String> {
         digest.update(&buffer[..count]);
     }
     Ok(format!("{:x}", digest.finalize()))
+}
+
+fn validate_image_signature(file_path: &Path, canonical_extension: &str) -> Result<(), String> {
+    let mut file = File::open(file_path).map_err(display_error)?;
+    let mut header = [0_u8; 32];
+    let count = file.read(&mut header).map_err(display_error)?;
+    let bytes = &header[..count];
+    let valid = match canonical_extension {
+        "jpg" => bytes.starts_with(&[0xff, 0xd8, 0xff]),
+        "png" => bytes.starts_with(&[0x89, b'P', b'N', b'G', 0x0d, 0x0a, 0x1a, 0x0a]),
+        "gif" => bytes.starts_with(b"GIF87a") || bytes.starts_with(b"GIF89a"),
+        "webp" => bytes.len() >= 12 && &bytes[0..4] == b"RIFF" && &bytes[8..12] == b"WEBP",
+        "avif" => bytes.len() >= 12
+            && &bytes[4..8] == b"ftyp"
+            && bytes[8..].windows(4).any(|brand| brand == b"avif" || brand == b"avis" || brand == b"mif1"),
+        _ => false,
+    };
+    if valid { Ok(()) } else { Err("图片扩展名与实际文件格式不匹配，已拒绝导入。".into()) }
 }
 
 
@@ -485,15 +558,94 @@ fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Re
 }
 
 #[tauri::command]
+fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+    if collection != "media-binding-receipts" {
+        return Err("V1-17 Desktop Audit Writer 只开放 media-binding-receipts。".into());
+    }
+    validate_private_audit_entity(&collection, &entity)?;
+    let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "审计实体缺少稳定 id。".to_string())?;
+    if !is_safe_id(id) { return Err("审计实体 id 包含不安全字符。".into()); }
+    let library_path = configured_private_library_path(&app)?;
+    let directory = PathBuf::from(library_path).join(&collection);
+    fs::create_dir_all(&directory).map_err(display_error)?;
+    let target = directory.join(format!("{id}.json"));
+    let temporary = directory.join(format!("{id}.json.tmp"));
+    let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
+    fs::write(&temporary, body).map_err(display_error)?;
+    if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+    fs::rename(temporary, target).map_err(display_error)
+}
+
+#[tauri::command]
 fn delete_library_entity(app: AppHandle, collection: String, id: String) -> Result<(), String> {
-    if collection != "media-files" {
-        return Err("V1-16 Desktop 只允许删除 Private media-files；Canonical 删除必须等待治理流程。".into());
+    if !matches!(collection.as_str(), "works" | "people" | "assets" | "media-files") {
+        return Err("V1-17 Desktop 删除只开放 works / people / assets / media-files；其它 Canonical 集合仍需后续治理流程。".into());
     }
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
+    ensure_private_delete_is_unreferenced(&library_path, &collection, &id)?;
     let target = safe_writable_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
     if target.exists() { fs::remove_file(target).map_err(display_error)?; }
     Ok(())
+}
+
+fn ensure_private_delete_is_unreferenced(library_path: &str, collection: &str, id: &str) -> Result<(), String> {
+    if collection == "media-files" { return Ok(()); }
+
+    let works = read_json_objects(&PathBuf::from(library_path).join("works"))?;
+    if collection == "people" {
+        for work in &works {
+            let referenced = work.get("personRelations").and_then(Value::as_array).map(|relations| {
+                relations.iter().any(|relation| relation.get("personId").and_then(Value::as_str) == Some(id))
+            }).unwrap_or(false);
+            if referenced {
+                return Err("人物仍被 Private Work 引用；请先在作品编辑中移除人物关系。".into());
+            }
+        }
+        let assets = read_json_objects(&PathBuf::from(library_path).join("assets"))?;
+        if assets.iter().any(|item| item.get("subjectType").and_then(Value::as_str) == Some("person") && item.get("subjectId").and_then(Value::as_str) == Some(id)) {
+            return Err("Person 仍有 Private Asset 引用；请先移除人物图片资产。".into());
+        }
+    }
+
+    if collection == "works" {
+        let media = read_json_objects(&PathBuf::from(library_path).join("media-files"))?;
+        if media.iter().any(|item| item.get("workId").and_then(Value::as_str) == Some(id)) {
+            return Err("Work 仍有 Private MediaFile 绑定；请先解除媒体关联。".into());
+        }
+        let assets = read_json_objects(&PathBuf::from(library_path).join("assets"))?;
+        if assets.iter().any(|item| item.get("subjectType").and_then(Value::as_str) == Some("work") && item.get("subjectId").and_then(Value::as_str) == Some(id)) {
+            return Err("Work 仍有 Private Asset 引用；请先移除本地图片资产。".into());
+        }
+    }
+
+    if collection == "assets" {
+        for work in &works {
+            let referenced = work.get("assetIds").and_then(Value::as_array).map(|values| values.iter().any(|value| value.as_str() == Some(id))).unwrap_or(false);
+            if referenced { return Err("Asset 仍被 Private Work 引用；请先从 Work.assetIds 移除。".into()); }
+        }
+        let people = read_json_objects(&PathBuf::from(library_path).join("people"))?;
+        for person in &people {
+            let portrait = person.get("portraitAssetId").and_then(Value::as_str) == Some(id);
+            let gallery = person.get("galleryAssetIds").and_then(Value::as_array).map(|values| values.iter().any(|value| value.as_str() == Some(id))).unwrap_or(false);
+            if portrait || gallery { return Err("Asset 仍被 Private Person 引用；请先移除人物图片引用。".into()); }
+        }
+    }
+    Ok(())
+}
+
+fn read_json_objects(directory: &Path) -> Result<Vec<Value>, String> {
+    if !directory.exists() { return Ok(Vec::new()); }
+    let mut output = Vec::new();
+    for entry in fs::read_dir(directory).map_err(display_error)? {
+        let path = entry.map_err(display_error)?.path();
+        if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
+        let text = fs::read_to_string(&path).map_err(display_error)?;
+        if let Ok(value) = serde_json::from_str::<Value>(&text) {
+            if value.is_object() { output.push(value); }
+        }
+    }
+    Ok(output)
 }
 
 fn emit_progress(app: &AppHandle, task_id: &str, stage: &'static str, message: &str, current_path: Option<&str>) {
@@ -520,6 +672,7 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.schema_version = 1;
     value.library_path = clean_optional_path(value.library_path)?;
     value.ffprobe_path = clean_optional_path(value.ffprobe_path)?;
+    value.library_roots = unique_clean_paths(value.library_roots)?;
     value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
     value.nfo_scan_paths = unique_clean_paths(value.nfo_scan_paths)?;
     value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
@@ -640,16 +793,33 @@ fn validate_writable_entity(collection: &str, entity: &Value) -> Result<(), Stri
         "people" => { require_array("names")?; require_array("careerEvents")?; require_array("galleryAssetIds")?; },
         "organizations" => { require_string("kind")?; if !entity.get("names").map(Value::is_object).unwrap_or(false) { return Err("organizations 实体缺少 names 对象。".into()); } },
         "series" | "genres" | "tags" => { if !entity.get("names").map(Value::is_object).unwrap_or(false) { return Err(format!("{collection} 实体缺少 names 对象。")); } },
+        "assets" => { require_string("type")?; require_string("storagePath")?; },
         "media-files" => { require_string("path")?; require_string("fileName")?; },
         _ => return Err("当前集合不允许通过 Desktop 写入。".into()),
     }
     Ok(())
 }
 
+fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(), String> {
+    if collection != "media-binding-receipts" || !entity.is_object() {
+        return Err("无效的 Desktop Private Audit 实体。".into());
+    }
+    for field in ["id", "mediaFileId", "mediaFilePath", "action", "changedAt"] {
+        if entity.get(field).and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()).is_none() {
+            return Err(format!("media-binding-receipts 缺少字符串字段 {field}。"));
+        }
+    }
+    let action = entity.get("action").and_then(Value::as_str).unwrap_or("");
+    if !matches!(action, "bind" | "rebind" | "unbind") {
+        return Err("media-binding-receipts.action 无效。".into());
+    }
+    Ok(())
+}
+
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
     validate_text_path(root)?;
-    if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "media-files") {
-        return Err("V1-16 Desktop 只允许写入明确白名单中的 Private Canonical / media-files 集合。".into());
+    if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files") {
+        return Err("V1-17 Desktop 只允许写入明确白名单中的 Private Canonical / assets / media-files 集合。".into());
     }
     Ok(PathBuf::from(root).join(collection))
 }
@@ -696,11 +866,13 @@ pub fn run() {
             path_exists,
             walk_files,
             read_nfo_text,
+            import_private_asset_file,
             sha256_text,
             sha256_file,
             inspect_shared_pack,
             read_library_collection,
             write_library_entity,
+            write_private_audit_entity,
             delete_library_entity,
         ])
         .run(tauri::generate_context!())

@@ -67,4 +67,4 @@ fileSize + fileModifiedAt
 
 作为文件变化 Fast Path，因此暂时不再创建一份重复的 ScanIndex JSON。
 
-注意：`sidecars` 是媒体扫描的本地观察，不是 Canonical Work 字段。扫描器不会读取 NFO 后直接改 Work。V1-16 另有独立 `nfoScanPaths` 的显式 Bootstrap Import；长期冲突治理仍回到 Evidence / Review。图片仍应进入 Asset 治理。
+注意：`sidecars` 是媒体扫描的本地观察，不是 Canonical Work 字段。扫描器不会读取 NFO 后直接改 Work。V1-16 起 NFO 有独立的显式 Bootstrap Import；V1-17 的 Unified Root 也只是统一“发现入口”。本地 poster / fanart / thumb 会通过单独的 Asset Preview / Explicit Import 进入 Asset 治理，长期冲突治理仍回到 Evidence / Review。

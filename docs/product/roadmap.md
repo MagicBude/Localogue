@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-16 Desktop Feature Parity II — Independent NFO Library Ingest**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 先解决独立 NFO 存量资料迁移。
+当前已推进到 **V1-17 Unified Library Source & Desktop Interaction Parity II**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 解决独立 NFO 存量资料迁移，V1-17 再把视频 / NFO / 本地图片提升为可跨子目录汇聚的统一资料源。
 
 已完成重点：
 
@@ -46,19 +46,27 @@
 - ~~Web / Desktop 共享 Works / People Query Core~~（V1-15）；
 - ~~独立 `nfoScanPaths` 与 NFO Preview / Explicit Import~~（V1-16）；
 - ~~XML 番号优先 + 文件名番号 / 日期 / 片名 fallback~~（V1-16）；
-- ~~Private-only Native Canonical Writer 与 media-only 删除边界~~（V1-16）。
+- ~~Private-only Native Canonical Writer 与 media-only 删除边界~~（V1-16）；
+- ~~`libraryRoots` Unified Library Source 与跨子目录视频/NFO发现~~（V1-17）；
+- ~~同番号 NFO Work Group 预览~~（V1-17）；
+- ~~poster / cover / fanart / thumb 本地 Asset Preview / Explicit Import~~（V1-17）；
+- ~~Native 图片格式校验、SHA-256 内容寻址与 Private-only Asset Writer~~（V1-17）；
+- ~~Desktop Work / Person Private CRUD 与 Shared Entity Private Override~~（V1-17）；
+- ~~Desktop Works / People 核心搜索、筛选、排序~~（V1-17）；
+- ~~Shared Pack 挂载、Native 校验、优先级调整、卸载~~（V1-17）；
+- ~~Work 元数据关系编辑~~（V1-17）；
+- ~~MediaFile bind / rebind / unbind 与审计 Receipt~~（V1-17）。
 
-### V1-17：Desktop Interaction Parity / Governance
+### V1-18：Desktop Governance & Native Enhancement
 
 下一阶段重点：
 
 - Desktop 高级 Works / People Facet、排序、分页与更多实体浏览；
-- Canonical Work / Person 编辑与既有 Commit Plan / Audit 规则接入；
+- 将 V1-17 Desktop Private CRUD 进一步接入既有 Commit Plan / Audit / History 治理规则；
 - Evidence / Review / Curation / History Desktop 交互；
-- 将 V1-16 NFO Bootstrap 中的冲突型更新继续收敛到完整治理链；
-- MediaFile bind / rebind / unbind 审计；
+- 将 V1-16/V1-17 Bootstrap Ingest 中的冲突型更新继续收敛到完整治理链；
 - Shared / Personal Portable Pack Desktop 导入导出；
-- Asset 二进制读取、头像/封面与 Presentation Preference；
+- Asset 二进制读取、头像/封面实际展示与 Presentation Preference；
 - 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复业务规则。
 
 ### 后续 Desktop Native Enhancement

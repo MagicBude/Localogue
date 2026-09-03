@@ -2,15 +2,28 @@
 
 NFO 是 Localogue 的一等元数据输入格式，但不要求它与视频文件相邻。
 
-## 两种 NFO 来源
+## NFO 来源
 
 ### 视频旁 Sidecar
 
 媒体扫描仍会观察视频目录中的 `.nfo`，把路径记录到 `MediaFile.sidecars.nfoPaths`。这属于“这个视频旁边发现了什么”的 Observation。
 
-### 独立 NFO 元数据目录
+### Unified Library Root（V1-17 首选）
 
-V1-16 新增 `nfoScanPaths`。NFO 可以集中存放在完全独立的目录树：
+如果视频、NFO 和海报只是位于同一收藏根目录的不同子目录，只需配置共同父目录：
+
+```text
+E:\Library\石川澪 DMM原档合集  <- libraryRoots
+  ├─ VR/
+  ├─ 单体/
+  └─ 封面+元数据/
+```
+
+Localogue 会递归发现 NFO，不要求它与视频同目录。
+
+### 独立 NFO 元数据目录（高级兼容）
+
+V1-16 的 `nfoScanPaths` 仍然保留。NFO 可以集中存放在完全独立的目录树：
 
 ```text
 D:\Media\...          <- mediaScanPaths
@@ -50,12 +63,13 @@ ABW001_20250812_片名.nfo
 
 ## Desktop 批量导入
 
-1. 在 Desktop 设置中添加一个或多个 **NFO 元数据目录**；
-2. 打开“媒体 → NFO 资料导入”；
-3. 点击“扫描 NFO”；
-4. 查看新 Work、已有 Work、缺番号、缺标题、重复番号和解析失败预览；
-5. 点击“导入可识别项目”；
-6. 再运行媒体增量扫描，用番号把现有 MediaFile 绑定到 Work。
+1. 在 Desktop 设置中优先添加一个或多个 **Unified Library Root**；完全独立的 NFO 目录再使用高级 `nfoScanPaths`；
+2. 打开“本地资料”；
+3. 点击“扫描资料源”；
+4. 查看 NFO Work Group、番号、标题与解析状态；
+5. 同一页面还会预览 `poster / cover / fanart / thumb` 本地图片候选；
+6. 点击“导入元数据与图片”；
+7. 再运行媒体增量扫描，用番号把现有 MediaFile 绑定到 Work。
 
 新 Work 会创建基础 Canonical 记录，并对人物、Maker / Label、Series、Genre、Tag 做规范化精确复用；不存在时创建 Private Entity。
 

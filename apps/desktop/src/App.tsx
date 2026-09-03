@@ -20,6 +20,8 @@ import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
+import type { PersonSort } from "@/domain/queries/person-query";
+import type { WorkSort } from "@/domain/queries/work-query";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 
 import type {
@@ -40,6 +42,19 @@ import {
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import {
+  importLocalAssetPreview,
+  previewLocalAssetImport,
+  type LocalAssetImportPreview,
+  type LocalAssetImportResult,
+} from "./local-asset-import";
+import {
+  CreatePersonPanel,
+  CreateWorkPanel,
+  MediaBindingPanel,
+  PersonEditor,
+  WorkEditor,
+} from "./desktop-management";
+import {
   importNfoPreview,
   previewNfoImport,
   type NfoImportPreview,
@@ -55,6 +70,7 @@ const fileHash = new TauriFileHashAdapter();
 
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   schemaVersion: 1,
+  libraryRoots: [],
   mediaScanPaths: [],
   nfoScanPaths: [],
   sharedPackPaths: [],
@@ -170,7 +186,7 @@ export default function App() {
       setSettings(saved);
       setSavedSettings(saved);
       await refreshSources(saved);
-      setMessage("Desktop 实例设置已保存；资料源、Shared Packs、媒体目录与 NFO 元数据目录已经重新加载。");
+      setMessage("Desktop 实例设置已保存；Unified Library Roots、兼容扫描路径与 Shared Packs 已重新加载。");
     } catch (error) {
       setMessage(`保存失败：${toMessage(error)}`);
     } finally {
@@ -187,7 +203,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span>
             <strong>Localogue</strong>
-            <small>Desktop · V1-16</small>
+            <small>Desktop · V1-17</small>
           </span>
         </button>
 
@@ -244,9 +260,11 @@ export default function App() {
               id={detail.id}
               onBack={() => setDetail(null)}
               openPerson={openPerson}
+              onLibraryChanged={refreshLibrary}
+              setMessage={setMessage}
             />
           ) : (
-            <WorksPage repository={repository} openWork={openWork} />
+            <WorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
         ) : page === "people" ? (
           detail?.kind === "person" ? (
@@ -255,9 +273,11 @@ export default function App() {
               id={detail.id}
               onBack={() => setDetail(null)}
               openWork={openWork}
+              onLibraryChanged={refreshLibrary}
+              setMessage={setMessage}
             />
           ) : (
-            <PeoplePage repository={repository} openPerson={openPerson} />
+            <PeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
         ) : page === "media" ? (
           <MediaPage
@@ -269,8 +289,13 @@ export default function App() {
           />
         ) : page === "packs" ? (
           <PacksPage
+            settings={settings}
+            setSettings={setSettings}
             privateLibraryPath={savedSettings.libraryPath}
             packInfos={packInfos}
+            busy={busy}
+            onSave={saveSettings}
+            setMessage={setMessage}
             onOpenSettings={() => navigate("settings")}
           />
         ) : (
@@ -350,8 +375,8 @@ function HomePage({
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>你的 Localogue，现在就在桌面端。</h1>
         <p>
-          V1-16 延续正式 Desktop 产品壳，并新增独立 NFO 资料导入。首页、作品、人物、媒体、资料包与设置
-          直接读取和 Web 相同的数据模型，并共享查询规则。
+          V1-17 已进入 Unified Library Source 与 Desktop 日常交互对齐阶段。首页、作品、人物、媒体、资料包与设置
+          直接读取和 Web 相同的数据模型，并共享查询规则；视频、NFO 与本地海报可以跨子目录按 Work 汇聚。
         </p>
       </section>
 
@@ -384,11 +409,29 @@ function HomePage({
   );
 }
 
-function WorksPage({ repository, openWork }: { repository: LibraryRepository; openWork: (id: string) => void }) {
+function WorksPage({
+  repository,
+  openWork,
+  onLibraryChanged,
+  setMessage,
+}: {
+  repository: TauriLibraryRepository;
+  openWork: (id: string) => void;
+  onLibraryChanged: () => void;
+  setMessage: (message: string) => void;
+}) {
   const [text, setText] = useState("");
+  const [sort, setSort] = useState<WorkSort>("release_desc");
+  const [mediaFilter, setMediaFilter] = useState<"all" | "yes" | "no">("all");
   const data = useAsyncData(
-    () => repository.listWorks({ text: text || undefined, page: 1, pageSize: 1000, sort: "release_desc" }),
-    [repository, text],
+    () => repository.listWorks({
+      text: text || undefined,
+      page: 1,
+      pageSize: 1000,
+      sort,
+      ...(mediaFilter === "all" ? {} : { hasMedia: mediaFilter === "yes" }),
+    }),
+    [repository, text, sort, mediaFilter],
   );
 
   return (
@@ -396,12 +439,14 @@ function WorksPage({ repository, openWork }: { repository: LibraryRepository; op
       <PageTitle
         eyebrow="CANONICAL WORKS"
         title="作品库"
-        description="Desktop 与 Web 共用 WorkQuery：番号/标题搜索、排序与 Facet 语义保持一致。"
+        description="Desktop 与 Web 共用 WorkQuery；V1-17 增加 Private Work 新建与详情编辑，同时保持 Shared Pack 只读。"
       />
-      <label className="search-box">
-        <span>搜索番号或标题</span>
-        <input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="例如 ABC-001 / タイトル" />
-      </label>
+      <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
+      <section className="filter-bar">
+        <label className="search-box"><span>搜索番号或标题</span><input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="例如 MIDV-077 / タイトル" /></label>
+        <label><span>排序</span><select value={sort} onChange={(event) => setSort(event.target.value as WorkSort)}><option value="release_desc">发行日期 ↓</option><option value="release_asc">发行日期 ↑</option><option value="code_asc">番号 A→Z</option><option value="code_desc">番号 Z→A</option><option value="title_asc">标题 A→Z</option><option value="updated_desc">最近更新</option></select></label>
+        <label><span>本地媒体</span><select value={mediaFilter} onChange={(event) => setMediaFilter(event.target.value as "all" | "yes" | "no")}><option value="all">全部</option><option value="yes">已有媒体</option><option value="no">无媒体</option></select></label>
+      </section>
       {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
         <>
           <div className="result-meta"><strong>{data.value.total}</strong> 项作品</div>
@@ -420,20 +465,25 @@ function WorkDetailPage({
   id,
   onBack,
   openPerson,
+  onLibraryChanged,
+  setMessage,
 }: {
-  repository: LibraryRepository;
+  repository: TauriLibraryRepository;
   id: string;
   onBack: () => void;
   openPerson: (id: string) => void;
+  onLibraryChanged: () => void;
+  setMessage: (message: string) => void;
 }) {
   const data = useAsyncData(async () => {
     const work = await repository.findWorkById(id);
     if (!work) return null;
-    const [people, organizations, series, media] = await Promise.all([
+    const [people, organizations, series, media, assets] = await Promise.all([
       repository.listPeople({ page: 1, pageSize: 99999 }),
       repository.listOrganizations(),
       repository.listSeries(),
       repository.listMediaFiles(work.id),
+      repository.listAssetsForSubject("work", work.id),
     ]);
     return {
       work,
@@ -441,15 +491,43 @@ function WorkDetailPage({
       organizations: new Map(organizations.map((item) => [item.id, item])),
       series: new Map(series.map((item) => [item.id, item])),
       media,
+      assets,
     };
   }, [repository, id]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error="作品不存在。" /> : <ErrorState error={data.error} />;
-  const { work, people, organizations, series, media } = data.value;
+  const { work, people, organizations, series, media, assets } = data.value;
 
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
+
+  async function removePrivateAsset(assetId: string, storagePath: string): Promise<void> {
+    try {
+      const isPrivateAsset = await repository.isPrivateEntity("assets", assetId);
+      if (!isPrivateAsset) {
+        setMessage("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。");
+        return;
+      }
+      if (!window.confirm(`从 ${work.code} 解除并删除这个 Private Asset 元数据？\n\n${storagePath}\n\n原始图片与 content-addressed 文件不会在 V1-17 自动物理删除。`)) return;
+      const nextWork: Work = {
+        ...work,
+        assetIds: work.assetIds.filter((value) => value !== assetId),
+        updatedAt: new Date().toISOString(),
+      };
+      await repository.saveWork(nextWork);
+      try {
+        await repository.deletePrivateAsset(assetId);
+      } catch (error) {
+        await repository.saveWork(work);
+        throw error;
+      }
+      setMessage(`已从 ${work.code} 解除并删除 Private Asset 元数据；图片文件保留。`);
+      onLibraryChanged();
+    } catch (error) {
+      setMessage(`删除 Asset 失败：${toMessage(error)}`);
+    }
+  }
 
   return (
     <div className="page-stack">
@@ -459,6 +537,13 @@ function WorkDetailPage({
         <h1>{localizeText(work.titles, "ja")}</h1>
         <p>{localizeText(work.descriptions, "zh-CN", "暂无简介")}</p>
       </section>
+      <WorkEditor
+        repository={repository}
+        work={work}
+        onSaved={onLibraryChanged}
+        onDeleted={() => { onLibraryChanged(); onBack(); }}
+        setMessage={setMessage}
+      />
       <section className="detail-grid">
         <InfoCard label="发行日期" value={work.releaseDate?.value} />
         <InfoCard label="时长" value={work.durationMinutes ? `${work.durationMinutes} 分钟` : undefined} />
@@ -466,9 +551,25 @@ function WorkDetailPage({
         <InfoCard label="厂牌" value={organizationName(organizations.get(work.labelId ?? ""))} />
         <InfoCard label="Series" value={work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, "ja")).filter((value) => value !== "—").join(" · ") || undefined} />
         <InfoCard label="本地媒体" value={`${media.length} 个文件`} />
+        <InfoCard label="本地图片" value={`${assets.length} 个资产`} />
       </section>
       <DetailPeople title="演员" relations={performers} people={people} onOpen={openPerson} />
       <DetailPeople title="导演" relations={directors} people={people} onOpen={openPerson} />
+      <section className="settings-card">
+        <span className="eyebrow">LOCAL ASSETS</span>
+        <h2>本地海报 / 封面 / Fanart</h2>
+        {assets.length ? (
+          <div className="name-list">
+            {assets.map((asset) => (
+              <div key={asset.id}>
+                <span>{asset.type} · {asset.mimeType ?? "local asset"}</span>
+                <strong>{asset.storagePath}</strong>
+                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>解除 / 删除</button>
+              </div>
+            ))}
+          </div>
+        ) : <p className="muted">尚未关联本地图片资产。</p>}
+      </section>
       <section className="settings-card">
         <span className="eyebrow">CLASSIFICATION</span>
         <h2>分类引用</h2>
@@ -478,20 +579,40 @@ function WorkDetailPage({
   );
 }
 
-function PeoplePage({ repository, openPerson }: { repository: LibraryRepository; openPerson: (id: string) => void }) {
+function PeoplePage({
+  repository,
+  openPerson,
+  onLibraryChanged,
+  setMessage,
+}: {
+  repository: TauriLibraryRepository;
+  openPerson: (id: string) => void;
+  onLibraryChanged: () => void;
+  setMessage: (message: string) => void;
+}) {
   const [text, setText] = useState("");
+  const [sort, setSort] = useState<PersonSort>("name_asc");
+  const [status, setStatus] = useState("all");
   const data = useAsyncData(
-    () => repository.listPeople({ text: text || undefined, page: 1, pageSize: 1000, sort: "name_asc" }),
-    [repository, text],
+    () => repository.listPeople({
+      text: text || undefined,
+      page: 1,
+      pageSize: 1000,
+      sort,
+      ...(status === "all" ? {} : { statuses: [status] }),
+    }),
+    [repository, text, sort, status],
   );
 
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="CANONICAL PEOPLE" title="人物库" description="正式名、译名、罗马字、别名和旧艺名都进入与 Web 相同的搜索范围。" />
-      <label className="search-box">
-        <span>搜索人物</span>
-        <input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="姓名 / 别名 / 旧艺名" />
-      </label>
+      <PageTitle eyebrow="CANONICAL PEOPLE" title="人物库" description="正式名、译名、罗马字、别名和旧艺名进入共享查询范围；Private Person 可在 Desktop 新建、编辑与安全删除。" />
+      <CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />
+      <section className="filter-bar">
+        <label className="search-box"><span>搜索人物</span><input value={text} onChange={(event: ChangeEvent<HTMLInputElement>) => setText(event.target.value)} placeholder="姓名 / 别名 / 旧艺名" /></label>
+        <label><span>排序</span><select value={sort} onChange={(event) => setSort(event.target.value as PersonSort)}><option value="name_asc">名称 A→Z</option><option value="name_desc">名称 Z→A</option><option value="birth_desc">出生日期 ↓</option><option value="debut_desc">出道日期 ↓</option><option value="height_desc">身高 ↓</option></select></label>
+        <label><span>状态</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="all">全部</option><option value="active">active</option><option value="retired">retired</option><option value="hiatus">hiatus</option><option value="inactive">inactive</option><option value="unknown">unknown</option></select></label>
+      </section>
       {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
         <>
           <div className="result-meta"><strong>{data.value.total}</strong> 项人物</div>
@@ -510,11 +631,15 @@ function PersonDetailPage({
   id,
   onBack,
   openWork,
+  onLibraryChanged,
+  setMessage,
 }: {
-  repository: LibraryRepository;
+  repository: TauriLibraryRepository;
   id: string;
   onBack: () => void;
   openWork: (id: string) => void;
+  onLibraryChanged: () => void;
+  setMessage: (message: string) => void;
 }) {
   const data = useAsyncData(async () => {
     const person = await repository.findPersonById(id);
@@ -535,6 +660,13 @@ function PersonDetailPage({
         <h1>{getPreferredPersonName(person, "ja")}</h1>
         <p>{localizeText(person.biographies, "zh-CN", "暂无人物简介")}</p>
       </section>
+      <PersonEditor
+        repository={repository}
+        person={person}
+        onSaved={onLibraryChanged}
+        onDeleted={() => { onLibraryChanged(); onBack(); }}
+        setMessage={setMessage}
+      />
       <section className="detail-grid">
         <InfoCard label="出生日期" value={person.birthDate?.value} />
         <InfoCard label="出生地" value={localizeText(person.birthPlace, "zh-CN")} />
@@ -568,7 +700,7 @@ function MediaPage({
   progress,
   onLibraryChanged,
 }: {
-  repository: LibraryRepository;
+  repository: TauriLibraryRepository;
   settings: DesktopBootstrapSettings;
   setMessage: (message: string) => void;
   progress: DesktopTaskProgress | null;
@@ -580,7 +712,10 @@ function MediaPage({
   const [probing, setProbing] = useState(false);
   const [nfoPreview, setNfoPreview] = useState<NfoImportPreview | null>(null);
   const [nfoResult, setNfoResult] = useState<NfoImportResult | null>(null);
-  const [nfoBusy, setNfoBusy] = useState(false);
+  const [assetPreview, setAssetPreview] = useState<LocalAssetImportPreview | null>(null);
+  const [assetResult, setAssetResult] = useState<LocalAssetImportResult | null>(null);
+  const [metadataBusy, setMetadataBusy] = useState(false);
+  const [bindingMediaId, setBindingMediaId] = useState<string | null>(null);
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
 
@@ -588,12 +723,17 @@ function MediaPage({
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
   }, []);
 
+  const mediaRoots = effectiveMediaRoots(settings);
+  const nfoRoots = effectiveNfoRoots(settings);
+  const assetRoots = effectiveAssetRoots(settings);
+
   const data = useAsyncData(async () => {
-    const [media, works] = await Promise.all([
+    const [media, works, assets] = await Promise.all([
       repository.listMediaFiles(),
       repository.listWorks({ page: 1, pageSize: 100000 }),
+      repository.listAssets(),
     ]);
-    return { media, works: new Map(works.items.map((item) => [item.id, item])) };
+    return { media, works: new Map(works.items.map((item) => [item.id, item])), assets };
   }, [repository]);
 
   async function startScan(): Promise<void> {
@@ -601,8 +741,8 @@ function MediaPage({
       setMessage("请先在设置页选择 Private Library。Shared Pack 不能保存 MediaFile。 ");
       return;
     }
-    if (!settings.mediaScanPaths.length) {
-      setMessage("请先在设置页添加至少一个媒体扫描目录。");
+    if (!mediaRoots.length) {
+      setMessage("请先添加 Unified Library Root，或在高级设置里添加媒体扫描目录。");
       return;
     }
 
@@ -619,14 +759,16 @@ function MediaPage({
       scanCoordinator.current = coordinator;
       setScan(
         coordinator.start({
-          roots: settings.mediaScanPaths,
+          roots: mediaRoots,
           ffprobeExecutable: settings.ffprobePath?.trim() || "ffprobe",
           probeMedia: true,
           computeSha256: false,
           pruneMissing: true,
+          // Unified Root 按文件扩展名分流：任何子目录中的视频都会被发现；图片由 Local Asset Ingest 单独处理，避免图片文件占用媒体发现上限。
+          observeImageSidecars: false,
         }),
       );
-      setMessage("Desktop 增量媒体扫描已启动；Shared Pack 中的 Work 也参与匹配。 ");
+      setMessage("Desktop 增量媒体扫描已启动；Unified Roots 与高级媒体路径已合并去重，Shared Pack Work 也参与匹配。 ");
       if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
       scanTimer.current = window.setInterval(() => {
         const snapshot = coordinator.getSnapshot();
@@ -647,41 +789,53 @@ function MediaPage({
     }
   }
 
-  async function scanNfoMetadata(): Promise<void> {
+  async function scanMetadataSource(): Promise<void> {
     if (!settings.libraryPath) {
-      setMessage("请先在设置页选择 Private Library；NFO 导入会写入私人 Canonical Library。");
+      setMessage("请先在设置页选择 Private Library；NFO 与本地 Asset 导入都会写入私人资料库。");
       return;
     }
-    if (!settings.nfoScanPaths.length) {
-      setMessage("请先在设置页添加至少一个 NFO 元数据目录。");
+    if (!nfoRoots.length && !assetRoots.length) {
+      setMessage("请先添加 Unified Library Root，或配置高级 NFO / Media 扫描路径。");
       return;
     }
 
-    setNfoBusy(true);
+    setMetadataBusy(true);
     setNfoResult(null);
+    setAssetResult(null);
     try {
-      const preview = await previewNfoImport(settings.nfoScanPaths, repository);
-      setNfoPreview(preview);
-      setMessage(`NFO 扫描完成：发现 ${preview.discovered} 个，${preview.importable} 个可导入。`);
+      const nfo = await previewNfoImport(nfoRoots, repository);
+      const assets = await previewLocalAssetImport(assetRoots, repository, nfo);
+      setNfoPreview(nfo);
+      setAssetPreview(assets);
+      setMessage(`资料源扫描完成：发现 ${nfo.discovered} 个 NFO（${nfo.importable} 个 Work 候选）和 ${assets.discovered} 张图片（${assets.linkable} 张可关联）。`);
     } catch (error) {
-      setMessage(`NFO 扫描失败：${toMessage(error)}`);
+      setMessage(`资料源扫描失败：${toMessage(error)}`);
     } finally {
-      setNfoBusy(false);
+      setMetadataBusy(false);
     }
   }
 
-  async function importNfoMetadata(): Promise<void> {
-    if (!nfoPreview?.importable) return;
-    setNfoBusy(true);
+  async function importMetadataSource(): Promise<void> {
+    if (!nfoPreview && !assetPreview) return;
+    setMetadataBusy(true);
     try {
-      const result = await importNfoPreview(nfoPreview, repository, (value) => fileHash.sha256Text(value));
-      setNfoResult(result);
+      let nfo: NfoImportResult | null = null;
+      let assets: LocalAssetImportResult | null = null;
+      if (nfoPreview?.importable) {
+        nfo = await importNfoPreview(nfoPreview, repository, (value) => fileHash.sha256Text(value));
+        setNfoResult(nfo);
+      }
+      if (assetPreview?.linkable) {
+        // Asset Import 会在真正写入时重新按番号查 Work，因此同一次操作里刚由 NFO 创建的 Work 也能立即接住 poster/fanart/thumb。
+        assets = await importLocalAssetPreview(assetPreview, repository, (value) => fileHash.sha256Text(value));
+        setAssetResult(assets);
+      }
       onLibraryChanged();
-      setMessage(`NFO 导入完成：创建 ${result.createdWorks} 个 Work，更新 ${result.updatedWorks} 个 Work。可再次运行媒体扫描按番号关联。`);
+      setMessage(`资料导入完成：${nfo ? `新建 Work ${nfo.createdWorks}、更新 ${nfo.updatedWorks}` : "无 NFO 写入"}；${assets ? `关联图片 ${assets.imported} 张、创建 Asset ${assets.createdAssets}` : "无图片写入"}。之后可运行媒体扫描按番号关联视频。`);
     } catch (error) {
-      setMessage(`NFO 导入失败：${toMessage(error)}`);
+      setMessage(`资料导入失败：${toMessage(error)}`);
     } finally {
-      setNfoBusy(false);
+      setMetadataBusy(false);
     }
   }
 
@@ -703,19 +857,20 @@ function MediaPage({
 
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="LOCAL · MEDIAFILE · FFPROBE" title="本地媒体" description="MediaFile 属于 Private Layer；作品事实仍来自 Canonical Library / Shared Packs。" />
+      <PageTitle eyebrow="LOCAL · MEDIA · METADATA · ASSET" title="本地资料" description="一个 Unified Library Root 可以同时发现视频、NFO、poster / fanart / thumb；它们最终按 Work 番号汇聚，而不依赖同目录。" />
       <section className="settings-card">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">INCREMENTAL SCAN</span>
+            <span className="eyebrow">INCREMENTAL MEDIA SCAN</span>
             <h2>媒体扫描</h2>
-            <p className="muted">复用 V1-12 MediaScanCoordinator，未变化文件会跳过昂贵分析。</p>
+            <p className="muted">递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。</p>
           </div>
           <div className="button-row">
             <button className="primary-button" disabled={scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void startScan()}>开始扫描</button>
             <button disabled={scan?.status !== "running"} onClick={() => setScan(scanCoordinator.current?.cancel() ?? null)}>取消</button>
           </div>
         </div>
+        <code className="path-block">{mediaRoots.length ? mediaRoots.join("\n") : "尚未配置可扫描资料根目录"}</code>
         {scan ? <div className={`progress ${scan.status}`}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></div> : null}
         {scan?.result ? <div className="mini-stat-grid">
           <MiniStat label="Discovered" value={scan.result.discovered} />
@@ -729,36 +884,64 @@ function MediaPage({
       <section className="settings-card table-card">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">INDEPENDENT NFO SOURCE</span>
-            <h2>NFO 资料导入</h2>
-            <p className="muted">NFO 不要求与视频同目录。先扫描独立 NFO 目录并预览，再由你明确确认写入 Private Work；已有 Canonical 字段采用 fill / merge，不静默覆盖。</p>
+            <span className="eyebrow">UNIFIED METADATA SOURCE</span>
+            <h2>NFO + 本地海报 / 封面</h2>
+            <p className="muted">推荐只配置一个大目录。Desktop 会递归发现子目录中的 NFO、poster、fanart、thumb，再按番号或同 stem 汇聚到同一个 Work；原始图片不会移动。</p>
           </div>
           <div className="button-row">
-            <button disabled={nfoBusy} onClick={() => void scanNfoMetadata()}>{nfoBusy ? "处理中…" : "扫描 NFO"}</button>
-            <button className="primary-button" disabled={nfoBusy || !nfoPreview?.importable} onClick={() => void importNfoMetadata()}>导入可识别项目</button>
+            <button disabled={metadataBusy} onClick={() => void scanMetadataSource()}>{metadataBusy ? "处理中…" : "扫描资料源"}</button>
+            <button className="primary-button" disabled={metadataBusy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={() => void importMetadataSource()}>导入元数据与图片</button>
           </div>
         </div>
-        <code className="path-block">{settings.nfoScanPaths.length ? settings.nfoScanPaths.join("\n") : "尚未配置 NFO 元数据目录"}</code>
+        <code className="path-block">{unique([...nfoRoots, ...assetRoots]).length ? unique([...nfoRoots, ...assetRoots]).join("\n") : "尚未配置 Unified Library Root / 兼容扫描路径"}</code>
+
         {nfoPreview ? <>
+          <SectionTitle eyebrow="NFO GROUPS" title="NFO 作品组" />
           <div className="mini-stat-grid">
-            <MiniStat label="NFO" value={nfoPreview.discovered} />
-            <MiniStat label="Importable" value={nfoPreview.importable} />
+            <MiniStat label="NFO Files" value={nfoPreview.discovered} />
+            <MiniStat label="Work Candidates" value={nfoPreview.importable} />
             <MiniStat label="New Works" value={nfoPreview.newWorks} />
             <MiniStat label="Existing" value={nfoPreview.existingWorks} />
-            <MiniStat label="Skipped" value={nfoPreview.skipped + nfoPreview.errors} />
+            <MiniStat label="Skipped Files" value={nfoPreview.skipped + nfoPreview.errors} />
           </div>
-          <div className="table-wrap nfo-preview-table"><table className="data-table"><thead><tr><th>NFO</th><th>番号</th><th>标题</th><th>状态</th></tr></thead><tbody>
-            {nfoPreview.items.slice(0, 100).map((item) => <tr key={item.path}>
-              <td><strong>{item.fileName}</strong><small className="path-text">{item.path}</small></td>
-              <td>{item.code ?? "—"}</td>
-              <td>{item.title ?? item.error ?? "—"}</td>
-              <td><span className={nfoStatusClass(item.status)}>{nfoStatusLabel(item.status)}</span></td>
+          <div className="table-wrap nfo-preview-table"><table className="data-table"><thead><tr><th>作品组 / NFO 来源</th><th>番号</th><th>标题</th><th>状态</th></tr></thead><tbody>
+            {nfoPreview.groups.slice(0, 100).map((group) => <tr key={group.key}>
+              <td>
+                <strong>{group.sourceCount > 1 ? `${group.sourceCount} 个 NFO 来源` : group.representative.fileName}</strong>
+                {group.sourceCount > 1 ? <details><summary>查看文件</summary><small className="path-text">{group.sources.map((item) => item.fileName).join("\n")}</small></details> : <small className="path-text">{group.representative.path}</small>}
+              </td>
+              <td>{group.code ?? "—"}</td>
+              <td>{group.title ?? group.representative.error ?? "—"}</td>
+              <td><span className={nfoStatusClass(group.status)}>{nfoStatusLabel(group.status)}{group.sourceCount > 1 ? ` · ${group.sourceCount} sources` : ""}</span></td>
             </tr>)}
           </tbody></table></div>
-          {nfoPreview.items.length > 100 ? <p className="muted">预览只显示前 100 条；实际导入会处理全部 {nfoPreview.importable} 条可识别 NFO。</p> : null}
-        </> : <p className="muted">支持“只有番号”的文件名，也支持“番号 + 日期 + 片名”或“日期 + 番号 + 片名”；XML 内字段始终优先。</p>}
-        {nfoResult ? <p className="success-message">导入：{nfoResult.imported} · 新建 Work {nfoResult.createdWorks} · 更新 {nfoResult.updatedWorks} · 新建 Person {nfoResult.createdPeople} · 新建 Organization {nfoResult.createdOrganizations}</p> : null}
-        {nfoResult?.warnings.length ? <details><summary>{nfoResult.warnings.length} 条导入警告</summary><ul>{nfoResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
+          {nfoPreview.groups.length > 100 ? <p className="muted">NFO 预览只显示前 100 个作品组；导入会处理全部 {nfoPreview.importable} 个可识别 Work 候选。</p> : null}
+        </> : <p className="muted">多段 NFO（例如 MDVR-195.part1～part6）会聚合成一个 Work 组，不再把其余文件显示成一长串“重复番号”。</p>}
+
+        {assetPreview ? <>
+          <SectionTitle eyebrow="LOCAL ASSET CANDIDATES" title="本地图片资产" />
+          <div className="mini-stat-grid">
+            <MiniStat label="Images" value={assetPreview.discovered} />
+            <MiniStat label="Linkable" value={assetPreview.linkable} />
+            <MiniStat label="Pending Work" value={assetPreview.pendingWork} />
+            <MiniStat label="Skipped" value={assetPreview.skipped} />
+          </div>
+          <div className="table-wrap"><table className="data-table"><thead><tr><th>图片</th><th>番号</th><th>类型</th><th>匹配</th><th>状态</th></tr></thead><tbody>
+            {assetPreview.items.slice(0, 100).map((item) => <tr key={item.path}>
+              <td><strong>{item.fileName}</strong><small className="path-text">{item.path}</small></td>
+              <td>{item.code ?? "—"}</td>
+              <td>{item.type ?? "—"}</td>
+              <td>{item.matchedBy === "nfo-stem" ? "同 NFO stem" : item.matchedBy === "filename-code" ? "文件名番号" : "—"}</td>
+              <td><span className={assetStatusClass(item.status)}>{assetStatusLabel(item.status)}</span></td>
+            </tr>)}
+          </tbody></table></div>
+          {assetPreview.items.length > 100 ? <p className="muted">图片预览只显示前 100 条；实际导入会处理全部 {assetPreview.linkable} 张可关联图片。</p> : null}
+        </> : null}
+
+        {nfoResult ? <p className="success-message">NFO：导入 {nfoResult.imported} · 新建 Work {nfoResult.createdWorks} · 更新 {nfoResult.updatedWorks} · 新建 Person {nfoResult.createdPeople} · 新建 Organization {nfoResult.createdOrganizations}</p> : null}
+        {assetResult ? <p className="success-message">图片：关联 {assetResult.imported} · 新建 Asset {assetResult.createdAssets} · 复用 {assetResult.reusedAssets} · 更新 Work {assetResult.updatedWorks}</p> : null}
+        {nfoResult?.warnings.length ? <details><summary>{nfoResult.warnings.length} 条 NFO 导入警告</summary><ul>{nfoResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
+        {assetResult?.warnings.length ? <details><summary>{assetResult.warnings.length} 条 Asset 导入警告</summary><ul>{assetResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
       </section>
 
       <section className="settings-card">
@@ -783,7 +966,7 @@ function MediaPage({
 
       {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
         <section className="settings-card table-card">
-          <div className="section-heading"><div><span className="eyebrow">MEDIA FILES</span><h2>{data.value.media.length} 个本地文件</h2></div></div>
+          <div className="section-heading"><div><span className="eyebrow">PRIVATE LOCAL DATA</span><h2>{data.value.media.length} 个视频 · {data.value.assets.length} 个 Asset</h2></div></div>
           {data.value.media.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>文件</th><th>Work</th><th>大小</th><th>媒体参数</th><th>操作</th></tr></thead><tbody>
             {data.value.media.map((file) => {
               const work = file.workId ? data.value!.works.get(file.workId) : undefined;
@@ -792,52 +975,94 @@ function MediaPage({
                 <td>{work ? <><strong>{work.code}</strong><small>{localizeText(work.titles, "ja")}</small></> : <span className="status-chip warn">未绑定</span>}</td>
                 <td>{formatBytes(file.fileSize ?? 0)}</td>
                 <td>{mediaSummary(file)}</td>
-                <td><div className="row-actions"><button onClick={() => void fileOpener.openPath(file.path)}>打开</button><button onClick={() => void fileOpener.revealInFolder(file.path)}>定位</button></div></td>
+                <td><div className="row-actions"><button onClick={() => void fileOpener.openPath(file.path)}>打开</button><button onClick={() => void fileOpener.revealInFolder(file.path)}>定位</button><button className={bindingMediaId === file.id ? "primary-button" : ""} onClick={() => setBindingMediaId((current) => current === file.id ? null : file.id)}>管理绑定</button></div></td>
               </tr>;
             })}
           </tbody></table></div> : <p className="muted">尚未扫描到本地媒体。</p>}
         </section>
       )}
+
+      {!data.loading && data.value && bindingMediaId ? (() => {
+        const target = data.value.media.find((item) => item.id === bindingMediaId);
+        return target ? <MediaBindingPanel media={target} repository={repository} setMessage={setMessage} onChanged={() => { setBindingMediaId(null); onLibraryChanged(); }} /> : null;
+      })() : null}
+
     </div>
   );
 }
 
 function PacksPage({
+  settings,
+  setSettings,
   privateLibraryPath,
   packInfos,
+  busy,
+  onSave,
+  setMessage,
   onOpenSettings,
 }: {
+  settings: DesktopBootstrapSettings;
+  setSettings: Dispatch<SetStateAction<DesktopBootstrapSettings>>;
   privateLibraryPath?: string;
   packInfos: DesktopSharedPackInfo[];
+  busy: boolean;
+  onSave: () => Promise<void>;
+  setMessage: (message: string) => void;
   onOpenSettings: () => void;
 }) {
+  async function addPack(): Promise<void> {
+    const path = await fileDialog.pickDirectory();
+    if (!path) return;
+    try {
+      const inspected = await desktopBridge.inspectSharedPack(path);
+      if (!inspected.valid) throw new Error(inspected.error ?? "Shared Pack 校验失败。");
+      setSettings((current) => ({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) }));
+      setMessage(`已加入 Shared Pack 草稿：${inspected.name ?? path}。点击“保存资料包配置”后生效。`);
+    } catch (error) {
+      setMessage(`无法挂载 Shared Pack：${toMessage(error)}`);
+    }
+  }
+
+  function movePack(index: number, direction: -1 | 1): void {
+    setSettings((current) => {
+      const next = [...current.sharedPackPaths];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return current;
+      [next[index], next[target]] = [next[target], next[index]];
+      return { ...current, sharedPackPaths: next };
+    });
+  }
+
+  function removePack(path: string): void {
+    setSettings((current) => ({ ...current, sharedPackPaths: current.sharedPackPaths.filter((item) => item !== path) }));
+  }
+
+  const hasDraftChanges = JSON.stringify(settings.sharedPackPaths) !== JSON.stringify(packInfos.map((item) => item.configuredPath));
+
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="SHARED · PRIVATE · PRIORITY" title="资料包" description="读取优先级与 Web 相同：Private Library > Shared Pack 1 > Shared Pack 2 > …；Shared Pack 永远只读。" />
+      <PageTitle eyebrow="SHARED · PRIVATE · PRIORITY" title="资料包" description="Shared Pack 在 Desktop 中支持挂载、Native 校验、优先级调整和卸载；内容仍由 Rust Boundary 强制只读。" />
       <section className="settings-card">
-        <span className="eyebrow">SOURCE PRIORITY</span>
-        <h2>当前资料源</h2>
+        <div className="section-heading"><div><span className="eyebrow">SOURCE PRIORITY</span><h2>当前资料源优先级</h2><p className="muted">Private 永远最高；Shared Pack 顺序决定相同稳定 ID 的读取优先级。</p></div><div className="button-row"><button onClick={() => void addPack()}>+ 挂载 Shared Pack</button><button className="primary-button" disabled={busy || !hasDraftChanges} onClick={() => void onSave()}>{busy ? "保存中…" : "保存资料包配置"}</button></div></div>
         <ol className="source-priority-list">
           {privateLibraryPath ? <li><span className="source-index">1</span><div><strong>Private Library</strong><code>{privateLibraryPath}</code></div><span className="status-chip ok">WRITABLE</span></li> : null}
-          {packInfos.map((pack, index) => (
-            <li key={`${pack.configuredPath}-${index}`}>
+          {settings.sharedPackPaths.map((path, index) => {
+            const pack = packInfos.find((item) => item.configuredPath === path);
+            return <li key={path}>
               <span className="source-index">{index + (privateLibraryPath ? 2 : 1)}</span>
-              <div><strong>{pack.name ?? pack.configuredPath}</strong><code>{pack.libraryPath ?? pack.absolutePath}</code><small>{pack.valid ? `${pack.id} · ${pack.version}${pack.license ? ` · ${pack.license}` : ""}` : pack.error}</small></div>
-              <span className={pack.valid ? "status-chip ok" : "status-chip warn"}>{pack.valid ? "READ ONLY" : "CHECK"}</span>
-            </li>
-          ))}
+              <div><strong>{pack?.name ?? path}</strong><code>{pack?.libraryPath ?? path}</code><small>{pack ? (pack.valid ? `${pack.id} · ${pack.version}${pack.license ? ` · ${pack.license}` : ""}` : pack.error) : "尚未保存 / 重新校验"}</small></div>
+              <div className="pack-actions"><button disabled={index === 0} onClick={() => movePack(index, -1)}>↑</button><button disabled={index === settings.sharedPackPaths.length - 1} onClick={() => movePack(index, 1)}>↓</button><button className="danger-button" onClick={() => removePack(path)}>卸载</button></div>
+            </li>;
+          })}
         </ol>
-        {!privateLibraryPath && !packInfos.length ? <p className="muted">当前没有配置资料源。</p> : null}
-        <button className="primary-button" onClick={onOpenSettings}>管理资料源</button>
+        {!privateLibraryPath && !settings.sharedPackPaths.length ? <p className="muted">当前没有配置资料源。</p> : null}
+        {hasDraftChanges ? <p className="status-chip warn">存在未保存的 Shared Pack 变更</p> : <p className="status-chip ok">Shared Pack 配置已保存</p>}
       </section>
       <section className="settings-card soft-card">
-        <span className="eyebrow">V1-16 SCOPE</span>
-        <h2>Desktop 现在已经理解 Shared Pack</h2>
-        <p>
-          Rust 会验证 <code>localogue-pack.json</code>、<code>schemaVersion=1</code>、
-          <code>kind=shared-library</code> 与 <code>library/</code> 目录。有效 Pack 才会进入 Desktop Repository。
-        </p>
-        <p className="muted">Portable Pack 导入/导出与完整 Evidence / Review / History 治理属于 V1-17；V1-16 只增加显式确认、fill / merge 的 NFO Bootstrap Ingest。</p>
+        <span className="eyebrow">NATIVE READ-ONLY BOUNDARY</span>
+        <h2>Shared Pack 不会被 Desktop CRUD 修改</h2>
+        <p>编辑 Shared Work / Person 时，Desktop 会在 Private Library 写入同 ID Override；删除也只删除 Private Override。Shared Pack 本身不会通过 Canonical Writer 被修改。</p>
+        <button onClick={onOpenSettings}>打开完整实例设置</button>
       </section>
     </div>
   );
@@ -871,6 +1096,12 @@ function SettingsPage({
     setSettings((current) => ({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) }));
   }
 
+  async function addLibraryRoot(): Promise<void> {
+    const path = await fileDialog.pickDirectory();
+    if (!path) return;
+    setSettings((current) => ({ ...current, libraryRoots: unique([...current.libraryRoots, path]) }));
+  }
+
   async function addMediaRoot(): Promise<void> {
     const path = await fileDialog.pickDirectory();
     if (!path) return;
@@ -901,6 +1132,12 @@ function SettingsPage({
         {settings.libraryPath ? <button className="danger-button" onClick={() => setSettings((current) => ({ ...current, libraryPath: undefined }))}>清除 Private Library</button> : null}
       </section>
 
+      <section className="settings-card featured-card">
+        <div className="section-heading"><div><span className="eyebrow">UNIFIED LIBRARY ROOTS</span><h2>统一资料源根目录</h2></div><button className="primary-button" onClick={() => void addLibraryRoot()}>+ 添加资料源</button></div>
+        <p className="muted">推荐配置。一个根目录下可以同时有“VR / 单体 / 封面+元数据 / 字幕”等任意子目录；Desktop 会按文件类型递归发现视频、NFO、poster / fanart / thumb，并按番号跨目录关联。</p>
+        <PathList values={settings.libraryRoots} onRemove={(path) => setSettings((current) => ({ ...current, libraryRoots: current.libraryRoots.filter((item) => item !== path) }))} />
+      </section>
+
       <section className="settings-card">
         <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>只读共享资料</h2></div><button onClick={() => void addSharedPack()}>+ 挂载资料包</button></div>
         <PathList values={settings.sharedPackPaths} onRemove={(path) => setSettings((current) => ({ ...current, sharedPackPaths: current.sharedPackPaths.filter((item) => item !== path) }))} />
@@ -908,13 +1145,14 @@ function SettingsPage({
       </section>
 
       <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">MEDIA ROOTS</span><h2>媒体扫描目录</h2></div><button onClick={() => void addMediaRoot()}>+ 添加目录</button></div>
+        <div className="section-heading"><div><span className="eyebrow">ADVANCED MEDIA ROOTS</span><h2>高级：额外媒体目录</h2></div><button onClick={() => void addMediaRoot()}>+ 添加目录</button></div>
+        <p className="muted">可选。只在媒体不位于 Unified Library Root 中时添加；扫描时会与 Unified Roots 合并去重。</p>
         <PathList values={settings.mediaScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, mediaScanPaths: current.mediaScanPaths.filter((item) => item !== path) }))} />
       </section>
 
       <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">NFO METADATA ROOTS</span><h2>NFO 元数据目录</h2></div><button onClick={() => void addNfoRoot()}>+ 添加目录</button></div>
-        <p className="muted">这里可以和视频目录完全不同。Desktop 会递归扫描 .nfo，并优先读取 XML 番号；缺失时再从文件名识别番号 / 日期 / 片名。</p>
+        <div className="section-heading"><div><span className="eyebrow">ADVANCED METADATA ROOTS</span><h2>高级：额外 NFO / 图片目录</h2></div><button onClick={() => void addNfoRoot()}>+ 添加目录</button></div>
+        <p className="muted">可选。适合 NFO / 海报完全放在另一块硬盘的情况；这里的目录也会参与 poster / fanart / thumb 发现。</p>
         <PathList values={settings.nfoScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, nfoScanPaths: current.nfoScanPaths.filter((item) => item !== path) }))} />
       </section>
 
@@ -999,6 +1237,33 @@ function nfoStatusLabel(status: NfoImportItemStatus): string {
 
 function nfoStatusClass(status: NfoImportItemStatus): string {
   return status === "new_work" || status === "existing_work" ? "status-chip ok" : "status-chip warn";
+}
+
+function assetStatusLabel(status: LocalAssetImportPreview["items"][number]["status"]): string {
+  switch (status) {
+    case "ready": return "可关联";
+    case "pending_work": return "等待本轮 NFO 创建 Work";
+    case "missing_code": return "缺少番号";
+    case "work_not_found": return "找不到 Work";
+    case "unknown_asset_type": return "未识别图片角色";
+  }
+}
+
+function assetStatusClass(status: LocalAssetImportPreview["items"][number]["status"]): string {
+  return status === "ready" || status === "pending_work" ? "status-chip ok" : "status-chip warn";
+}
+
+function effectiveMediaRoots(settings: DesktopBootstrapSettings): string[] {
+  return unique([...settings.libraryRoots, ...settings.mediaScanPaths]);
+}
+
+function effectiveNfoRoots(settings: DesktopBootstrapSettings): string[] {
+  return unique([...settings.libraryRoots, ...settings.nfoScanPaths]);
+}
+
+function effectiveAssetRoots(settings: DesktopBootstrapSettings): string[] {
+  // 兼容 V1-16：旧用户即使还没有迁移到 Unified Roots，NFO / Media 专用路径里的图片也会被发现。
+  return unique([...settings.libraryRoots, ...settings.nfoScanPaths, ...settings.mediaScanPaths]);
 }
 
 function PathList({ values, onRemove }: { values: string[]; onRemove: (value: string) => void }) {

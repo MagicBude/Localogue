@@ -1,5 +1,32 @@
 # 更新日志
 
+## V1-17 · Unified Library Source & Desktop Interaction Parity II
+
+- Desktop Works 新增 Private Work 创建、详情编辑与受引用保护的 Private 删除；Shared Work 保存为同 ID Private Override。
+- Work 编辑器可修改番号、标题、简介、日期、时长以及 performer/director、Maker、Label、Series、Genre、Tag 关系。
+- Desktop People 新增 Person 创建、编辑与受引用保护删除；Shared Person 同样使用 Private Override。
+- Works / People 增加核心搜索、筛选与排序交互，继续复用 Web/Desktop 共享 Query Core。
+- Media 列表新增人工 Work 绑定治理：搜索、bind、rebind、unbind，并统一标记 `matchMethod=manual`。
+- 新增受限 Desktop Private Audit Writer，仅允许写 `media-binding-receipts`；Receipt 写失败时补偿恢复 MediaFile。
+- Packs 页面升级为可管理：挂载前 Native 校验、调整 Shared Pack 读取优先级、卸载并保存实例配置。
+- Private Canonical 删除白名单开放 `works / people / assets / media-files`，Rust 在删除前执行引用检查；Shared Pack 仍无写/删入口。
+- 新增 ADR-033 与 Desktop Interaction Parity 实现导读。
+- 新增 `libraryRoots` 统一资料源根目录；一个共同父目录可递归发现不同子目录的视频、NFO 与本地图片。
+- Web / Desktop 对 `libraryRoots` 使用相同设置语义；原 `mediaScanPaths / nfoScanPaths` 保留为高级兼容路径。
+- Desktop Media 页面统一扫描 NFO + `poster / cover / fanart / thumb` 图片，并在导入前提供 Preview。
+- Desktop Unified Root 按文件类型分流：目录名不参与媒体判断，`写真/` 等分类目录中的受支持视频照常扫描；图片由专门 Asset Ingest 处理，避免图片文件占用视频发现上限。
+- 图片与 NFO / 视频不要求同目录，通过规范化 Work 番号关联；缺少直接番号时可用同 NFO stem 保守匹配。
+- 同番号多 NFO 改为 Work Group 预览，`part1~partN` 不再显示成长串“重复番号”。
+- 新增 Native Private Asset Import：限制图片类型与 25 MB 大小，校验 magic bytes，计算 SHA-256 后复制到 `asset-files/`。
+- Asset 创建 `subjectType=work` 关系并加入 `Work.assetIds`，现有 poster/cover Presentation Resolver 可直接复用。
+- 原始图片不移动、不删除；相同内容使用 SHA-256 内容寻址避免重复二进制。
+- Desktop Work 详情新增本地图片数量与 Asset 类型 / 存储引用核对。
+- Work 详情可显式解除并删除 Private Asset 元数据；Native 引用保护确保先解除 Work.assetIds，V1-17 不自动物理删除用户原图或 content-addressed 二进制。
+- `assets` 加入受控 Private Writer；写根仍由 Rust 从 Desktop Settings 解析，Shared Pack 继续只读。
+- 新增 ADR-032、V1-17 实现导读与 Manifest。
+- 项目、Desktop Workspace、Rust Crate 与 Tauri 配置升级至 0.1.17。
+
+
 ## V1-16 · Desktop Feature Parity II — Independent NFO Library Ingest
 
 - 新增独立 `nfoScanPaths`，NFO 元数据目录可与视频目录完全分离。

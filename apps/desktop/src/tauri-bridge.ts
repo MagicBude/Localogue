@@ -7,8 +7,11 @@ import type {
   DesktopRuntimeInfo,
   DesktopTaskProgress,
   DesktopFileEntry,
+  DesktopImportedAssetFile,
   DesktopFileStat,
+  DesktopDeletableLibraryCollection,
   DesktopLibraryCollection,
+  DesktopPrivateAuditCollection,
   DesktopWritableLibraryCollection,
   DesktopSharedPackInfo,
 } from "./contracts";
@@ -33,6 +36,7 @@ export const desktopBridge = {
   walkFiles: (request: { root: string; extensions?: string[]; includeHidden?: boolean; maxFiles?: number }) =>
     invoke<DesktopFileEntry[]>("walk_files", { request }),
   readNfoText: (path: string) => invoke<string>("read_nfo_text", { path }),
+  importPrivateAssetFile: (path: string) => invoke<DesktopImportedAssetFile>("import_private_asset_file", { path }),
   sha256File: (path: string) => invoke<string>("sha256_file", { path }),
   inspectSharedPack: (packPath: string) =>
     invoke<DesktopSharedPackInfo>("inspect_shared_pack", { packPath }),
@@ -40,6 +44,10 @@ export const desktopBridge = {
     invoke<T[]>("read_library_collection", { libraryPath, collection }),
   writeLibraryEntity: (collection: DesktopWritableLibraryCollection, entity: unknown) =>
     invoke<void>("write_library_entity", { collection, entity }),
+  writePrivateAuditEntity: (collection: DesktopPrivateAuditCollection, entity: unknown) =>
+    invoke<void>("write_private_audit_entity", { collection, entity }),
+  deleteLibraryEntity: (collection: DesktopDeletableLibraryCollection, id: string) =>
+    invoke<void>("delete_library_entity", { collection, id }),
   deleteMediaFile: (id: string) =>
     invoke<void>("delete_library_entity", { collection: "media-files", id }),
   listenProgress: (handler: (payload: DesktopTaskProgress) => void): Promise<UnlistenFn> =>

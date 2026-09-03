@@ -57,3 +57,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 ### V1-16
 - [ADR-031：NFO 元数据目录与媒体目录解耦](ADR-031-independent-nfo-metadata-roots.md)
+
+### V1-17
+- [ADR-032：统一资料源根目录与按番号汇聚本地 Asset](ADR-032-unified-library-roots-and-code-linked-local-assets.md)
+- [ADR-033：Desktop CRUD 写 Private Override，Media 人工绑定必须审计](ADR-033-desktop-private-override-crud-and-audited-media-binding.md)

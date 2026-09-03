@@ -34,6 +34,7 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
 
   const libraryPath = optionalString(input.libraryPath);
   const sharedPackPaths = stringArray(input.sharedPackPaths, "sharedPackPaths");
+  const libraryRoots = stringArray(input.libraryRoots, "libraryRoots");
   const mediaScanPaths = stringArray(input.mediaScanPaths, "mediaScanPaths");
   const nfoScanPaths = stringArray(input.nfoScanPaths, "nfoScanPaths");
   const ffprobePath = optionalStringField(input.ffprobePath, "ffprobePath");
@@ -41,6 +42,7 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
     schemaVersion: 1,
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
+    ...(libraryRoots.length ? { libraryRoots } : {}),
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
     ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),

@@ -18,6 +18,9 @@ export interface DesktopRuntimeInfo {
 export interface DesktopBootstrapSettings {
   schemaVersion: 1;
   libraryPath?: string;
+  /** Unified Library Roots：一次配置即可递归发现视频、NFO、本地海报/封面等资料。 */
+  libraryRoots: string[];
+  /** 兼容/高级媒体专用路径；与 libraryRoots 合并扫描。 */
   mediaScanPaths: string[];
   nfoScanPaths: string[];
   sharedPackPaths: string[];

@@ -15,7 +15,7 @@ Localogue 不把 Web “打包成 Desktop”，也不在 Tauri 里重新实现�
                Node / Server          Rust / OS
 ```
 
-V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest。
+V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest，V1-17 再把视频 / NFO / 本地图片统一成可跨子目录发现的 Library Source。
 
 ## V1-15 Desktop 产品壳
 
@@ -30,7 +30,7 @@ V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入
 - Packs；
 - Settings。
 
-这些页面是 V1-15 的第一批浏览能力，不等于 Web 所有治理功能已经迁移完成。V1-16 优先解决真实存量资料迁移：NFO 目录与媒体目录解耦，并提供 Preview -> Explicit Import。高级筛选、冲突编辑、Evidence/Review/Curation/History、Media Binding 审计与 Portable Pack 完整交互继续进入 V1-17。
+这些页面从 V1-15 的浏览壳逐步演进：V1-16 解决独立 NFO 存量迁移，V1-17 增加 Unified Library Root、NFO Work Group、本地 Asset 汇聚，并补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理以及 Media bind/rebind/unbind 审计。Web 的全部高级 Facet、Evidence/Review/Curation/History、字段级冲突治理与 Portable Pack 完整交互继续进入 V1-18。
 
 ## 共享查询核心
 
@@ -64,7 +64,7 @@ Private Library
 
 相同稳定 ID 使用靠前数据源的完整实体，V1 不做隐式字段级深度合并。
 
-Desktop V1-16 可读取：
+Desktop V1-17 可读取：
 
 - works；
 - people；
@@ -98,17 +98,18 @@ Desktop 设置保存的是 Shared Pack 根目录，而 Repository 实际需要�
 - Media：`probe_media`；
 - FileSystem / Hash：扫描需要的受限目录遍历、文件状态和 SHA-256；
 - NFO：受限 `.nfo` 文本读取（单文件上限 10 MB）；
+- Local Asset：受限本地图片导入，校验扩展名 / 大小 / magic bytes 后复制到 Private `asset-files/`；
 - Repository：`read_library_collection`、Private-only `write_library_entity`、media-only `delete_library_entity`；
 - Shared Pack：`inspect_shared_pack`。
 
 所有自定义命令都必须由 `desktop-runtime` Permission 显式授权。
 
-### V1-16：受控 Private Canonical Writer
+### V1-17：受控 Private Canonical / Asset Writer
 
-V1-16 为用户明确确认的 NFO Bootstrap Ingest 增加受控 Canonical 写能力：
+V1-17 在 V1-16 NFO Bootstrap 基础上，为用户明确确认的本地 Asset Ingest 扩展受控写能力：
 
 ```text
-works / people / organizations / series / genres / tags / media-files
+works / people / organizations / series / genres / tags / assets / media-files
 ```
 
 但它不是“Webview 可指定任意目录的 JSON Writer”。Native `write_library_entity` 不再接受写根目录参数，而是：
@@ -121,11 +122,11 @@ Rust load_desktop_settings()
   -> atomic JSON replace
 ```
 
-因此 Shared Pack 即使已经挂载，也不能借用该 Command 被写入。`assets` 仍不在写白名单。
+因此 Shared Pack 即使已经挂载，也不能借用该 Command 被写入。`assets` 元数据可以写 Private，但二进制必须经过专门的 `import_private_asset_file` 校验并写入内容寻址目录。
 
-删除边界更窄：`delete_library_entity` 在 V1-16 仍只允许 Private `media-files`，Canonical Entity 删除必须等待完整治理流程。
+删除边界更窄：`delete_library_entity` 在 V1-17 仍只允许 Private `media-files`，Canonical Entity / Asset 删除必须等待完整治理流程。
 
-NFO Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-17。
+NFO / Local Asset Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-18。
 
 ## Media Scan
 
@@ -139,7 +140,7 @@ V1-14 已实现：
 
 V1-15 将扫描 Repository 与正式 Desktop Repository 合并。这样 Shared Pack 的 Work 可以参与番号匹配，但扫描结果生成的 MediaFile 仍只写 Private Library。
 
-V1-16 的独立 NFO 导入不会重新实现媒体绑定：NFO 创建 / 补充 Canonical Work 后，再运行同一增量扫描，由既有番号匹配器重新判断 `MediaFile.workId`。视频 size / mtime 没变化时不会因此重复 ffprobe / SHA-256。
+V1-17 的 Unified Root 不重新实现媒体绑定：NFO 创建 / 补充 Canonical Work 后，再运行同一增量扫描，由既有番号匹配器重新判断 `MediaFile.workId`。本地 poster / fanart / thumb 则通过 Asset Ingest 按相同番号挂到 Work；视频 size / mtime 没变化时不会因此重复 ffprobe / SHA-256。
 
 ## 为什么不开放 Shell
 
@@ -180,7 +181,7 @@ Web 当前使用：
 .localogue/settings.json
 ```
 
-Desktop 使用 Tauri App Config。V1-16 仍不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
+Desktop 使用 Tauri App Config。V1-17 仍不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
 
 ## Open 边界
 

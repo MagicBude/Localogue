@@ -27,6 +27,14 @@ export interface DesktopFileEntry {
   modifiedAt: string;
 }
 
+
+export interface DesktopImportedAssetFile {
+  storagePath: string;
+  mimeType: string;
+  fileSize: number;
+  sha256: string;
+}
+
 export type DesktopWritableLibraryCollection =
   | "works"
   | "people"
@@ -34,6 +42,18 @@ export type DesktopWritableLibraryCollection =
   | "series"
   | "genres"
   | "tags"
+  | "assets"
+  | "media-files";
+
+
+
+export type DesktopPrivateAuditCollection =
+  | "media-binding-receipts";
+
+export type DesktopDeletableLibraryCollection =
+  | "works"
+  | "people"
+  | "assets"
   | "media-files";
 
 export type DesktopLibraryCollection =

@@ -13,9 +13,14 @@ export interface InstanceSettings {
    * 本地私人 Library 永远排在它们之前。
    */
   sharedPackPaths: string[];
-  /** 本地媒体扫描目录；MediaFile 永远属于私人层。 */
+  /**
+   * 统一资料源根目录。一个根目录可以同时包含视频、NFO、海报/封面等子目录；
+   * Application 层按文件类型分类发现，而不是要求这些文件相邻。
+   */
+  libraryRoots?: string[];
+  /** 高级/兼容媒体扫描目录；MediaFile 永远属于私人层。 */
   mediaScanPaths?: string[];
-  /** 独立 NFO 元数据目录；不要求与视频目录重合或相邻。 */
+  /** 高级/兼容 NFO 元数据目录；不要求与视频目录重合或相邻。 */
   nfoScanPaths?: string[];
   /** ffprobe 可执行文件。为空时使用 PATH 中的 ffprobe。 */
   ffprobePath?: string;

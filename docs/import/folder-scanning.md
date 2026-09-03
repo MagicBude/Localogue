@@ -73,3 +73,18 @@ Snapshot → Diff → Reconcile
 ## V1-16：独立 NFO 元数据目录
 
 `mediaScanPaths` 与 `nfoScanPaths` 是两套独立输入。前者负责视频 / MediaFile，后者负责 NFO 元数据预览与显式导入。两棵目录树可以完全不同。NFO 导入 Work 后，再运行媒体增量扫描即可按番号重新绑定既有 MediaFile；视频未变化时仍走增量 fast path。
+
+
+## V1-17：统一资料源根目录
+
+`libraryRoots` 是首选扫描入口。一个共同父目录下可以把视频、NFO、海报、Fanart、缩略图分别放在不同子目录；Desktop 按文件类型递归发现后再通过作品番号汇聚。
+
+```text
+Library Root/
+├─ 单体/                -> video / MediaFile
+├─ VR/                  -> video / MediaFile
+├─ 封面+元数据/         -> NFO + poster/fanart/thumb
+└─ 字幕/
+```
+
+原 `mediaScanPaths / nfoScanPaths` 不删除，只作为额外根目录兼容“确实在另一块磁盘”的资料。重叠目录最终按规范化文件路径去重。

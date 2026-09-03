@@ -2,11 +2,31 @@
 
 ## 当前阶段
 
-**V1-16：Desktop Feature Parity II — Independent NFO Library Ingest。**
+**V1-17：Unified Library Source & Desktop Interaction Parity II。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
-V1-16 在 V1-15 正式 Desktop 应用壳之上，优先补齐真实本地资料迁移能力：NFO 元数据目录与媒体目录完全解耦，可独立递归扫描、预览并显式导入 Private Canonical Library。导入后的 Work 再通过既有番号匹配与 MediaFile 建立关系；Shared Pack 仍保持只读。
+V1-17 在 V1-16 独立 NFO 导入之上进一步匹配真实资料库目录：用户可以把共同父目录配置为 `libraryRoots`，Localogue 会递归发现不同子目录里的视频、NFO、poster / fanart / thumb，再按 Work 番号汇聚。独立 `mediaScanPaths / nfoScanPaths` 继续作为高级兼容路径。
+
+本地图片必须先 Preview、再由用户显式导入。Rust 校验图片扩展名、大小与文件签名后复制到 Private `asset-files/` 并创建 Asset；原文件不移动。V1-17 同时补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理和 MediaFile 人工绑定审计；Shared Pack 仍保持只读。
+
+## V1-17 Unified Source / Desktop Interaction Parity
+
+- `libraryRoots` 统一资料源根目录，Web / Desktop 设置语义一致；
+- Unified Root + 高级媒体/NFO路径合并并按规范化文件路径去重；
+- 视频、NFO、poster / cover / fanart / thumb 可以位于不同子目录；
+- NFO 多段 / 多来源按番号聚合成 Work Group；
+- 本地图片按文件名番号优先、同 NFO stem fallback；
+- 同一次显式导入先创建 Work，再关联刚发现的本地图片；
+- Native Private Asset Import 使用 SHA-256 内容寻址并校验实际图片签名；
+- Work 详情可核对本地 Asset 数量、类型与存储引用；
+- Shared Pack 只读边界保持不变；Shared Entity 编辑统一写 Private Override；
+- Work / Person 支持 Desktop 新建、编辑与受引用保护删除；
+- Work 编辑可维护 performer/director、Maker、Label、Series、Genre、Tag 关系；
+- Works / People 支持核心搜索、筛选和排序；
+- MediaFile 支持人工 bind / rebind / unbind，并写 `media-binding-receipts`；
+- Packs 支持 Native 校验、挂载、优先级调整与卸载；
+- Native 删除仅开放 works / people / assets / media-files，并执行引用检查。
 
 ## 已完成
 
@@ -197,21 +217,21 @@ V1-16 在 V1-15 正式 Desktop 应用壳之上，优先补齐真实本地资料�
 - 已有 Work 使用 fill / merge，不静默覆盖已有核心字段；
 - Rust NFO Reader 仅允许 `.nfo`、单文件 10 MB；
 - Desktop Canonical 写白名单扩大到明确 Private 集合，写根由 Rust 从 Desktop Settings 强制解析，Shared Pack 仍只读；
-- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；完整 Evidence / Review / History 冲突治理继续由 V1-17 接入；
-- Canonical 删除继续关闭，仅 Private `media-files` 可删除；
+- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-18；
+- V1-16 当时仅允许删除 Private `media-files`；V1-17 已扩展为受引用保护的 Work / Person / Asset / MediaFile 删除。
 - `findWorkByCode` 兼容带 / 不带连字符番号。
 
 ## 下一阶段建议
 
-**V1-17：Desktop Interaction Parity / Governance。**
+**V1-18：Desktop Governance & Native Enhancement。**
 
-1. 将 Works / People 的高级筛选、排序、分页和更多关系浏览完整映射到 Desktop UI；
-2. 接入 Canonical 编辑、Evidence/Review/Curation/History 等治理交互，并复用既有 Application Service / Commit Plan；
-3. Desktop 支持 MediaFile bind / rebind / unbind 审计流程；
-4. 接入 Shared / Personal Portable Pack 导入导出，而不是仅配置目录；
-5. 抽取更多可共享 Presentation/DTO，继续减少 Web 与 Desktop 表现层重复；
-6. 设计 Desktop Asset 二进制读取与 Presentation Preference 显示；
-7. 保持所有 Native 写能力使用最小命令和显式白名单。
+1. 将 Works / People 的高级 Facet、分页和更多实体浏览完整映射到 Desktop UI；
+2. 将 V1-17 的直接 Private CRUD 接入 Commit Plan / Audit / History，补齐 Evidence / Review / Curation 等治理交互；
+3. 接入 Shared / Personal Portable Pack Desktop 导入导出，而不是仅管理已挂载目录；
+4. 增加 Asset 二进制读取、头像 / 封面实际展示与 Presentation Preference；
+5. 继续抽取共享 Presentation / DTO，减少 Web 与 Desktop 表现层重复；
+6. 设计 Asset 孤儿治理、安全物理删除与更完整的本地资源生命周期；
+7. 保持所有 Native 写能力使用最小命令、显式白名单和引用保护。
 
 ## 当前不做
 

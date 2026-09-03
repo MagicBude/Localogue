@@ -11,9 +11,9 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-16 Desktop Feature Parity II — Independent NFO Library Ingest**：Tauri Desktop 除了直接浏览 Private Library / Shared Packs 和扫描本地媒体外，现在还可以配置与视频目录完全独立的 NFO 元数据目录，批量预览并显式导入 Work / People 等 Private Canonical 数据。
+当前实现已推进到 **V1-17 Unified Library Source & Desktop Interaction Parity II**：Tauri Desktop 可以把一个共同父目录作为统一资料源，递归发现不同子目录中的视频、NFO、poster / fanart / thumb，并按 Work 番号汇聚。`mediaScanPaths / nfoScanPaths` 继续保留为完全不同磁盘场景的高级兼容路径。
 
-Web 与 Desktop 不复制两套查询规则：Works / People 的过滤、排序、分页与 Facet 共用 Application Query Core。V1-16 为 NFO 导入显式开放受控 Private Canonical 写白名单，但 Shared Pack 始终只读，Rust 仍不提供通用文件写入 / Shell 能力。
+Web 与 Desktop 不复制两套查询规则：Works / People 查询继续共用 Application Query Core，`libraryRoots` 的媒体扫描语义也保持一致。V1-17 同时新增受控 Private CRUD、元数据关系编辑、Media ↔ Work 人工绑定审计与 Shared Pack 挂载/排序/卸载；Shared Entity 的修改统一落为 Private Override，Rust 仍不提供通用文件写入 / Shell 能力。
 
 当前 V1 已完成：
 
@@ -75,6 +75,10 @@ Web 与 Desktop 不复制两套查询规则：Works / People 的过滤、排序�
 - `/packs` Shared / Personal Pack 管理；
 - `.localogue-pack` 导出、预览与安全导入；
 - 主项目 Community Validator 与 `localogue-community-data` V0-01 协议对接。
+- Desktop `libraryRoots` 统一资料源，可一次配置共同父目录并递归发现不同子目录的视频 / NFO / 本地图片；
+- Desktop NFO 同番号多来源按 Work Group 聚合预览；
+- Desktop 本地 `poster / cover / fanart / thumb` 预览、Private Asset 导入与 Work 关联；
+- Native Asset 导入执行扩展名 / 大小 / magic bytes 校验与 SHA-256 内容寻址，原始文件不移动。
 
 ## 技术栈
 
@@ -262,7 +266,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-16 已提供正式 Home / Works / People / Media / Packs / Settings 应用壳、Work / Person 详情、Private + Shared Pack 合并浏览、原生增量媒体扫描，以及独立 NFO 元数据目录的预览 / 批量导入。Canonical 完整编辑、Evidence/Review/Curation/History、MediaFile 人工绑定审计与 Portable Pack 完整交互将在后续 Interaction Parity 阶段继续对齐。
+Desktop V1-17 已提供正式 Home / Works / People / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap，以及 Unified Library Root 下的本地 poster / cover / fanart / thumb 资产汇聚。Evidence / Review / Curation / History 与 Portable Pack 等重治理工作台将在 V1-18 继续对齐。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 
@@ -620,7 +624,7 @@ extrafanart/
 
 媒体扫描本身仍只把这些邻接文件保存为 `MediaFile.sidecars` Observation，不会因为“视频旁存在 NFO”就自动改 Canonical Work。
 
-V1-16 另外提供独立 `nfoScanPaths`：NFO 可以位于完全不同的资料目录，先批量 Preview，再由用户明确确认导入 Private Canonical；导入后的 Work 再通过既有番号匹配与 MediaFile 建立关系。
+V1-17 首选 `libraryRoots`：如果视频、NFO、poster / fanart / thumb 只是位于同一大目录的不同子目录，只需添加共同父目录一次；Localogue 会递归发现并按番号汇聚。`mediaScanPaths / nfoScanPaths` 仍保留给完全不同磁盘的高级兼容场景。
 
 新增平台边界：
 

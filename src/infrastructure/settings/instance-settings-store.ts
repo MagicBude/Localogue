@@ -56,6 +56,7 @@ export function saveInstanceSettings(input: InstanceSettings): InstanceSettings 
 function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
   const libraryPath = normalizeOptionalPath(input.libraryPath);
   const sharedPackPaths = normalizePathArray(input.sharedPackPaths);
+  const libraryRoots = normalizePathArray(input.libraryRoots);
   const mediaScanPaths = normalizePathArray(input.mediaScanPaths);
   const nfoScanPaths = normalizePathArray(input.nfoScanPaths);
   const ffprobePath = normalizeOptionalPath(input.ffprobePath);
@@ -64,6 +65,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
     schemaVersion: 1,
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
+    ...(libraryRoots.length ? { libraryRoots } : {}),
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
     ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),

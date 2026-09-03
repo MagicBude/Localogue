@@ -35,6 +35,16 @@ export interface NfoImportItem {
   error?: string;
 }
 
+export interface NfoImportGroup {
+  key: string;
+  code?: string;
+  title?: string;
+  status: NfoImportItemStatus;
+  sourceCount: number;
+  representative: NfoImportItem;
+  sources: NfoImportItem[];
+}
+
 export interface NfoImportPreview {
   roots: string[];
   discovered: number;
@@ -44,6 +54,7 @@ export interface NfoImportPreview {
   skipped: number;
   errors: number;
   items: NfoImportItem[];
+  groups: NfoImportGroup[];
 }
 
 export interface NfoImportResult {
@@ -129,6 +140,7 @@ export async function previewNfoImport(
 
   markDuplicateCodes(parsedItems);
   const importableItems = parsedItems.filter(isImportable);
+  const groups = buildGroups(parsedItems);
 
   return {
     roots: rootList,
@@ -139,6 +151,7 @@ export async function previewNfoImport(
     skipped: parsedItems.filter((item) => !isImportable(item) && item.status !== "parse_error").length,
     errors: parsedItems.filter((item) => item.status === "parse_error").length,
     items: parsedItems,
+    groups,
   };
 }
 
@@ -422,6 +435,31 @@ async function findOrCreateTag(
   context.tags.push(entity);
   context.result.createdTags += 1;
   return entity.id;
+}
+
+function buildGroups(items: NfoImportItem[]): NfoImportGroup[] {
+  const grouped = new Map<string, NfoImportItem[]>();
+  for (const item of items) {
+    const key = item.code ? `code:${compactCode(item.code)}` : `path:${normalizePath(item.path)}`;
+    const values = grouped.get(key) ?? [];
+    values.push(item);
+    grouped.set(key, values);
+  }
+
+  return [...grouped.entries()].map(([key, sources]) => {
+    const representative = sources.find(isImportable)
+      ?? sources.find((item) => item.status !== "duplicate_code")
+      ?? sources[0];
+    return {
+      key,
+      ...(representative.code ? { code: representative.code } : {}),
+      ...(representative.title ? { title: representative.title } : {}),
+      status: representative.status,
+      sourceCount: sources.length,
+      representative,
+      sources: [...sources].sort((a, b) => a.fileName.localeCompare(b.fileName, "ja")),
+    };
+  }).sort((a, b) => (a.code ?? a.representative.fileName).localeCompare(b.code ?? b.representative.fileName, "en"));
 }
 
 function markDuplicateCodes(items: NfoImportItem[]): void {
