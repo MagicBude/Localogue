@@ -1,0 +1,28 @@
+source,aliases,target,action
+系列: <value>,シリーズ: <value> | Series: <value>,series,extract-value
+片商: <value>,メーカー: <value> | Maker: <value> | Studio: <value>,maker,fallback-only
+厂牌: <value>,レーベル: <value> | Label: <value>,label,fallback-only
+发行: <value>,配給: <value> | Publisher: <value>,source-only,do-not-promote
+标签: <value>,タグ: <value> | Tag: <value>,tag,explicit-tag
+单体作品,単体作品 | 単体 | Solo,workType:solo,controlled
+共演作品,共演 | Co-starring,workType:co_starring,controlled
+VR作品,VR | VR動画 | VR Video,workType:vr,controlled
+イメージビデオ,イメージDVD | 写真影像 | Image Video,workType:image_video,controlled
+総集編,合辑 | Compilation,workType:compilation,controlled
+オムニバス,单元合集 | Omnibus,workType:omnibus,controlled
+ベスト,精选集 | Best Of,workType:best_of,controlled
+制服,Uniform,genre:uniform,controlled
+OL,Office Lady | 职场女性,genre:office_lady,controlled
+人妻,Married Woman,genre:married_woman,controlled
+熟女,Mature,genre:mature,controlled
+素人,Amateur,genre:amateur,controlled
+巨乳,Big Bust,genre:big_bust,controlled
+貧乳,贫乳 | Small Bust,genre:small_bust,controlled
+スレンダー,苗条 | Slender,genre:slender,controlled
+コスプレ,角色扮演 | Cosplay,genre:cosplay,controlled
+ドラマ,剧情 | Drama,genre:drama,controlled
+ドキュメンタリー,纪录 | Documentary,genre:documentary,controlled
+レズ,女同性题材 | Lesbian,genre:lesbian,controlled
+デビュー作,出道作 | Debut Work,genre:first_work,controlled
+周年,周年企划 | Anniversary,genre:anniversary,controlled
+ハイビジョン,高清 | High Definition,genre:high_definition,controlled

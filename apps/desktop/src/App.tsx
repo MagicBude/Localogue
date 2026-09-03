@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
+import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 import {
   getPreferredPersonName,
   localizeText,
@@ -69,6 +70,7 @@ import {
   type NfoImportResult,
   type NfoImportItemStatus,
 } from "./nfo-library-import";
+import { applyVocabularyRepair, previewVocabularyRepair, type VocabularyRepairPreview, type VocabularyRepairResult } from "./vocabulary-repair";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -499,10 +501,12 @@ function WorkDetailPage({
   const data = useAsyncData(async () => {
     const work = await repository.findWorkById(id);
     if (!work) return null;
-    const [people, organizations, series, media, assets] = await Promise.all([
+    const [people, organizations, series, genres, tags, media, assets] = await Promise.all([
       repository.listPeople({ page: 1, pageSize: 99999 }),
       repository.listOrganizations(),
       repository.listSeries(),
+      repository.listGenres(),
+      repository.listTags(),
       repository.listMediaFiles(work.id),
       repository.listAssetsForSubject("work", work.id),
     ]);
@@ -511,6 +515,8 @@ function WorkDetailPage({
       people: new Map(people.items.map((item) => [item.id, item])),
       organizations: new Map(organizations.map((item) => [item.id, item])),
       series: new Map(series.map((item) => [item.id, item])),
+      genres: new Map(genres.map((item) => [item.id, item])),
+      tags: new Map(tags.map((item) => [item.id, item])),
       media,
       assets,
     };
@@ -518,7 +524,7 @@ function WorkDetailPage({
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error={t("作品不存在。")} /> : <ErrorState error={data.error} />;
-  const { work, people, organizations, series, media, assets } = data.value;
+  const { work, people, organizations, series, genres, tags, media, assets } = data.value;
   const poster = chooseWorkPoster(assets);
 
   const performers = work.personRelations.filter((item) => item.role === "performer");
@@ -602,8 +608,24 @@ function WorkDetailPage({
       </section>
       <section className="settings-card">
         <span className="eyebrow">CLASSIFICATION</span>
-        <h2>{t("分类引用")}</h2>
-        <TokenList values={[...work.workTypeIds, ...work.genreIds, ...work.tagIds]} />
+        <h2>{t("分类与标签")}</h2>
+        <div className="classification-groups">
+          <ClassificationGroup
+            label={t("作品类型")}
+            values={work.workTypeIds.map((id) => {
+              const definition = workTypeDefinition(id);
+              return definition ? localizeText(definition.names, metadataLanguage, id) : id;
+            })}
+          />
+          <ClassificationGroup
+            label={t("Genre")}
+            values={work.genreIds.map((id) => localizeText(genres.get(id)?.names, metadataLanguage, id))}
+          />
+          <ClassificationGroup
+            label={t("Tag")}
+            values={work.tagIds.map((id) => localizeText(tags.get(id)?.names, metadataLanguage, id))}
+          />
+        </div>
       </section>
     </div>
   );
@@ -741,6 +763,9 @@ function MediaPage({
   const [assetResult, setAssetResult] = useState<LocalAssetImportResult | null>(null);
   const [metadataBusy, setMetadataBusy] = useState(false);
   const [bindingMediaId, setBindingMediaId] = useState<string | null>(null);
+  const [vocabularyPreview, setVocabularyPreview] = useState<VocabularyRepairPreview | null>(null);
+  const [vocabularyResult, setVocabularyResult] = useState<VocabularyRepairResult | null>(null);
+  const [vocabularyBusy, setVocabularyBusy] = useState(false);
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
 
@@ -911,6 +936,37 @@ function MediaPage({
     await startScan();
   }
 
+  async function auditVocabulary(): Promise<void> {
+    setVocabularyBusy(true);
+    setVocabularyResult(null);
+    try {
+      const preview = await previewVocabularyRepair(repository);
+      setVocabularyPreview(preview);
+      setMessage(t("分类审计完成：{works} 个 Work 需要修复；{unmapped} 个来源词保持 unmapped。", { works: preview.affectedWorks, unmapped: preview.unmappedTerms.length }));
+    } catch (error) {
+      setMessage(t("分类审计失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setVocabularyBusy(false);
+    }
+  }
+
+  async function repairVocabulary(): Promise<void> {
+    if (!vocabularyPreview?.affectedWorks) return;
+    if (!window.confirm(t("应用分类修复？只重排 V1-16/17 NFO 自动生成的 Genre / Tag 引用，不会删除用户手工 Tag。"))) return;
+    setVocabularyBusy(true);
+    try {
+      const result = await applyVocabularyRepair(repository, vocabularyPreview, (value) => fileHash.sha256Text(value));
+      setVocabularyResult(result);
+      setVocabularyPreview(await previewVocabularyRepair(repository));
+      onLibraryChanged();
+      setMessage(t("分类修复完成：更新 {works} 个 Work；新建 Series {series}；新建 Genre {genres}。", { works: result.updatedWorks, series: result.createdSeries, genres: result.createdGenres }));
+    } catch (error) {
+      setMessage(t("分类修复失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setVocabularyBusy(false);
+    }
+  }
+
   async function chooseAndProbe(): Promise<void> {
     const path = await fileDialog.pickFile();
     if (!path) return;
@@ -996,7 +1052,7 @@ function MediaPage({
                 {group.sourceCount > 1 ? <details><summary>{t("查看文件")}</summary><small className="path-text">{group.sources.map((item) => item.fileName).join("\n")}</small></details> : <small className="path-text">{group.representative.path}</small>}
               </td>
               <td>{group.code ?? "—"}</td>
-              <td>{group.title ?? group.representative.error ?? "—"}</td>
+              <td>{group.title ?? group.representative.error ?? "—"}{group.representative.unmappedTerms?.length ? <small className="path-text">{t("Unmapped 来源词")}: {group.representative.unmappedTerms.length}</small> : null}</td>
               <td><span className={nfoStatusClass(group.status)}>{nfoStatusLabel(group.status, t)}{group.sourceCount > 1 ? ` · ${t("{count} 个 NFO 来源", { count: group.sourceCount })}` : ""}</span></td>
             </tr>)}
           </tbody></table></div>
@@ -1027,6 +1083,33 @@ function MediaPage({
         {assetResult ? <p className="success-message">{t("图片：关联 {imported} · 新建 Asset {created} · 复用 {reused} · 更新 Work {works}", { imported: assetResult.imported, created: assetResult.createdAssets, reused: assetResult.reusedAssets, works: assetResult.updatedWorks })}</p> : null}
         {nfoResult?.warnings.length ? <details><summary>{t("{count} 条 NFO 导入警告", { count: nfoResult.warnings.length })}</summary><ul>{nfoResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
         {assetResult?.warnings.length ? <details><summary>{t("{count} 条 Asset 导入警告", { count: assetResult.warnings.length })}</summary><ul>{assetResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
+      </section>
+
+      <section className="settings-card vocabulary-audit-card">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">VOCABULARY AUDIT</span>
+            <h2>{t("分类词表审计")}</h2>
+            <p className="muted">{t("检查早期 NFO 导入把“系列: … / 单体作品 / イメージビデオ”等混入 Genre / Tag 的情况。先预览，再显式修复；用户手工 Tag 不会被删除。")}</p>
+          </div>
+          <div className="button-row">
+            <button disabled={vocabularyBusy} onClick={() => void auditVocabulary()}>{vocabularyBusy ? t("处理中…") : t("检查分类")}</button>
+            <button className="primary-button" disabled={vocabularyBusy || !vocabularyPreview?.affectedWorks} onClick={() => void repairVocabulary()}>{t("应用修复")}</button>
+          </div>
+        </div>
+        {vocabularyPreview ? <>
+          <div className="mini-stat-grid">
+            <MiniStat label={t("扫描 Work")} value={vocabularyPreview.scannedWorks} />
+            <MiniStat label={t("需要修复")} value={vocabularyPreview.affectedWorks} />
+            <MiniStat label={t("移入 Series")} value={vocabularyPreview.movedToSeries} />
+            <MiniStat label={t("移入作品类型")} value={vocabularyPreview.movedToWorkTypes} />
+            <MiniStat label={t("移入 Genre")} value={vocabularyPreview.movedToGenres} />
+            <MiniStat label={t("Unmapped 来源词")} value={vocabularyPreview.unmappedTerms.length} />
+          </div>
+          {vocabularyPreview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{vocabularyPreview.unmappedTerms.slice(0, 200).map((term) => <code key={term}>{term}</code>)}</div></details> : null}
+          <p className="muted">{t("将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。", { genres: vocabularyPreview.removedImportedGenres, tags: vocabularyPreview.removedImportedTags })}</p>
+        </> : <p className="muted">{t("尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。")}</p>}
+        {vocabularyResult ? <p className="success-message">{t("上次修复：更新 {works} 个 Work · 新建 Series {series} · 新建 Genre {genres}", { works: vocabularyResult.updatedWorks, series: vocabularyResult.createdSeries, genres: vocabularyResult.createdGenres })}</p> : null}
       </section>
 
       <section className="settings-card">
@@ -1264,6 +1347,13 @@ function SettingsPage({
       </section>
     </div>
   );
+}
+
+
+function ClassificationGroup({ label, values }: { label: string; values: string[] }) {
+  const { t } = useDesktopI18n();
+  const clean = values.filter((value) => value && value !== "—");
+  return <div className="classification-group"><strong>{label}</strong>{clean.length ? <div className="classification-chip-row">{clean.map((value) => <span className="classification-chip" key={`${label}:${value}`}>{value}</span>)}</div> : <span className="muted">{t("未设置")}</span>}</div>;
 }
 
 function DetailPeople({

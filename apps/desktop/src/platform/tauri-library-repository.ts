@@ -148,6 +148,18 @@ export class TauriLibraryRepository implements LibraryRepository {
     this.cache.delete("people");
   }
 
+  async deletePrivateGenre(id: string): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    await desktopBridge.deleteLibraryEntity("genres", id);
+    this.cache.delete("genres");
+  }
+
+  async deletePrivateTag(id: string): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    await desktopBridge.deleteLibraryEntity("tags", id);
+    this.cache.delete("tags");
+  }
+
   async deletePrivateAsset(id: string): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
     await desktopBridge.deleteLibraryEntity("assets", id);

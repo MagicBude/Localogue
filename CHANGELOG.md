@@ -1,5 +1,22 @@
 # Changelog
 
+## V1-21 - Vocabulary Governance & Work Metadata Visibility
+
+- 修复 NFO `<genre>/<tag>` 混合桶被直接复制到 Canonical Genre / Tag 的问题。
+- 新增共享 Import Classification Normalizer：Series / Maker / Label / Work Type / controlled Genre / explicit Tag 分流。
+- `系列:` 进入 Series；`单体作品 / イメージビデオ / VR` 等进入 Work Type。
+- 番号前缀、演员名、片商、发行与未知来源词不再自动成为 Genre / Tag。
+- 未知来源分类生成 `unmapped_classification` warning。
+- 新增 `resources/vocabularies/import-term-mappings.json/.csv` 与 `docs/vocabulary/import-term-mappings.md`。
+- Desktop 本地资料页新增“分类词表审计” Preview → Explicit Repair。
+- 历史修复只处理 `genre_nfo_* / tag_nfo_*`，保留用户手工 Tag。
+- Repair 可迁移 Series / Work Type / controlled Genre，并清理无引用旧 NFO Genre / Tag。
+- Rust Canonical Delete 增加受引用保护的 Private Genre / Tag 清理能力。
+- Work Detail 分开展示作品类型 / Genre / Tag 的本地化名称。
+- Work Editor 新增 Work Type 多选编辑。
+- Desktop Boundary Validator 固化 Vocabulary mapping 代码 / resources / docs 同步要求。
+- 保持 V1-20 UX/I18N 与 V1-18 Hotfix 3 Unified Library / Native I/O 稳定实现不变。
+
 ## V1-20 - Desktop UX & I18N Parity
 
 - Desktop 主导航默认收窄并支持显式折叠 / 展开，折叠状态本机持久化。

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { inferCatalogFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
+import { WORK_TYPE_DEFINITIONS } from "@/application/importers/import-classification-normalizer";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
 import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
 import type { MediaFile } from "@/domain/entities/media-file";
@@ -112,6 +113,7 @@ export function WorkEditor({
   const [labelId, setLabelId] = useState(work.labelId ?? "");
   const [performerIds, setPerformerIds] = useState(work.personRelations.filter((item) => item.role === "performer").map((item) => item.personId));
   const [directorIds, setDirectorIds] = useState(work.personRelations.filter((item) => item.role === "director").map((item) => item.personId));
+  const [workTypeIds, setWorkTypeIds] = useState(work.workTypeIds);
   const [seriesIds, setSeriesIds] = useState(work.seriesIds);
   const [genreIds, setGenreIds] = useState(work.genreIds);
   const [tagIds, setTagIds] = useState(work.tagIds);
@@ -166,6 +168,7 @@ export function WorkEditor({
         ...(releaseDate.trim() ? { releaseDate: { value: releaseDate.trim(), precision: datePrecision(releaseDate.trim()) } } : {}),
         ...(duration.trim() && Number(duration) > 0 ? { durationMinutes: Number(duration) } : {}),
         personRelations: dedupeRelations(relations),
+        workTypeIds,
         ...(makerId ? { makerId } : {}),
         ...(labelId ? { labelId } : {}),
         seriesIds,
@@ -218,6 +221,7 @@ export function WorkEditor({
       <label>{t("厂牌")}<select value={labelId} onChange={(event) => setLabelId(event.target.value)}><option value="">{t("未设置")}</option>{labels.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
       <MultiSelect label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
       <MultiSelect label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
+      <MultiSelect label={t("作品类型")} values={workTypeIds} onChange={setWorkTypeIds} options={WORK_TYPE_DEFINITIONS.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id) }))} />
       <MultiSelect label={t("系列")} values={seriesIds} onChange={setSeriesIds} options={seriesOptions} />
       <MultiSelect label={t("Genre")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
       <MultiSelect label={t("Tag")} values={tagIds} onChange={setTagIds} options={tagOptions} />

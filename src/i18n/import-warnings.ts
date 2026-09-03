@@ -9,6 +9,7 @@ const messages = {
     missing_performers: "出演者情報を認識できませんでした。",
     json_row_not_object: "JSON の {detail} 件目はオブジェクトではないためスキップしました。",
     xlsx_fallback_sheet: "「作品」シートがないため、先頭シート「{detail}」を読み込みました。",
+    unmapped_classification: "分類語「{detail}」はまだ Canonical 語彙へマッピングされていません。",
   },
   "zh-CN": {
     missing_code: "未识别到番号 / 作品代码。",
@@ -17,6 +18,7 @@ const messages = {
     missing_performers: "未识别到演员信息。",
     json_row_not_object: "第 {detail} 条 JSON 不是对象，已跳过。",
     xlsx_fallback_sheet: "未找到“作品”工作表，已读取第一个工作表：{detail}。",
+    unmapped_classification: "来源分类词“{detail}”尚未映射到 Canonical 词表。",
   },
   en: {
     missing_code: "No work code was recognized.",
@@ -25,6 +27,7 @@ const messages = {
     missing_performers: "No performer information was recognized.",
     json_row_not_object: "JSON item {detail} is not an object and was skipped.",
     xlsx_fallback_sheet: 'No "作品" sheet was found; the first sheet "{detail}" was used.',
+    unmapped_classification: 'Source classification term "{detail}" is not yet mapped to Canonical vocabulary.',
   },
 } as const;
 

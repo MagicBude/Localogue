@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-20 Desktop UX & I18N Parity**。V1-19 已关闭主要 Discovery / Presentation 差距；V1-20 根据实机使用继续收口主导航、Facet Rail、Asset 语义/顺序，以及与 Web 同语义的中 / 日 / 英 UI Language 与 Metadata Language 独立偏好。
+当前已推进到 **V1-21 Vocabulary Governance & Work Metadata Visibility**。V1-21 根据真实 NFO 数据修复 Series / Work Type / Genre / Tag 混合分类，并增加历史分类审计 / 显式修复与 Work Detail 分类可见性。
 
 已完成重点：
 
@@ -67,7 +67,10 @@
 - ~~Desktop Sidebar 默认收窄、可折叠并持久化~~（V1-20）；
 - ~~Desktop Facet Rail 加宽与长选项换行~~（V1-20）；
 - ~~poster / fanart / screenshot / cover 用户语义与展示顺序统一~~（V1-20）；
-- ~~Desktop UI / Metadata 中日英独立语言偏好~~（V1-20）。
+- ~~Desktop UI / Metadata 中日英独立语言偏好~~（V1-20）；
+- ~~NFO 混合分类 Vocabulary Routing 与 unmapped policy~~（V1-21）；
+- ~~早期 NFO Genre / Tag 污染 Preview → Explicit Repair~~（V1-21）；
+- ~~Desktop Work Detail 分开展示 Work Type / Genre / Tag~~（V1-21）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
 
@@ -77,7 +80,11 @@
 
 本阶段完成 Desktop 布局和三语 Presentation 对齐：可折叠窄 Sidebar、宽 Facet Rail、Asset 语义/顺序，以及独立 UI / Metadata Language。
 
-### V1-21：Desktop Governance Parity
+### V1-21：Vocabulary Governance & Work Metadata Visibility
+
+本阶段先修复真实来源词表问题：受控 NFO 分类映射、历史分类审计/修复、Work Detail 分类展示。
+
+### V1-22：Desktop Governance Parity
 
 下一阶段重点：
 

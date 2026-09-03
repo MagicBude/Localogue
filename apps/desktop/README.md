@@ -1,8 +1,8 @@
 # Localogue Desktop
 
-V1-20：**Desktop UX & I18N Parity**。
+V1-21：**Vocabulary Governance & Work Metadata Visibility**。
 
-Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-19 已对齐首页/Person 相关作品海报、完整 Work Facet、People 高级筛选和 Catalog Browse；V1-20 继续对齐 UX 与 i18n：可折叠窄 Sidebar、更宽 Facet Rail、统一 Asset 语义/顺序，以及与 Web 同语义的中 / 日 / 英 UI / Metadata 独立语言偏好。它与 Next.js Web 共享 Domain / Application Query Core，但使用 Tauri/Rust 作为本地平台适配层。
+Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-19 对齐 Discovery / Presentation，V1-20 对齐 UX 与中 / 日 / 英 i18n；V1-21 根据真实 NFO 数据修复来源分类污染：Series / Work Type / Genre / Tag 经过统一 Vocabulary Router，再进入 Canonical，并提供历史 NFO 分类审计与显式修复。它与 Next.js Web 共享 Domain / Application Query Core，但使用 Tauri/Rust 作为本地平台适配层。
 
 当前提供：
 
@@ -29,7 +29,10 @@ Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-19 �
 - Sidebar 默认收窄并支持本机持久化折叠；
 - Work Facet Rail 加宽，长选项允许换行；
 - poster / fanart / screenshot / cover 使用一致的三语语义和固定展示顺序；
-- UI Language 与 Metadata Language 独立支持 `zh-CN / ja / en`。
+- UI Language 与 Metadata Language 独立支持 `zh-CN / ja / en`；
+- NFO 混合 `<genre>/<tag>` 经过统一 Vocabulary Router，不再直接复制到 Canonical；
+- Media 页面提供历史 NFO 分类词表审计 / 预览 / 显式修复；
+- Work Detail 分开展示 Work Type / Genre / Tag，Work Editor 可显式维护 Work Type。
 
 ## V1-18 权限边界
 
@@ -46,11 +49,11 @@ works / people / organizations / series / genres / tags / assets / media-files
 另外：
 
 - `assets` 只能通过受控 Native 图片导入 + Private Writer 元数据写入；图片扩展名、大小与文件签名会在 Rust 校验；
-- Private 删除只开放 `works / people / assets / media-files`，并由 Rust 在删除前执行引用保护；
+- Private 删除只开放受控 `works / people / genres / tags / assets / media-files`，并由 Rust 在删除前执行引用保护；Genre / Tag 删除前会检查 Work 引用；
 - Work 详情可先解除 / 删除 Private Asset 元数据，再完成受保护的 Work 删除；原始图片不会被自动物理删除；
 - NFO 导入已有 Work 只能 fill / merge，不静默覆盖已有核心事实。
 
-完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-21。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
+完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-22。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
 
 ## 开发
 
@@ -83,3 +86,5 @@ pnpm desktop:build
 - `docs/architecture/desktop-runtime.md`
 - `docs/development/v1-17-unified-library-source-and-local-assets-walkthrough.md`
 - `docs/development/v1-18-desktop-presentation-parity-and-unified-sync-walkthrough.md`
+- `docs/development/v1-21-vocabulary-governance-walkthrough.md`
+- `docs/vocabulary/import-term-mappings.md`

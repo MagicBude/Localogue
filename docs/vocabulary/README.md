@@ -28,6 +28,7 @@ solo
 - Raw Term 不能因为未识别而丢弃；
 - 词表可逐步扩展，不追求 V0 一次穷举所有行业术语；
 - 文档表格用于人阅读；
+- [导入词条映射表](import-term-mappings.md) 规定 NFO / 外部来源混合分类如何进入 Series / Work Type / Genre / Tag；
 - `resources/vocabularies/` 中的 JSON 用于未来程序读取。
 - [Review 字段决策](review-field-decisions.md)
 - [实体审核动作](entity-review-actions.md)

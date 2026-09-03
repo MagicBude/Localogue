@@ -42,7 +42,7 @@ Localogue 优先相信 NFO XML 内明确字段：
 - 导演；
 - Maker / Studio；
 - Series；
-- Genre / Tag；
+- 来源 Genre / Tag 混合词（先经过 [导入词条映射表](../vocabulary/import-term-mappings.md)，不会直接照单全收）；
 - 发行日期；
 - 时长；
 - 简介。
@@ -82,3 +82,8 @@ ABW001_20250812_片名.nfo
 - 写入只发生在用户明确点击导入之后；
 - Shared Pack 保持只读；写入目标只能是 Private Library；
 - 无法可靠识别番号的新 NFO 不自动创建 Work。
+
+
+## 分类映射（V1-21）
+
+NFO 的 `<genre>` / `<tag>` 经常包含 Series、Maker、Work Type、番号前缀和技术标签。Localogue 现在先经过受控映射，再写 Canonical。未知词保持 `unmapped`，不会自动污染 Genre / Tag。早期 Desktop NFO Bootstrap 已导入的混合分类可以在“本地资料 → 分类词表审计”先预览再显式修复。

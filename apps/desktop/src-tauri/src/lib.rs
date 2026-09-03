@@ -828,8 +828,8 @@ async fn delete_library_entity(app: AppHandle, collection: String, id: String) -
 }
 
 fn delete_library_entity_blocking(app: AppHandle, collection: String, id: String) -> Result<(), String> {
-    if !matches!(collection.as_str(), "works" | "people" | "assets" | "media-files") {
-        return Err("V1-18 Desktop 删除只开放 works / people / assets / media-files；其它 Canonical 集合仍需后续治理流程。".into());
+    if !matches!(collection.as_str(), "works" | "people" | "genres" | "tags" | "assets" | "media-files") {
+        return Err("Desktop 删除只开放受引用保护的 works / people / genres / tags / assets / media-files。".into());
     }
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
@@ -866,6 +866,16 @@ fn ensure_private_delete_is_unreferenced(library_path: &str, collection: &str, i
         let assets = read_json_objects(&PathBuf::from(library_path).join("assets"))?;
         if assets.iter().any(|item| item.get("subjectType").and_then(Value::as_str) == Some("work") && item.get("subjectId").and_then(Value::as_str) == Some(id)) {
             return Err("Work 仍有 Private Asset 引用；请先移除本地图片资产。".into());
+        }
+    }
+
+    if collection == "genres" || collection == "tags" {
+        let field = if collection == "genres" { "genreIds" } else { "tagIds" };
+        for work in &works {
+            let referenced = work.get(field).and_then(Value::as_array).map(|values| values.iter().any(|value| value.as_str() == Some(id))).unwrap_or(false);
+            if referenced {
+                return Err(format!("{} 仍被 Private Work 引用；请先完成分类修复或在作品编辑中解除引用。", if collection == "genres" { "Genre" } else { "Tag" }));
+            }
         }
     }
 

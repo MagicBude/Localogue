@@ -19,7 +19,8 @@ export type ImportWarningCode =
   | "invalid_duration"
   | "missing_performers"
   | "json_row_not_object"
-  | "xlsx_fallback_sheet";
+  | "xlsx_fallback_sheet"
+  | "unmapped_classification";
 
 export interface ImportWarning {
   code: ImportWarningCode;

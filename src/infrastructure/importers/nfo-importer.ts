@@ -3,6 +3,7 @@ import { XMLParser } from "fast-xml-parser";
 import type { ImportPreview } from "@/domain/entities/evidence";
 import { isRecord, normalizeLooseRecord } from "@/application/importers/import-normalizer";
 import { inferNfoFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
+import { normalizeImportedClassifications } from "@/application/importers/import-classification-normalizer";
 import { validateImportCandidate } from "@/application/importers/import-validation";
 import type { ImportInput, MetadataImporter } from "@/infrastructure/importers/importer-types";
 
@@ -23,7 +24,8 @@ export class NfoMetadataImporter implements MetadataImporter {
     if (!isRecord(movie)) throw new Error("NFO 中没有识别到 <movie> 元数据。");
 
     const raw = adaptNfoMovie(movie, input.fileName);
-    const normalized = normalizeLooseRecord(raw);
+    const classification = normalizeImportedClassifications(normalizeLooseRecord(raw));
+    const normalized = classification.candidate;
 
     return {
       sourceType: "nfo",
@@ -33,7 +35,10 @@ export class NfoMetadataImporter implements MetadataImporter {
         index: 1,
         raw: movie,
         normalized,
-        warnings: validateImportCandidate(normalized),
+        warnings: [
+          ...validateImportCandidate(normalized),
+          ...classification.unmappedTerms.map((term) => ({ code: "unmapped_classification" as const, detail: term })),
+        ],
       }],
       warnings: [],
     };

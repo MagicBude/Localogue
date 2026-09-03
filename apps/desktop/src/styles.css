@@ -773,3 +773,13 @@ select[multiple] { min-height: 105px; padding: 6px; }
 @media (prefers-color-scheme: dark) {
   .desktop-asset-card-body > span code { background: rgba(255,255,255,.06); }
 }
+
+/* V1-21: Work classification should be readable semantic groups, not raw IDs. */
+.classification-groups { display: grid; gap: 14px; }
+.classification-group { display: grid; grid-template-columns: minmax(92px, 132px) 1fr; gap: 12px; align-items: start; }
+.classification-group > strong { padding-top: 6px; font-size: 13px; }
+.classification-chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.classification-chip { border: 1px solid var(--border); background: #f6f6f2; border-radius: 999px; padding: 6px 9px; font-size: 12px; line-height: 1.25; }
+.vocabulary-unmapped-list { margin-top: 10px; max-height: 240px; overflow: auto; }
+@media (max-width: 760px) { .classification-group { grid-template-columns: 1fr; gap: 6px; } }
+@media (prefers-color-scheme: dark) { .classification-chip { background: #22231f; } }

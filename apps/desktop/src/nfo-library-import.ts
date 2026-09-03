@@ -1,4 +1,5 @@
 import { normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
+import { controlledGenreDefinition, workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 import { normalizeIdentityText } from "@/application/review/entity-resolution-service";
 import type { Genre, Tag } from "@/domain/entities/classification";
 import type { NormalizedImportCandidate } from "@/domain/entities/evidence";
@@ -33,6 +34,7 @@ export interface NfoImportItem {
   normalized?: NormalizedImportCandidate;
   matchedWorkId?: string;
   error?: string;
+  unmappedTerms?: string[];
 }
 
 export interface NfoImportGroup {
@@ -108,6 +110,9 @@ export async function previewNfoImport(
       if (normalized && code) normalized.code = code;
       const matched = code ? await repository.findWorkByCode(code) : null;
       const title = normalized?.originalTitle ?? normalized?.title;
+      const unmappedTerms = preview.candidates[0]?.warnings
+        .filter((warning) => warning.code === "unmapped_classification" && warning.detail)
+        .map((warning) => warning.detail!) ?? [];
 
       parsedItems.push({
         path: entry.path,
@@ -124,6 +129,7 @@ export async function previewNfoImport(
         ...(code ? { code } : {}),
         ...(title ? { title } : {}),
         ...(normalized ? { normalized } : {}),
+        ...(unmappedTerms.length ? { unmappedTerms } : {}),
         ...(matched ? { matchedWorkId: matched.id } : {}),
       });
     } catch (error) {
@@ -216,6 +222,7 @@ export async function importNfoPreview(
       else if (changed) result.updatedWorks += 1;
       else result.unchangedWorks += 1;
       result.imported += 1;
+      if (item.unmappedTerms?.length) result.warnings.push(`${item.fileName}: ${item.unmappedTerms.length} 个来源分类词保持 unmapped：${item.unmappedTerms.join(" · ")}`);
     } catch (error) {
       result.skipped += 1;
       result.warnings.push(`${item.fileName}: ${message(error)}`);
@@ -305,7 +312,7 @@ function buildWork(
       ...(candidate.description ? { descriptions: { ja: candidate.description } } : {}),
       ...(toPartialDate(candidate.releaseDate) ? { releaseDate: toPartialDate(candidate.releaseDate) } : {}),
       ...(candidate.durationMinutes !== undefined ? { durationMinutes: candidate.durationMinutes } : {}),
-      workTypeIds: [],
+      workTypeIds: unique(candidate.workTypes.map((value) => workTypeDefinition(value)?.id).filter((value): value is string => Boolean(value))),
       personRelations: relations.personRelations,
       ...(relations.makerId ? { makerId: relations.makerId } : {}),
       ...(relations.labelId ? { labelId: relations.labelId } : {}),
@@ -328,6 +335,7 @@ function buildWork(
   if (!next.releaseDate) next.releaseDate = toPartialDate(candidate.releaseDate);
   if (next.durationMinutes === undefined && candidate.durationMinutes !== undefined) next.durationMinutes = candidate.durationMinutes;
   next.personRelations = mergeRelations(next.personRelations, relations.personRelations);
+  next.workTypeIds = unique([...next.workTypeIds, ...candidate.workTypes.map((value) => workTypeDefinition(value)?.id).filter((value): value is string => Boolean(value))]);
   if (!next.makerId && relations.makerId) next.makerId = relations.makerId;
   if (!next.labelId && relations.labelId) next.labelId = relations.labelId;
   next.seriesIds = unique([...next.seriesIds, ...relations.seriesIds]);
@@ -411,11 +419,18 @@ async function findOrCreateGenre(
   name: string,
   context: NfoIngestContext,
 ): Promise<string> {
+  const definition = controlledGenreDefinition(name);
   const key = normalizeIdentityText(name);
-  const existing = context.genres.find((item) => Object.values(item.names).some((value) => value && normalizeIdentityText(value) === key));
+  const existing = context.genres.find((item) =>
+    item.id === definition?.id
+    || Object.values(item.names).some((value) => value && normalizeIdentityText(value) === key)
+    || (definition ? Object.values(item.names).some((value) => value && Object.values(definition.names).some((label) => label && normalizeIdentityText(value) === normalizeIdentityText(label))) : false)
+  );
   if (existing) return existing.id;
 
-  const entity: Genre = { id: stableNamedId("genre", name, context.hashText), names: { ja: name.trim() } };
+  const entity: Genre = definition
+    ? { id: definition.id, names: { ...definition.names } }
+    : { id: stableNamedId("genre", name, context.hashText), names: { ja: name.trim() } };
   await context.repository.saveGenre(entity);
   context.genres.push(entity);
   context.result.createdGenres += 1;

@@ -22,6 +22,11 @@ const required = [
   "apps/desktop/src/styles.css",
   "src/application/library/library-query.ts",
   "src/application/importers/nfo-filename-metadata.ts",
+  "src/application/importers/import-classification-normalizer.ts",
+  "apps/desktop/src/vocabulary-repair.ts",
+  "resources/vocabularies/import-term-mappings.json",
+  "resources/vocabularies/import-term-mappings.csv",
+  "docs/vocabulary/import-term-mappings.md",
   "src/infrastructure/importers/nfo-importer.ts",
   "apps/desktop/src-tauri/Cargo.toml",
   "apps/desktop/src-tauri/tauri.conf.json",
@@ -209,8 +214,8 @@ if (!errors.length) {
   if (!rust.includes("configured_private_library_path") || /fn write_library_entity\([^)]*library_path/.test(rust)) {
     errors.push("V1-18 写命令必须由 Rust 自己从 Desktop Settings 解析 Private Library，禁止 Webview 选择写根目录。");
   }
-  if (!rust.includes('"works" | "people" | "assets" | "media-files"') || !rust.includes("ensure_private_delete_is_unreferenced")) {
-    errors.push("V1-18 Private 删除必须只开放 Work / Person / Asset / MediaFile，并执行引用检查。");
+  if (!rust.includes('"works" | "people" | "genres" | "tags" | "assets" | "media-files"') || !rust.includes("ensure_private_delete_is_unreferenced")) {
+    errors.push("V1-21 Private 删除必须只开放受引用保护的 Work / Person / Genre / Tag / Asset / MediaFile，并执行引用检查。");
   }
   if (!rust.includes("write_private_audit_entity") || !rust.includes('collection != "media-binding-receipts"')) {
     errors.push("V1-18 Media 手工绑定必须通过受限 Private Audit Writer 保存 media-binding-receipts。");
@@ -263,6 +268,51 @@ if (!errors.length) {
   for (const command of ["stat_path", "path_exists", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"]) {
     if (!rust.includes(`async fn ${command}`)) errors.push(`V1-18 Hotfix 3 高频 Native I/O 命令必须为 async：${command}`);
   }
+
+  const classificationNormalizer = readFileSync(path.join(root, "src/application/importers/import-classification-normalizer.ts"), "utf8");
+  const vocabularyRepair = readFileSync(path.join(root, "apps/desktop/src/vocabulary-repair.ts"), "utf8");
+  const mappingDocument = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/import-term-mappings.json"), "utf8"));
+  const mappingCsv = readFileSync(path.join(root, "resources/vocabularies/import-term-mappings.csv"), "utf8").replace(/\r/g, "").trim();
+  const mappingDocs = readFileSync(path.join(root, "docs/vocabulary/import-term-mappings.md"), "utf8");
+  const controlledGenres = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/genres.json"), "utf8"));
+  const controlledWorkTypes = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/work-types.json"), "utf8"));
+  for (const token of ["normalizeImportedClassifications", "系列", "片商", "发行", "单体作品", "イメージビデオ", "unmappedTerms"]) {
+    if (!classificationNormalizer.includes(token)) errors.push(`V1-21 导入分类规范器缺少规则：${token}`);
+  }
+  if (!Array.isArray(mappingDocument.rules) || mappingDocument.rules.length < 10 || !mappingDocument.unmappedPolicy) {
+    errors.push("V1-21 resources/vocabularies/import-term-mappings.json 必须包含可审计映射规则与 unmappedPolicy。");
+  } else {
+    const csvLines = mappingCsv.split("\n").filter(Boolean);
+    if (csvLines.length !== mappingDocument.rules.length + 1) {
+      errors.push(`V1-21 Vocabulary CSV 必须与 JSON 映射逐条同步：JSON ${mappingDocument.rules.length} 条，CSV ${Math.max(0, csvLines.length - 1)} 条。`);
+    }
+    const genreIds = new Set((controlledGenres.items ?? []).map((item) => item.id));
+    const workTypeIds = new Set((controlledWorkTypes.items ?? []).map((item) => item.id));
+    for (const rule of mappingDocument.rules) {
+      if (!mappingCsv.includes(rule.source) || !mappingCsv.includes(rule.target)) {
+        errors.push(`V1-21 Vocabulary CSV 缺少 JSON 映射：${rule.source} -> ${rule.target}`);
+      }
+      if (typeof rule.target === "string" && rule.target.startsWith("genre:") && !genreIds.has(rule.target.slice("genre:".length))) {
+        errors.push(`V1-21 Vocabulary 映射指向不存在的 Genre ID：${rule.target}`);
+      }
+      if (typeof rule.target === "string" && rule.target.startsWith("workType:") && !workTypeIds.has(rule.target.slice("workType:".length))) {
+        errors.push(`V1-21 Vocabulary 映射指向不存在的 Work Type ID：${rule.target}`);
+      }
+    }
+  }
+  for (const token of ["Source `<tag>` ≠ Localogue Tag", "Work Type", "Unknown / Unmapped", "系列: ALL NUDE"]) {
+    if (!mappingDocs.includes(token)) errors.push(`V1-21 Vocabulary 映射文档缺少关键说明：${token}`);
+  }
+  if (!vocabularyRepair.includes('genre_nfo_') || !vocabularyRepair.includes('tag_nfo_') || !vocabularyRepair.includes("previewVocabularyRepair") || !vocabularyRepair.includes("applyVocabularyRepair")) {
+    errors.push("V1-21 Desktop 必须提供针对早期 NFO Genre/Tag 污染的显式 Preview -> Repair 工具，并只收口 NFO 自动生成实体。");
+  }
+  if (!vocabularyRepair.includes('isPrivateEntity("works", work.id)')) {
+    errors.push("V1-21 历史 Vocabulary Repair 必须显式限制为 Private Work，不能因为 Shared ID 恰好匹配旧 NFO 前缀而创建 Override。");
+  }
+  if (!desktopApp.includes("分类词表审计") || !desktopApp.includes("ClassificationGroup") || !desktopApp.includes("workTypeDefinition")) {
+    errors.push("V1-21 Desktop 必须在 Work Detail 分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
+  }
+
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -280,7 +330,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-20 Sidebar/Facet UX、Asset 语义顺序、UI/Metadata 三语偏好，以及 V1-19 Discovery 与 V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-21 Vocabulary Routing / Repair、Work Metadata Visibility，以及 V1-20 UX/I18N、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

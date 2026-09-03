@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-20 Desktop UX & I18N Parity**：V1-19 已补齐首页/Person 相关作品真实海报、完整 Work Facet、People 高级筛选和分类浏览；V1-20 根据实机使用继续收口桌面体验：主导航默认更窄并可折叠、Facet Rail 加宽并允许长文本换行、Work Asset 统一为海报/背景图/缩略图语义和固定顺序，同时接入与 Web 同语义的中文 / 日本語 / English UI 与元数据语言独立切换。
+当前实现已推进到 **V1-21 Vocabulary Governance & Work Metadata Visibility**：在 V1-20 Desktop UX / I18N 对齐基础上，V1-21 根据真实 NFO 数据修复 Series / Work Type / Genre / Tag 混合分类问题，新增受控导入词条映射、历史 NFO 分类审计与显式修复，并让 Desktop Work Detail 分开展示作品类型 / Genre / Tag 的真实名称。
 
 Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset → Media** 编排：先让 NFO 创建或补充 Work，再关联 poster / fanart / thumb，最后运行既有增量媒体扫描重新匹配 Work。高级用户仍可分别执行视频扫描与 NFO/图片 Preview / Import。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
@@ -278,7 +278,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-20 已提供正式 Home / Works / People / Browse / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap、Unified Library Root、本地 Asset 汇聚，以及 Works 海报墙 / 列表 / 表格三视图和真实 Private poster 展示。Evidence / Review / Curation / History、Portable Pack 完整交互与 Presentation Preference Workbench 等重治理能力将在 V1-21 继续对齐。
+Desktop V1-20 已提供正式 Home / Works / People / Browse / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap、Unified Library Root、本地 Asset 汇聚，以及 Works 海报墙 / 列表 / 表格三视图和真实 Private poster 展示。Evidence / Review / Curation / History、Portable Pack 完整交互与 Presentation Preference Workbench 等更重治理能力将在 V1-22 继续对齐。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 
