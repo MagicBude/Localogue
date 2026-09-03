@@ -65,6 +65,29 @@ impl Default for DesktopBootstrapSettings {
     }
 }
 
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopSharedPackInfo {
+    configured_path: String,
+    absolute_path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    library_path: Option<String>,
+    valid: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    version: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    license: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    error: Option<String>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MediaProbeRequest {
@@ -342,6 +365,73 @@ fn sha256_file(path: String) -> Result<String, String> {
     Ok(format!("{:x}", digest.finalize()))
 }
 
+
+#[tauri::command]
+fn inspect_shared_pack(pack_path: String) -> Result<DesktopSharedPackInfo, String> {
+    validate_text_path(&pack_path)?;
+    let configured = pack_path.trim().to_string();
+    let requested = PathBuf::from(&configured);
+    let absolute = if requested.is_absolute() {
+        requested
+    } else {
+        std::env::current_dir().map_err(display_error)?.join(requested)
+    };
+    let absolute = normalize_lexical(&absolute);
+    let manifest_path = absolute.join("localogue-pack.json");
+    let library_path = absolute.join("library");
+
+    let invalid = |message: String| DesktopSharedPackInfo {
+        configured_path: configured.clone(),
+        absolute_path: path_to_string(&absolute),
+        library_path: None,
+        valid: false,
+        id: None,
+        name: None,
+        version: None,
+        description: None,
+        license: None,
+        error: Some(message),
+    };
+
+    if !manifest_path.is_file() {
+        return Ok(invalid("缺少 localogue-pack.json。".into()));
+    }
+    if !library_path.is_dir() {
+        return Ok(invalid("缺少 library/ 目录。".into()));
+    }
+
+    let raw = fs::read_to_string(&manifest_path)
+        .map_err(|error| format!("无法读取 Shared Pack manifest：{error}"))?;
+    let manifest: Value = serde_json::from_str(&raw)
+        .map_err(|error| format!("无法解析 Shared Pack manifest：{error}"))?;
+    if manifest.get("schemaVersion").and_then(Value::as_u64) != Some(1) {
+        return Ok(invalid("当前只支持 Shared Pack schemaVersion 1。".into()));
+    }
+    if manifest.get("kind").and_then(Value::as_str) != Some("shared-library") {
+        return Ok(invalid("当前只支持 kind=shared-library。".into()));
+    }
+
+    let id = manifest.get("id").and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty());
+    let name = manifest.get("name").and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty());
+    let version = manifest.get("version").and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty());
+    if id.is_none() || name.is_none() || version.is_none() {
+        return Ok(invalid("Shared Pack manifest 缺少 id / name / version。".into()));
+    }
+
+    Ok(DesktopSharedPackInfo {
+        configured_path: configured,
+        absolute_path: path_to_string(&absolute),
+        library_path: Some(path_to_string(&library_path)),
+        valid: true,
+        id: id.map(str::to_string),
+        name: name.map(str::to_string),
+        version: version.map(str::to_string),
+        description: manifest.get("description").and_then(Value::as_str).map(str::to_string),
+        license: manifest.get("license").and_then(Value::as_str).map(str::to_string),
+        error: None,
+    })
+}
+
 #[tauri::command]
 fn read_library_collection(library_path: String, collection: String) -> Result<Vec<Value>, String> {
     let directory = safe_collection_directory(&library_path, &collection)?;
@@ -360,7 +450,7 @@ fn read_library_collection(library_path: String, collection: String) -> Result<V
 fn write_library_entity(library_path: String, collection: String, entity: Value) -> Result<(), String> {
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "实体缺少稳定 id。".to_string())?;
     if !is_safe_id(id) { return Err("实体 id 包含不安全字符。".into()); }
-    let directory = safe_collection_directory(&library_path, &collection)?;
+    let directory = safe_writable_collection_directory(&library_path, &collection)?;
     fs::create_dir_all(&directory).map_err(display_error)?;
     let target = directory.join(format!("{id}.json"));
     let temporary = directory.join(format!("{id}.json.tmp"));
@@ -373,7 +463,7 @@ fn write_library_entity(library_path: String, collection: String, entity: Value)
 #[tauri::command]
 fn delete_library_entity(library_path: String, collection: String, id: String) -> Result<(), String> {
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
-    let target = safe_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
+    let target = safe_writable_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
     if target.exists() { fs::remove_file(target).map_err(display_error)?; }
     Ok(())
 }
@@ -485,7 +575,20 @@ fn resolve_ffprobe_executable(value: &str) -> Result<PathBuf, String> {
 
 fn safe_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
     validate_text_path(root)?;
-    if !matches!(collection, "works" | "media-files") { return Err("Desktop Scan 只允许访问 works / media-files 集合。".into()); }
+    if !matches!(
+        collection,
+        "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files"
+    ) {
+        return Err("Desktop Library 只允许访问明确白名单中的资料集合。".into());
+    }
+    Ok(PathBuf::from(root).join(collection))
+}
+
+fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
+    validate_text_path(root)?;
+    if collection != "media-files" {
+        return Err("V1-15 Desktop 只允许写入私人 media-files 集合。".into());
+    }
     Ok(PathBuf::from(root).join(collection))
 }
 
@@ -532,6 +635,7 @@ pub fn run() {
             walk_files,
             sha256_text,
             sha256_file,
+            inspect_shared_pack,
             read_library_collection,
             write_library_entity,
             delete_library_entity,

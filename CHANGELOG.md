@@ -1,5 +1,21 @@
 # 更新日志
 
+## V1-15 · Desktop Feature Parity I
+
+- Desktop 从 Runtime Console 升级为正式 Localogue 应用壳，新增 Home / Works / People / Media / Packs / Settings。
+- 新增 Desktop Work / Person 详情视图与基础关系导航。
+- 新增 `TauriLibraryRepository`，按 `Private Library > Shared Packs` 合并 Canonical Entity。
+- 抽出 `src/application/library/library-query.ts`，Web `JsonLibraryRepository` 与 Desktop Repository 共用 Works / People 过滤、排序、分页与 self-excluding Facet 规则。
+- 旧 `TauriScanRepository` 收敛为兼容薄包装，避免继续维护第二套查询实现。
+- Rust 新增 `inspect_shared_pack`，校验 `localogue-pack.json`、schemaVersion、kind、核心 Manifest 字段与 `library/`。
+- Desktop Canonical 读取白名单扩展到 works / people / organizations / series / genres / tags / assets；写白名单仍严格只有 Private `media-files`。
+- Desktop Media Scan 改用正式合并 Repository，使 Shared Pack Work 可以参与本地媒体番号匹配。
+- Media 页面继续支持增量扫描、取消、ffprobe、打开和资源管理器定位。
+- Packs 页面显示 Private / Shared 数据源优先级、Manifest 元数据与无效 Pack 错误。
+- Settings 页面管理 Private Library、Shared Packs、媒体目录、ffprobe 路径与本机 Web URL。
+- 新增 ADR-030、V1-15 实现导读、Manifest，并同步 Desktop Runtime 架构与路线图。
+- 项目、Desktop Workspace、Rust Crate 与 Tauri 配置版本升级至 0.1.15。
+
 ## V1-13 · Tauri Desktop Alpha
 
 - 新增 pnpm workspace，并创建 `apps/desktop` Tauri 2 + React/Vite Desktop Alpha。

@@ -19,13 +19,13 @@
 - 三语；
 - 主题；
 - JSON / CSV / XLSX / NFO 导入导出；
-- Review 原型。
+- Review 与治理链路。
 
-## V1.x：资料治理增强
+## V1.x：资料治理与 Desktop 对齐
 
-已进入此阶段。V1-13 已完成 Tauri Desktop Alpha 的第一条原生纵向链路，下一阶段进入 Desktop Runtime Integration。
+当前已推进到 **V1-15 Desktop Feature Parity I**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 开始把 Web 产品能力按共享 Domain/Application 规则系统性映射到 Desktop。
 
-后续重点：
+已完成重点：
 
 - ~~资料完整度与治理队列~~（V1-08）；
 - ~~Evidence 生命周期批量治理~~（V1-08）；
@@ -34,16 +34,39 @@
 - ~~网页设置中心、Library 路径与 Shared Pack 数据分层~~（V1-09）；
 - ~~Asset 上传、封面选择、Presentation Preference 与 SHA-256 内容寻址~~（V1-10）；
 - ~~MediaFile 扫描、ffprobe 与可选视频哈希~~（V1-10）；
-- ~~Work ↔ MediaFile 手工绑定 / 解绑与候选审核~~（V1-11）；
-- Asset 图集、孤儿资源和安全删除治理；
-- Community Pack 更新检查、版本升级与冲突预览；
-- ~~Shared / Personal Pack 打包导入导出~~（V1-11）；
+- ~~Work ↔ MediaFile 手工绑定 / 解绑与候选审核~~（V1-11 Web）；
+- ~~Shared / Personal Pack 打包导入导出~~（V1-11 Web）；
 - ~~Media Scan Platform Ports 与 Node/Web Adapter~~（V1-12）；
 - ~~size + mtime 增量扫描、Sidecar Observation 与可取消 Scan Job~~（V1-12）；
-- ~~Tauri 2 Desktop Alpha（V1-13）~~；
-- ~~原生 Folder Picker / Open / Reveal / Rust ffprobe Command（V1-13）~~；
-- 完整 Tauri FileSystem / FileHash Adapter 与 ScanCoordinator Event Bridge（V1-14）；
-- ffprobe Sidecar target-triple 打包与 Binary Dependency 流程（V1-14）；
+- ~~Tauri 2 Desktop Alpha~~（V1-13）；
+- ~~原生 Folder Picker / Open / Reveal / Rust ffprobe Command~~（V1-13）；
+- ~~完整 Tauri FileSystem / FileHash Adapter 与 MediaScanCoordinator~~（V1-14）；
+- ~~Desktop Home / Works / People / Media / Packs / Settings 正式应用壳~~（V1-15）；
+- ~~Private + Shared Pack Desktop 合并浏览~~（V1-15）；
+- ~~Web / Desktop 共享 Works / People Query Core~~（V1-15）。
+
+### V1-16：Desktop Feature Parity II
+
+下一阶段重点：
+
+- Desktop 高级 Works / People Facet、排序、分页与更多实体浏览；
+- Canonical Work / Person 编辑与既有 Commit Plan / Audit 规则接入；
+- Evidence / Review / Curation / History Desktop 交互；
+- MediaFile bind / rebind / unbind 审计；
+- Shared / Personal Portable Pack Desktop 导入导出；
+- Asset 二进制读取、头像/封面与 Presentation Preference；
+- 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复业务规则。
+
+### 后续 Desktop Native Enhancement
+
+- Native Pack Open / Save Dialog 与拖放；
+- ffprobe Sidecar target-triple 获取、版本、License、Hash 与发行流程；
+- 安装器、签名和自动更新；
+- Asset 孤儿治理与安全删除；
+- Community Pack 更新检查、版本升级与冲突预览。
+
+同时继续保留：
+
 - 更安全的实体 Merge Plan；
 - CSV / XLSX 更完整的批量编辑回写。
 

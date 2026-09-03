@@ -8,6 +8,8 @@ import type {
   DesktopTaskProgress,
   DesktopFileEntry,
   DesktopFileStat,
+  DesktopLibraryCollection,
+  DesktopSharedPackInfo,
 } from "./contracts";
 
 const PROGRESS_EVENT = "localogue://desktop-task-progress";
@@ -30,7 +32,9 @@ export const desktopBridge = {
   walkFiles: (request: { root: string; extensions?: string[]; includeHidden?: boolean; maxFiles?: number }) =>
     invoke<DesktopFileEntry[]>("walk_files", { request }),
   sha256File: (path: string) => invoke<string>("sha256_file", { path }),
-  readLibraryCollection: <T>(libraryPath: string, collection: "works" | "media-files") =>
+  inspectSharedPack: (packPath: string) =>
+    invoke<DesktopSharedPackInfo>("inspect_shared_pack", { packPath }),
+  readLibraryCollection: <T>(libraryPath: string, collection: DesktopLibraryCollection) =>
     invoke<T[]>("read_library_collection", { libraryPath, collection }),
   writeLibraryEntity: (libraryPath: string, collection: "media-files", entity: unknown) =>
     invoke<void>("write_library_entity", { libraryPath, collection, entity }),

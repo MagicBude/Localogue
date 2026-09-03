@@ -7,6 +7,7 @@ export type {
   DesktopMediaProbeRequest,
   DesktopMediaProbeResult,
   DesktopRuntimeInfo,
+  DesktopSharedPackInfo,
   DesktopTaskProgress,
   DesktopTaskStage,
 } from "../../../src/application/platform/desktop-runtime-contract";
@@ -25,3 +26,13 @@ export interface DesktopFileEntry {
   size: number;
   modifiedAt: string;
 }
+
+export type DesktopLibraryCollection =
+  | "works"
+  | "people"
+  | "organizations"
+  | "series"
+  | "genres"
+  | "tags"
+  | "assets"
+  | "media-files";

@@ -2,11 +2,11 @@
 
 ## 当前阶段
 
-**V1-14：Desktop Runtime Integration。**
+**V1-15：Desktop Feature Parity I。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
-V1-14 已让 Tauri Desktop 复用 V1-12 的增量媒体扫描 Application Core：FileSystem、FileHash、MediaProbe 与扫描专用 Repository 由受限 Native Adapter 实现，Desktop 可启动、观察和取消扫描。Web / Desktop 的实例设置字段语义已经统一，运行入口仍各自保存本机配置。
+V1-15 开始把 Web 已有的资料浏览能力系统性接入 Tauri Desktop。Desktop 现在拥有正式应用壳，并通过 `TauriLibraryRepository` 浏览 Private Library 与 Shared Packs；Works / People 查询规则与 Web 共享同一纯 Application Query Core。媒体扫描继续复用 V1-12/V1-14 的 `MediaScanCoordinator`，并能使用 Shared Pack Work 参与匹配，同时保持 MediaFile 只写 Private Layer。
 
 ## 已完成
 
@@ -168,17 +168,36 @@ V1-14 已让 Tauri Desktop 复用 V1-12 的增量媒体扫描 Application Core�
 - 新增首批 Tauri FileDialog / FileOpener / MediaProbe Adapter；
 - 新增 `validate:desktop` 与 Tauri prerequisites doctor。
 
+### V1-14 Desktop Runtime Integration
+
+- TauriFileSystemAdapter / TauriFileHashAdapter 已实现；
+- Desktop 已直接复用 `MediaScanCoordinator / scanMediaLibrary`；
+- Rust 提供受限目录遍历、stat、SHA-256、ffprobe 与 Private MediaFile 持久化；
+- 扫描支持进度、取消、增量 fast path 与缺失文件 reconcile；
+- ffprobe 采用显式路径 → `resources/bin` → PATH 的受控发现顺序。
+
+### V1-15 Desktop Feature Parity I
+
+- Desktop 从 Runtime Console 升级为正式 Localogue 应用壳；
+- 新增 Home / Works / People / Media / Packs / Settings 六个一级页面；
+- 新增 Work / Person Desktop 详情视图与关系导航；
+- 新增 `TauriLibraryRepository`，按 Private > Shared Packs 合并 Canonical Entity；
+- Shared Pack 由 Rust 校验 Manifest 后才进入 Desktop 读取根；
+- Works / People 过滤、排序、分页与 Facet 抽为 Web/Desktop 共用 `library-query`；
+- Desktop 媒体扫描使用同一合并 Repository，使 Shared Pack Work 也能参与匹配；
+- Rust Canonical 集合扩大为受控只读白名单，写白名单仍严格只有 `media-files`。
+
 ## 下一阶段建议
 
-**V1-14：Desktop Runtime Integration。**
+**V1-16：Desktop Feature Parity II / Interaction Parity。**
 
-1. 把 FileSystemPort / FileHashPort 实现为完整 Tauri Adapter；
-2. 将 MediaScanCoordinator 从 Web Runtime 映射到 Desktop Task / Event；
-3. Native Pack Open / Save Dialog 与拖放；
-4. 建立 ffprobe Sidecar 获取、target-triple 命名、版本与许可流程；
-5. Desktop Settings 与 Localogue Instance Settings 的明确迁移/同步策略；
-6. Asset 孤儿治理与安全删除；
-7. Community Pack 更新检查与版本升级预览。
+1. 将 Works / People 的高级筛选、排序、分页和更多关系浏览完整映射到 Desktop UI；
+2. 接入 Canonical 编辑、Evidence/Review/Curation/History 等治理交互，并复用既有 Application Service / Commit Plan；
+3. Desktop 支持 MediaFile bind / rebind / unbind 审计流程；
+4. 接入 Shared / Personal Portable Pack 导入导出，而不是仅配置目录；
+5. 抽取更多可共享 Presentation/DTO，继续减少 Web 与 Desktop 表现层重复；
+6. 设计 Desktop Asset 二进制读取与 Presentation Preference 显示；
+7. 保持所有 Native 写能力使用最小命令和显式白名单。
 
 ## 当前不做
 

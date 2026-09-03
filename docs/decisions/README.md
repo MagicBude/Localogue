@@ -50,3 +50,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 ### V1-14
 - [ADR-029：Desktop 复用 Media Scan Application Core](ADR-029-desktop-reuses-media-scan-core.md)
+
+### V1-15
+- [ADR-030：Web 与 Desktop 共享 Library Query Core](ADR-030-shared-query-core-for-web-desktop.md)
+

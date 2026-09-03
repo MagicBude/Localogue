@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-14 Desktop Runtime Integration**。
+当前阶段：**V1-15 Desktop Feature Parity I**。
 
 V1 当前约束：
 
@@ -244,6 +244,18 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - ffprobe 查找顺序为显式用户路径、发行包 `resources/bin`、系统 PATH；所有候选仍须通过 basename 白名单。
 - 未准备齐 target-triple 二进制、许可证与校验摘要前，不得配置不存在的 Tauri `externalBin`。
 - 修改 Desktop Runtime 边界后必须运行 `pnpm validate:desktop`；有 Rust/Tauri 环境时另外运行 `pnpm desktop:doctor` 与 `pnpm desktop:dev`。
+
+## V1-15 实现约束补充
+
+- Web 与 Desktop 可以使用不同存储 Adapter，但 Works / People 的过滤、排序、分页与 Facet 语义必须复用 `src/application/library/library-query.ts`；不得在两个宿主各维护一套查询规则。
+- Desktop Canonical 浏览通过 `TauriLibraryRepository` 统一进入 `LibraryRepository`；React 页面不得直接拼接资料目录或逐文件读取 JSON。
+- Desktop 读取优先级固定为 `Private Library > Shared Pack 1 > Shared Pack 2 > …`，同一稳定 ID 仍采用高优先级完整实体覆盖。
+- Shared Pack 必须先由 Rust Native Boundary 校验 `localogue-pack.json`、`schemaVersion=1`、`kind=shared-library` 与 `library/` 目录；无效 Pack 不得加入 Repository 读取根。
+- V1-15 允许 Desktop 只读 `works / people / organizations / series / genres / tags / assets`，`media-files` 仍只属于 Private Layer；Canonical 治理写入暂不开放。
+- Rust 写集合白名单必须继续只有 `media-files`。扩大读取能力不等于扩大写权限，更不得演变成 Webview 可指定任意目录/集合的通用文件 API。
+- Desktop 媒体扫描必须使用与浏览页面相同的合并 Repository，使 Shared Pack Work 能参与番号匹配，但扫描产生的 MediaFile 只能写入 Private Library。
+- V1-15 的 Home / Works / People / Media / Packs / Settings 是正式 Desktop 产品壳，不再把 Desktop 视为 Runtime 测试控制台。
+- V1-16 再补 Canonical 编辑、治理、Portable Pack 导入导出和更完整筛选交互；不要为了追求表面 parity 把 Next.js Route Handler 或 Node 文件 API 直接复制进 Tauri Webview。
 
 
 ### V1-13 Desktop Open 边界

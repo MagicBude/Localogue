@@ -18,5 +18,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "../../src/application/media", "../../src/application/platform", "../../src/domain"]
+  "include": ["src", "../../src/application/library", "../../src/application/media", "../../src/application/platform", "../../src/application/services/localization-service.ts", "../../src/domain"]
 }
