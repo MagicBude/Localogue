@@ -11,6 +11,8 @@ const platformNeutralFiles = [
   "src/application/media/media-scan-service.ts",
   "src/application/media/media-scan-coordinator.ts",
   "src/application/platform/platform-ports.ts",
+  "src/application/importers/nfo-filename-metadata.ts",
+  "src/infrastructure/importers/nfo-importer.ts",
 ];
 
 const violations = [];
@@ -25,5 +27,5 @@ if (violations.length) {
   for (const violation of violations) console.error(`- ${violation}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Platform Boundary 校验通过：Media Scan Application Core 未直接依赖 Node 内建模块。");
+  console.log("Localogue Platform Boundary 校验通过：Media Scan 与共享 NFO 解析核心未直接依赖 Node 内建模块。");
 }

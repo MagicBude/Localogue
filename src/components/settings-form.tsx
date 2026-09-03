@@ -30,6 +30,7 @@ export function SettingsForm({
   const [libraryPath, setLibraryPath] = useState(settings.libraryPath ?? "");
   const [sharedPackText, setSharedPackText] = useState(settings.sharedPackPaths.join("\n"));
   const [mediaScanText, setMediaScanText] = useState((settings.mediaScanPaths ?? []).join("\n"));
+  const [nfoScanText, setNfoScanText] = useState((settings.nfoScanPaths ?? []).join("\n"));
   const [ffprobePath, setFfprobePath] = useState(settings.ffprobePath ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
@@ -47,6 +48,7 @@ export function SettingsForm({
           libraryPath,
           sharedPackPaths: sharedPackText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           mediaScanPaths: mediaScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
+          nfoScanPaths: nfoScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           ffprobePath,
         }),
       });
@@ -133,6 +135,11 @@ export function SettingsForm({
           <span>{text.mediaPaths}</span>
           <textarea rows={5} value={mediaScanText} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setMediaScanText(event.target.value)} placeholder="D:\\Media\\Movies\nE:\\Archive" />
           <small>{text.mediaHelp}</small>
+        </label>
+        <label className="settings-field">
+          <span>{text.nfoPaths}</span>
+          <textarea rows={4} value={nfoScanText} onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setNfoScanText(event.target.value)} placeholder="D:\\Metadata\\NFO\nE:\\NFO-Archive" />
+          <small>{text.nfoHelp}</small>
         </label>
         <label className="settings-field">
           <span>{text.ffprobePath}</span>

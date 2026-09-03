@@ -10,7 +10,7 @@ import type { PersonQuery, PersonSearchResult } from "@/domain/queries/person-qu
 import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 
-import type { DesktopLibraryCollection } from "../contracts";
+import type { DesktopLibraryCollection, DesktopWritableLibraryCollection } from "../contracts";
 import { desktopBridge } from "../tauri-bridge";
 
 /**
@@ -18,7 +18,8 @@ import { desktopBridge } from "../tauri-bridge";
  *
  * - Canonical 数据按 private > shared pack 1 > shared pack 2 的顺序合并；
  * - MediaFile 永远只从 private root 读取；
- * - V1-15 只开放 MediaFile 写入，人物/作品治理仍留给后续 parity 阶段；
+ * - V1-16 仅为“明确确认的 NFO Bootstrap Ingest”开放受控 Private Canonical 写入；
+ * - Shared Pack 始终只读；Canonical 删除仍未开放，只有 MediaFile 可以删除；
  * - 查询/排序/Facet 使用与 Web JsonLibraryRepository 完全相同的纯函数核心。
  */
 export class TauriLibraryRepository implements LibraryRepository {
@@ -34,10 +35,10 @@ export class TauriLibraryRepository implements LibraryRepository {
   }
 
   async findWorkByCode(code: string): Promise<Work | null> {
-    const normalized = code.trim().toUpperCase();
+    const normalized = compactWorkCode(code);
     return (
       (await this.readMerged<Work>("works")).find(
-        (item) => item.code.toUpperCase() === normalized,
+        (item) => compactWorkCode(item.code) === normalized,
       ) ?? null
     );
   }
@@ -120,16 +121,16 @@ export class TauriLibraryRepository implements LibraryRepository {
 
   deleteMediaFile(id: string): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
-    return desktopBridge.deleteLibraryEntity(this.privateRoot, "media-files", id);
+    return desktopBridge.deleteMediaFile(id);
   }
 
-  saveWork(): Promise<void> { return readOnlyGovernance(); }
-  savePerson(): Promise<void> { return readOnlyGovernance(); }
-  saveOrganization(): Promise<void> { return readOnlyGovernance(); }
-  saveSeries(): Promise<void> { return readOnlyGovernance(); }
-  saveGenre(): Promise<void> { return readOnlyGovernance(); }
-  saveTag(): Promise<void> { return readOnlyGovernance(); }
-  saveAsset(): Promise<void> { return readOnlyGovernance(); }
+  saveWork(work: Work): Promise<void> { return this.writePrivate("works", work); }
+  savePerson(person: Person): Promise<void> { return this.writePrivate("people", person); }
+  saveOrganization(organization: Organization): Promise<void> { return this.writePrivate("organizations", organization); }
+  saveSeries(series: Series): Promise<void> { return this.writePrivate("series", series); }
+  saveGenre(genre: Genre): Promise<void> { return this.writePrivate("genres", genre); }
+  saveTag(tag: Tag): Promise<void> { return this.writePrivate("tags", tag); }
+  saveAsset(): Promise<void> { return readOnlyAssetGovernance(); }
 
   private async readMerged<T extends { id: string }>(
     collection: Exclude<DesktopLibraryCollection, "media-files">,
@@ -155,9 +156,10 @@ export class TauriLibraryRepository implements LibraryRepository {
     return [...merged.values()];
   }
 
-  private writePrivate(collection: "media-files", entity: unknown): Promise<void> {
+  private async writePrivate(collection: DesktopWritableLibraryCollection, entity: unknown): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
-    return desktopBridge.writeLibraryEntity(this.privateRoot, collection, entity);
+    await desktopBridge.writeLibraryEntity(collection, entity);
+    this.cache.delete(collection);
   }
 }
 
@@ -167,8 +169,11 @@ function missingPrivateRoot<T = void>(): Promise<T> {
   );
 }
 
-function readOnlyGovernance<T = void>(): Promise<T> {
-  return Promise.reject(
-    new Error("V1-15 Desktop 先开放完整浏览；Canonical 治理写入将在 V1-16 对齐。"),
-  );
+function readOnlyAssetGovernance<T = void>(): Promise<T> {
+  return Promise.reject(new Error("V1-16 的 NFO 导入暂不写 Asset；图片仍由 Asset 治理阶段处理。"));
+}
+
+
+function compactWorkCode(value: string): string {
+  return value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }

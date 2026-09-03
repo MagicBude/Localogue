@@ -21,7 +21,7 @@ V1-12 当前实际观察：
 - 不重命名；
 - 不删除原始媒体；
 - 不自动覆盖 Canonical 资料；
-- NFO 不直接成为 Canonical；
+- 视频旁 NFO 不会因为“被媒体扫描发现”就直接成为 Canonical；独立 NFO 批量导入见 `docs/import/nfo.md`；
 - Poster / Fanart 不直接覆盖 Presentation Preference。
 
 ## V1-12 增量扫描
@@ -68,3 +68,8 @@ Snapshot → Diff → Reconcile
 ```
 
 这样应用关闭期间、NAS 断线或 Watcher 丢事件后仍然可以恢复正确状态。
+
+
+## V1-16：独立 NFO 元数据目录
+
+`mediaScanPaths` 与 `nfoScanPaths` 是两套独立输入。前者负责视频 / MediaFile，后者负责 NFO 元数据预览与显式导入。两棵目录树可以完全不同。NFO 导入 Work 后，再运行媒体增量扫描即可按番号重新绑定既有 MediaFile；视频未变化时仍走增量 fast path。

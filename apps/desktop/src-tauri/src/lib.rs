@@ -43,6 +43,8 @@ struct DesktopBootstrapSettings {
     #[serde(default)]
     media_scan_paths: Vec<String>,
     #[serde(default)]
+    nfo_scan_paths: Vec<String>,
+    #[serde(default)]
     shared_pack_paths: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     ffprobe_path: Option<String>,
@@ -57,6 +59,7 @@ impl Default for DesktopBootstrapSettings {
             schema_version: 1,
             library_path: None,
             media_scan_paths: Vec::new(),
+            nfo_scan_paths: Vec::new(),
             shared_pack_paths: Vec::new(),
             ffprobe_path: None,
             web_url: "http://127.0.0.1:3000".into(),
@@ -351,6 +354,22 @@ fn walk_files(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry>, String
 #[tauri::command]
 fn sha256_text(value: String) -> String { format!("{:x}", Sha256::digest(value.as_bytes())) }
 
+
+#[tauri::command]
+fn read_nfo_text(path: String) -> Result<String, String> {
+    let file = require_existing_file(&path)?;
+    let extension = file.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
+    if extension != "nfo" {
+        return Err("只允许通过 NFO Reader 读取 .nfo 文件。".into());
+    }
+    let metadata = fs::metadata(&file).map_err(display_error)?;
+    const MAX_NFO_BYTES: u64 = 10 * 1024 * 1024;
+    if metadata.len() > MAX_NFO_BYTES {
+        return Err("NFO 文件超过 10 MB 安全上限。".into());
+    }
+    fs::read_to_string(file).map_err(|error| format!("无法读取 NFO：{error}"))
+}
+
 #[tauri::command]
 fn sha256_file(path: String) -> Result<String, String> {
     let file_path = require_existing_file(&path)?;
@@ -447,9 +466,14 @@ fn read_library_collection(library_path: String, collection: String) -> Result<V
 }
 
 #[tauri::command]
-fn write_library_entity(library_path: String, collection: String, entity: Value) -> Result<(), String> {
+fn write_library_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
+    validate_writable_entity(&collection, &entity)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "实体缺少稳定 id。".to_string())?;
     if !is_safe_id(id) { return Err("实体 id 包含不安全字符。".into()); }
+
+    // 写根目录不接受 Webview 传参。Native Boundary 永远从当前 Desktop Settings
+    // 解析 Private Library，因而 Shared Pack 即使被挂载，也不能借用此命令写入。
+    let library_path = configured_private_library_path(&app)?;
     let directory = safe_writable_collection_directory(&library_path, &collection)?;
     fs::create_dir_all(&directory).map_err(display_error)?;
     let target = directory.join(format!("{id}.json"));
@@ -461,8 +485,12 @@ fn write_library_entity(library_path: String, collection: String, entity: Value)
 }
 
 #[tauri::command]
-fn delete_library_entity(library_path: String, collection: String, id: String) -> Result<(), String> {
+fn delete_library_entity(app: AppHandle, collection: String, id: String) -> Result<(), String> {
+    if collection != "media-files" {
+        return Err("V1-16 Desktop 只允许删除 Private media-files；Canonical 删除必须等待治理流程。".into());
+    }
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
+    let library_path = configured_private_library_path(&app)?;
     let target = safe_writable_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
     if target.exists() { fs::remove_file(target).map_err(display_error)?; }
     Ok(())
@@ -478,6 +506,12 @@ fn emit_progress(app: &AppHandle, task_id: &str, stage: &'static str, message: &
     });
 }
 
+
+fn configured_private_library_path(app: &AppHandle) -> Result<String, String> {
+    let settings = load_desktop_settings(app.clone())?;
+    settings.library_path.ok_or_else(|| "当前没有配置 Private Library；Shared Pack 永远只读。".to_string())
+}
+
 fn desktop_settings_path(app: &AppHandle) -> Result<PathBuf, String> {
     app.path().app_config_dir().map(|path| path.join(SETTINGS_FILE)).map_err(display_error)
 }
@@ -487,6 +521,7 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.library_path = clean_optional_path(value.library_path)?;
     value.ffprobe_path = clean_optional_path(value.ffprobe_path)?;
     value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
+    value.nfo_scan_paths = unique_clean_paths(value.nfo_scan_paths)?;
     value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
     let web_url = value.web_url.trim();
     value.web_url = if web_url.is_empty() { "http://127.0.0.1:3000".into() } else { web_url.into() };
@@ -584,10 +619,37 @@ fn safe_collection_directory(root: &str, collection: &str) -> Result<PathBuf, St
     Ok(PathBuf::from(root).join(collection))
 }
 
+fn validate_writable_entity(collection: &str, entity: &Value) -> Result<(), String> {
+    if !entity.is_object() { return Err("写入实体必须是 JSON 对象。".into()); }
+    let require_string = |field: &str| -> Result<(), String> {
+        if entity.get(field).and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()).is_none() {
+            return Err(format!("{collection} 实体缺少字符串字段 {field}。"));
+        }
+        Ok(())
+    };
+    let require_array = |field: &str| -> Result<(), String> {
+        if !entity.get(field).map(Value::is_array).unwrap_or(false) {
+            return Err(format!("{collection} 实体缺少数组字段 {field}。"));
+        }
+        Ok(())
+    };
+
+    require_string("id")?;
+    match collection {
+        "works" => { require_string("code")?; require_array("personRelations")?; require_array("seriesIds")?; require_array("genreIds")?; require_array("tagIds")?; },
+        "people" => { require_array("names")?; require_array("careerEvents")?; require_array("galleryAssetIds")?; },
+        "organizations" => { require_string("kind")?; if !entity.get("names").map(Value::is_object).unwrap_or(false) { return Err("organizations 实体缺少 names 对象。".into()); } },
+        "series" | "genres" | "tags" => { if !entity.get("names").map(Value::is_object).unwrap_or(false) { return Err(format!("{collection} 实体缺少 names 对象。")); } },
+        "media-files" => { require_string("path")?; require_string("fileName")?; },
+        _ => return Err("当前集合不允许通过 Desktop 写入。".into()),
+    }
+    Ok(())
+}
+
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
     validate_text_path(root)?;
-    if collection != "media-files" {
-        return Err("V1-15 Desktop 只允许写入私人 media-files 集合。".into());
+    if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "media-files") {
+        return Err("V1-16 Desktop 只允许写入明确白名单中的 Private Canonical / media-files 集合。".into());
     }
     Ok(PathBuf::from(root).join(collection))
 }
@@ -633,6 +695,7 @@ pub fn run() {
             stat_path,
             path_exists,
             walk_files,
+            read_nfo_text,
             sha256_text,
             sha256_file,
             inspect_shared_pack,

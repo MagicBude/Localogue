@@ -54,3 +54,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 ### V1-15
 - [ADR-030：Web 与 Desktop 共享 Library Query Core](ADR-030-shared-query-core-for-web-desktop.md)
 
+
+### V1-16
+- [ADR-031：NFO 元数据目录与媒体目录解耦](ADR-031-independent-nfo-metadata-roots.md)

@@ -39,6 +39,13 @@ import {
 } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
+import {
+  importNfoPreview,
+  previewNfoImport,
+  type NfoImportPreview,
+  type NfoImportResult,
+  type NfoImportItemStatus,
+} from "./nfo-library-import";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -49,6 +56,7 @@ const fileHash = new TauriFileHashAdapter();
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   schemaVersion: 1,
   mediaScanPaths: [],
+  nfoScanPaths: [],
   sharedPackPaths: [],
   webUrl: "http://127.0.0.1:3000",
 };
@@ -162,7 +170,7 @@ export default function App() {
       setSettings(saved);
       setSavedSettings(saved);
       await refreshSources(saved);
-      setMessage("Desktop 实例设置已保存；资料源、Shared Packs 与媒体目录已经重新加载。");
+      setMessage("Desktop 实例设置已保存；资料源、Shared Packs、媒体目录与 NFO 元数据目录已经重新加载。");
     } catch (error) {
       setMessage(`保存失败：${toMessage(error)}`);
     } finally {
@@ -179,7 +187,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span>
             <strong>Localogue</strong>
-            <small>Desktop · V1-15</small>
+            <small>Desktop · V1-16</small>
           </span>
         </button>
 
@@ -214,7 +222,7 @@ export default function App() {
       <main className="content-shell">
         <header className="topbar">
           <div>
-            <span className="eyebrow">DESKTOP FEATURE PARITY I</span>
+            <span className="eyebrow">NFO LIBRARY INGEST · FEATURE PARITY II</span>
             <strong>{NAV_ITEMS.find((item) => item.id === page)?.label}</strong>
           </div>
           <div className="topbar-actions">
@@ -342,7 +350,7 @@ function HomePage({
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>你的 Localogue，现在就在桌面端。</h1>
         <p>
-          V1-15 开始，Desktop 不再只是 Runtime 测试壳。首页、作品、人物、媒体、资料包与设置
+          V1-16 延续正式 Desktop 产品壳，并新增独立 NFO 资料导入。首页、作品、人物、媒体、资料包与设置
           直接读取和 Web 相同的数据模型，并共享查询规则。
         </p>
       </section>
@@ -570,6 +578,9 @@ function MediaPage({
   const [selectedPath, setSelectedPath] = useState("");
   const [probe, setProbe] = useState<DesktopMediaProbeResult | null>(null);
   const [probing, setProbing] = useState(false);
+  const [nfoPreview, setNfoPreview] = useState<NfoImportPreview | null>(null);
+  const [nfoResult, setNfoResult] = useState<NfoImportResult | null>(null);
+  const [nfoBusy, setNfoBusy] = useState(false);
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
 
@@ -636,6 +647,44 @@ function MediaPage({
     }
   }
 
+  async function scanNfoMetadata(): Promise<void> {
+    if (!settings.libraryPath) {
+      setMessage("请先在设置页选择 Private Library；NFO 导入会写入私人 Canonical Library。");
+      return;
+    }
+    if (!settings.nfoScanPaths.length) {
+      setMessage("请先在设置页添加至少一个 NFO 元数据目录。");
+      return;
+    }
+
+    setNfoBusy(true);
+    setNfoResult(null);
+    try {
+      const preview = await previewNfoImport(settings.nfoScanPaths, repository);
+      setNfoPreview(preview);
+      setMessage(`NFO 扫描完成：发现 ${preview.discovered} 个，${preview.importable} 个可导入。`);
+    } catch (error) {
+      setMessage(`NFO 扫描失败：${toMessage(error)}`);
+    } finally {
+      setNfoBusy(false);
+    }
+  }
+
+  async function importNfoMetadata(): Promise<void> {
+    if (!nfoPreview?.importable) return;
+    setNfoBusy(true);
+    try {
+      const result = await importNfoPreview(nfoPreview, repository, (value) => fileHash.sha256Text(value));
+      setNfoResult(result);
+      onLibraryChanged();
+      setMessage(`NFO 导入完成：创建 ${result.createdWorks} 个 Work，更新 ${result.updatedWorks} 个 Work。可再次运行媒体扫描按番号关联。`);
+    } catch (error) {
+      setMessage(`NFO 导入失败：${toMessage(error)}`);
+    } finally {
+      setNfoBusy(false);
+    }
+  }
+
   async function chooseAndProbe(): Promise<void> {
     const path = await fileDialog.pickFile();
     if (!path) return;
@@ -675,6 +724,41 @@ function MediaPage({
           <MiniStat label="Unchanged" value={scan.result.unchanged} />
           <MiniStat label="Removed" value={scan.result.removed} />
         </div> : null}
+      </section>
+
+      <section className="settings-card table-card">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">INDEPENDENT NFO SOURCE</span>
+            <h2>NFO 资料导入</h2>
+            <p className="muted">NFO 不要求与视频同目录。先扫描独立 NFO 目录并预览，再由你明确确认写入 Private Work；已有 Canonical 字段采用 fill / merge，不静默覆盖。</p>
+          </div>
+          <div className="button-row">
+            <button disabled={nfoBusy} onClick={() => void scanNfoMetadata()}>{nfoBusy ? "处理中…" : "扫描 NFO"}</button>
+            <button className="primary-button" disabled={nfoBusy || !nfoPreview?.importable} onClick={() => void importNfoMetadata()}>导入可识别项目</button>
+          </div>
+        </div>
+        <code className="path-block">{settings.nfoScanPaths.length ? settings.nfoScanPaths.join("\n") : "尚未配置 NFO 元数据目录"}</code>
+        {nfoPreview ? <>
+          <div className="mini-stat-grid">
+            <MiniStat label="NFO" value={nfoPreview.discovered} />
+            <MiniStat label="Importable" value={nfoPreview.importable} />
+            <MiniStat label="New Works" value={nfoPreview.newWorks} />
+            <MiniStat label="Existing" value={nfoPreview.existingWorks} />
+            <MiniStat label="Skipped" value={nfoPreview.skipped + nfoPreview.errors} />
+          </div>
+          <div className="table-wrap nfo-preview-table"><table className="data-table"><thead><tr><th>NFO</th><th>番号</th><th>标题</th><th>状态</th></tr></thead><tbody>
+            {nfoPreview.items.slice(0, 100).map((item) => <tr key={item.path}>
+              <td><strong>{item.fileName}</strong><small className="path-text">{item.path}</small></td>
+              <td>{item.code ?? "—"}</td>
+              <td>{item.title ?? item.error ?? "—"}</td>
+              <td><span className={nfoStatusClass(item.status)}>{nfoStatusLabel(item.status)}</span></td>
+            </tr>)}
+          </tbody></table></div>
+          {nfoPreview.items.length > 100 ? <p className="muted">预览只显示前 100 条；实际导入会处理全部 {nfoPreview.importable} 条可识别 NFO。</p> : null}
+        </> : <p className="muted">支持“只有番号”的文件名，也支持“番号 + 日期 + 片名”或“日期 + 番号 + 片名”；XML 内字段始终优先。</p>}
+        {nfoResult ? <p className="success-message">导入：{nfoResult.imported} · 新建 Work {nfoResult.createdWorks} · 更新 {nfoResult.updatedWorks} · 新建 Person {nfoResult.createdPeople} · 新建 Organization {nfoResult.createdOrganizations}</p> : null}
+        {nfoResult?.warnings.length ? <details><summary>{nfoResult.warnings.length} 条导入警告</summary><ul>{nfoResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
       </section>
 
       <section className="settings-card">
@@ -747,13 +831,13 @@ function PacksPage({
         <button className="primary-button" onClick={onOpenSettings}>管理资料源</button>
       </section>
       <section className="settings-card soft-card">
-        <span className="eyebrow">V1-15 SCOPE</span>
+        <span className="eyebrow">V1-16 SCOPE</span>
         <h2>Desktop 现在已经理解 Shared Pack</h2>
         <p>
           Rust 会验证 <code>localogue-pack.json</code>、<code>schemaVersion=1</code>、
           <code>kind=shared-library</code> 与 <code>library/</code> 目录。有效 Pack 才会进入 Desktop Repository。
         </p>
-        <p className="muted">Portable Pack 导入/导出与治理写入属于 V1-16 的交互对齐，不在这一版偷偷复制一套实现。</p>
+        <p className="muted">Portable Pack 导入/导出与完整 Evidence / Review / History 治理属于 V1-17；V1-16 只增加显式确认、fill / merge 的 NFO Bootstrap Ingest。</p>
       </section>
     </div>
   );
@@ -793,6 +877,12 @@ function SettingsPage({
     setSettings((current) => ({ ...current, mediaScanPaths: unique([...current.mediaScanPaths, path]) }));
   }
 
+  async function addNfoRoot(): Promise<void> {
+    const path = await fileDialog.pickDirectory();
+    if (!path) return;
+    setSettings((current) => ({ ...current, nfoScanPaths: unique([...current.nfoScanPaths, path]) }));
+  }
+
   async function openWeb(): Promise<void> {
     try {
       await desktopBridge.openWebUrl(settings.webUrl);
@@ -820,6 +910,12 @@ function SettingsPage({
       <section className="settings-card">
         <div className="section-heading"><div><span className="eyebrow">MEDIA ROOTS</span><h2>媒体扫描目录</h2></div><button onClick={() => void addMediaRoot()}>+ 添加目录</button></div>
         <PathList values={settings.mediaScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, mediaScanPaths: current.mediaScanPaths.filter((item) => item !== path) }))} />
+      </section>
+
+      <section className="settings-card">
+        <div className="section-heading"><div><span className="eyebrow">NFO METADATA ROOTS</span><h2>NFO 元数据目录</h2></div><button onClick={() => void addNfoRoot()}>+ 添加目录</button></div>
+        <p className="muted">这里可以和视频目录完全不同。Desktop 会递归扫描 .nfo，并优先读取 XML 番号；缺失时再从文件名识别番号 / 日期 / 片名。</p>
+        <PathList values={settings.nfoScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, nfoScanPaths: current.nfoScanPaths.filter((item) => item !== path) }))} />
       </section>
 
       <section className="settings-card form-card">
@@ -888,6 +984,21 @@ function DetailPeople({
       </div>
     </section>
   );
+}
+
+function nfoStatusLabel(status: NfoImportItemStatus): string {
+  switch (status) {
+    case "new_work": return "新 Work";
+    case "existing_work": return "补充已有 Work";
+    case "missing_code": return "缺少番号";
+    case "missing_title": return "缺少标题";
+    case "duplicate_code": return "重复番号";
+    case "parse_error": return "解析失败";
+  }
+}
+
+function nfoStatusClass(status: NfoImportItemStatus): string {
+  return status === "new_work" || status === "existing_work" ? "status-chip ok" : "status-chip warn";
 }
 
 function PathList({ values, onRemove }: { values: string[]; onRemove: (value: string) => void }) {

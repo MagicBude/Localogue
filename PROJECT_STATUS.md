@@ -2,11 +2,11 @@
 
 ## 当前阶段
 
-**V1-15：Desktop Feature Parity I。**
+**V1-16：Desktop Feature Parity II — Independent NFO Library Ingest。**
 
 V0 设计规范仍是架构基线；V1 继续使用 JSON 作为文件化 Canonical Library，SQLite 仍计划在 V2 引入。
 
-V1-15 开始把 Web 已有的资料浏览能力系统性接入 Tauri Desktop。Desktop 现在拥有正式应用壳，并通过 `TauriLibraryRepository` 浏览 Private Library 与 Shared Packs；Works / People 查询规则与 Web 共享同一纯 Application Query Core。媒体扫描继续复用 V1-12/V1-14 的 `MediaScanCoordinator`，并能使用 Shared Pack Work 参与匹配，同时保持 MediaFile 只写 Private Layer。
+V1-16 在 V1-15 正式 Desktop 应用壳之上，优先补齐真实本地资料迁移能力：NFO 元数据目录与媒体目录完全解耦，可独立递归扫描、预览并显式导入 Private Canonical Library。导入后的 Work 再通过既有番号匹配与 MediaFile 建立关系；Shared Pack 仍保持只读。
 
 ## 已完成
 
@@ -187,9 +187,23 @@ V1-15 开始把 Web 已有的资料浏览能力系统性接入 Tauri Desktop。D
 - Desktop 媒体扫描使用同一合并 Repository，使 Shared Pack Work 也能参与匹配；
 - Rust Canonical 集合扩大为受控只读白名单，写白名单仍严格只有 `media-files`。
 
+### V1-16 Independent NFO Library Ingest
+
+- 新增 `nfoScanPaths`，NFO 资料目录无需与视频同目录；
+- Desktop 新增 NFO 扫描预览 / 批量导入；
+- XML 番号优先，文件名番号 / 日期 / 片名 fallback；
+- 同番号重复 NFO 做保守去重；
+- 可创建 / 补充 Work，并精确复用或创建 Person / Maker / Label / Series / Genre / Tag；
+- 已有 Work 使用 fill / merge，不静默覆盖已有核心字段；
+- Rust NFO Reader 仅允许 `.nfo`、单文件 10 MB；
+- Desktop Canonical 写白名单扩大到明确 Private 集合，写根由 Rust 从 Desktop Settings 强制解析，Shared Pack 仍只读；
+- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；完整 Evidence / Review / History 冲突治理继续由 V1-17 接入；
+- Canonical 删除继续关闭，仅 Private `media-files` 可删除；
+- `findWorkByCode` 兼容带 / 不带连字符番号。
+
 ## 下一阶段建议
 
-**V1-16：Desktop Feature Parity II / Interaction Parity。**
+**V1-17：Desktop Interaction Parity / Governance。**
 
 1. 将 Works / People 的高级筛选、排序、分页和更多关系浏览完整映射到 Desktop UI；
 2. 接入 Canonical 编辑、Evidence/Review/Curation/History 等治理交互，并复用既有 Application Service / Commit Plan；

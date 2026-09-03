@@ -33,6 +33,13 @@
     },
     "ffprobePath": {
       "type": "string"
+    },
+    "nfoScanPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
     }
   }
 }

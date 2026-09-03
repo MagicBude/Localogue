@@ -345,10 +345,10 @@
       "description": "Permission identifier",
       "oneOf": [
         {
-          "description": "允许 Localogue 主窗口调用 V1-15 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。",
+          "description": "允许 Localogue 主窗口调用 V1-16 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。",
           "type": "string",
           "const": "desktop-runtime",
-          "markdownDescription": "允许 Localogue 主窗口调用 V1-15 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。"
+          "markdownDescription": "允许 Localogue 主窗口调用 V1-16 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。"
         },
         {
           "description": "Default core plugins set.\n#### This default permission set includes:\n\n- `core:path:default`\n- `core:event:default`\n- `core:window:default`\n- `core:webview:default`\n- `core:app:default`\n- `core:image:default`\n- `core:resources:default`\n- `core:menu:default`\n- `core:tray:default`",

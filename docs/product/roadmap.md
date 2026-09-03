@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-15 Desktop Feature Parity I**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 开始把 Web 产品能力按共享 Domain/Application 规则系统性映射到 Desktop。
+当前已推进到 **V1-16 Desktop Feature Parity II — Independent NFO Library Ingest**。V1-13 建立 Tauri 宿主，V1-14 接通完整媒体扫描，V1-15 建立正式 Desktop 产品壳，V1-16 先解决独立 NFO 存量资料迁移。
 
 已完成重点：
 
@@ -43,15 +43,19 @@
 - ~~完整 Tauri FileSystem / FileHash Adapter 与 MediaScanCoordinator~~（V1-14）；
 - ~~Desktop Home / Works / People / Media / Packs / Settings 正式应用壳~~（V1-15）；
 - ~~Private + Shared Pack Desktop 合并浏览~~（V1-15）；
-- ~~Web / Desktop 共享 Works / People Query Core~~（V1-15）。
+- ~~Web / Desktop 共享 Works / People Query Core~~（V1-15）；
+- ~~独立 `nfoScanPaths` 与 NFO Preview / Explicit Import~~（V1-16）；
+- ~~XML 番号优先 + 文件名番号 / 日期 / 片名 fallback~~（V1-16）；
+- ~~Private-only Native Canonical Writer 与 media-only 删除边界~~（V1-16）。
 
-### V1-16：Desktop Feature Parity II
+### V1-17：Desktop Interaction Parity / Governance
 
 下一阶段重点：
 
 - Desktop 高级 Works / People Facet、排序、分页与更多实体浏览；
 - Canonical Work / Person 编辑与既有 Commit Plan / Audit 规则接入；
 - Evidence / Review / Curation / History Desktop 交互；
+- 将 V1-16 NFO Bootstrap 中的冲突型更新继续收敛到完整治理链；
 - MediaFile bind / rebind / unbind 审计；
 - Shared / Personal Portable Pack Desktop 导入导出；
 - Asset 二进制读取、头像/封面与 Presentation Preference；

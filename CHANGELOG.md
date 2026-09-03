@@ -1,5 +1,21 @@
 # 更新日志
 
+## V1-16 · Desktop Feature Parity II — Independent NFO Library Ingest
+
+- 新增独立 `nfoScanPaths`，NFO 元数据目录可与视频目录完全分离。
+- Desktop Media 页面新增 NFO 扫描预览与显式批量导入。
+- NFO XML 内番号优先；缺失时从文件名保守识别番号，并可从文件名补充发行日期 / 片名。
+- 支持 `SONE-123`、`ABW001`、`300MIUM-123`、`FC2-PPV-1234567` 等典型命名。
+- 同番号多 NFO 自动去重，优先元数据更完整、修改时间更新的候选。
+- 新 NFO 可创建 Work / Person / Organization / Series / Genre / Tag；已有 Work 使用 fill / merge，不静默覆盖已有核心字段。
+- Web / Desktop `findWorkByCode` 改为 compact code 比较，兼容带/不带连字符番号。
+- Rust 新增受限 `read_nfo_text`，只允许 `.nfo` 且限制 10 MB。
+- Desktop Private Canonical 写白名单扩大到 works / people / organizations / series / genres / tags / media-files，并增加最小结构校验；写根由 Rust 从当前 Desktop Settings 强制解析，Shared Pack 仍只读。
+- Canonical 删除仍不开放，Native delete 仅允许 Private `media-files`；NFO 写入定位为显式确认、fill / merge 的 Bootstrap Ingest。
+- Web / Desktop 设置均新增 NFO 元数据目录字段。
+- 新增 ADR-031、NFO 导入文档与 V1-16 Manifest。
+- 项目、Desktop Workspace、Rust Crate 与 Tauri 配置升级至 0.1.16。
+
 ## V1-15 · Desktop Feature Parity I
 
 - Desktop 从 Runtime Console 升级为正式 Localogue 应用壳，新增 Home / Works / People / Media / Packs / Settings。

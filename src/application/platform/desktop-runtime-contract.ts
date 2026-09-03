@@ -19,6 +19,7 @@ export interface DesktopBootstrapSettings {
   schemaVersion: 1;
   libraryPath?: string;
   mediaScanPaths: string[];
+  nfoScanPaths: string[];
   sharedPackPaths: string[];
   ffprobePath?: string;
   webUrl: string;

@@ -27,6 +27,15 @@ export interface DesktopFileEntry {
   modifiedAt: string;
 }
 
+export type DesktopWritableLibraryCollection =
+  | "works"
+  | "people"
+  | "organizations"
+  | "series"
+  | "genres"
+  | "tags"
+  | "media-files";
+
 export type DesktopLibraryCollection =
   | "works"
   | "people"

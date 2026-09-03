@@ -110,6 +110,8 @@ media-files
 
 Canonical 编辑要等 V1-16 把已有 Commit Plan、Audit、Evidence 治理规则正确接过来，而不是用通用 JSON 写命令绕过它们。
 
+> 路线调整：实际 V1-16 因真实资料库需求，先实现独立 NFO Bootstrap Ingest；完整治理交互顺延到 V1-17。V1-16 Writer 也已收紧为 Rust 从 Desktop Settings 强制解析 Private 根，而不是 Webview 可指定任意写目录。
+
 ## 六、Desktop 页面现在有哪些
 
 ### Home

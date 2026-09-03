@@ -10,7 +10,10 @@ const required = [
   "scripts/clean-desktop-generated-artifacts.mjs",
   "apps/desktop/src/tauri-bridge.ts",
   "apps/desktop/src/platform/tauri-library-repository.ts",
+  "apps/desktop/src/nfo-library-import.ts",
   "src/application/library/library-query.ts",
+  "src/application/importers/nfo-filename-metadata.ts",
+  "src/infrastructure/importers/nfo-importer.ts",
   "apps/desktop/src-tauri/Cargo.toml",
   "apps/desktop/src-tauri/tauri.conf.json",
   "apps/desktop/src-tauri/tauri.dev.conf.json",
@@ -43,7 +46,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  for (const command of ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "delete_library_entity"]) {
+  for (const command of ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "delete_library_entity"]) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
   if (/shell:allow-(execute|spawn)/.test(capability + permission)) {
@@ -79,19 +82,40 @@ if (!errors.length) {
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
-    errors.push("V1-15 Desktop 必须复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
+    errors.push("V1-16 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
+  }
+  if (!desktopApp.includes("previewNfoImport") || !desktopApp.includes("importNfoPreview")) {
+    errors.push("V1-16 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
   }
   if (!adapters.includes("class TauriFileSystemAdapter") || !adapters.includes("class TauriFileHashAdapter")) {
-    errors.push("V1-15 Desktop 必须继续实现 FileSystemPort / FileHashPort。");
+    errors.push("V1-16 Desktop 必须继续实现 FileSystemPort / FileHashPort。");
   }
   if (!rust.includes("safe_collection_directory") || !rust.includes('"people"') || !rust.includes('"organizations"') || !rust.includes('"assets"')) {
-    errors.push("V1-15 Desktop Repository 读取白名单必须覆盖 Canonical 浏览集合。");
+    errors.push("V1-16 Desktop Repository 读取白名单必须覆盖 Canonical 浏览集合。");
   }
-  if (!rust.includes("safe_writable_collection_directory") || !rust.includes('collection != "media-files"')) {
-    errors.push("V1-15 Desktop Repository 写入权限必须继续只允许私人 media-files。");
+  for (const collection of ["works", "people", "organizations", "series", "genres", "tags", "media-files"]) {
+    if (!rust.includes(`"${collection}"`)) errors.push(`V1-16 Private 写白名单缺少集合：${collection}`);
+  }
+  if (!rust.includes("safe_writable_collection_directory") || !rust.includes("validate_writable_entity")) {
+    errors.push("V1-16 Desktop Canonical 写入必须同时经过集合白名单与最小结构校验。");
+  }
+  if (/safe_writable_collection_directory[\s\S]{0,600}"assets"/.test(rust)) {
+    errors.push("V1-16 Desktop 不允许通过通用 Canonical Writer 写 Assets。");
+  }
+  if (!rust.includes("configured_private_library_path") || /fn write_library_entity\([^)]*library_path/.test(rust)) {
+    errors.push("V1-16 写命令必须由 Rust 自己从 Desktop Settings 解析 Private Library，禁止 Webview 选择写根目录。");
+  }
+  if (!rust.includes('if collection != "media-files"')) {
+    errors.push("V1-16 Canonical 删除仍必须关闭；delete_library_entity 只允许 Private media-files。");
+  }
+  if (!rust.includes("read_nfo_text") || !rust.includes('extension != "nfo"') || !rust.includes("MAX_NFO_BYTES")) {
+    errors.push("V1-16 NFO Reader 必须限制为 .nfo 普通文件，并保留单文件大小上限。");
+  }
+  if (!rust.includes("nfo_scan_paths") || !desktopApp.includes("nfoScanPaths")) {
+    errors.push("V1-16 Desktop Settings 必须把 NFO 根目录与媒体根目录独立建模。");
   }
   if (!rust.includes("inspect_shared_pack") || !rust.includes('localogue-pack.json') || !rust.includes('kind=shared-library')) {
-    errors.push("V1-15 Desktop 必须在 Rust 边界验证 Shared Pack manifest 与 library/ 目录。");
+    errors.push("V1-16 Desktop 必须继续在 Rust 边界验证 Shared Pack manifest 与 library/ 目录。");
   }
   const desktopRepository = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-library-repository.ts"), "utf8");
   const jsonRepository = readFileSync(path.join(root, "src/infrastructure/repositories/json-library-repository.ts"), "utf8");
@@ -122,7 +146,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-15 共享查询核心、完整浏览 Repository、Shared Pack 验证、最小写权限与 Web/Tauri 分层均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-16 独立 NFO 根、Preview/Import、Private-only Canonical Writer、Shared Pack 只读与 Web/Tauri 分层均符合规则。");
 }
 
 function walkTextFiles(directory) {

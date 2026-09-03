@@ -37,17 +37,13 @@ Electron Main / IPC / Vue UI 的边界说明桌面系统能力应该集中在后
 
 ### NFO 不是真相
 
-Localogue：
+Localogue 的长期治理模型：
 
 ```text
 NFO → Evidence → Review → Canonical
 ```
 
-而不是：
-
-```text
-NFO → Canonical DB
-```
+而不是“扫描到 NFO 就自动改数据库”。V1-16 的独立 NFO 导入只是面向用户已有存量资料的显式 Preview -> Confirm Bootstrap，已有事实只能 fill / merge，后续冲突治理仍回到上述链路。
 
 ### 名字不等于人物身份
 

@@ -33,14 +33,16 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
   if (!isObject(input)) throw new Error("设置请求必须是 JSON 对象。");
 
   const libraryPath = optionalString(input.libraryPath);
-  const sharedPackPaths = stringArray(input.sharedPackPaths);
-  const mediaScanPaths = stringArray(input.mediaScanPaths);
+  const sharedPackPaths = stringArray(input.sharedPackPaths, "sharedPackPaths");
+  const mediaScanPaths = stringArray(input.mediaScanPaths, "mediaScanPaths");
+  const nfoScanPaths = stringArray(input.nfoScanPaths, "nfoScanPaths");
   const ffprobePath = optionalStringField(input.ffprobePath, "ffprobePath");
   const saved = saveInstanceSettings({
     schemaVersion: 1,
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
+    ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),
   });
 
@@ -73,10 +75,10 @@ function optionalStringField(value: unknown, fieldName: string): string | undefi
   return trimmed || undefined;
 }
 
-function stringArray(value: unknown): string[] {
+function stringArray(value: unknown, fieldName: string): string[] {
   if (value === undefined) return [];
   if (!Array.isArray(value) || value.some((item) => typeof item !== "string")) {
-    throw new Error("sharedPackPaths 必须是字符串数组。");
+    throw new Error(`${fieldName} 必须是字符串数组。`);
   }
   return value.map((item) => item.trim()).filter(Boolean);
 }

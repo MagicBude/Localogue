@@ -86,7 +86,7 @@ NFO → 未来 Evidence Candidate
 图片 → 未来 Asset Candidate
 ```
 
-扫描器绝不能直接把 NFO 内容写成 Canonical Work，也不能因为发现 poster 就自动覆盖用户首选封面。
+扫描器绝不能直接把 NFO 内容写成 Canonical Work，也不能因为发现 poster 就自动覆盖用户首选封面。 V1-16 的独立 NFO 资料导入属于单独的 Preview -> Explicit Import 流程，不改变这条扫描器边界。
 
 ## 为什么 Sidecar 要单独比较
 

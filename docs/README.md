@@ -144,6 +144,7 @@
 - [V1-13 Tauri Desktop Alpha 实现导读](development/v1-13-tauri-desktop-alpha-walkthrough.md)
 - [V1-14 Desktop Runtime Integration 实现导读](development/v1-14-desktop-runtime-integration-walkthrough.md)
 - [V1-15 Desktop Feature Parity I 实现导读](development/v1-15-desktop-feature-parity-i-walkthrough.md)
+- [V1-16 独立 NFO 资料库导入实现导读](development/v1-16-independent-nfo-library-ingest-walkthrough.md)
 
 ## 开发
 

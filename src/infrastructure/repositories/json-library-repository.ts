@@ -35,9 +35,9 @@ export class JsonLibraryRepository implements LibraryRepository {
   }
 
   async findWorkByCode(code: string): Promise<Work | null> {
-    const normalized = code.trim().toUpperCase();
+    const normalized = compactWorkCode(code);
     const works = await this.store.readCollection<Work>("works");
-    return works.find((work) => work.code.toUpperCase() === normalized) ?? null;
+    return works.find((work) => compactWorkCode(work.code) === normalized) ?? null;
   }
 
   async listWorks(query: WorkQuery = {}): Promise<WorkSearchResult> {
@@ -161,4 +161,9 @@ export class JsonLibraryRepository implements LibraryRepository {
     const root = typeof this.writableRoot === "function" ? this.writableRoot() : this.writableRoot;
     return root || null;
   }
+}
+
+
+function compactWorkCode(value: string): string {
+  return value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
 }

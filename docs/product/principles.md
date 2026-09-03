@@ -8,6 +8,8 @@
 
 NFO、JSON、CSV、API 响应、人工提交都先视为 Evidence。Evidence 可以互相冲突，正式资料不能因为某一次导入而被无条件覆盖。
 
+V1-16 为用户已有的本地 NFO 存量资料提供一个窄范围 Bootstrap Ingest 例外：必须先 Preview、再明确确认，且已有 Work 只能 fill / merge，不能覆盖既有核心事实。这个迁移例外不改变长期 Evidence / Review 原则，也不推广到在线 Provider 或一般编辑。
+
 ## P03：原文优先且永久保留
 
 日本作品默认保留日文原始标题、名称和简介。中文、英文是映射或翻译，不得覆盖原文。

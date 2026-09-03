@@ -57,6 +57,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
   const libraryPath = normalizeOptionalPath(input.libraryPath);
   const sharedPackPaths = normalizePathArray(input.sharedPackPaths);
   const mediaScanPaths = normalizePathArray(input.mediaScanPaths);
+  const nfoScanPaths = normalizePathArray(input.nfoScanPaths);
   const ffprobePath = normalizeOptionalPath(input.ffprobePath);
 
   return {
@@ -64,6 +65,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
     ...(libraryPath ? { libraryPath } : {}),
     sharedPackPaths,
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
+    ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),
     ...(typeof input.updatedAt === "string" ? { updatedAt: input.updatedAt } : {}),
   };

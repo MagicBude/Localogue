@@ -15,7 +15,7 @@ Localogue 不把 Web “打包成 Desktop”，也不在 Tauri 里重新实现�
                Node / Server          Rust / OS
 ```
 
-V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 开始正式做 Web / Desktop Feature Parity。
+V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest。
 
 ## V1-15 Desktop 产品壳
 
@@ -30,7 +30,7 @@ V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入
 - Packs；
 - Settings。
 
-这些页面仍是 V1-15 的第一批浏览能力，不等于 Web 所有治理功能已经迁移完成。V1-16 再继续接入高级筛选、编辑、Evidence/Review/Curation/History、Media Binding 与 Portable Pack 完整交互。
+这些页面是 V1-15 的第一批浏览能力，不等于 Web 所有治理功能已经迁移完成。V1-16 优先解决真实存量资料迁移：NFO 目录与媒体目录解耦，并提供 Preview -> Explicit Import。高级筛选、冲突编辑、Evidence/Review/Curation/History、Media Binding 审计与 Portable Pack 完整交互继续进入 V1-17。
 
 ## 共享查询核心
 
@@ -64,7 +64,7 @@ Private Library
 
 相同稳定 ID 使用靠前数据源的完整实体，V1 不做隐式字段级深度合并。
 
-Desktop V1-15 可读取：
+Desktop V1-16 可读取：
 
 - works；
 - people；
@@ -78,7 +78,7 @@ Desktop V1-15 可读取：
 
 ## Shared Pack Native 校验
 
-Desktop 设置保存的是 Shared Pack 根目录，而 Repository 实际需要其 `library/` 目录。V1-15 新增 Rust `inspect_shared_pack` Command，在路径进入读取根前检查：
+Desktop 设置保存的是 Shared Pack 根目录，而 Repository 实际需要其 `library/` 目录。V1-15 起使用 Rust `inspect_shared_pack` Command，在路径进入读取根前检查：
 
 - `localogue-pack.json` 存在且可解析；
 - `schemaVersion === 1`；
@@ -97,20 +97,35 @@ Desktop 设置保存的是 Shared Pack 根目录，而 Repository 实际需要�
 - Open / Reveal：`open_path`、`reveal_in_folder`、`open_web_url`；
 - Media：`probe_media`；
 - FileSystem / Hash：扫描需要的受限目录遍历、文件状态和 SHA-256；
-- Repository：`read_library_collection`、`write_library_entity`、`delete_library_entity`；
+- NFO：受限 `.nfo` 文本读取（单文件上限 10 MB）；
+- Repository：`read_library_collection`、Private-only `write_library_entity`、media-only `delete_library_entity`；
 - Shared Pack：`inspect_shared_pack`。
 
 所有自定义命令都必须由 `desktop-runtime` Permission 显式授权。
 
-### 读权限扩大不等于写权限扩大
+### V1-16：受控 Private Canonical Writer
 
-V1-15 为正式资料浏览扩展了 `read_library_collection` 的集合白名单，但写路径单独经过 `safe_writable_collection_directory`，当前只允许：
+V1-16 为用户明确确认的 NFO Bootstrap Ingest 增加受控 Canonical 写能力：
 
 ```text
-media-files
+works / people / organizations / series / genres / tags / media-files
 ```
 
-因此 Webview 不能因为能阅读 People / Works 就直接写 Canonical JSON。Canonical 治理写入会在 V1-16 通过已有 Application Service / Commit Plan / Audit 规则对齐，而不是通过一个通用文件写命令绕过治理。
+但它不是“Webview 可指定任意目录的 JSON Writer”。Native `write_library_entity` 不再接受写根目录参数，而是：
+
+```text
+Rust load_desktop_settings()
+  -> configured Private libraryPath
+  -> collection whitelist
+  -> minimal entity shape validation
+  -> atomic JSON replace
+```
+
+因此 Shared Pack 即使已经挂载，也不能借用该 Command 被写入。`assets` 仍不在写白名单。
+
+删除边界更窄：`delete_library_entity` 在 V1-16 仍只允许 Private `media-files`，Canonical Entity 删除必须等待完整治理流程。
+
+NFO Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-17。
 
 ## Media Scan
 
@@ -123,6 +138,8 @@ V1-14 已实现：
 - 进度、取消、增量 Fast Path 与缺失文件 reconcile。
 
 V1-15 将扫描 Repository 与正式 Desktop Repository 合并。这样 Shared Pack 的 Work 可以参与番号匹配，但扫描结果生成的 MediaFile 仍只写 Private Library。
+
+V1-16 的独立 NFO 导入不会重新实现媒体绑定：NFO 创建 / 补充 Canonical Work 后，再运行同一增量扫描，由既有番号匹配器重新判断 `MediaFile.workId`。视频 size / mtime 没变化时不会因此重复 ffprobe / SHA-256。
 
 ## 为什么不开放 Shell
 
@@ -151,6 +168,7 @@ Desktop Settings 位于 Tauri App Config；其：
 - `libraryPath`；
 - `sharedPackPaths`；
 - `mediaScanPaths`；
+- `nfoScanPaths`；
 - `ffprobePath`；
 - `webUrl`；
 
@@ -162,7 +180,7 @@ Web 当前使用：
 .localogue/settings.json
 ```
 
-Desktop 使用 Tauri App Config。V1-15 不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
+Desktop 使用 Tauri App Config。V1-16 仍不伪装成已经双向同步；未来如果统一，应设计明确迁移方案与单一真相源。
 
 ## Open 边界
 

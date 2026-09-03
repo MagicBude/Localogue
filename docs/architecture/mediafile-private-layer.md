@@ -66,4 +66,4 @@ matchMethod = manual
 
 媒体技术信息使用 `fileSize + fileModifiedAt` 判断是否需要重新 ffprobe。视频改变但无法重新分析时通过 `analysisStale=true` 暴露不确定性，而不是静默展示旧技术参数。
 
-NFO / Poster / Fanart 作为 `sidecars` 记录在 Private MediaFile 上，仅用于后续 Evidence / Asset Candidate，不改变 Community Work。
+媒体扫描观察到的 NFO / Poster / Fanart 作为 `sidecars` 记录在 Private MediaFile 上；扫描器本身不会改 Canonical Work。V1-16 的独立 `nfoScanPaths` Bootstrap Import 是另一条显式确认链路，且只写 Private Canonical，不改变 Shared / Community Work。

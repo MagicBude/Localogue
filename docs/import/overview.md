@@ -31,6 +31,6 @@ Importer → Evidence → Normalize → Resolve → Validate → Review → Comm
 
 ## V1-04 实现状态
 
-V1-04 已实现 JSON、NFO、CSV、XLSX 的 Parser → Normalize → Validate → Preview → Evidence Store。
+V1-04 已实现 JSON、NFO、CSV、XLSX 的 Parser → Normalize → Validate → Preview → Evidence Store。 Web 的一般导入仍遵循这条治理链；V1-16 Desktop 另外提供面向本地存量 NFO 的显式 Bootstrap Ingest，范围与限制见 `docs/import/nfo.md`。
 
 尚未实现 Resolve / Review / Commit，因此 Evidence 中的人物、厂商、系列和 Genre 仍可保留来源字符串，不会直接变成 Canonical Entity ID。

@@ -108,6 +108,6 @@ Electron + Vue 3 的本地 NFO 影视库。Localogue 主要参考其后续版本
 - 演员外挂头像和本地选择；
 - Desktop Main / IPC / UI 分层。
 
-Localogue 不采用“NFO 直接成为数据库真相”的模型，仍保持 Evidence → Review → Canonical；也不复制该 GPL-3.0 项目的具体实现代码。
+Localogue 不采用“扫描到 NFO 就自动成为数据库真相”的模型，长期仍保持 Evidence → Review → Canonical；V1-16 仅为用户明确确认的本地存量迁移提供 fill / merge Bootstrap 例外。也不复制该 GPL-3.0 项目的具体实现代码。
 
 详见：[local-javlibrary 对 Localogue 的参考价值](local-javlibrary-reference.md)。
