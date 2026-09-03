@@ -68,3 +68,6 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 ### V1-19
 - [ADR-035：Desktop Discovery Parity 复用共享 Query Core](ADR-035-desktop-discovery-parity-reuses-shared-query-core.md)
+
+### V1-20
+- [ADR-036：Desktop 将 UI 语言与元数据语言作为独立展示偏好](ADR-036-desktop-ui-and-metadata-language-preferences.md)

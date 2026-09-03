@@ -650,3 +650,126 @@ select[multiple] { min-height: 105px; padding: 6px; }
 }
 .desktop-catalog-grid button:hover { border-color: var(--accent); }
 .desktop-catalog-grid button small { color: var(--muted); }
+
+/* V1-20: Desktop UX polish, collapsible navigation and language preferences. */
+.desktop-layout {
+  grid-template-columns: 188px minmax(0, 1fr);
+  transition: grid-template-columns .18s ease;
+}
+.desktop-layout.is-sidebar-collapsed { grid-template-columns: 72px minmax(0, 1fr); }
+.sidebar { padding-inline: 13px; transition: padding .18s ease; }
+.is-sidebar-collapsed .sidebar { padding-inline: 10px; align-items: stretch; }
+.brand-copy,
+.nav-item-label,
+.nav-item small,
+.source-summary .eyebrow,
+.source-summary small,
+.sidebar-collapse-label,
+.runtime-pill > span:last-child {
+  transition: opacity .12s ease;
+}
+.nav-item-short { display: none; font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.sidebar-collapse-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+}
+.is-sidebar-collapsed .brand { justify-content: center; padding-inline: 0; }
+.is-sidebar-collapsed .brand-copy,
+.is-sidebar-collapsed .nav-item-label,
+.is-sidebar-collapsed .nav-item small,
+.is-sidebar-collapsed .source-summary .eyebrow,
+.is-sidebar-collapsed .source-summary small,
+.is-sidebar-collapsed .sidebar-collapse-label,
+.is-sidebar-collapsed .runtime-pill > span:last-child { display: none; }
+.is-sidebar-collapsed .nav-item-short { display: inline; }
+.is-sidebar-collapsed .nav-item { justify-content: center; padding-inline: 6px; min-height: 40px; }
+.is-sidebar-collapsed .source-summary { padding: 10px 6px; place-items: center; }
+.is-sidebar-collapsed .source-summary strong { font-size: 20px; }
+.is-sidebar-collapsed .runtime-pill { justify-content: center; padding-inline: 0; }
+
+.topbar { min-height: 76px; flex-wrap: wrap; padding-block: 8px; }
+.topbar-actions { align-items: flex-end; justify-content: flex-end; }
+.desktop-language-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  padding-right: 4px;
+}
+.desktop-language-controls label {
+  display: grid;
+  gap: 3px;
+  min-width: 116px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 760;
+}
+.desktop-language-controls select {
+  min-width: 116px;
+  padding: 7px 28px 7px 9px;
+  border-radius: 9px;
+  font-size: 10px;
+}
+
+/* The facet rail is intentionally wider than V1-19. The collapsible app sidebar
+   gives the catalog enough horizontal space without shrinking poster results. */
+.desktop-library-layout {
+  grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
+  gap: 20px;
+}
+.desktop-facet-panel { padding: 18px; }
+.desktop-facet-panel .field,
+.desktop-person-filter-panel .field { min-width: 0; }
+.desktop-facet-panel input,
+.desktop-facet-panel select { min-width: 0; }
+.desktop-facet-group summary span,
+.desktop-facet-options label span {
+  overflow-wrap: anywhere;
+}
+.desktop-facet-options label span {
+  white-space: normal;
+  line-height: 1.35;
+}
+.desktop-facet-options { max-height: 270px; }
+.desktop-filter-pair { gap: 10px; }
+
+.desktop-asset-card-body > span {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.desktop-asset-card-body > span code {
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: rgba(0,0,0,.045);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+@media (max-width: 1260px) {
+  .desktop-library-layout { grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); }
+  .desktop-language-controls label { min-width: 104px; }
+  .desktop-language-controls select { min-width: 104px; }
+}
+@media (max-width: 1040px) {
+  /* Keep collapse semantics explicit: the user-controlled button remains the
+     single source of truth instead of visually forcing a collapsed sidebar. */
+  .desktop-layout:not(.is-sidebar-collapsed) { grid-template-columns: 168px minmax(0, 1fr); }
+  .desktop-library-layout { grid-template-columns: minmax(290px, 320px) minmax(0, 1fr); }
+  .topbar-actions { width: 100%; justify-content: flex-start; }
+}
+@media (max-width: 900px) {
+  .desktop-library-layout { grid-template-columns: 1fr; }
+  .desktop-facet-panel { position: static; max-height: none; }
+}
+@media (prefers-color-scheme: dark) {
+  .desktop-asset-card-body > span code { background: rgba(255,255,255,.06); }
+}

@@ -7,6 +7,7 @@ import type { PersonQuery, PersonSort } from "@/domain/queries/person-query";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useDesktopI18n } from "./desktop-i18n";
 
 const PAGE_SIZE = 24;
 
@@ -17,6 +18,7 @@ export function DesktopPersonExplorer({
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
 }) {
+  const { t } = useDesktopI18n();
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
   const [page, setPage] = useState(1);
   useEffect(() => setPage(1), [query]);
@@ -54,8 +56,8 @@ export function DesktopPersonExplorer({
     };
   }, [repository, query]);
 
-  if (data.loading) return <ExplorerState>正在读取人物资料…</ExplorerState>;
-  if (data.error || !data.value) return <ExplorerState error>{data.error ?? "无法读取人物。"}</ExplorerState>;
+  if (data.loading) return <ExplorerState>{t("正在读取人物资料…")}</ExplorerState>;
+  if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取人物。")}</ExplorerState>;
 
   const total = data.value.filteredPerformers.length;
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -67,7 +69,7 @@ export function DesktopPersonExplorer({
       <PersonFilterPanel query={query} onChange={setQuery} data={data.value} />
       <section className="desktop-results-panel desktop-people-results">
         <div className="desktop-results-toolbar">
-          <div className="result-meta"><strong>{total}</strong> 项人物 · 第 {currentPage} / {pageCount} 页</div>
+          <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}</div>
         </div>
         <div className="desktop-person-grid">
           {visible.map((person) => (
@@ -80,12 +82,12 @@ export function DesktopPersonExplorer({
             />
           ))}
         </div>
-        {!visible.length ? <ExplorerState>没有符合当前筛选条件的演员。</ExplorerState> : null}
+        {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
         {total > PAGE_SIZE ? (
-          <div className="desktop-pagination" aria-label="人物分页">
-            <button disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← 上一页</button>
+          <div className="desktop-pagination" aria-label={t("分页")}>
+            <button disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
             <span>{currentPage} / {pageCount}</span>
-            <button disabled={currentPage >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>下一页 →</button>
+            <button disabled={currentPage >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
           </div>
         ) : null}
       </section>
@@ -104,7 +106,8 @@ export function DesktopPersonCard({
   workCount: number;
   onOpen: () => void;
 }) {
-  const name = getPreferredPersonName(person, "ja");
+  const { t, metadataLanguage } = useDesktopI18n();
+  const name = getPreferredPersonName(person, metadataLanguage);
   const romanized = person.names.find((item) => item.type === "romanized" && item.value !== name)?.value;
   return (
     <button className="desktop-person-card" onClick={onOpen} type="button">
@@ -115,7 +118,7 @@ export function DesktopPersonCard({
         <small className="status-chip">{person.activityStatus}</small>
         <strong>{name}</strong>
         {romanized ? <span>{romanized}</span> : null}
-        <em>{workCount} 部作品</em>
+        <em>{t("{count} 部作品", { count: workCount })}</em>
       </span>
     </button>
   );
@@ -135,6 +138,7 @@ function PersonFilterPanel({
     retirementYears: string[];
   };
 }) {
+  const { t } = useDesktopI18n();
   const patch = (next: Partial<PersonQuery>) => onChange({ ...query, ...next });
   const selectedStatus = query.statuses?.[0] ?? "";
   const selectedBirth = query.birthYears?.[0] ?? "";
@@ -143,22 +147,22 @@ function PersonFilterPanel({
   return (
     <section className="desktop-person-filter-panel">
       <div className="desktop-person-filter-heading">
-        <div><strong>人物高级筛选</strong><small>姓名 / 状态 / 年份 / 身高 / 排序</small></div>
-        <button onClick={() => onChange({ sort: "name_asc" })} type="button">清除</button>
+        <div><strong>{t("人物高级筛选")}</strong><small>{t("姓名 / 状态 / 年份 / 身高 / 排序")}</small></div>
+        <button onClick={() => onChange({ sort: "name_asc" })} type="button">{t("清除")}</button>
       </div>
       <div className="desktop-person-filter-grid">
-        <label className="field desktop-person-search"><span>搜索姓名 / 别名 / 旧艺名</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
-        <SelectField label="状态" value={selectedStatus} options={data.statusOptions} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
-        <SelectField label="出道年份" value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
-        <SelectField label="引退年份" value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
-        <SelectField label="出生年份" value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
-        <label className="field"><span>身高 ≥</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
-        <label className="field"><span>身高 ≤</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
-        <label className="field"><span>排序</span><select value={query.sort ?? "name_asc"} onChange={(event) => patch({ sort: event.target.value as PersonSort })}>
-          <option value="name_asc">名称 A → Z</option><option value="name_desc">名称 Z → A</option>
-          <option value="debut_desc">出道年份 ↓</option><option value="debut_asc">出道年份 ↑</option>
-          <option value="birth_desc">出生年份 ↓</option><option value="birth_asc">出生年份 ↑</option>
-          <option value="height_desc">身高 ↓</option><option value="height_asc">身高 ↑</option>
+        <label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
+        <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
+        <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
+        <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
+        <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
+        <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
+        <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
+        <label className="field"><span>{t("排序")}</span><select value={query.sort ?? "name_asc"} onChange={(event) => patch({ sort: event.target.value as PersonSort })}>
+          <option value="name_asc">{t("名称")} A → Z</option><option value="name_desc">{t("名称")} Z → A</option>
+          <option value="debut_desc">{t("出道年份")} ↓</option><option value="debut_asc">{t("出道年份")} ↑</option>
+          <option value="birth_desc">{t("出生年份")} ↓</option><option value="birth_asc">{t("出生年份")} ↑</option>
+          <option value="height_desc">{t("身高")} ↓</option><option value="height_asc">{t("身高")} ↑</option>
         </select></label>
       </div>
     </section>
@@ -166,7 +170,8 @@ function PersonFilterPanel({
 }
 
 function SelectField({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
-  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">任意</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
+  const { t } = useDesktopI18n();
+  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
 }
 
 function buildPortraitMap(assets: Asset[], people: Person[]): Map<string, Asset> {

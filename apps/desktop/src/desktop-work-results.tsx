@@ -2,9 +2,11 @@ import type { Asset } from "@/domain/entities/asset";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
+import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { useDesktopI18n } from "./desktop-i18n";
 
 export type DesktopWorkViewMode = "grid" | "list" | "table";
 
@@ -22,6 +24,7 @@ export function buildDesktopWorkCards(
   people: Person[],
   organizations: Organization[],
   assets: Asset[],
+  metadataLanguage: SupportedLanguage,
 ): DesktopWorkCardViewModel[] {
   const peopleById = new Map(people.map((item) => [item.id, item]));
   const organizationsById = new Map(organizations.map((item) => [item.id, item]));
@@ -43,15 +46,15 @@ export function buildDesktopWorkCards(
       .sort((a, b) => (a.billingOrder ?? 999) - (b.billingOrder ?? 999))
       .map((relation) => peopleById.get(relation.personId))
       .filter((person): person is Person => Boolean(person))
-      .map((person) => getPreferredPersonName(person, "ja"));
+      .map((person) => getPreferredPersonName(person, metadataLanguage));
     const maker = work.makerId ? organizationsById.get(work.makerId) : undefined;
 
     return {
       work,
-      title: localizeText(work.titles, "ja"),
+      title: localizeText(work.titles, metadataLanguage),
       releaseDate: work.releaseDate?.value ?? "—",
       performerNames,
-      makerName: maker ? localizeText(maker.names, "ja") : undefined,
+      makerName: maker ? localizeText(maker.names, metadataLanguage) : undefined,
       poster,
     };
   });
@@ -64,13 +67,14 @@ export function DesktopWorkViewSwitcher({
   current: DesktopWorkViewMode;
   onChange: (view: DesktopWorkViewMode) => void;
 }) {
+  const { t } = useDesktopI18n();
   const views: Array<{ id: DesktopWorkViewMode; label: string }> = [
-    { id: "grid", label: "海报墙" },
-    { id: "list", label: "列表" },
-    { id: "table", label: "表格" },
+    { id: "grid", label: t("海报墙") },
+    { id: "list", label: t("列表") },
+    { id: "table", label: t("表格") },
   ];
   return (
-    <div className="desktop-view-switcher" aria-label="作品视图">
+    <div className="desktop-view-switcher" aria-label={t("作品视图")}>
       {views.map((view) => (
         <button
           aria-pressed={current === view.id}
@@ -95,6 +99,7 @@ export function DesktopWorkResults({
   view: DesktopWorkViewMode;
   onOpen: (id: string) => void;
 }) {
+  const { t } = useDesktopI18n();
   if (view === "list") {
     return (
       <div className="desktop-work-list">
@@ -114,7 +119,7 @@ export function DesktopWorkResults({
             </button>
             <div className="desktop-work-list-facts">
               <span>{card.releaseDate}</span>
-              <span>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} 分钟` : "—"}</span>
+              <span>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} ${t("分钟")}` : "—"}</span>
               <span>{card.makerName ?? "—"}</span>
             </div>
           </article>
@@ -129,13 +134,13 @@ export function DesktopWorkResults({
         <table className="desktop-work-table">
           <thead>
             <tr>
-              <th>番号</th>
-              <th>标题</th>
-              <th>发行日期</th>
-              <th>时长</th>
-              <th>演员</th>
-              <th>Maker</th>
-              <th>类型</th>
+              <th>{t("番号")}</th>
+              <th>{t("标题")}</th>
+              <th>{t("发行日期")}</th>
+              <th>{t("时长")}</th>
+              <th>{t("演员")}</th>
+              <th>{t("厂商")}</th>
+              <th>{t("类型")}</th>
             </tr>
           </thead>
           <tbody>
@@ -144,7 +149,7 @@ export function DesktopWorkResults({
                 <td><button className="table-link" onClick={() => onOpen(card.work.id)} type="button">{card.work.code}</button></td>
                 <td><button className="table-link table-title-link" onClick={() => onOpen(card.work.id)} type="button">{card.title}</button></td>
                 <td>{card.releaseDate}</td>
-                <td>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} 分钟` : "—"}</td>
+                <td>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} ${t("分钟")}` : "—"}</td>
                 <td>{card.performerNames.join(" · ") || "—"}</td>
                 <td>{card.makerName ?? "—"}</td>
                 <td>{card.work.workTypeIds.join(" · ") || "—"}</td>

@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-19 Desktop Discovery & Presentation Parity**。V1-18 补齐真实本地图片展示、Works 三视图和 Unified Library 同步；V1-19 继续关闭 Web/Desktop 日常浏览差距，把首页海报、完整 Work Facet、People 高级筛选、Person 相关作品二次筛选和分类浏览接入 Desktop。
+当前已推进到 **V1-20 Desktop UX & I18N Parity**。V1-19 已关闭主要 Discovery / Presentation 差距；V1-20 根据实机使用继续收口主导航、Facet Rail、Asset 语义/顺序，以及与 Web 同语义的中 / 日 / 英 UI Language 与 Metadata Language 独立偏好。
 
 已完成重点：
 
@@ -64,12 +64,20 @@
 - ~~Desktop People 高级筛选~~（V1-19）；
 - ~~Person Detail 相关作品海报 / 三视图 / 二次 Facet~~（V1-19）；
 - ~~Desktop Maker / Label / Series / Genre / Director / Work Type / Tag 分类浏览~~（V1-19）。
+- ~~Desktop Sidebar 默认收窄、可折叠并持久化~~（V1-20）；
+- ~~Desktop Facet Rail 加宽与长选项换行~~（V1-20）；
+- ~~poster / fanart / screenshot / cover 用户语义与展示顺序统一~~（V1-20）；
+- ~~Desktop UI / Metadata 中日英独立语言偏好~~（V1-20）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
 
 本阶段完成日常浏览对齐：完整 Work Facet、People 高级筛选、Person 相关作品二次筛选、首页/关联作品海报和分类浏览。
 
-### V1-20：Desktop Governance Parity
+### V1-20：Desktop UX & I18N Parity
+
+本阶段完成 Desktop 布局和三语 Presentation 对齐：可折叠窄 Sidebar、宽 Facet Rail、Asset 语义/顺序，以及独立 UI / Metadata Language。
+
+### V1-21：Desktop Governance Parity
 
 下一阶段重点：
 

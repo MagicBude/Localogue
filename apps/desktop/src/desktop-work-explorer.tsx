@@ -13,6 +13,7 @@ import {
 import type { WorkQuery, WorkSearchResult, WorkSort } from "@/domain/queries/work-query";
 
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useDesktopI18n } from "./desktop-i18n";
 import {
   buildDesktopWorkCards,
   DesktopWorkResults,
@@ -55,6 +56,7 @@ export function DesktopWorkExplorer({
   storageKey?: string;
   initialQuery?: WorkQuery;
 }) {
+  const { t, metadataLanguage } = useDesktopI18n();
   const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
   const [page, setPage] = useState(1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
@@ -90,7 +92,7 @@ export function DesktopWorkExplorer({
     const optionForPerson = (id: string, count: number | undefined): FilterOption => ({
       id,
       label: peopleById.has(id)
-        ? getPreferredPersonName(peopleById.get(id)!, "ja")
+        ? getPreferredPersonName(peopleById.get(id)!, metadataLanguage)
         : id,
       count,
     });
@@ -106,7 +108,7 @@ export function DesktopWorkExplorer({
       .filter((item) => item.kind === "maker")
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, "ja", item.id),
+        label: localizeText(item.names, metadataLanguage, item.id),
         count: result.facets.makers.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.makerIds?.includes(item.id))
@@ -116,7 +118,7 @@ export function DesktopWorkExplorer({
       .filter((item) => item.kind === "label")
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, "ja", item.id),
+        label: localizeText(item.names, metadataLanguage, item.id),
         count: result.facets.labels.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.labelIds?.includes(item.id))
@@ -125,7 +127,7 @@ export function DesktopWorkExplorer({
     const seriesOptions = series
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, "ja", item.id),
+        label: localizeText(item.names, metadataLanguage, item.id),
         count: result.facets.series.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.seriesIds?.includes(item.id))
@@ -134,7 +136,7 @@ export function DesktopWorkExplorer({
     const genreOptions = genres
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, "ja", item.id),
+        label: localizeText(item.names, metadataLanguage, item.id),
         count: result.facets.genres.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.genreIds?.includes(item.id))
@@ -143,7 +145,7 @@ export function DesktopWorkExplorer({
     const tagOptions = tags
       .map((item) => ({
         id: item.id,
-        label: localizeText(item.names, "ja", item.id),
+        label: localizeText(item.names, metadataLanguage, item.id),
         count: result.facets.tags.find((facet) => facet.id === item.id)?.count ?? 0,
       }))
       .filter((item) => item.count > 0 || query.tagIds?.includes(item.id))
@@ -169,7 +171,7 @@ export function DesktopWorkExplorer({
 
     return {
       result,
-      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets),
+      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage),
       people,
       directors,
       makers,
@@ -180,15 +182,15 @@ export function DesktopWorkExplorer({
       workTypes,
       years,
     };
-  }, [repository, query, page, pageSize, fixedPersonId]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage]);
 
   function changeView(next: DesktopWorkViewMode): void {
     setView(next);
     window.localStorage.setItem(storageKey, next);
   }
 
-  if (data.loading) return <ExplorerState>正在读取作品与 Facet…</ExplorerState>;
-  if (data.error || !data.value) return <ExplorerState error>{data.error ?? "无法读取作品。"}</ExplorerState>;
+  if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
+  if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取作品。")}</ExplorerState>;
 
   const { result, cards } = data.value;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
@@ -206,17 +208,17 @@ export function DesktopWorkExplorer({
         <DesktopWorkFilterChips query={query} data={data.value} onChange={setQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
-            <strong>{result.total}</strong> 项作品 · 第 {result.page} / {pageCount} 页
+            {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
           </div>
           <DesktopWorkViewSwitcher current={view} onChange={changeView} />
         </div>
         <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
-        {!cards.length ? <ExplorerState>没有符合当前筛选条件的作品。</ExplorerState> : null}
+        {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
         {result.total > pageSize ? (
-          <div className="desktop-pagination" aria-label="作品分页">
-            <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← 上一页</button>
+          <div className="desktop-pagination" aria-label={t("分页")}>
+            <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
             <span>{page} / {pageCount}</span>
-            <button disabled={page >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>下一页 →</button>
+            <button disabled={page >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
           </div>
         ) : null}
       </section>
@@ -235,62 +237,63 @@ function WorkFacetPanel({
   fixedPersonId?: string;
   data: ExplorerData;
 }) {
+  const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
   return (
     <aside className="desktop-facet-panel">
       <div className="desktop-facet-panel__heading">
-        <div><strong>多维筛选</strong><small>与 Web 共用 WorkQuery / Facet 规则</small></div>
-        <button type="button" onClick={() => onChange({ sort: "release_desc" })}>清除</button>
+        <div><strong>{t("多维筛选")}</strong><small>{t("与 Web 共用 WorkQuery / Facet 规则")}</small></div>
+        <button type="button" onClick={() => onChange({ sort: "release_desc" })}>{t("清除")}</button>
       </div>
 
       <label className="field">
-        <span>搜索番号或标题</span>
+        <span>{t("搜索番号或标题")}</span>
         <input
           value={query.text ?? ""}
           onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })}
-          placeholder="例如 MIDV-077 / タイトル"
+          placeholder={t("例如 MIDV-077 / 标题")}
           type="search"
         />
       </label>
 
       <label className="field">
-        <span>排序</span>
+        <span>{t("排序")}</span>
         <select value={query.sort ?? "release_desc"} onChange={(event) => patch({ sort: event.target.value as WorkSort })}>
-          <option value="release_desc">发行日期 ↓</option>
-          <option value="release_asc">发行日期 ↑</option>
-          <option value="duration_desc">时长 ↓</option>
-          <option value="duration_asc">时长 ↑</option>
-          <option value="code_asc">番号 A → Z</option>
-          <option value="code_desc">番号 Z → A</option>
-          <option value="title_asc">标题 A → Z</option>
-          <option value="title_desc">标题 Z → A</option>
-          <option value="created_desc">最近创建</option>
-          <option value="updated_desc">最近更新</option>
+          <option value="release_desc">{t("发行日期")} ↓</option>
+          <option value="release_asc">{t("发行日期")} ↑</option>
+          <option value="duration_desc">{t("时长")} ↓</option>
+          <option value="duration_asc">{t("时长")} ↑</option>
+          <option value="code_asc">{t("番号")} A → Z</option>
+          <option value="code_desc">{t("番号")} Z → A</option>
+          <option value="title_asc">{t("标题")} A → Z</option>
+          <option value="title_desc">{t("标题")} Z → A</option>
+          <option value="created_desc">{t("最近创建")}</option>
+          <option value="updated_desc">{t("最近更新")}</option>
         </select>
       </label>
 
       <div className="desktop-filter-pair">
-        <label className="field"><span>发行日期 ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
-        <label className="field"><span>发行日期 ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
+        <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
+        <label className="field"><span>{t("发行日期")} ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
       </div>
       <div className="desktop-filter-pair">
-        <label className="field"><span>时长 ≥</span><input min="0" value={query.durationMin ?? ""} onChange={(event) => patch({ durationMin: parseOptionalNumber(event.target.value) })} placeholder="90" type="number" /></label>
-        <label className="field"><span>时长 ≤</span><input min="0" value={query.durationMax ?? ""} onChange={(event) => patch({ durationMax: parseOptionalNumber(event.target.value) })} placeholder="180" type="number" /></label>
+        <label className="field"><span>{t("时长")} ≥</span><input min="0" value={query.durationMin ?? ""} onChange={(event) => patch({ durationMin: parseOptionalNumber(event.target.value) })} placeholder="90" type="number" /></label>
+        <label className="field"><span>{t("时长")} ≤</span><input min="0" value={query.durationMax ?? ""} onChange={(event) => patch({ durationMax: parseOptionalNumber(event.target.value) })} placeholder="180" type="number" /></label>
       </div>
       <div className="desktop-filter-pair">
-        <BooleanSelect label="有封面" value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
-        <BooleanSelect label="有本地媒体" value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
+        <BooleanSelect label={t("有封面")} value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
+        <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
       </div>
 
-      {!fixedPersonId ? <FilterGroup label="演员" values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
-      <FilterGroup label="导演" values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
-      <FilterGroup label="年份" values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
-      <FilterGroup label="作品类型" values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
-      <FilterGroup label="厂商" values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
-      <FilterGroup label="厂牌" values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
-      <FilterGroup label="系列" values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
-      <FilterGroup label="Genre" values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
-      <FilterGroup label="Tag" values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
+      {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
+      <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
+      <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("Genre")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
+      <FilterGroup label={t("Tag")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
     </aside>
   );
 }
@@ -304,6 +307,7 @@ function DesktopWorkFilterChips({
   data: ExplorerData;
   onChange: (query: WorkQuery) => void;
 }) {
+  const { t } = useDesktopI18n();
   const maps = useMemo(() => ({
     personIds: toOptionMap(data.people),
     directorIds: toOptionMap(data.directors),
@@ -317,27 +321,27 @@ function DesktopWorkFilterChips({
   }), [data]);
 
   const chips: Array<{ key: keyof WorkQuery; value?: string; label: string }> = [];
-  if (query.text) chips.push({ key: "text", label: `关键词：${query.text}` });
-  pushArrayChips(chips, "personIds", "演员", query.personIds, maps.personIds);
-  pushArrayChips(chips, "directorIds", "导演", query.directorIds, maps.directorIds);
-  pushArrayChips(chips, "makerIds", "厂商", query.makerIds, maps.makerIds);
-  pushArrayChips(chips, "labelIds", "厂牌", query.labelIds, maps.labelIds);
-  pushArrayChips(chips, "seriesIds", "系列", query.seriesIds, maps.seriesIds);
+  if (query.text) chips.push({ key: "text", label: `${t("关键词")}：${query.text}` });
+  pushArrayChips(chips, "personIds", t("演员"), query.personIds, maps.personIds);
+  pushArrayChips(chips, "directorIds", t("导演"), query.directorIds, maps.directorIds);
+  pushArrayChips(chips, "makerIds", t("厂商"), query.makerIds, maps.makerIds);
+  pushArrayChips(chips, "labelIds", t("厂牌"), query.labelIds, maps.labelIds);
+  pushArrayChips(chips, "seriesIds", t("系列"), query.seriesIds, maps.seriesIds);
   pushArrayChips(chips, "genreIds", "Genre", query.genreIds, maps.genreIds);
-  pushArrayChips(chips, "workTypeIds", "类型", query.workTypeIds, maps.workTypeIds);
+  pushArrayChips(chips, "workTypeIds", t("类型"), query.workTypeIds, maps.workTypeIds);
   pushArrayChips(chips, "tagIds", "Tag", query.tagIds, maps.tagIds);
-  pushArrayChips(chips, "releaseYears", "年份", query.releaseYears, maps.releaseYears);
-  if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `发行 ≥ ${query.releaseFrom}` });
-  if (query.releaseTo) chips.push({ key: "releaseTo", label: `发行 ≤ ${query.releaseTo}` });
-  if (query.durationMin !== undefined) chips.push({ key: "durationMin", label: `时长 ≥ ${query.durationMin}` });
-  if (query.durationMax !== undefined) chips.push({ key: "durationMax", label: `时长 ≤ ${query.durationMax}` });
-  if (query.hasCover !== undefined) chips.push({ key: "hasCover", label: `封面：${query.hasCover ? "有" : "无"}` });
-  if (query.hasMedia !== undefined) chips.push({ key: "hasMedia", label: `媒体：${query.hasMedia ? "有" : "无"}` });
+  pushArrayChips(chips, "releaseYears", t("年份"), query.releaseYears, maps.releaseYears);
+  if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `${t("发行日期")} ≥ ${query.releaseFrom}` });
+  if (query.releaseTo) chips.push({ key: "releaseTo", label: `${t("发行日期")} ≤ ${query.releaseTo}` });
+  if (query.durationMin !== undefined) chips.push({ key: "durationMin", label: `${t("时长")} ≥ ${query.durationMin}` });
+  if (query.durationMax !== undefined) chips.push({ key: "durationMax", label: `${t("时长")} ≤ ${query.durationMax}` });
+  if (query.hasCover !== undefined) chips.push({ key: "hasCover", label: `${t("封面")}：${query.hasCover ? t("是") : t("否")}` });
+  if (query.hasMedia !== undefined) chips.push({ key: "hasMedia", label: `${t("媒体")}：${query.hasMedia ? t("是") : t("否")}` });
 
   if (!chips.length) return null;
   return (
     <div className="desktop-active-filters">
-      <strong>已选筛选</strong>
+      <strong>{t("已选筛选")}</strong>
       <div>
         {chips.map((chip) => (
           <button
@@ -354,13 +358,14 @@ function DesktopWorkFilterChips({
 }
 
 function BooleanSelect({ label, value, onChange }: { label: string; value?: boolean; onChange: (value?: boolean) => void }) {
+  const { t } = useDesktopI18n();
   return (
     <label className="field">
       <span>{label}</span>
       <select value={value === undefined ? "" : String(value)} onChange={(event) => onChange(event.target.value === "" ? undefined : event.target.value === "true")}>
-        <option value="">任意</option>
-        <option value="true">是</option>
-        <option value="false">否</option>
+        <option value="">{t("任意")}</option>
+        <option value="true">{t("是")}</option>
+        <option value="false">{t("否")}</option>
       </select>
     </label>
   );
@@ -377,11 +382,12 @@ function FilterGroup({
   values?: string[];
   onChange: (values: string[]) => void;
 }) {
+  const { t } = useDesktopI18n();
   if (!options.length && !values.length) return null;
   const ordered = [...options].sort((a, b) => Number(values.includes(b.id)) - Number(values.includes(a.id)) || optionSort(a, b));
   return (
     <details className="desktop-facet-group" open={values.length > 0}>
-      <summary><span>{label}</span><small>{values.length ? `已选 ${values.length}` : `${options.length} 项`}</small></summary>
+      <summary><span>{label}</span><small>{values.length ? t("已选 {count}", { count: values.length }) : t("{count} 项", { count: options.length })}</small></summary>
       <div className="desktop-facet-options">
         {ordered.slice(0, 80).map((option) => (
           <label key={option.id}>
@@ -395,7 +401,7 @@ function FilterGroup({
           </label>
         ))}
       </div>
-      {ordered.length > 80 ? <small className="muted">当前显示前 80 项；可先组合其他维度缩小范围。</small> : null}
+      {ordered.length > 80 ? <small className="muted">{t("当前显示前 80 项；可先组合其他维度缩小范围。")}</small> : null}
     </details>
   );
 }

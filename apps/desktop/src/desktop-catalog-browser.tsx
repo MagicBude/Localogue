@@ -8,6 +8,7 @@ import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
 
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useDesktopI18n } from "./desktop-i18n";
 
 type CatalogKind = "makers" | "labels" | "series" | "genres" | "directors" | "workTypes" | "tags";
 
@@ -30,6 +31,7 @@ export function DesktopCatalogBrowser({
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
 }) {
+  const { t, metadataLanguage } = useDesktopI18n();
   const [selection, setSelection] = useState<CatalogSelection | null>(null);
   const data = useAsyncCatalogData(async () => {
     const [result, organizations, series, genres, tags, people] = await Promise.all([
@@ -42,27 +44,27 @@ export function DesktopCatalogBrowser({
     ]);
     const peopleById = new Map(people.items.map((person) => [person.id, person]));
     return {
-      makers: organizations.filter((item) => item.kind === "maker").map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "makers", item.id) })).filter(hasCount).sort(catalogSort),
-      labels: organizations.filter((item) => item.kind === "label").map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "labels", item.id) })).filter(hasCount).sort(catalogSort),
-      series: series.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "series", item.id) })).filter(hasCount).sort(catalogSort),
-      genres: genres.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "genres", item.id) })).filter(hasCount).sort(catalogSort),
-      tags: tags.map((item) => ({ id: item.id, label: localizeText(item.names, "ja", item.id), count: facetCount(result, "tags", item.id) })).filter(hasCount).sort(catalogSort),
-      directors: result.facets.directors.map((facet) => ({ id: facet.id, label: peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, "ja") : facet.id, count: facet.count })).sort(catalogSort),
+      makers: organizations.filter((item) => item.kind === "maker").map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "makers", item.id) })).filter(hasCount).sort(catalogSort),
+      labels: organizations.filter((item) => item.kind === "label").map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "labels", item.id) })).filter(hasCount).sort(catalogSort),
+      series: series.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "series", item.id) })).filter(hasCount).sort(catalogSort),
+      genres: genres.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "genres", item.id) })).filter(hasCount).sort(catalogSort),
+      tags: tags.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id), count: facetCount(result, "tags", item.id) })).filter(hasCount).sort(catalogSort),
+      directors: result.facets.directors.map((facet) => ({ id: facet.id, label: peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, metadataLanguage) : facet.id, count: facet.count })).sort(catalogSort),
       workTypes: result.facets.workTypes.map((facet) => ({ id: facet.id, label: friendlyId(facet.id), count: facet.count })).sort(catalogSort),
     };
-  }, [repository]);
+  }, [repository, metadataLanguage]);
 
-  if (data.loading) return <BrowserState>正在生成分类索引…</BrowserState>;
-  if (data.error || !data.value) return <BrowserState error>{data.error ?? "无法读取分类索引。"}</BrowserState>;
+  if (data.loading) return <BrowserState>{t("正在生成分类索引…")}</BrowserState>;
+  if (data.error || !data.value) return <BrowserState error>{data.error ?? t("无法读取分类索引。")}</BrowserState>;
 
   if (selection) {
     return (
       <div className="page-stack">
-        <button className="back-button" onClick={() => setSelection(null)}>← 返回分类浏览</button>
+        <button className="back-button" onClick={() => setSelection(null)}>← {t("返回分类浏览")}</button>
         <section className="page-title">
           <span className="eyebrow">CATALOG · {catalogTitle(selection.kind).toUpperCase()}</span>
           <h1>{selection.label}</h1>
-          <p>从分类索引进入后仍然可以继续组合其他 Facet；这一点与 Web 分类详情页保持一致。</p>
+          <p>{t("从分类索引进入后仍然可以继续组合其他 Facet；这一点与 Web 分类详情页保持一致。")}</p>
         </section>
         <DesktopWorkExplorer
           key={`${selection.kind}:${selection.id}`}
@@ -76,12 +78,12 @@ export function DesktopCatalogBrowser({
   }
 
   const sections: Array<{ kind: CatalogKind; title: string; eyebrow: string; items: CatalogItem[] }> = [
-    { kind: "makers", title: "厂商", eyebrow: "MAKERS", items: data.value.makers },
-    { kind: "labels", title: "厂牌", eyebrow: "LABELS", items: data.value.labels },
-    { kind: "series", title: "系列", eyebrow: "SERIES", items: data.value.series },
+    { kind: "makers", title: t("厂商"), eyebrow: "MAKERS", items: data.value.makers },
+    { kind: "labels", title: t("厂牌"), eyebrow: "LABELS", items: data.value.labels },
+    { kind: "series", title: t("系列"), eyebrow: "SERIES", items: data.value.series },
     { kind: "genres", title: "Genre", eyebrow: "GENRES", items: data.value.genres },
-    { kind: "directors", title: "导演", eyebrow: "DIRECTORS", items: data.value.directors },
-    { kind: "workTypes", title: "作品类型", eyebrow: "WORK TYPES", items: data.value.workTypes },
+    { kind: "directors", title: t("导演"), eyebrow: "DIRECTORS", items: data.value.directors },
+    { kind: "workTypes", title: t("作品类型"), eyebrow: "WORK TYPES", items: data.value.workTypes },
     { kind: "tags", title: "Tag", eyebrow: "TAGS", items: data.value.tags },
   ];
 
@@ -89,22 +91,22 @@ export function DesktopCatalogBrowser({
     <div className="page-stack">
       <section className="page-title">
         <span className="eyebrow">EXPLORE · CATALOG INDEX</span>
-        <h1>分类浏览</h1>
-        <p>对齐 Web 的厂商、厂牌、系列、Genre、导演、作品类型和 Tag 索引；点击任意分类后继续使用完整作品多维筛选。</p>
+        <h1>{t("分类浏览")}</h1>
+        <p>{t("对齐 Web 的厂商、厂牌、系列、Genre、导演、作品类型和 Tag 索引；点击任意分类后继续使用完整作品多维筛选。")}</p>
       </section>
       <div className="desktop-catalog-sections">
         {sections.map((section) => (
           <section className="settings-card" key={section.kind}>
-            <div className="section-heading"><div><span className="eyebrow">{section.eyebrow}</span><h2>{section.title}</h2></div><small className="muted">{section.items.length} 项</small></div>
+            <div className="section-heading"><div><span className="eyebrow">{section.eyebrow}</span><h2>{section.title}</h2></div><small className="muted">{t("{count} 项", { count: section.items.length })}</small></div>
             {section.items.length ? (
               <div className="desktop-catalog-grid">
                 {section.items.slice(0, 120).map((item) => (
                   <button key={item.id} onClick={() => setSelection({ kind: section.kind, id: item.id, label: item.label })} type="button">
-                    <strong>{item.label}</strong><small>{item.count} 部作品</small>
+                    <strong>{item.label}</strong><small>{t("{count} 部作品", { count: item.count })}</small>
                   </button>
                 ))}
               </div>
-            ) : <p className="muted">当前资料源没有这个维度的数据。</p>}
+            ) : <p className="muted">{t("当前资料源没有这个维度的数据。")}</p>}
           </section>
         ))}
       </div>

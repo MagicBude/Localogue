@@ -1,8 +1,8 @@
 # Localogue Desktop
 
-V1-19：**Desktop Discovery & Presentation Parity**。
+V1-20：**Desktop UX & I18N Parity**。
 
-Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-18 建立 Works 三视图、Private poster 实际渲染和 Unified Library 同步；V1-19 继续对齐 Web 日常探索能力：首页/Person 相关作品真实海报、完整 Work Facet、People 高级筛选和 Catalog Browse。它与 Next.js Web 共享 Domain / Application Query Core，但使用 Tauri/Rust 作为本地平台适配层。
+Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-19 已对齐首页/Person 相关作品海报、完整 Work Facet、People 高级筛选和 Catalog Browse；V1-20 继续对齐 UX 与 i18n：可折叠窄 Sidebar、更宽 Facet Rail、统一 Asset 语义/顺序，以及与 Web 同语义的中 / 日 / 英 UI / Metadata 独立语言偏好。它与 Next.js Web 共享 Domain / Application Query Core，但使用 Tauri/Rust 作为本地平台适配层。
 
 当前提供：
 
@@ -26,6 +26,10 @@ Desktop 已从 Runtime 验证壳升级为正式 Localogue 应用入口。V1-18 �
 - 默认程序打开与资源管理器 / Finder 定位；
 - Tauri App Config / App Local Data；
 - Dev / Release identifier 隔离。
+- Sidebar 默认收窄并支持本机持久化折叠；
+- Work Facet Rail 加宽，长选项允许换行；
+- poster / fanart / screenshot / cover 使用一致的三语语义和固定展示顺序；
+- UI Language 与 Metadata Language 独立支持 `zh-CN / ja / en`。
 
 ## V1-18 权限边界
 
@@ -46,7 +50,7 @@ works / people / organizations / series / genres / tags / assets / media-files
 - Work 详情可先解除 / 删除 Private Asset 元数据，再完成受保护的 Work 删除；原始图片不会被自动物理删除；
 - NFO 导入已有 Work 只能 fill / merge，不静默覆盖已有核心事实。
 
-完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-20。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
+完整 Evidence / Review / Curation / History、字段级冲突治理与 Portable Pack 完整交互继续属于 V1-21。Media ↔ Work 的 bind / rebind / unbind 与 `media-binding-receipts` 已在 V1-17 接入；不要在 Desktop 侧复制一套 Next.js/Node 实现。
 
 ## 开发
 

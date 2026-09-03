@@ -15,7 +15,7 @@ Localogue 不把 Web “打包成 Desktop”，也不在 Tauri 里重新实现�
                Node / Server          Rust / OS
 ```
 
-V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest，V1-17 把视频 / NFO / 本地图片统一成可跨子目录发现的 Library Source，V1-18 再补齐 Works 三视图、Private Asset 实际展示与 Unified Library 顺序同步；V1-19 继续把首页海报、完整 Work Facet、People 高级筛选、Person 相关作品二次筛选与 Catalog Browse 接入 Desktop。
+V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入 Desktop，V1-15 建立正式产品壳，V1-16 增加独立 NFO Library Ingest，V1-17 把视频 / NFO / 本地图片统一成可跨子目录发现的 Library Source，V1-18 再补齐 Works 三视图、Private Asset 实际展示与 Unified Library 顺序同步；V1-19 继续把首页海报、完整 Work Facet、People 高级筛选、Person 相关作品二次筛选与 Catalog Browse 接入 Desktop；V1-20 再补可折叠窄 Sidebar、更宽 Facet Rail、统一 Asset 语义/顺序，以及中 / 日 / 英 UI / Metadata 独立语言偏好。
 
 ## V1-15 Desktop 产品壳
 
@@ -30,7 +30,7 @@ V1-13 建立首条 Native 纵向链路，V1-14 把完整增量媒体扫描接入
 - Packs；
 - Settings。
 
-这些页面从 V1-15 的浏览壳逐步演进：V1-16 解决独立 NFO 存量迁移，V1-17 增加 Unified Library Root、NFO Work Group、本地 Asset 汇聚，并补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理以及 Media bind/rebind/unbind 审计。V1-18 对齐 Works 海报墙 / 列表 / 表格并让 Private poster 真正可见；V1-19 对齐高级 Work Facet、People Filter、Person 相关作品与 Catalog Browse。Evidence/Review/Curation/History、字段级冲突治理与 Portable Pack 完整交互继续进入 V1-20。
+这些页面从 V1-15 的浏览壳逐步演进：V1-16 解决独立 NFO 存量迁移，V1-17 增加 Unified Library Root、NFO Work Group、本地 Asset 汇聚，并补齐 Work/Person Private CRUD、核心筛选排序、Shared Pack 管理以及 Media bind/rebind/unbind 审计。V1-18 对齐 Works 海报墙 / 列表 / 表格并让 Private poster 真正可见；V1-19 对齐高级 Work Facet、People Filter、Person 相关作品与 Catalog Browse。Evidence/Review/Curation/History、字段级冲突治理与 Portable Pack 完整交互继续进入 V1-21。
 
 ## 共享查询核心
 
@@ -64,7 +64,7 @@ Private Library
 
 相同稳定 ID 使用靠前数据源的完整实体，V1 不做隐式字段级深度合并。
 
-Desktop V1-19 可读取：
+Desktop V1-20 可读取：
 
 - works；
 - people；
@@ -126,7 +126,7 @@ Rust load_desktop_settings()
 
 V1-17 起删除边界扩展为受引用保护的 Private `works / people / assets / media-files`；其它 Canonical 集合仍不开放通用删除。删除 Canonical 元数据不会自动物理删除用户原始媒体或原始图片。
 
-NFO / Local Asset Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-20。
+NFO / Local Asset Bootstrap 也不是完整 Evidence / Review 替代品：扫描必须先 Preview，写入必须由用户明确确认；已有 Work 只能 fill / merge，不静默覆盖核心事实。冲突型修改与完整 Audit 对齐继续进入 V1-21。
 
 ## V1-18 Private Asset 展示边界
 

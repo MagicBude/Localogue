@@ -2,20 +2,24 @@
 
 ## 当前阶段
 
-**V1-19：Desktop Discovery & Presentation Parity。**
+**V1-20：Desktop UX & I18N Parity。**
 
-V1-18 的 Unified Library、真实 Private Asset 展示与 Native I/O Hotfix 已通过实机同步验证。V1-19 根据实机验收继续关闭 Desktop 的浏览差距：
+V1-18 Hotfix 3 已通过 Windows 实机 Unified Library 同步验证，V1-19 已关闭主要 Discovery / Presentation 差距。V1-20 根据继续实机使用收口 Desktop 的布局、Asset 语义和三语偏好：
 
-- 首页最近作品使用真实 poster / cover；
-- Works 对齐 Web 完整多维 Facet、self-excluding count、Chips、分页和三视图；
-- People 对齐姓名/别名、状态、出生/出道/引退年份、身高和排序；
-- Person Detail 的相关作品复用完整 Work Explorer，因此支持海报、三视图与二次筛选；
-- 新增 Browse 一级入口，覆盖 Maker / Label / Series / Genre / Director / Work Type / Tag；
-- Web/Desktop 继续共用 `library-query`，没有复制第二套查询算法。
+- 主导航默认宽度收窄，并支持手动折叠 / 展开；折叠状态保存在 Desktop 本机；
+- Works 与 Person 相关作品的 Facet Rail 加宽，长 Maker / Series / Genre 等选项允许换行；
+- Work Detail Asset 固定按 poster → fanart → screenshot → cover → 其他排序；
+- 用户可见语义统一为海报 / 背景图 / 缩略图 / 封面，不再使用中英混排标题；
+- 新增 Desktop `DesktopI18nProvider`；
+- UI Language 与 Metadata Language 独立支持 `zh-CN / ja / en`；
+- 默认 UI 为中文、元数据为日文，与 Web 偏好语义一致；
+- 语言偏好只影响 Presentation，不写 Canonical；
+- Desktop `t()` 字面量由 Boundary Validator 强制检查日 / 英翻译覆盖与 key 对齐，避免页面新增文案后静默回退中文；
+- V1-20 不修改 V1-18 已稳定的 Rust Unified Library / Native I/O 扫描链。
 
-### 明确留到 V1-20
+### 明确留到 V1-21
 
-Evidence / Review / Curation / History/Restore、Portable Pack 完整导入导出和 Presentation Preference Workbench 仍属于治理对齐，不在 V1-19 冒充完成。
+Evidence / Review / Commit Plan、Curation、History/Restore、Portable Pack 完整导入导出与更完整的 Presentation Preference Workbench 仍属于 Governance Parity，不在 V1-20 冒充完成。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -224,21 +228,20 @@ Evidence / Review / Curation / History/Restore、Portable Pack 完整导入导�
 - 已有 Work 使用 fill / merge，不静默覆盖已有核心字段；
 - Rust NFO Reader 仅允许 `.nfo`、单文件 10 MB；
 - Desktop Canonical 写白名单扩大到明确 Private 集合，写根由 Rust 从 Desktop Settings 强制解析，Shared Pack 仍只读；
-- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-20；
+- NFO 导入定位为显式确认的 Bootstrap Ingest：已有 Work 只 fill / merge；V1-17 已补日常 Private CRUD，完整 Evidence / Review / History 冲突治理继续留给 V1-21；
 - V1-16 当时仅允许删除 Private `media-files`；V1-17 已扩展为受引用保护的 Work / Person / Asset / MediaFile 删除。
 - `findWorkByCode` 兼容带 / 不带连字符番号。
 
 ## 下一阶段建议
 
-**V1-19：Desktop Governance & Native Enhancement。**
+**V1-21：Desktop Governance Parity。**
 
-1. 将 Works / People 的高级 Facet、分页和更多实体浏览完整映射到 Desktop UI；
-2. 将现有 Desktop Private CRUD 接入 Commit Plan / Audit / History，补齐 Evidence / Review / Curation 等治理交互；
-3. 接入 Shared / Personal Portable Pack Desktop 导入导出，而不是仅管理已挂载目录；
-4. 补 Person 头像显示、Presentation Preference 与 Shared Asset 二进制展示边界；
-5. 继续抽取共享 Presentation / DTO，减少 Web 与 Desktop 表现层重复；
-6. 设计 Asset 孤儿治理、安全物理删除与更完整的本地资源生命周期；
-7. 保持所有 Native 写能力使用最小命令、显式白名单和引用保护。
+1. 将现有 Desktop Private CRUD 接入 Commit Plan / Audit / History，补齐 Evidence / Review / Curation 等治理交互；
+2. 接入 Shared / Personal Portable Pack Desktop 导入导出，而不是仅管理已挂载目录；
+3. 补更完整的 Presentation Preference 与 Shared Asset 展示/治理边界；
+4. 继续抽取共享 Presentation / DTO，减少 Web 与 Desktop 表现层重复；
+5. 设计 Asset 孤儿治理、安全物理删除与更完整的本地资源生命周期；
+6. 保持所有 Native 写能力使用最小命令、显式白名单和引用保护。
 
 ## 当前不做
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## V1-20 - Desktop UX & I18N Parity
+
+- Desktop 主导航默认收窄并支持显式折叠 / 展开，折叠状态本机持久化。
+- Works / Person related Works 的 Facet Rail 加宽并允许长筛选项换行，减少 Maker / Series / Genre 文本截断。
+- Work Detail 本地 Asset 固定按 poster → fanart → screenshot → cover → 其他排序。
+- 用户可见 Asset 语义统一为海报 / 背景图 / 缩略图 / 封面，并提供日本語 / English 对应标签。
+- 新增 `DesktopI18nProvider` 与顶部双语言控制：UI Language、Metadata Language 独立切换。
+- Desktop 支持 `zh-CN / ja / en` 三种 UI 语言，并让 Work / Person / Organization 等展示尊重 Metadata Language。
+- 语言偏好使用与 Web 同语义的 `localogue_ui_language` / `localogue_metadata_language` 键，但 Desktop 本机使用 localStorage 持久化。
+- 语言和 Sidebar 偏好只影响 Presentation，不修改 Canonical Library。
+- 首页统计、媒体/NFO/Asset 扫描统计、ffprobe 信息、Work 编辑器与作品表格等残余固定英文标签统一接入 Desktop I18N。
+- Desktop Boundary Validator 新增 `t()` 字面量翻译覆盖审计：日文 / 英文缺 key 或两张表 key 不一致会直接使校验失败。
+- 保持 V1-19 Query/Facet 行为与 V1-18 Hotfix 3 Unified Library / Native I/O 安全链不变。
+
 ## V1-19 - Desktop Discovery & Presentation Parity
 
 - 首页最近作品改用真实 poster / cover 卡片。

@@ -18,6 +18,8 @@ const required = [
   "apps/desktop/src/desktop-person-explorer.tsx",
   "apps/desktop/src/desktop-catalog-browser.tsx",
   "apps/desktop/src/desktop-management.tsx",
+  "apps/desktop/src/desktop-i18n.tsx",
+  "apps/desktop/src/styles.css",
   "src/application/library/library-query.ts",
   "src/application/importers/nfo-filename-metadata.ts",
   "src/infrastructure/importers/nfo-importer.ts",
@@ -118,6 +120,8 @@ if (!errors.length) {
   const desktopWorkExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-work-explorer.tsx"), "utf8");
   const desktopPersonExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-person-explorer.tsx"), "utf8");
   const desktopCatalogBrowser = readFileSync(path.join(root, "apps/desktop/src/desktop-catalog-browser.tsx"), "utf8");
+  const desktopI18n = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n.tsx"), "utf8");
+  const desktopStyles = readFileSync(path.join(root, "apps/desktop/src/styles.css"), "utf8");
   for (const token of ["personIds", "directorIds", "makerIds", "labelIds", "seriesIds", "genreIds", "workTypeIds", "tagIds", "releaseYears", "releaseFrom", "releaseTo", "durationMin", "durationMax", "hasCover", "hasMedia"]) {
     if (!desktopWorkExplorer.includes(token)) errors.push(`V1-19 Desktop Work 多维筛选缺少 WorkQuery 条件：${token}`);
   }
@@ -135,6 +139,48 @@ if (!errors.length) {
   }
   if (!desktopApp.includes('{ id: "browse", label: "浏览"')) {
     errors.push("V1-19 Desktop 主导航必须提供分类浏览入口。");
+  }
+  if (!desktopI18n.includes("DesktopI18nProvider") || !desktopI18n.includes("DesktopLanguageControls") || !desktopI18n.includes("useDesktopI18n")) {
+    errors.push("V1-20 Desktop 必须通过统一 I18N Context 提供三语界面与语言控制，禁止各页面维护独立语言状态。");
+  }
+  for (const token of ["localogue_ui_language", "localogue_metadata_language", '"zh-CN"', '"ja"', '"en"']) {
+    if (!desktopI18n.includes(token)) errors.push(`V1-20 Desktop I18N 缺少语言偏好契约：${token}`);
+  }
+  const desktopTranslationKeys = {
+    ja: collectDesktopTranslationKeys(desktopI18n, "ja"),
+    en: collectDesktopTranslationKeys(desktopI18n, "en"),
+  };
+  const desktopLiteralTKeys = collectDesktopLiteralTKeys(path.join(root, "apps/desktop/src"));
+  for (const language of ["ja", "en"]) {
+    for (const key of desktopLiteralTKeys) {
+      if (!desktopTranslationKeys[language].has(key)) {
+        errors.push(`V1-20 Desktop I18N ${language} 缺少 t() 文案：${JSON.stringify(key)}`);
+      }
+    }
+  }
+  for (const key of desktopTranslationKeys.ja) {
+    if (!desktopTranslationKeys.en.has(key)) errors.push(`V1-20 Desktop I18N 英文表缺少日文表已有 key：${JSON.stringify(key)}`);
+  }
+  for (const key of desktopTranslationKeys.en) {
+    if (!desktopTranslationKeys.ja.has(key)) errors.push(`V1-20 Desktop I18N 日文表缺少英文表已有 key：${JSON.stringify(key)}`);
+  }
+  if (!desktopApp.includes("localogue.desktop.sidebar-collapsed") || !desktopApp.includes("is-sidebar-collapsed")) {
+    errors.push("V1-20 Desktop Sidebar 必须支持显式折叠并本机持久化，不允许只能依赖屏宽隐式收起。");
+  }
+  if (!desktopStyles.includes("grid-template-columns: 188px") || !desktopStyles.includes("grid-template-columns: 72px")) {
+    errors.push("V1-20 Desktop Sidebar 必须保持默认窄栏与折叠窄条两种明确宽度。");
+  }
+  if (!desktopStyles.includes("minmax(330px, 380px)") || !desktopStyles.includes("white-space: normal")) {
+    errors.push("V1-20 Work Facet Rail 必须加宽并允许长筛选项换行，避免标签被窄栏截断。");
+  }
+  for (const token of ['poster: 0', 'fanart: 1', 'screenshot: 2', 'cover: 3']) {
+    if (!desktopApp.includes(token)) errors.push(`V1-20 Work Asset 展示顺序缺少：${token}`);
+  }
+  if (desktopApp.includes("本地海报 / 封面 / Fanart")) {
+    errors.push("V1-20 不允许继续使用中英混排且语义不明确的本地海报 / 封面 / Fanart 标题。");
+  }
+  for (const token of ['poster:', 'fanart:', 'screenshot:', '海报', '背景图', '缩略图', 'ポスター', '背景画像', 'サムネイル', 'Poster', 'Background', 'Thumbnail']) {
+    if (!desktopI18n.includes(token)) errors.push(`V1-20 Asset I18N 语义映射缺少：${token}`);
   }
   if (!desktopAssetImage.includes("readPrivateAssetBytes") || !rust.includes("read_private_asset_bytes")) {
     errors.push("V1-18 Desktop 必须通过受限 Private Asset Reader 显示本地图片，不能继续只画占位符。");
@@ -234,7 +280,65 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-19 首页/人物关联作品海报、多维 Work Facet、人物高级筛选、分类浏览、三视图，以及 V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-20 Sidebar/Facet UX、Asset 语义顺序、UI/Metadata 三语偏好，以及 V1-19 Discovery 与 V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+}
+
+function collectDesktopTranslationKeys(source, language) {
+  const output = new Set();
+  for (const declaration of ["const translations", "const supplementalTranslations"]) {
+    const declarationIndex = source.indexOf(declaration);
+    if (declarationIndex < 0) continue;
+    const languageMatch = new RegExp(`\\b${language}\\s*:\\s*\\{`).exec(source.slice(declarationIndex));
+    if (!languageMatch) continue;
+    const braceIndex = declarationIndex + languageMatch.index + languageMatch[0].lastIndexOf("{");
+    const block = readBalancedObject(source, braceIndex);
+    for (const match of block.matchAll(/^\s*"((?:\\.|[^"\\])*)"\s*:/gm)) {
+      output.add(unescapeTranslationKey(match[1]));
+    }
+  }
+  return output;
+}
+
+function collectDesktopLiteralTKeys(directory) {
+  const output = new Set();
+  for (const file of walkTextFiles(directory)) {
+    if (file.endsWith(`${path.sep}desktop-i18n.tsx`)) continue;
+    const source = readFileSync(file, "utf8");
+    for (const match of source.matchAll(/\bt\(\s*(["'])(.*?)\1/gs)) {
+      output.add(unescapeTranslationKey(match[2]));
+    }
+  }
+  return output;
+}
+
+function readBalancedObject(source, braceIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  for (let index = braceIndex; index < source.length; index += 1) {
+    const char = source[index];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (char === "\\\\") escaped = true;
+      else if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") quote = char;
+    else if (char === "{") depth += 1;
+    else if (char === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(braceIndex + 1, index);
+    }
+  }
+  return "";
+}
+
+function unescapeTranslationKey(value) {
+  return value
+    .replaceAll("\\\\n", "\\n")
+    .replaceAll('\\\\"', '"')
+    .replaceAll("\\\\'", "'")
+    .replaceAll("\\\\\\\\", "\\\\");
 }
 
 function walkTextFiles(directory) {
