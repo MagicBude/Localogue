@@ -20,6 +20,13 @@ const required = [
   "apps/desktop/src/desktop-catalog-browser.tsx",
   "apps/desktop/src/desktop-management.tsx",
   "apps/desktop/src/desktop-i18n.tsx",
+  "apps/desktop/src/desktop-governance.tsx",
+  "apps/desktop/src/desktop-governance-service.ts",
+  "apps/desktop/src/desktop-vocabulary-repository.ts",
+  "src/application/crypto/sha256.ts",
+  "docs/decisions/ADR-039-desktop-governance-private-audit-and-snapshot-boundary.md",
+  "docs/development/v1-23-desktop-governance-parity-walkthrough.md",
+  "V1_23_MANIFEST.md",
   "apps/desktop/src/styles.css",
   "src/application/library/library-query.ts",
   "src/application/importers/nfo-filename-metadata.ts",
@@ -67,7 +74,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"];
+  const runtimeCommands = ["pick_directory", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "restore_private_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -242,9 +249,24 @@ if (!errors.length) {
   if (!rust.includes('"works" | "people" | "genres" | "tags" | "assets" | "media-files"') || !rust.includes("ensure_private_delete_is_unreferenced")) {
     errors.push("V1-21 Private 删除必须只开放受引用保护的 Work / Person / Genre / Tag / Asset / MediaFile，并执行引用检查。");
   }
-  if (!rust.includes("write_private_audit_entity") || !rust.includes('collection != "media-binding-receipts"')) {
-    errors.push("V1-18 Media 手工绑定必须通过受限 Private Audit Writer 保存 media-binding-receipts。");
+  if (!rust.includes("write_private_audit_entity") || !rust.includes("is_private_audit_collection") || !rust.includes('"media-binding-receipts"')) {
+    errors.push("V1-23 Private Audit Writer 必须保留受限集合白名单，并继续支持 media-binding-receipts。");
   }
+  const governanceAuditCollections = ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts"];
+  for (const collection of governanceAuditCollections) {
+    if (!desktopContracts.includes(`| "${collection}"`) && !desktopContracts.includes(`= "${collection}"`)) errors.push(`V1-23 DesktopPrivateAuditCollection 缺少：${collection}`);
+    if (!rust.includes(`"${collection}"`)) errors.push(`V1-23 Rust Private Audit 白名单缺少：${collection}`);
+  }
+  const desktopGovernance = readFileSync(path.join(root, "apps/desktop/src/desktop-governance.tsx"), "utf8");
+  const desktopGovernanceService = readFileSync(path.join(root, "apps/desktop/src/desktop-governance-service.ts"), "utf8");
+  const commitPlanService = readFileSync(path.join(root, "src/application/review/commit-plan-service.ts"), "utf8");
+  const sha256Core = readFileSync(path.join(root, "src/application/crypto/sha256.ts"), "utf8");
+  if (!desktopApp.includes('id: "governance"') || !desktopApp.includes("<DesktopGovernance")) errors.push("V1-23 Desktop 必须提供 Governance 一级入口。 ");
+  for (const token of ["Evidence", "Curation", "History", "restoreDesktopCommit", "executeDesktopCanonicalCommit"]) {
+    if (!desktopGovernance.includes(token) && !desktopGovernanceService.includes(token)) errors.push(`V1-23 Desktop Governance 缺少能力：${token}`);
+  }
+  if (!rust.includes("restore_private_snapshot") || !rust.includes("validate_snapshot_restore_entry") || !rust.includes("include_audit_state")) errors.push("V1-23 Snapshot Restore 必须由 Rust 在受限路径白名单内执行。 ");
+  if (commitPlanService.includes("node:crypto") || !commitPlanService.includes("sha256Text") || !sha256Core.includes("crypto.subtle.digest")) errors.push("V1-23 Commit Plan 指纹必须使用平台中立 WebCrypto SHA-256，不能依赖 Node crypto。 ");
   if (!rust.includes("read_nfo_text") || !rust.includes('extension != "nfo"') || !rust.includes("MAX_NFO_BYTES")) {
     errors.push("V1-18 NFO Reader 必须限制为 .nfo 普通文件，并保留单文件大小上限。");
   }
@@ -416,7 +438,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-22 Stable Refresh / Dense Work Detail / Curated Genre Aliases，以及 V1-21 Vocabulary Governance、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-23 Governance / Private Audit / Snapshot Restore，以及 V1-22 Presentation / Vocabulary、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

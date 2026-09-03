@@ -792,6 +792,9 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
     let directory = safe_writable_collection_directory(&library_path, &collection)?;
     fs::create_dir_all(&directory).map_err(display_error)?;
     let target = directory.join(format!("{id}.json"));
+    if collection == "evidence" && target.exists() {
+        return Err("Evidence 是不可变审计输入；已存在的 Evidence 不允许覆盖。".into());
+    }
     let temporary = directory.join(format!("{id}.json.tmp"));
     let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
     fs::write(&temporary, body).map_err(display_error)?;
@@ -800,13 +803,35 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
 }
 
 #[tauri::command]
+async fn read_private_audit_collection(app: AppHandle, collection: String) -> Result<Vec<Value>, String> {
+    spawn_native_io("read_private_audit_collection", move || read_private_audit_collection_blocking(app, collection)).await
+}
+
+fn read_private_audit_collection_blocking(app: AppHandle, collection: String) -> Result<Vec<Value>, String> {
+    if !is_private_audit_collection(&collection) {
+        return Err("Desktop Governance 只允许读取明确白名单中的 Private Audit 集合。".into());
+    }
+    let library_path = configured_private_library_path(&app)?;
+    let directory = PathBuf::from(library_path).join(&collection);
+    if !directory.exists() { return Ok(Vec::new()); }
+    let mut values = Vec::new();
+    for item in fs::read_dir(directory).map_err(display_error)? {
+        let path = item.map_err(display_error)?.path();
+        if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
+        let raw = fs::read_to_string(&path).map_err(display_error)?;
+        values.push(serde_json::from_str(&raw).map_err(display_error)?);
+    }
+    Ok(values)
+}
+
+#[tauri::command]
 async fn write_private_audit_entity(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
     spawn_native_io("write_private_audit_entity", move || write_private_audit_entity_blocking(app, collection, entity)).await
 }
 
 fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
-    if collection != "media-binding-receipts" {
-        return Err("V1-18 Desktop Audit Writer 只开放 media-binding-receipts。".into());
+    if !is_private_audit_collection(&collection) {
+        return Err("Desktop Governance 只允许写入明确白名单中的 Private Audit 集合。".into());
     }
     validate_private_audit_entity(&collection, &entity)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "审计实体缺少稳定 id。".to_string())?;
@@ -1085,20 +1110,92 @@ fn validate_writable_entity(collection: &str, entity: &Value) -> Result<(), Stri
     Ok(())
 }
 
+fn is_private_audit_collection(collection: &str) -> bool {
+    matches!(
+        collection,
+        "evidence"
+            | "evidence-lifecycle"
+            | "review-commits"
+            | "snapshots"
+            | "restore-receipts"
+            | "provenance"
+            | "media-binding-receipts"
+    )
+}
+
 fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(), String> {
-    if collection != "media-binding-receipts" || !entity.is_object() {
+    if !is_private_audit_collection(collection) || !entity.is_object() {
         return Err("无效的 Desktop Private Audit 实体。".into());
     }
-    for field in ["id", "mediaFileId", "mediaFilePath", "action", "changedAt"] {
+    let require_string = |field: &str| -> Result<(), String> {
         if entity.get(field).and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()).is_none() {
-            return Err(format!("media-binding-receipts 缺少字符串字段 {field}。"));
+            return Err(format!("{collection} 缺少字符串字段 {field}。"));
         }
-    }
-    let action = entity.get("action").and_then(Value::as_str).unwrap_or("");
-    if !matches!(action, "bind" | "rebind" | "unbind") {
-        return Err("media-binding-receipts.action 无效。".into());
+        Ok(())
+    };
+    require_string("id")?;
+    match collection {
+        "evidence" => { require_string("sourceType")?; require_string("sourceName")?; require_string("importedAt")?; },
+        "evidence-lifecycle" => { require_string("evidenceId")?; require_string("status")?; require_string("updatedAt")?; },
+        "review-commits" => { require_string("evidenceId")?; require_string("committedAt")?; require_string("fingerprint")?; require_string("targetWorkId")?; },
+        "snapshots" => { require_string("evidenceId")?; require_string("targetWorkId")?; require_string("fingerprint")?; if !entity.get("entries").map(Value::is_array).unwrap_or(false) { return Err("snapshots 缺少 entries 数组。".into()); } },
+        "restore-receipts" => { require_string("commitReceiptId")?; require_string("snapshotId")?; require_string("targetWorkId")?; require_string("restoredAt")?; },
+        "provenance" => { require_string("workId")?; if !entity.get("events").map(Value::is_array).unwrap_or(false) { return Err("provenance 缺少 events 数组。".into()); } },
+        "media-binding-receipts" => {
+            for field in ["mediaFileId", "mediaFilePath", "action", "changedAt"] { require_string(field)?; }
+            let action = entity.get("action").and_then(Value::as_str).unwrap_or("");
+            if !matches!(action, "bind" | "rebind" | "unbind") { return Err("media-binding-receipts.action 无效。".into()); }
+        },
+        _ => return Err("无效的 Desktop Private Audit 集合。".into()),
     }
     Ok(())
+}
+
+#[tauri::command]
+async fn restore_private_snapshot(app: AppHandle, snapshot: Value, include_audit_state: bool) -> Result<(), String> {
+    spawn_native_io("restore_private_snapshot", move || restore_private_snapshot_blocking(app, snapshot, include_audit_state)).await
+}
+
+fn restore_private_snapshot_blocking(app: AppHandle, snapshot: Value, include_audit_state: bool) -> Result<(), String> {
+    let entries = snapshot.get("entries").and_then(Value::as_array).ok_or_else(|| "Snapshot 缺少 entries 数组。".to_string())?;
+    let library_path = configured_private_library_path(&app)?;
+    let root = PathBuf::from(library_path);
+    for entry in entries {
+        let relative = entry.get("relativePath").and_then(Value::as_str).ok_or_else(|| "Snapshot 条目缺少 relativePath。".to_string())?;
+        let parts: Vec<&str> = relative.split('/').collect();
+        if parts.len() != 2 || parts[1].contains('/') || !parts[1].ends_with(".json") || parts.iter().any(|part| part.is_empty() || *part == "." || *part == "..") {
+            return Err(format!("Snapshot 包含不安全路径：{relative}"));
+        }
+        let collection = parts[0];
+        if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "evidence-lifecycle" | "provenance") {
+            return Err(format!("Snapshot 包含不允许恢复的集合：{collection}"));
+        }
+        if !include_audit_state && collection == "provenance" { continue; }
+        let target = root.join(collection).join(parts[1]);
+        let existed = entry.get("existed").and_then(Value::as_bool).ok_or_else(|| format!("Snapshot 条目缺少 existed：{relative}"))?;
+        if !existed {
+            if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+            continue;
+        }
+        let content = entry.get("content").and_then(Value::as_str).ok_or_else(|| format!("Snapshot 条目缺少 content：{relative}"))?;
+        let restored_entity: Value = serde_json::from_str(content).map_err(|error| format!("Snapshot JSON 无效 {relative}: {error}"))?;
+        validate_snapshot_restore_entry(collection, &restored_entity)?;
+        if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+        let temporary = target.with_extension("json.restore.tmp");
+        fs::write(&temporary, content).map_err(display_error)?;
+        if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+        fs::rename(&temporary, &target).map_err(display_error)?;
+    }
+    Ok(())
+}
+
+
+fn validate_snapshot_restore_entry(collection: &str, entity: &Value) -> Result<(), String> {
+    match collection {
+        "works" | "people" | "organizations" | "series" | "genres" | "tags" => validate_writable_entity(collection, entity),
+        "evidence-lifecycle" | "provenance" => validate_private_audit_entity(collection, entity),
+        _ => Err("Snapshot 包含不允许恢复的集合。".into()),
+    }
 }
 
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
@@ -1157,8 +1254,10 @@ pub fn run() {
             sha256_file,
             inspect_shared_pack,
             read_library_collection,
+            read_private_audit_collection,
             write_library_entity,
             write_private_audit_entity,
+            restore_private_snapshot,
             delete_library_entity,
         ])
         .run(tauri::generate_context!())

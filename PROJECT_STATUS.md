@@ -2,27 +2,27 @@
 
 ## 当前阶段
 
-**V1-22：Desktop Information Architecture & Metadata Localization。**
+**V1-23：Desktop Governance Parity I。**
 
-V1-22 来自 V1-21 实机体验反馈：筛选或切语言时旧结果被短暂 LoadingState 替换，导致页面高度骤降并把滚动位置夹回顶部；部分 Facet 词条仍显示 raw stable id / 单语来源文本；Work Detail 则把分类信息放在页面底部，信息密度明显低于资料站常见详情布局。当前阶段已：
+V1-23 将 Web 已有治理核心带入 Desktop，并继续保持共享 Application Core 与最小 Native 权限：
 
-- 新增 `useStableAsyncData`，Works / People / Browse / Detail 首次加载后统一采用 stale-while-refresh；
-- 筛选、分页和语言变化时保留旧结果与 DOM 高度，在原位置显示轻量刷新状态；
-- 主语言选择默认同时切 UI + Metadata，仍保留 Metadata Language 高级独立覆盖；
-- Work Type Facet / Table 改为受控三语名称，Person Activity Status 改为受控三语名称；
-- Hotfix 3 移除完整 1271 条外部 Genre Catalog 的 Runtime 依赖，只保留从参考表人工筛选的 67 条来源别名；
-- Canonical Genre 扩充并校正为 33 个明确内容题材；`デビュー作 / 周年 / ハイビジョン` 等发行/技术属性不再属于 Genre；
-- Desktop / Web 的 Genre 展示统一经过 `localizeGenre`；
-- 中文 UI 的 Genre / Tag 用户标签统一为“题材 / 标签”；
-- Work Detail 重构为“顶部媒体画廊 + 下方全宽高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
-- V1-22 Hotfix 2 将媒体画廊升级为真实宽高比自适应；Hotfix 3 进一步将 poster 从详情 Hero Gallery 排除，避免纵向封面与宽屏预览区域冲突；
-- Desktop 主内容区取消历史固定 max-width，2K / 4K 与宽窗口下 Works / Browse / People / Detail 会使用完整可用宽度；
-- Vocabulary Audit 只使用正式映射与人工批准来源别名，不再依赖完整外部参考表；
-- V1-18 Hotfix 3 Unified Library / Native I/O 稳定链保持不变。
+- 新增 Desktop Governance 一级入口；
+- Evidence Inbox 支持 pending / committed / ignored；
+- Review 支持字段决策、实体决策、Commit Plan、Blocker / Warning / Operation 预览；
+- Commit Plan 指纹使用平台中立 WebCrypto SHA-256；
+- 显式 Commit 前创建最小 Snapshot，失败时自动恢复；
+- Commit Receipt、Lifecycle、Snapshot、Restore Receipt、Provenance 写入受限 Private Audit；
+- Curation 复用完整度与重复候选服务；
+- History / Restore 支持最新有效 Commit 恢复、引用阻塞、确认码与 Guard Snapshot；
+- Rust 新增 Private Audit Reader 与安全 Snapshot Restore；
+- Evidence 在 Native Writer 边界不可覆盖；
+- V1-22 Presentation / Vocabulary 与 V1-18 Native I/O 稳定实现保持不变。
 
-### 明确留到 V1-23
+### 明确留到 V1-24
 
-Evidence / Review / Commit Plan、Curation、History/Restore、Portable Pack 完整导入导出与 Presentation Preference Workbench 继续进入 Desktop Governance Parity。
+- Native `.localogue-pack` Open / Save / Drag & Drop 导入导出；V1-23 先复用 Web Portable Pack Workbench；
+- Presentation Preference Workbench 的 Desktop 完整编辑；
+- 更完整的人物 Asset 管理与 Asset 孤儿治理。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 

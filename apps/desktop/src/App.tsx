@@ -72,6 +72,7 @@ import {
 } from "./nfo-library-import";
 import { applyVocabularyRepair, previewVocabularyRepair, type VocabularyRepairPreview, type VocabularyRepairResult } from "./vocabulary-repair";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { DesktopGovernance } from "./desktop-governance";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -88,7 +89,7 @@ const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   webUrl: "http://127.0.0.1:3000",
 };
 
-type DesktopPage = "home" | "works" | "people" | "browse" | "media" | "packs" | "settings";
+type DesktopPage = "home" | "works" | "people" | "browse" | "media" | "governance" | "packs" | "settings";
 type DetailTarget = { kind: "work" | "person"; id: string } | null;
 
 const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short: string }> = [
@@ -97,6 +98,7 @@ const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short:
   { id: "people", label: "人物", eyebrow: "PEOPLE", short: "PP" },
   { id: "browse", label: "浏览", eyebrow: "BROWSE", short: "BR" },
   { id: "media", label: "媒体", eyebrow: "MEDIA", short: "MD" },
+  { id: "governance", label: "治理", eyebrow: "GOVERNANCE", short: "GV" },
   { id: "packs", label: "资料包", eyebrow: "PACKS", short: "PK" },
   { id: "settings", label: "设置", eyebrow: "SETTINGS", short: "ST" },
 ];
@@ -217,7 +219,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span className="brand-copy">
             <strong>Localogue</strong>
-            <small>Desktop · V1-20</small>
+            <small>Desktop · {runtime?.version ?? "…"}</small>
           </span>
         </button>
 
@@ -319,6 +321,17 @@ export default function App() {
             setMessage={setMessage}
             progress={progress}
             onLibraryChanged={refreshLibrary}
+          />
+        ) : page === "governance" ? (
+          <DesktopGovernance
+            repository={repository}
+            privateLibraryPath={savedSettings.libraryPath ?? null}
+            openWork={openWork}
+            openPerson={openPerson}
+            onLibraryChanged={refreshLibrary}
+            setMessage={setMessage}
+            onOpenPortablePacks={() => navigate("packs")}
+            webUrl={savedSettings.webUrl}
           />
         ) : page === "packs" ? (
           <PacksPage

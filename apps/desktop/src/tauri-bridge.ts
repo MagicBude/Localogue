@@ -45,8 +45,12 @@ export const desktopBridge = {
     invoke<T[]>("read_library_collection", { libraryPath, collection }),
   writeLibraryEntity: (collection: DesktopWritableLibraryCollection, entity: unknown) =>
     invoke<void>("write_library_entity", { collection, entity }),
+  readPrivateAuditCollection: <T>(collection: DesktopPrivateAuditCollection) =>
+    invoke<T[]>("read_private_audit_collection", { collection }),
   writePrivateAuditEntity: (collection: DesktopPrivateAuditCollection, entity: unknown) =>
     invoke<void>("write_private_audit_entity", { collection, entity }),
+  restorePrivateSnapshot: (snapshot: unknown, includeAuditState = false) =>
+    invoke<void>("restore_private_snapshot", { snapshot, includeAuditState }),
   deleteLibraryEntity: (collection: DesktopDeletableLibraryCollection, id: string) =>
     invoke<void>("delete_library_entity", { collection, id }),
   deleteMediaFile: (id: string) =>

@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-21 Vocabulary Governance & Work Metadata Visibility**。V1-21 根据真实 NFO 数据修复 Series / Work Type / Genre / Tag 混合分类，并增加历史分类审计 / 显式修复与 Work Detail 分类可见性。
+当前已推进到 **V1-23 Desktop Governance Parity I**。V1-23 在 V1-22 Presentation / Vocabulary 基础上，把 Evidence Review、Commit Plan、Curation、History / Restore 的共享治理核心接入 Desktop。
 
 已完成重点：
 
@@ -91,16 +91,28 @@
 
 本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。完整外部 Genre 参考表不进入仓库；仅保留人工批准来源别名，不绕过 Canonical Vocabulary 映射边界。
 
-### V1-23：Desktop Governance Parity
+### V1-23：Desktop Governance Parity I
+
+本阶段完成：
+
+- Desktop Evidence Inbox / Review / Commit Plan / Explicit Commit；
+- Private Audit Reader / Writer 与 Evidence immutable Native 边界；
+- Commit 前 Snapshot、失败自动恢复、Commit Receipt / Provenance；
+- Desktop Curation 完整度与重复候选；
+- Desktop History / latest-first Restore / Restore Receipt；
+- Commit Plan SHA-256 收敛为 Web/Desktop 共用 WebCrypto。
+
+Portable Pack 二进制归档暂时复用 Web Workbench，避免复制第二套 Archive Codec。
+
+### V1-24：Desktop Transport & Governance Parity II
 
 下一阶段重点：
 
-- 将 Desktop Private CRUD 接入既有 Commit Plan / Audit / History 治理规则；
-- Evidence / Review / Curation / History Desktop 交互；
-- Bootstrap Ingest 冲突型更新收敛到完整治理链；
-- Shared / Personal Portable Pack Desktop 导入导出；
-- Presentation Preference Workbench 与更多人物 Asset 管理；
-- 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复业务规则。
+- Native `.localogue-pack` Open / Save / Drag & Drop；
+- Shared / Personal Portable Pack Desktop 完整导入导出；
+- Presentation Preference Workbench；
+- 更多人物 Asset 管理、Asset 孤儿治理与安全物理删除；
+- 继续抽取共享 Presentation / DTO。
 
 ### 后续 Desktop Native Enhancement
 

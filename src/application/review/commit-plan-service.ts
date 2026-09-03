@@ -1,5 +1,3 @@
-import { createHash } from "node:crypto";
-
 import type { Genre, Tag } from "@/domain/entities/classification";
 import type {
   CanonicalCommitPlan,
@@ -15,6 +13,7 @@ import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 import type { PartialDate } from "@/domain/value-objects/partial-date";
 import { normalizeIdentityText } from "@/application/review/entity-resolution-service";
+import { sha256Text } from "@/application/crypto/sha256";
 import {
   entityDecisionKey,
   enumerateResolutions,
@@ -127,7 +126,7 @@ export async function buildCanonicalCommitPlan(
         warnings.push(`你明确选择为歧义名称“${item.resolution.sourceValue}”创建新实体，请再次核对。`);
       }
 
-      const id = stableEntityId(evidence.id, item.kind, item.resolution.sourceValue);
+      const id = await stableEntityId(evidence.id, item.kind, item.resolution.sourceValue);
       entityIdByKey.set(item.key, id);
       const label = item.resolution.sourceValue;
 
@@ -189,7 +188,7 @@ export async function buildCanonicalCommitPlan(
     }
   }
 
-  const targetWorkId = existingWork?.id ?? stableWorkId(evidence.normalized.code ?? evidence.id);
+  const targetWorkId = existingWork?.id ?? await stableWorkId(evidence.normalized.code ?? evidence.id);
   const nextWork = buildTargetWork(evidence, analysis, existingWork, decisions, entityIdByKey, targetWorkId);
 
   if (existingWork) {
@@ -222,7 +221,7 @@ export async function buildCanonicalCommitPlan(
     blockers,
     warnings,
   });
-  const fingerprint = createHash("sha256").update(fingerprintSource).digest("hex");
+  const fingerprint = await sha256Text(fingerprintSource);
 
   return {
     plan: {
@@ -399,23 +398,20 @@ function localizedSourceName(value: string) {
   return language === "en" ? { en: value } : { ja: value };
 }
 
-function stableEntityId(
+async function stableEntityId(
   evidenceId: string,
   kind: ResolutionKind,
   value: string,
-): string {
+): Promise<string> {
   const entityClass = kind === "performer" || kind === "director" ? "person" : kind;
-  const token = createHash("sha256")
-    .update(`${evidenceId}|${entityClass}|${normalizeIdentityText(value)}`)
-    .digest("hex")
-    .slice(0, 12);
+  const token = (await sha256Text(`${evidenceId}|${entityClass}|${normalizeIdentityText(value)}`)).slice(0, 12);
   const prefix = kind === "performer" || kind === "director" ? "person" : kind;
   return `${prefix}_${token}`;
 }
 
-function stableWorkId(code: string): string {
+async function stableWorkId(code: string): Promise<string> {
   const normalized = code.normalize("NFKC").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-  return normalized ? `work_${normalized}` : `work_${createHash("sha256").update(code).digest("hex").slice(0, 12)}`;
+  return normalized ? `work_${normalized}` : `work_${(await sha256Text(code)).slice(0, 12)}`;
 }
 
 function toPartialDate(value: string | undefined): PartialDate | undefined {

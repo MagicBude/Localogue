@@ -1052,3 +1052,49 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-dense-chip.is-strong { background: rgba(255,255,255,.07); }
   .desktop-inline-entity-links button { color: #65a8ff; }
 }
+
+/* V1-23 Desktop Governance */
+.governance-page { min-width: 0; }
+.governance-tabs { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0 12px; border-bottom: 1px solid var(--line, #deddd7); }
+.governance-tabs button { border: 1px solid var(--line, #d9d7cf); background: var(--panel, #fff); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.governance-tabs button.active { background: #171715; color: #fff; border-color: #171715; }
+.governance-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.governance-list { display: grid; gap: 10px; }
+.governance-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; padding: 16px; border: 1px solid var(--line, #ddd); border-radius: 14px; background: var(--panel, #fff); }
+.governance-card h3 { margin: 8px 0 4px; font-size: 1rem; }
+.governance-metrics { display: grid; grid-template-columns: repeat(4, minmax(62px, 1fr)); gap: 6px; }
+.governance-metrics span { min-width: 62px; padding: 7px 8px; border-radius: 9px; background: rgba(127,127,127,.08); font-size: .72rem; }
+.governance-metrics strong { display: block; font-size: 1rem; margin-top: 2px; }
+.decision-table { display: grid; gap: 8px; }
+.decision-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e5e3dd); }
+.decision-row code { white-space: pre-wrap; overflow-wrap: anywhere; padding: 7px; border-radius: 8px; background: rgba(127,127,127,.07); }
+.decision-row button.active { background: #171715; color: white; }
+.entity-decision-row { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(170px, .5fr) minmax(180px, .6fr); gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e5e3dd); }
+.entity-decision-row > div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.entity-decision-row small { color: var(--muted, #777); }
+.commit-plan-card code { overflow-wrap: anywhere; }
+.governance-stat-grid { grid-template-columns: repeat(4, minmax(130px, 1fr)); }
+.compact-governance-table { display: grid; border: 1px solid var(--line, #ddd); border-radius: 12px; overflow: hidden; }
+.compact-governance-table > button { display: grid; grid-template-columns: 110px minmax(0, 1fr) 120px minmax(180px, .7fr); gap: 12px; align-items: center; text-align: left; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line, #e5e3dd); background: transparent; cursor: pointer; }
+.compact-governance-table > button:last-child { border-bottom: 0; }
+.compact-governance-table > button:hover { background: rgba(127,127,127,.06); }
+.compact-governance-table small { color: var(--muted, #777); overflow-wrap: anywhere; }
+.duplicate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.duplicate-grid article { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--line, #ddd); border-radius: 10px; }
+.duplicate-grid code { overflow-wrap: anywhere; }
+.history-list { display: grid; gap: 8px; }
+.history-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #ddd); border-radius: 10px; }
+.history-card > div:first-child { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.history-card small { color: var(--muted, #777); }
+.restore-confirm-panel { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; }
+.restore-confirm-panel label { display: grid; gap: 4px; }
+.restore-confirm-panel input { min-width: 190px; }
+@media (max-width: 1150px) {
+  .governance-card { grid-template-columns: 1fr; }
+  .decision-row { grid-template-columns: 100px 1fr; }
+  .decision-row > :nth-child(3) { display: none; }
+  .decision-row .button-row { grid-column: 1 / -1; }
+  .entity-decision-row { grid-template-columns: 1fr; }
+  .compact-governance-table > button { grid-template-columns: 100px 1fr; }
+  .governance-stat-grid { grid-template-columns: repeat(2, 1fr); }
+}

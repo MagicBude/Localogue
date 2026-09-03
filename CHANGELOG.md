@@ -1,5 +1,18 @@
 # Changelog
 
+## V1-23 - Desktop Governance Parity I
+
+- Desktop 新增 Governance 一级工作台，覆盖 Evidence Review、Commit Plan、Curation 与 History / Restore。
+- Web / Desktop 共用 Entity Resolution、Review Decisions、Commit Plan 与 Curation Application Core。
+- Commit Plan fingerprint 从 Node `crypto` 收敛为平台中立 WebCrypto SHA-256。
+- 新增受限 Private Audit Reader；Audit Writer 白名单扩展到 Evidence Lifecycle、Commit Receipt、Snapshot、Restore Receipt 与 Provenance。
+- Evidence 在 Rust 边界保持不可变，已存在 Evidence ID 不允许覆盖。
+- Canonical Commit 前创建最小 Snapshot；失败时自动恢复。
+- History 只允许按同一 Work 最新有效 Commit 逐步 Restore，并保留 Restore Receipt / Provenance。
+- Rust Snapshot Restore 只接受明确白名单集合与安全相对路径，不允许 WebView 指定任意文件路径。
+- Portable Pack 在 V1-23 提供 Desktop 入口，但二进制归档暂时复用既有 Web Workbench；Native Open/Save 进入 V1-24。
+- 产品版本升级至 `0.1.23`。
+
 ## V1-22 Hotfix 3 - Detail Hero Cleanup & Curated Genre Vocabulary
 
 - Work Detail 顶部 Hero Gallery 不再展示 poster；poster 继续用于作品墙、列表、首页与人物相关作品封面。

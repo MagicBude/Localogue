@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-22 Desktop Information Architecture & Metadata Localization**。
+当前阶段：**V1-23 Desktop Governance Parity I**。
 
 V1 当前约束：
 
@@ -342,3 +342,13 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Work Detail 顶部 Hero Gallery 不展示 poster；poster 用于作品墙/列表封面，Hero 优先 fanart / screenshot / gallery / cover。
 - V1-18 Hotfix 3 Native I/O / Unified Library 稳定实现继续冻结；本阶段不得因 Presentation 修改扩大 Native 文件权限。
 - V1-23 再继续 Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack 等完整治理链。
+
+
+## V1-23 Governance 约束
+
+- Desktop Governance 必须复用共享 Review / Commit Plan / Curation 规则，不复制第二套匹配逻辑。
+- Evidence 本体不可变；状态变化只能写 `evidence-lifecycle`。
+- Desktop Audit I/O 只能访问当前 Private Library 的受控集合；Shared Pack 不可写。
+- Canonical Commit 前必须有 Snapshot；失败必须恢复；用户 Restore 必须保留 Receipt / Provenance。
+- Snapshot Restore 不允许任意路径，只允许白名单集合的一层 JSON 相对路径。
+- V1-23 Portable Pack 仍复用 Web Archive Workbench；Native Archive Transport 留 V1-24。

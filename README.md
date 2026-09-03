@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-22 Desktop Information Architecture & Metadata Localization** 并完成三轮实机热修：筛选 / 分页 / 切语言采用 stale-while-refresh；Work Detail 使用顶部宽屏媒体画廊 + 下方高密度字段表；Hotfix 3 不再保存完整外部 Genre 参考表，而是收敛为 **33 个 Canonical Genre + 67 条人工批准来源别名**。详情页 Hero Gallery 同时不再展示纵向 poster，poster 继续服务作品墙 / 列表封面。
+当前实现已推进到 **V1-23 Desktop Governance Parity I**：在 V1-22 已稳定的 Presentation / Vocabulary 基础上，Desktop 新增 Evidence Review、Commit Plan、Curation、History / Restore，并通过受限 Private Audit Reader/Writer 与 Native Snapshot Restore 保持 Evidence immutable、Shared Pack read-only 和 Commit-before-Canonical-write 边界。Portable Pack 二进制导入导出本阶段仍复用 Web Workbench，Native Transport 进入 V1-24。
 
 Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset → Media** 编排：先让 NFO 创建或补充 Work，再关联 poster / fanart / thumb，最后运行既有增量媒体扫描重新匹配 Work。高级用户仍可分别执行视频扫描与 NFO/图片 Preview / Import。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
@@ -278,7 +278,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-22 已提供正式 Home / Works / People / Browse / Media / Packs / Settings 应用壳、Work / Person 新建编辑删除、核心搜索筛选排序、元数据关系编辑、Shared Pack 管理、MediaFile bind/rebind/unbind 审计、原生增量媒体扫描、NFO Bootstrap、Unified Library Root、本地 Asset 汇聚，以及 Works 海报墙 / 列表 / 表格三视图和真实 Private poster 展示。Evidence / Review / Curation / History、Portable Pack 完整交互与 Presentation Preference Workbench 等更重治理能力将在 V1-23 继续对齐。
+Desktop V1-23 已提供 Home / Works / People / Browse / Media / Packs / Settings / Governance 应用壳，并完成 Evidence Review、Commit Plan、Curation、History / Restore 的第一阶段治理对齐。Portable Pack 的 Desktop Native Open / Save / Drag & Drop 与 Presentation Preference Workbench 继续进入 V1-24。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 

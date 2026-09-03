@@ -48,6 +48,12 @@ export type DesktopWritableLibraryCollection =
 
 
 export type DesktopPrivateAuditCollection =
+  | "evidence"
+  | "evidence-lifecycle"
+  | "review-commits"
+  | "snapshots"
+  | "restore-receipts"
+  | "provenance"
   | "media-binding-receipts";
 
 export type DesktopDeletableLibraryCollection =
