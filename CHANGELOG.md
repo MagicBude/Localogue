@@ -1,5 +1,15 @@
 # Changelog
 
+## V1-22 Hotfix - Desktop Delete Type Sync & Work Media Gallery
+
+- 修复 `DesktopDeletableLibraryCollection` 未同步 Native `genres / tags` 受控删除白名单导致的 `TS2345` 编译失败。
+- Desktop Boundary Validator 新增 Rust / TypeScript 删除集合一致性检查，避免跨层白名单再次漂移。
+- Work Detail 从固定“左图 + 右侧长字段表”调整为“顶部全宽媒体画廊 + 下方全宽 Metadata Table”，消除图片高度有限时左栏底部大块空白。
+- 顶部画廊按 poster → fanart → screenshot/thumb → cover → 其他图片排序，只读取当前图片，支持左右箭头和轻量标签切换。
+- 画廊结构为后续视频预览图 / 更多截图保留统一扩展入口。
+- 底部 Local Asset 区改为紧凑管理列表，避免与顶部画廊重复展示整组大图片。
+- 产品版本继续保持 `0.1.22`，作为 V1-22 实机热修。
+
 ## V1-22 - Desktop Information Architecture & Metadata Localization
 
 - 修复 Desktop 选择 Facet、分页或切换语言时页面回跳顶部的问题，结果刷新改为 stale-while-refresh。
@@ -12,7 +22,7 @@
 - Source Genre Catalog 只用于翻译补全、来源参考和映射候选，不自动将来源站混合分类晋升为 Canonical Genre。
 - Desktop / Web Genre Facet、索引和详情统一使用 `localizeGenre`。
 - Vocabulary Audit 的 unmapped 来源词命中 Source Genre Catalog 时显示当前 Metadata Language 的词表参考。
-- Work Detail 重构为左侧海报 + 右侧高密度 Metadata Table，将发行日期、时长、演员、导演、Maker、Label、Series、Work Type、题材和标签放在同一主信息区。
+- Work Detail 重构为顶部媒体画廊 + 下方全宽高密度 Metadata Table，将发行日期、时长、演员、导演、Maker、Label、Series、Work Type、题材和标签放在同一主信息区，并避免左图右表在长信息下产生大块空白。
 - Work 编辑器默认收紧闭合空间，本地 Asset 区域减少卡片尺寸与间距。
 - 新增 Source Genre Catalog 文档、ADR 与 V1-22 实现导读，并扩展 Desktop Boundary Validator。
 - 保持 V1-18 Hotfix 3 Unified Library / Native I/O / SHA-256 稳定修复不变。

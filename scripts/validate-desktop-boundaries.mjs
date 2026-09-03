@@ -9,6 +9,7 @@ const required = [
   "apps/desktop/vite.config.mts",
   "scripts/clean-desktop-generated-artifacts.mjs",
   "apps/desktop/src/tauri-bridge.ts",
+  "apps/desktop/src/contracts.ts",
   "apps/desktop/src/platform/tauri-library-repository.ts",
   "apps/desktop/src/nfo-library-import.ts",
   "apps/desktop/src/local-asset-import.ts",
@@ -104,6 +105,7 @@ if (!errors.length) {
   if (!desktopPackage.scripts?.dev?.includes("--config vite.config.mts") || !desktopPackage.scripts?.["build:webview"]?.includes("--config vite.config.mts")) {
     errors.push("Desktop Vite 命令必须显式使用 vite.config.mts，禁止重新依赖 Vite 自动配置发现。");
   }
+  const desktopContracts = readFileSync(path.join(root, "apps/desktop/src/contracts.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
@@ -121,6 +123,12 @@ if (!errors.length) {
   }
   if (!desktopApp.includes("removePrivateAsset") || !desktopApp.includes("deletePrivateAsset")) {
     errors.push("V1-18 Work 详情必须提供显式 Private Asset 解除/删除入口，避免引用保护导致 Work 无法完成删除闭环。");
+  }
+  for (const collection of ["works", "people", "genres", "tags", "assets", "media-files"]) {
+    if (!desktopContracts.includes(`| "${collection}"`)) errors.push(`V1-22 DesktopDeletableLibraryCollection 缺少 Native 已受控开放的集合：${collection}`);
+  }
+  if (!desktopApp.includes("function WorkAssetGallery") || !desktopApp.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
+    errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
   const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");

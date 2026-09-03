@@ -1,4 +1,4 @@
-# V1-22 覆盖包说明
+# V1-22 Hotfix 覆盖包说明
 
 覆盖 V1-21 后运行：
 
@@ -9,6 +9,8 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
+本 Hotfix 先修复 `genres / tags` 删除类型白名单未同步造成的 Desktop TypeScript 编译失败，并调整 Work Detail 媒体布局。
+
 重点验收：
 
 1. 在 Works 页面滚动到中段，勾选 / 取消任意 Facet，页面不再跳回顶部；
@@ -17,7 +19,7 @@ pnpm desktop:dev
 4. 中文 UI 中显示“题材 / 标签”，不再直接显示 Genre / Tag 英文业务标题；
 5. Work Type Facet 显示“单体作品 / 写真影像 / VR …”等三语名称，不再显示 raw stable id；
 6. Genre 若 Canonical 实体缺少当前语言，但能与 Source Genre Catalog 匹配，应从 1271 条参考表补全显示；
-7. Work Detail 应变为高密度“左海报 + 右字段表”，作品类型、题材、标签与日期 / 演员 / 厂商 / 系列处于同一主信息区；
+7. Work Detail 顶部应为全宽媒体画廊，可用左右箭头切换 poster / fanart / thumb / cover；下方为全宽高密度字段表，不再出现固定左图下方大块空白；
 8. “分类词表审计”的 unmapped 词若命中 Source Genre Catalog，会显示当前元数据语言的参考名称，但不会自动晋升 Canonical Genre；
 9. V1-18 Hotfix 3 Unified Library / Native I/O 扫描链继续正常。
 

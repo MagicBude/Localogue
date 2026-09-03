@@ -14,7 +14,7 @@ V1-22 来自 V1-21 实机体验反馈：筛选或切语言时旧结果被短暂 
 - Source Genre Catalog 仅做翻译、来源参考和映射候选，不自动晋升 1271 条为 Canonical Genre；
 - Desktop / Web 的 Genre 展示统一经过 `localizeGenre`；
 - 中文 UI 的 Genre / Tag 用户标签统一为“题材 / 标签”；
-- Work Detail 重构为“左侧海报 + 右侧高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
+- Work Detail 重构为“顶部媒体画廊 + 下方全宽高密度字段表”，把发行、人物、组织、系列、作品类型、题材和标签放在同一主信息区；
 - Vocabulary Audit 的 unmapped 来源词若命中 Source Genre Catalog，会显示当前元数据语言的参考翻译；
 - V1-18 Hotfix 3 Unified Library / Native I/O 稳定链保持不变。
 

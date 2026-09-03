@@ -44,7 +44,6 @@ import { desktopBridge } from "./tauri-bridge";
 import { DesktopAssetImage } from "./desktop-asset-image";
 import {
   buildDesktopWorkCards,
-  chooseWorkPoster,
   DesktopWorkResults,
 } from "./desktop-work-results";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
@@ -527,7 +526,6 @@ function WorkDetailPage({
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error={t("作品不存在。")} /> : <ErrorState error={data.error} />;
   const { work, people, organizations, series, genres, tags, media, assets } = data.value;
-  const poster = chooseWorkPoster(assets);
 
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -573,20 +571,23 @@ function WorkDetailPage({
     <div className="page-stack desktop-work-detail-page">
       <button className="back-button" onClick={onBack}>← {t("返回作品库")}</button>
 
-      <section className="desktop-work-record">
-        <aside className="desktop-work-record__visual">
-          <div className="desktop-work-record__poster">
-            <DesktopAssetImage asset={poster} alt={`${work.code} poster`} fallback={<span className="desktop-poster-placeholder"><b>{work.code}</b></span>} />
-          </div>
-          <div className="desktop-work-record__counts">
-            <span>{t("本地媒体")} <strong>{media.length}</strong></span>
-            <span>{t("本地图片")} <strong>{assets.length}</strong></span>
-          </div>
-        </aside>
+      <WorkAssetGallery
+        assets={assets}
+        workCode={work.code}
+        mediaCount={media.length}
+        assetTypeLabel={assetTypeLabel}
+      />
 
+      <section className="desktop-work-record desktop-work-record--stacked">
         <div className="desktop-work-record__content">
           <header className="desktop-work-record__header">
-            <span className="code-badge">{work.code}</span>
+            <div className="desktop-work-record__headline">
+              <span className="code-badge">{work.code}</span>
+              <span className="desktop-work-record__summary-counts">
+                <span>{t("本地媒体")} <strong>{media.length}</strong></span>
+                <span>{t("本地图片")} <strong>{assets.length}</strong></span>
+              </span>
+            </div>
             <h1>{localizeText(work.titles, metadataLanguage, work.code)}</h1>
             <p>{localizeText(work.descriptions, metadataLanguage, t("暂无简介"))}</p>
           </header>
@@ -624,21 +625,89 @@ function WorkDetailPage({
           <small className="muted">{t("{count} 个资产", { count: assets.length })}</small>
         </div>
         {assets.length ? (
-          <div className="desktop-asset-gallery">
+          <div className="desktop-asset-management-list">
             {sortWorkAssets(assets).map((asset) => (
-              <article className="desktop-asset-card" key={asset.id}>
-                <div className="desktop-asset-preview"><DesktopAssetImage asset={asset} alt={`${work.code} ${asset.type}`} fallback={<span className="desktop-poster-placeholder"><b>{asset.type}</b></span>} /></div>
-                <div className="desktop-asset-card-body">
-                  <span>{assetTypeLabel(asset.type)} <code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span>
-                  <code>{asset.storagePath}</code>
-                  <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除")}</button>
+              <article className="desktop-asset-management-row" key={asset.id}>
+                <div>
+                  <strong>{assetTypeLabel(asset.type)}</strong>
+                  <span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span>
+                  <code className="desktop-asset-management-path">{asset.storagePath}</code>
                 </div>
+                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除")}</button>
               </article>
             ))}
           </div>
         ) : <p className="muted">{t("尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / fanart / thumb 导入。")}</p>}
       </section>
     </div>
+  );
+}
+
+function WorkAssetGallery({
+  assets,
+  workCode,
+  mediaCount,
+  assetTypeLabel,
+}: {
+  assets: Asset[];
+  workCode: string;
+  mediaCount: number;
+  assetTypeLabel: (type: Asset["type"]) => string;
+}) {
+  const { t } = useDesktopI18n();
+  const imageAssets = useMemo(
+    () => sortWorkAssets(assets).filter((asset) => asset.mimeType?.startsWith("image/") ?? ["poster", "fanart", "screenshot", "cover", "portrait", "gallery", "logo"].includes(asset.type)),
+    [assets],
+  );
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    setIndex((current) => imageAssets.length ? Math.min(current, imageAssets.length - 1) : 0);
+  }, [imageAssets.length, workCode]);
+
+  const current = imageAssets[index];
+  const canNavigate = imageAssets.length > 1;
+  const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
+  const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
+
+  return (
+    <section className="desktop-work-gallery" aria-label={t("作品媒体画廊")}>
+      <div className="desktop-work-gallery__stage">
+        {current ? (
+          <DesktopAssetImage asset={current} alt={`${workCode} ${current.type}`} fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>} />
+        ) : (
+          <span className="desktop-work-gallery__empty"><b>{workCode}</b><small>{t("暂无本地图片")}</small></span>
+        )}
+        {canNavigate ? <>
+          <button className="desktop-work-gallery__arrow is-prev" type="button" onClick={previous} aria-label={t("上一张")}>‹</button>
+          <button className="desktop-work-gallery__arrow is-next" type="button" onClick={next} aria-label={t("下一张")}>›</button>
+        </> : null}
+        <div className="desktop-work-gallery__overlay">
+          <span>{current ? assetTypeLabel(current.type) : t("本地图片")}</span>
+          <span>{imageAssets.length ? `${index + 1} / ${imageAssets.length}` : `0 / 0`}</span>
+        </div>
+      </div>
+      <div className="desktop-work-gallery__rail">
+        <div className="desktop-work-gallery__tabs" role="tablist" aria-label={t("作品图片") }>
+          {imageAssets.map((asset, assetIndex) => (
+            <button
+              className={assetIndex === index ? "is-active" : ""}
+              key={asset.id}
+              onClick={() => setIndex(assetIndex)}
+              role="tab"
+              type="button"
+              aria-selected={assetIndex === index}
+            >
+              {assetTypeLabel(asset.type)} <small>{assetIndex + 1}</small>
+            </button>
+          ))}
+        </div>
+        <div className="desktop-work-gallery__counts">
+          <span>{t("本地媒体")} <strong>{mediaCount}</strong></span>
+          <span>{t("本地图片")} <strong>{assets.length}</strong></span>
+        </div>
+      </div>
+    </section>
   );
 }
 

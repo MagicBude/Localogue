@@ -17,7 +17,7 @@
 - 新增 Source Genre Catalog：1271 条、日文/简中/繁中/英文完整，保留来源、URL/ID 与 note；
 - Source Genre Catalog 只作为 localization/reference layer，不自动把 1271 个来源分类晋升为 Canonical Genre；
 - Vocabulary Audit 的 unmapped 来源词若命中 Source Genre Catalog，会显示当前 Metadata Language 的词表参考；
-- Work Detail 重构为“左侧海报 + 右侧高密度 Metadata Table”；
+- Work Detail 重构为“顶部媒体画廊 + 下方全宽高密度 Metadata Table”；
 - 发行日期、时长、演员、导演、Maker、Label、Series、Work Type、题材、标签合并到主信息区；
 - 移除 Work Detail 底部独立“分类与标签”大卡片；
 - Work 编辑区保持折叠式操作，并缩减闭合状态占用；

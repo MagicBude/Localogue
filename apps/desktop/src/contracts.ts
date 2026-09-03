@@ -53,6 +53,8 @@ export type DesktopPrivateAuditCollection =
 export type DesktopDeletableLibraryCollection =
   | "works"
   | "people"
+  | "genres"
+  | "tags"
   | "assets"
   | "media-files";
 

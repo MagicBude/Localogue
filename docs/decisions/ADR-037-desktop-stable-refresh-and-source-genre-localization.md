@@ -35,9 +35,9 @@ V1-21 实机反馈暴露两个 Presentation 问题：
 - 绕过 V1-21 的 `import-classification-normalizer`；
 - 把技术规格、活动、渠道或发行属性重新污染 Genre / Tag。
 
-### 3. Work Detail 使用高密度主信息表
+### 3. Work Detail 使用顶部媒体画廊 + 全宽高密度主信息表
 
-作品核心事实与分类关系应在首屏主信息区集中展示。Work Type / Genre / Tag 不再拆到页面底部的大卡片。
+作品图片不再作为固定左栏与右侧长信息表并排，因为当 Metadata 明显高于图片时会形成持续空白。主视觉改为顶部媒体画廊，当前只加载一张本地图片并通过左右箭头 / 轻量标签切换 poster、fanart、thumbnail、cover；后续视频预览图可以继续复用同一画廊。作品核心事实与分类关系在画廊下方的全宽主信息表集中展示，Work Type / Genre / Tag 不再拆到页面底部的大卡片。
 
 ## 后果
 
