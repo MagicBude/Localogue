@@ -115,14 +115,13 @@ Profile 保存：
 
 推荐流程：
 
-1. 点击“新建资料库”，Localogue 会创建一个不指向任何路径的“资料库 1”；
-2. 为它选择 Private Library，并按需添加 Content Root / Shared Pack；
-3. 保存 Desktop 设置；
-4. 再次点击“新建资料库”，会得到“资料库 2”；
-5. 用户可以随时把这些中性名称改成自己需要的名字；
-6. 开发环境执行 `pnpm desktop:demo:reset` 后，可直接点击“添加示例库”，加入固定名称“示例库”。
+1. 点击“新建资料库”，Localogue 会创建并立即保存一个不指向任何路径的“资料库 1”；
+2. 为它选择 Private Library，并按需添加 Content Root / Shared Pack；路径编辑完成后点击“保存设置”；
+3. 再次点击“新建资料库”，会得到“资料库 2”；原有 Profile 不会被覆盖；
+4. 用户可以随时把这些中性名称改成自己需要的名字；重命名、删除、切换都会立即持久化；
+5. 点击“添加示例库”时，Desktop 会自行把内置 Fixture 复制到 App Local Data，并立即加入固定名称“示例库”。普通用户不需要安装 pnpm，也不需要知道仓库目录。
 
-之后侧边栏会出现资料库选择器，可以直接切换。
+之后侧边栏会出现资料库选择器，可以直接切换；重启 Desktop 后 Profile 列表和当前选择仍应保持。
 
 ## 切换时发生什么
 
@@ -184,4 +183,17 @@ Profile 是“整组路径预设”，不是 OS 沙箱。
 - 未来 E2E Fixture；
 - 新用户第一次打开 Localogue 时的功能展示库。
 
-当前 Git 模板通过 `pnpm desktop:demo:reset` 复制到可写运行目录。正式发行版未来可以把同一套 Fixture 作为只读应用资源，再在用户首次选择“体验示例库”时复制到 App Local Data；仍然不应直接写安装目录里的模板。
+当前 Git 模板仍然是 Fixture 的唯一事实源。Desktop Bundle 会把同一套模板作为只读应用资源嵌入；用户点击“添加示例库”时，Native Runtime 将它复制到 App Local Data 的可写 `example-library` 运行副本。
+
+开发者仍可使用 `pnpm desktop:demo:reset` 重置仓库内的 `var/dev-fixture-library` 做脚本 / 手工验收，但它不再是产品 UI 的使用前提。安装版与开发版的“添加示例库”都必须由 Desktop 自己完成初始化。
+
+## Profile 持久化与异常回退
+
+V1-24 Persistence Hotfix 规定：
+
+- Profile 列表一旦存在，就是资料库配置的事实源；旧版平面路径字段不允许再次生成“幽灵 Profile”；
+- 新建、切换、重命名、删除 Profile 都会立即写入 Desktop Settings，不依赖用户再补点一次“保存设置”；
+- 路径字段本身仍使用“保存设置”提交，避免选择目录时频繁写盘；
+- `activeLibraryProfileId` 缺失或指向不存在的 ID 时，TypeScript 与 Rust 都回退到现有列表第一项；
+- 只有 `libraryProfiles` 真正为空时，侧栏才显示“尚未创建资料库”；
+- 示例库初始化失败时应提示安装资源缺失，而不是要求普通用户执行开发命令。

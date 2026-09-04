@@ -2,6 +2,14 @@
 
 ## V1-24 Foundation Cleanup - Library Profiles / Source Model / Rich Fixture
 
+- 修复 Webview 已热更新但 Rust Native Runtime 仍停留在旧版本时的 Profile 假成功问题：Runtime 新增 `contractRevision=2`，Profile UI 在版本不匹配时阻止增删改切换并明确提示重启/重编译。
+- Profile metadata mutation 不再经过 active path snapshot；重命名完成后还会核对 Native 返回的 Profile 名称，避免只显示“已重命名”提示但实际未持久化。
+- `build.rs` 显式监听 Rust command、permissions、capabilities 与 Tauri 配置，降低覆盖补丁后复用旧 IPC / ACL 构建产物的概率。
+- 示例库 `provision_example_library` 仍由专用 Native Command + ACL 提供；若开发环境残留旧 Native Binary，会被 contractRevision 直接识别，而不是继续产生 `Command not found` 与 Profile 列表回退。
+- 修复 Library Profile 持久化：新建、切换、重命名、删除现在立即写入 Desktop Settings，避免只更新设置页临时状态后在侧栏/重启时丢失。
+- `activeLibraryProfileId` 失效时，TypeScript 与 Rust 双层都回退到现有 Profile；已有 Profile 列表不再被兼容平面路径二次迁移成“幽灵资料库”。
+- “添加示例库”改为真正的产品级一键初始化：Tauri Bundle 嵌入标准 Fixture / Starter Shared Pack，Native Runtime 自动复制可写示例库到 App Local Data，不再要求普通用户执行 `pnpm desktop:demo:reset`。
+- 仓库 `desktop:demo:*` 命令继续保留给开发者重置 `var/dev-fixture-library`，与产品内置示例库运行副本明确分工。
 - 新增 Desktop `Library Profile`，可把 Private Library、Unified Roots、额外 Media/NFO 路径和 Shared Packs 保存为“示例库 / 资料库 1 / 资料库 2”等独立配置。
 - 侧栏新增当前资料库快速切换；切换只替换路径配置，不复制、移动或合并磁盘资料。
 - Library Profile onboarding 收口：旧单库 Settings 自动迁移为 Profile；Dev Fixture 固定使用短名称“示例库”；普通新建项只生成“资料库 1 / 资料库 2 …”等中性默认名，不预设内容分类。

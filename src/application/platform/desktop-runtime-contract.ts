@@ -10,6 +10,8 @@ export interface DesktopRuntimeInfo {
   version: string;
   identifier: string;
   environment: "development" | "production";
+  /** Native IPC / ACL contract revision. Missing means an older runtime is still running. */
+  contractRevision?: number;
   appConfigDir: string;
   appLocalDataDir: string;
   settingsPath: string;
@@ -27,6 +29,12 @@ export interface DesktopLibraryProfile {
   sharedPackPaths: string[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface DesktopExampleLibraryInfo {
+  libraryPath: string;
+  sharedPackPath?: string;
+  created: boolean;
 }
 
 export interface DesktopBootstrapSettings {

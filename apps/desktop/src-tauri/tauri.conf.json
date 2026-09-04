@@ -36,6 +36,10 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": {
+      "../../../examples/dev-library/template/": "examples/dev-library/template/",
+      "../../../examples/shared-packs/starter-community-pack/": "examples/shared-packs/starter-community-pack/"
+    }
   }
 }

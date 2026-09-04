@@ -391,6 +391,8 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 
 - Desktop 必须允许多个独立 Library Profile 快速切换，用于示例库与用户自建资料库不同收藏；不得要求用户为每个库安装一个新的 Localogue 实例。
 - 一个 Library Profile 只保存本机资料源路径：`libraryPath / libraryRoots / mediaScanPaths / nfoScanPaths / sharedPackPaths`。切换 Profile 不得复制、移动、合并或删除任何 Canonical / Media 数据。
+- Profile 新建、切换、重命名和删除必须立即持久化，不能只改 React 临时状态；`activeLibraryProfileId` 失效时必须回退到现有 Profile，而不是清空列表或重新迁移出“幽灵资料库”。
+- “添加示例库”属于产品能力：Desktop 必须从内置 Fixture 资源自动创建 App Local Data 可写副本；普通用户不得被要求运行 `pnpm desktop:demo:reset`。该命令只服务仓库开发/验收。
 - `ffprobePath / webUrl` 等运行环境设置是应用级全局配置，不得因为增加 Profile 而在每个资料库重复保存。
 - Settings 普通用户语义固定为四层：私人资料库（可写）、内容根目录（推荐）、只读共享资料、高级兼容目录；`mediaScanPaths / nfoScanPaths` 必须继续作为高级兼容能力，不重新提升为主路径概念。
 - Unified Library 一键同步必须在 NFO → Asset 之后等待**全部**有效 Media Root 扫描完成才可显示“同步完成”；多根目录不得因第一个 root 完成就提前刷新为成功。

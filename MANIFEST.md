@@ -18,7 +18,12 @@
 - 侧栏提供当前资料库下拉，可从任意主页面快速切换；
 - Profile 切换只切换 Settings 中的路径集合，不复制、不移动、不合并磁盘资料；
 - Settings Schema 继续保持 `schemaVersion=1`，新字段为向后兼容的可选扩展；
-- Rust Native Boundary 对 Profile 数量、ID、名称与路径进行规范化和安全校验。
+- Rust Native Boundary 对 Profile 数量、ID、名称与路径进行规范化和安全校验；
+- Profile 管理动作立即持久化，`activeLibraryProfileId` 缺失/失效时 TypeScript 与 Rust 都回退到现有首个 Profile；
+- 已有 Profile 列表成为事实源，兼容平面路径不再在 active ID 异常时二次创建“幽灵 Profile”；
+- “添加示例库”由 Native Runtime 从 Tauri 内置资源复制到 App Local Data，可直接一键使用，不要求普通用户执行 pnpm。
+- Desktop Runtime 公开 `contractRevision=2`；若 Webview 已更新但 Native Runtime 仍旧，Profile 管理会被安全禁用并提示重新启动/重编译，避免旧 Rust Settings Contract 把 Profile 字段丢弃；
+- Profile 重命名等 metadata mutation 直接持久化完整 Profile 状态，不再被 active path snapshot 二次覆盖。
 
 ### 资料源设置收敛
 
@@ -69,7 +74,7 @@ Desktop 设置页将资料源解释为四层：
 3. 切换 Profile 不删除、移动或合并磁盘上的任何资料。
 4. Media / NFO / Asset 扫描继续通过 Platform/Application 边界，不向 WebView 开放通用文件系统或 Shell。
 5. Presentation Preference 仍只是私人显示选择，不改写 Canonical。
-6. Dev Fixture 模板只存虚构/生成式数据，日常测试只操作 `var/dev-fixture-library` 运行副本。
+6. Dev Fixture 模板只存虚构/生成式数据；开发脚本操作 `var/dev-fixture-library`，产品“示例库”操作 App Local Data 的独立可写副本，二者都不直接写模板。
 
 ## 后续
 

@@ -7,6 +7,10 @@
 V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Desktop 的资料源模型，使它从“很多散落路径设置”升级为用户可以理解和快速切换的资料库工作区：
 
 - 新增 **Library Profile**：示例库与用户自建资料库可分别保存 Private Library、Unified Roots、额外 Media / NFO 路径与 Shared Packs；
+- Profile 新建 / 切换 / 重命名 / 删除已改为立即持久化；active ID 失效时自动回退到现有 Profile，避免新增资料库后旧 Profile 消失或侧栏失去选择器；
+- “添加示例库”由 Desktop Native Runtime 自动从内置资源初始化到 App Local Data，不再依赖用户先运行 pnpm 开发命令；
+- 新增 Native `contractRevision` 防漂移检查：Webview 热更新而 Rust Binary / ACL 未重编译时，Profile 管理不会再显示假成功，而会要求重启或重编译；
+- Profile metadata mutation 与普通路径设置保存分离，重命名会核对 Native 返回值后再确认持久化结果；
 - 侧栏直接提供资料库下拉切换与管理入口，切换只替换当前路径配置，不复制或移动磁盘数据；
 - 旧单库 Settings 会平滑迁移为 Profile；Dev Fixture 固定命名为“示例库”，普通新建库使用“资料库 1 / 资料库 2 …”中性默认名；
 - `ffprobe` / Web URL 保持应用级全局设置，不被 Profile 重复保存；

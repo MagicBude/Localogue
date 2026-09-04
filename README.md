@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。在 V1-24A Presentation Preference Workbench 基础上，Desktop 新增 **Library Profile（资料库配置）**：示例库与用户自建资料库可以分别记住 Private Library、统一内容根目录、高级媒体/NFO目录与 Shared Pack，并从侧栏快速切换；旧单库设置会自动迁移，普通新建库使用“资料库 1 / 资料库 2 …”中性名称，不预设内容分类。切换只替换本机路径配置，不复制或移动 Canonical / Media 数据。
+当前实现已推进到 **V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。在 V1-24A Presentation Preference Workbench 基础上，Desktop 新增 **Library Profile（资料库配置）**：示例库与用户自建资料库可以分别记住 Private Library、统一内容根目录、高级媒体/NFO目录与 Shared Pack，并从侧栏快速切换；旧单库设置会自动迁移，普通新建库使用“资料库 1 / 资料库 2 …”中性名称，不预设内容分类。Profile 新建、切换、重命名与删除会立即持久化，active ID 异常会自动回退到现有 Profile；切换只替换本机路径配置，不复制或移动 Canonical / Media 数据。
 
 资料源设置同时收敛为四层语义：**私人资料库（可写）→ 内容根目录（推荐扫描入口）→ 只读共享资料（Shared Pack）→ 高级兼容目录**。Media 页面的一键同步继续固定按 **NFO → Asset → Media** 编排，并且现在会等待全部 Unified Root + 额外媒体目录扫描完成后才报告成功，扫描结果会明确列出本轮实际检查的全部目录。Desktop Vite 构建也使用 Rolldown vendor code splitting 解决单一主 bundle 持续膨胀的问题，而不是简单调高 warning 阈值。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
@@ -244,7 +244,7 @@ pnpm library:init:demo
 pnpm desktop:demo:reset
 ```
 
-它会把 `examples/dev-library/template/` 复制到 Git 忽略的 `var/dev-fixture-library/`。当前 Fixture 已扩充为 **11 Works / 8 People / 29 张生成式 JPEG**：`LX-*` 子集专门覆盖封面、头像、Gallery 与 Presentation Preference，`DEMO-*` 子集覆盖更多人物关系、厂商、厂牌、系列、题材和筛选场景；6 位 performer 都配有独立 Gallery。开发环境可在 Desktop `设置 → 资料库` 中点击“添加示例库”，也可以手工把运行副本加入为“示例库”，之后可以和真实的其他用户自建 Profile 从侧栏一键切换。需要清空运行副本时执行 `pnpm desktop:demo:clean`。V1-24 起 `examples/imports`、`examples/settings` 与 `examples/shared-packs` 也围绕这套 Fixture 联动；旧的独立 `examples/people` / `examples/works` 已合并，避免重复示例漂移。
+它会把 `examples/dev-library/template/` 复制到 Git 忽略的 `var/dev-fixture-library/`，用于开发者脚本与手工验收。当前 Fixture 已扩充为 **11 Works / 8 People / 29 张生成式 JPEG**：`LX-*` 子集专门覆盖封面、头像、Gallery 与 Presentation Preference，`DEMO-*` 子集覆盖更多人物关系、厂商、厂牌、系列、题材和筛选场景；6 位 performer 都配有独立 Gallery。Desktop `设置 → 资料库 → 添加示例库` 不再依赖这条 pnpm 命令：安装版与开发版都会从随应用嵌入的同一 Fixture 资源自动创建 App Local Data 可写副本并立即加入“示例库” Profile。`desktop:demo:*` 仍保留给开发者重置仓库测试副本。V1-24 起 `examples/imports`、`examples/settings` 与 `examples/shared-packs` 也围绕这套 Fixture 联动；旧的独立 `examples/people` / `examples/works` 已合并，避免重复示例漂移。
 
 V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓库中只读挂载，而本地同 ID 实体始终拥有更高优先级。
 

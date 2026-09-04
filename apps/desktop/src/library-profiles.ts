@@ -71,7 +71,9 @@ export function nextLibraryProfileName(
 export function isDevFixtureLibraryPath(value?: string): boolean {
   if (!value) return false;
   const normalized = value.trim().replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase();
-  return normalized.endsWith("/var/dev-fixture-library") || normalized.endsWith("/dev-fixture-library");
+  return normalized.endsWith("/var/dev-fixture-library")
+    || normalized.endsWith("/dev-fixture-library")
+    || normalized.endsWith("/example-library");
 }
 
 /**
@@ -106,17 +108,9 @@ export function ensureLibraryProfiles(settings: DesktopBootstrapSettings): Deskt
   const matching = profiles.find((profile) => sameLibraryPaths(settings, profile));
   if (matching) return applyLibraryProfile({ ...settings, libraryProfiles: profiles }, matching);
 
-  // active ID 丢失但当前平面路径仍有意义时，保留这组路径为一个新 Profile，
-  // 而不是静默覆盖成列表第一项。
-  if (hasConfiguredLibrarySources(settings)) {
-    const isFixture = isDevFixtureLibraryPath(settings.libraryPath);
-    const preferredId = isFixture ? DEV_FIXTURE_PROFILE_ID : LEGACY_PROFILE_ID;
-    const id = profiles.some((profile) => profile.id === preferredId) ? createLibraryProfileId() : preferredId;
-    const name = isFixture ? "示例库" : nextLibraryProfileName({ ...settings, libraryProfiles: profiles });
-    const migrated = createLibraryProfile(settings, id, name);
-    return applyLibraryProfile({ ...settings, libraryProfiles: [...profiles, migrated] }, migrated);
-  }
-
+  // 一旦已经存在 Profile，列表就是资料库配置的事实源。active ID 失效时只允许
+  // 回退到现有 Profile，绝不能把平面兼容字段再次“迁移”为一个新 Profile。
+  // 否则一次旧状态 / 并发保存就可能制造幽灵资料库，甚至让 UI 看起来像列表丢失。
   return applyLibraryProfile({ ...settings, libraryProfiles: profiles }, profiles[0]);
 }
 
@@ -156,18 +150,25 @@ export function applyLibraryProfile(
 /** 保存 Settings 时，把当前路径状态写回当前 Profile。 */
 export function syncActiveLibraryProfile(settings: DesktopBootstrapSettings): DesktopBootstrapSettings {
   const profiles = (settings.libraryProfiles ?? []).map(normalizeProfile);
-  const activeId = settings.activeLibraryProfileId;
-  if (!activeId) return { ...settings, libraryProfiles: profiles };
+  if (!profiles.length) {
+    return { ...settings, libraryProfiles: [], activeLibraryProfileId: undefined };
+  }
 
-  const active = profiles.find((profile) => profile.id === activeId);
-  if (!active) return { ...settings, activeLibraryProfileId: undefined, libraryProfiles: profiles };
+  const active = profiles.find((profile) => profile.id === settings.activeLibraryProfileId)
+    ?? profiles.find((profile) => sameLibraryPaths(settings, profile))
+    ?? profiles[0];
 
-  // 这里必须以当前 Settings 的路径字段为真相：设置页可能刚修改过路径，
-  // 若先重新 apply 旧 Profile，会把尚未保存的新路径覆盖掉。
+  // active ID 失效时先落到一个真实存在的 Profile。只有原 active 仍然有效时，
+  // 当前平面路径字段才被视为设置页尚未保存的编辑，并写回该 Profile。
+  const activeWasValid = active.id === settings.activeLibraryProfileId;
+  const current = activeWasValid
+    ? { ...settings, activeLibraryProfileId: active.id, libraryProfiles: profiles }
+    : applyLibraryProfile({ ...settings, libraryProfiles: profiles }, active);
+
   return {
-    ...settings,
+    ...current,
     libraryProfiles: profiles.map((profile) => (
-      profile.id === activeId ? snapshotLibraryProfile(settings, active) : profile
+      profile.id === active.id ? snapshotLibraryProfile(current, active) : profile
     )),
   };
 }
@@ -214,7 +215,8 @@ export function renameLibraryProfile(
 }
 
 export function activeLibraryProfile(settings: DesktopBootstrapSettings): DesktopLibraryProfile | null {
-  return (settings.libraryProfiles ?? []).find((profile) => profile.id === settings.activeLibraryProfileId) ?? null;
+  const profiles = settings.libraryProfiles ?? [];
+  return profiles.find((profile) => profile.id === settings.activeLibraryProfileId) ?? profiles[0] ?? null;
 }
 
 export function hasUnsavedLibraryPaths(

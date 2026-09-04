@@ -81,7 +81,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["pick_directory", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
+  const runtimeCommands = ["provision_example_library", "pick_directory", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -497,6 +497,35 @@ if (!errors.length) {
   }
   if (!libraryProfiles.includes('"示例库"') || !desktopApp.includes('t("+ 添加示例库")')) {
     errors.push("V1-24 开发 Fixture 必须以短名称“示例库”接入 Library Profile。");
+  }
+  if (!desktopApp.includes("provisionExampleLibrary") || !rust.includes("provision_example_library") || !permission.includes('"provision_example_library"')) {
+    errors.push("V1-24 示例库必须由 Desktop 自行初始化，不能要求普通用户先运行 pnpm desktop:demo:reset。");
+  }
+  if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
+    errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
+  }
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 2")) {
+    errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
+  }
+  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
+    errors.push("V1-24 Profile UI 必须在 Native Runtime 版本落后时阻止误保存并给出明确诊断。");
+  }
+  const tauriBuild = readFileSync(path.join(root, "apps/desktop/src-tauri/build.rs"), "utf8");
+  for (const watched of ["src/lib.rs", "permissions", "capabilities", "tauri.conf.json"]) {
+    if (!tauriBuild.includes(`cargo:rerun-if-changed=${watched}`)) {
+      errors.push(`V1-24 Native IPC / ACL 构建输入未显式监听：${watched}`);
+    }
+  }
+  if (desktopApp.includes("示例库运行副本不存在。请先在仓库根目录运行 pnpm desktop:demo:reset。")) {
+    errors.push("V1-24 产品 UI 不应暴露开发者 pnpm 命令作为示例库使用前提。");
+  }
+  const bundledResources = release.bundle?.resources;
+  if (!bundledResources || Array.isArray(bundledResources)
+    || bundledResources["../../../examples/dev-library/template/"] !== "examples/dev-library/template/") {
+    errors.push("V1-24 Desktop Bundle 必须嵌入标准 Dev Fixture，供安装版一键创建示例库。");
+  }
+  if (!libraryProfiles.includes("profiles[0]") || !rust.includes("value.library_profiles.first()")) {
+    errors.push("V1-24 Library Profile active ID 失效时必须回退到现有 Profile，而不是清空选择或创建幽灵 Profile。");
   }
   if (/影视库|成人库/.test(desktopApp + libraryProfiles)) {
     errors.push("V1-24 Desktop 不允许把具体内容分类名称硬编码为默认 Library Profile。 ");

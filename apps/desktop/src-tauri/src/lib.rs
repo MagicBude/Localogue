@@ -25,12 +25,22 @@ const SAFE_MEDIA_EXTENSIONS: &[&str] = &[
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopExampleLibraryInfo {
+    library_path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shared_pack_path: Option<String>,
+    created: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopRuntimeInfo {
     runtime: &'static str,
     product_name: String,
     version: String,
     identifier: String,
     environment: &'static str,
+    contract_revision: u16,
     app_config_dir: String,
     app_local_data_dir: String,
     settings_path: String,
@@ -218,6 +228,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
+        contract_revision: 2,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -253,6 +264,37 @@ fn save_desktop_settings(app: AppHandle, settings: DesktopBootstrapSettings) -> 
     fs::rename(&temporary, &path).map_err(display_error)?;
     Ok(normalized)
 }
+
+#[tauri::command]
+fn provision_example_library(app: AppHandle) -> Result<DesktopExampleLibraryInfo, String> {
+    let source_library = locate_example_resource(&app, "examples/dev-library/template")?;
+    let local_data = app.path().app_local_data_dir().map_err(display_error)?;
+    let destination = local_data.join("example-library");
+    let created = if example_library_is_complete(&destination) {
+        false
+    } else {
+        let temporary = local_data.join(format!("example-library.tmp-{}", now_marker()));
+        if temporary.exists() {
+            fs::remove_dir_all(&temporary).map_err(display_error)?;
+        }
+        copy_directory_tree(&source_library, &temporary)?;
+        if destination.exists() {
+            fs::remove_dir_all(&destination).map_err(display_error)?;
+        }
+        fs::rename(&temporary, &destination).map_err(display_error)?;
+        true
+    };
+
+    let shared_pack_path = locate_example_resource_optional(&app, "examples/shared-packs/starter-community-pack")
+        .map(|path| path_to_string(&path));
+
+    Ok(DesktopExampleLibraryInfo {
+        library_path: path_to_string(&destination),
+        shared_pack_path,
+        created,
+    })
+}
+
 
 #[tauri::command]
 async fn pick_directory(app: AppHandle) -> Result<Option<String>, String> {
@@ -1320,6 +1362,60 @@ fn desktop_settings_path(app: &AppHandle) -> Result<PathBuf, String> {
     app.path().app_config_dir().map(|path| path.join(SETTINGS_FILE)).map_err(display_error)
 }
 
+fn locate_example_resource(app: &AppHandle, relative: &str) -> Result<PathBuf, String> {
+    locate_example_resource_optional(app, relative).ok_or_else(|| {
+        format!("Localogue 内置示例资源缺失：{relative}。请重新安装或重新构建 Desktop。")
+    })
+}
+
+fn locate_example_resource_optional(app: &AppHandle, relative: &str) -> Option<PathBuf> {
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        let candidate = resource_dir.join(relative);
+        if candidate.is_dir() {
+            return Some(candidate);
+        }
+    }
+
+    // tauri dev 的工作目录在不同启动方式下可能落在仓库根、apps/desktop 或 src-tauri。
+    // 这里只向父级查找受信任的项目内 examples，不接受用户传入任意复制源。
+    if let Ok(current) = std::env::current_dir() {
+        let mut cursor = Some(current.as_path());
+        for _ in 0..6 {
+            let Some(base) = cursor else { break; };
+            let candidate = base.join(relative);
+            if candidate.is_dir() {
+                return Some(candidate);
+            }
+            cursor = base.parent();
+        }
+    }
+    None
+}
+
+fn example_library_is_complete(path: &Path) -> bool {
+    ["works", "people", "assets", "asset-files", "presentation-preferences"]
+        .iter()
+        .all(|name| path.join(name).is_dir())
+}
+
+fn copy_directory_tree(source: &Path, destination: &Path) -> Result<(), String> {
+    if !source.is_dir() {
+        return Err(format!("示例资源目录不存在：{}", source.display()));
+    }
+    fs::create_dir_all(destination).map_err(display_error)?;
+    for entry in fs::read_dir(source).map_err(display_error)? {
+        let entry = entry.map_err(display_error)?;
+        let file_type = entry.file_type().map_err(display_error)?;
+        let target = destination.join(entry.file_name());
+        if file_type.is_dir() {
+            copy_directory_tree(&entry.path(), &target)?;
+        } else if file_type.is_file() {
+            fs::copy(entry.path(), target).map_err(display_error)?;
+        }
+    }
+    Ok(())
+}
+
 fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBootstrapSettings, String> {
     value.schema_version = 1;
     value.library_path = clean_optional_path(value.library_path)?;
@@ -1330,10 +1426,11 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
     value.library_profiles = normalize_library_profiles(value.library_profiles)?;
     value.active_library_profile_id = clean_optional_text(value.active_library_profile_id, 160)?;
-    if let Some(active_id) = value.active_library_profile_id.as_deref() {
-        if !value.library_profiles.iter().any(|profile| profile.id == active_id) {
-            value.active_library_profile_id = None;
-        }
+    let active_is_valid = value.active_library_profile_id.as_deref()
+        .map(|active_id| value.library_profiles.iter().any(|profile| profile.id == active_id))
+        .unwrap_or(false);
+    if !active_is_valid {
+        value.active_library_profile_id = value.library_profiles.first().map(|profile| profile.id.clone());
     }
     let web_url = value.web_url.trim();
     value.web_url = if web_url.is_empty() { "http://127.0.0.1:3000".into() } else { web_url.into() };
@@ -1604,6 +1701,7 @@ pub fn run() {
             get_runtime_info,
             load_desktop_settings,
             save_desktop_settings,
+            provision_example_library,
             pick_directory,
             pick_media_file,
             pick_portable_pack_file,

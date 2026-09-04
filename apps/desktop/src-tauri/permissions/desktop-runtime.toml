@@ -5,6 +5,7 @@ commands.allow = [
   "get_runtime_info",
   "load_desktop_settings",
   "save_desktop_settings",
+  "provision_example_library",
   "pick_directory",
   "pick_media_file",
   "pick_portable_pack_file",

@@ -3,6 +3,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 import type {
   DesktopBootstrapSettings,
+  DesktopExampleLibraryInfo,
   DesktopMediaProbeResult,
   DesktopRuntimeInfo,
   DesktopTaskProgress,
@@ -25,6 +26,7 @@ export const desktopBridge = {
   loadSettings: () => invoke<DesktopBootstrapSettings>("load_desktop_settings"),
   saveSettings: (settings: DesktopBootstrapSettings) =>
     invoke<DesktopBootstrapSettings>("save_desktop_settings", { settings }),
+  provisionExampleLibrary: () => invoke<DesktopExampleLibraryInfo>("provision_example_library"),
   pickDirectory: () => invoke<string | null>("pick_directory"),
   pickMediaFile: () => invoke<string | null>("pick_media_file"),
   pickPortablePackFile: () => invoke<string | null>("pick_portable_pack_file"),

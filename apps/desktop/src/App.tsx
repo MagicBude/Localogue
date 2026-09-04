@@ -99,6 +99,8 @@ const mediaProbe = new TauriMediaProbeAdapter();
 const fileSystem = new TauriFileSystemAdapter();
 const fileHash = new TauriFileHashAdapter();
 
+const PROFILE_NATIVE_CONTRACT_REVISION = 2;
+
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   schemaVersion: 1,
   libraryRoots: [],
@@ -219,17 +221,52 @@ export default function App() {
     setLibraryEpoch((value) => value + 1);
   }, []);
 
+  async function persistDesktopSettings(
+    next: DesktopBootstrapSettings,
+    options: { syncActiveProfile?: boolean } = {},
+  ): Promise<DesktopBootstrapSettings> {
+    // 普通设置保存要把当前路径草稿写回 active Profile；Profile 自身的增删改切换
+    // 已经显式构造了完整状态，不能再做一次 active snapshot。
+    const prepared = ensureLibraryProfiles(
+      options.syncActiveProfile === false ? next : syncActiveLibraryProfile(next),
+    );
+    const saved = ensureLibraryProfiles(await desktopBridge.saveSettings(prepared));
+    setSettings(saved);
+    setSavedSettings(saved);
+    await refreshSources(saved);
+    return saved;
+  }
+
   async function saveSettings(): Promise<void> {
     setBusy(true);
     try {
-      const prepared = syncActiveLibraryProfile(settings);
-      const saved = await desktopBridge.saveSettings(prepared);
-      setSettings(saved);
-      setSavedSettings(saved);
-      await refreshSources(saved);
+      await persistDesktopSettings(settings);
       setMessage(t("Desktop 实例设置已保存；当前资料库配置、资料源与 Shared Packs 已重新加载。"));
     } catch (error) {
       setMessage(t("保存失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function persistProfileMutation(
+    next: DesktopBootstrapSettings,
+    successMessage: string,
+  ): Promise<DesktopBootstrapSettings> {
+    if ((runtime?.contractRevision ?? 0) < PROFILE_NATIVE_CONTRACT_REVISION) {
+      const error = new Error(t("Desktop Native Runtime 与当前界面版本不一致。请完全退出并重新启动 Desktop；开发环境若仍未更新，请执行一次 Rust clean 后重启。"));
+      setMessage(error.message);
+      throw error;
+    }
+    setBusy(true);
+    try {
+      const saved = await persistDesktopSettings(next, { syncActiveProfile: false });
+      setDetail(null);
+      setMessage(successMessage);
+      return saved;
+    } catch (error) {
+      setMessage(t("资料库配置保存失败：{error}", { error: toMessage(error) }));
+      throw error;
     } finally {
       setBusy(false);
     }
@@ -240,32 +277,25 @@ export default function App() {
     if (!profile || profile.id === savedSettings.activeLibraryProfileId) return;
     if (hasUnsavedLibraryPaths(settings, savedSettings) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
 
-    setBusy(true);
     try {
       const next = applyLibraryProfile(savedSettings, profile);
-      const saved = await desktopBridge.saveSettings(next);
-      setSettings(saved);
-      setSavedSettings(saved);
-      setDetail(null);
-      await refreshSources(saved);
-      setMessage(t("已切换资料库：{name}", { name: profile.name }));
-    } catch (error) {
-      setMessage(t("切换资料库失败：{error}", { error: toMessage(error) }));
-    } finally {
-      setBusy(false);
+      await persistProfileMutation(next, t("已切换资料库：{name}", { name: profile.name }));
+    } catch {
+      // persistProfileMutation 已给出错误信息。
     }
   }
 
   async function installSharedPackPath(path: string): Promise<void> {
-    const current = await desktopBridge.loadSettings();
+    const current = ensureLibraryProfiles(await desktopBridge.loadSettings());
     const next = syncActiveLibraryProfile({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) });
-    const saved = await desktopBridge.saveSettings(next);
+    const saved = ensureLibraryProfiles(await desktopBridge.saveSettings(next));
     setSettings(saved);
     setSavedSettings(saved);
     await refreshSources(saved);
   }
 
   const hasLibrarySource = readRoots.length > 0;
+  const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   return (
     <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
@@ -301,7 +331,7 @@ export default function App() {
               <select
                 className="source-profile-select"
                 aria-label={t("快速切换资料库")}
-                disabled={busy}
+                disabled={busy || !profileNativeRuntimeReady}
                 value={savedSettings.activeLibraryProfileId ?? ""}
                 onChange={(event) => void switchLibraryProfile(event.target.value)}
               >
@@ -421,6 +451,7 @@ export default function App() {
             busy={busy}
             packInfos={packInfos}
             onSave={() => void saveSettings()}
+            onPersistProfiles={persistProfileMutation}
             setMessage={setMessage}
           />
         )}
@@ -1550,6 +1581,7 @@ function SettingsPage({
   busy,
   packInfos,
   onSave,
+  onPersistProfiles,
   setMessage,
 }: {
   runtime: DesktopRuntimeInfo | null;
@@ -1558,65 +1590,69 @@ function SettingsPage({
   busy: boolean;
   packInfos: DesktopSharedPackInfo[];
   onSave: () => void;
+  onPersistProfiles: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   setMessage: (message: string) => void;
 }) {
   const { t } = useDesktopI18n();
   const profiles = settings.libraryProfiles ?? [];
   const selectedProfile = activeLibraryProfile(settings);
+  const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   async function chooseLibrary(): Promise<void> {
     const path = await fileDialog.pickDirectory();
     if (path) setSettings((current) => ({ ...current, libraryPath: path }));
   }
 
-  function createProfile(): void {
-    setSettings((current) => {
-      const prepared = syncActiveLibraryProfile(current);
-      const name = nextLibraryProfileName(prepared, t("资料库"));
-      return addLibraryProfile(prepared, createEmptyLibraryProfile(createLibraryProfileId(), name));
-    });
-    setMessage(t("已新建空白资料库；选择 Private Library / 内容根目录后点击“保存设置”。"));
+  async function createProfile(): Promise<void> {
+    const prepared = syncActiveLibraryProfile(settings);
+    const name = nextLibraryProfileName(prepared, t("资料库"));
+    const next = addLibraryProfile(prepared, createEmptyLibraryProfile(createLibraryProfileId(), name));
+    try {
+      await onPersistProfiles(next, t("已新建资料库：{name}。现在可以为它选择 Private Library / 内容根目录。", { name }));
+    } catch {
+      // 父级已经显示保存错误。
+    }
   }
 
   async function addDevFixtureProfile(): Promise<void> {
     try {
-      const fixturePath = await desktopBridge.resolvePath("./var/dev-fixture-library");
-      if (!await desktopBridge.pathExists(fixturePath)) {
-        setMessage(t("示例库运行副本不存在。请先在仓库根目录运行 pnpm desktop:demo:reset。"));
-        return;
-      }
-
-      const sharedPackPath = await desktopBridge.resolvePath("./examples/shared-packs/starter-community-pack");
-      const sharedPackPaths = await desktopBridge.pathExists(sharedPackPath) ? [sharedPackPath] : [];
-      setSettings((current) => {
-        const prepared = syncActiveLibraryProfile(current);
-        const existing = (prepared.libraryProfiles ?? []).find((profile) => isDevFixtureLibraryPath(profile.libraryPath));
-        const fixtureSettings: DesktopBootstrapSettings = {
-          ...prepared,
-          libraryPath: fixturePath,
-          libraryRoots: [],
-          mediaScanPaths: [],
-          nfoScanPaths: [],
-          sharedPackPaths,
-        };
-        const profile = createLibraryProfile(
-          fixtureSettings,
-          existing?.id ?? "library_profile_dev_fixture",
-          t("示例库"),
-        );
-        return addLibraryProfile(fixtureSettings, {
-          ...profile,
-          description: t("Localogue 内置开发 / 功能展示 Fixture"),
-          createdAt: existing?.createdAt ?? profile.createdAt,
-        });
+      const provisioned = await desktopBridge.provisionExampleLibrary();
+      const prepared = syncActiveLibraryProfile(settings);
+      const existing = (prepared.libraryProfiles ?? []).find((profile) => isDevFixtureLibraryPath(profile.libraryPath));
+      const fixtureSettings: DesktopBootstrapSettings = {
+        ...prepared,
+        libraryPath: provisioned.libraryPath,
+        libraryRoots: [],
+        mediaScanPaths: [],
+        nfoScanPaths: [],
+        sharedPackPaths: provisioned.sharedPackPath ? [provisioned.sharedPackPath] : [],
+      };
+      const profile = createLibraryProfile(
+        fixtureSettings,
+        existing?.id ?? "library_profile_dev_fixture",
+        t("示例库"),
+      );
+      const next = addLibraryProfile(fixtureSettings, {
+        ...profile,
+        description: t("Localogue 内置开发 / 功能展示 Fixture"),
+        createdAt: existing?.createdAt ?? profile.createdAt,
       });
-      setMessage(t("示例库已加入当前设置；点击“保存设置”后即可从侧栏快速切换。"));
+      await onPersistProfiles(
+        next,
+        t(provisioned.created
+          ? "示例库已创建并加入资料库列表，可以直接从侧栏切换。"
+          : "示例库已加入资料库列表，可以直接从侧栏切换。"),
+      );
     } catch (error) {
-      setMessage(t("无法加入示例库：{error}", { error: toMessage(error) }));
+      const detail = toMessage(error);
+      const nativeCommandMissing = detail.includes("Command not found") || detail.includes("not allowed");
+      setMessage(nativeCommandMissing
+        ? t("Desktop Native Runtime 与当前界面版本不一致。请完全退出并重新启动 Desktop；开发环境若仍未更新，请执行一次 Rust clean 后重启。")
+        : t("无法加入示例库：{error}", { error: detail }));
     }
   }
 
-  function selectProfile(profileId: string): void {
+  async function selectProfile(profileId: string): Promise<void> {
     const profile = (settings.libraryProfiles ?? []).find((item) => item.id === profileId);
     if (!profile || profile.id === settings.activeLibraryProfileId) return;
 
@@ -1625,22 +1661,41 @@ function SettingsPage({
       if (hasUnsavedLibraryPaths(settings, activeSnapshot) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
     }
 
-    setSettings((current) => applyLibraryProfile(current, profile));
+    try {
+      await onPersistProfiles(applyLibraryProfile(settings, profile), t("已切换资料库：{name}", { name: profile.name }));
+    } catch {
+      // 父级已经显示保存错误。
+    }
   }
 
-  function renameProfile(): void {
+  async function renameProfile(): Promise<void> {
     const profile = activeLibraryProfile(settings);
     if (!profile) return;
     const name = window.prompt(t("资料库配置名称"), profile.name);
     if (!name?.trim()) return;
-    setSettings((current) => renameLibraryProfile(current, profile.id, name));
+    try {
+      const saved = await onPersistProfiles(
+        renameLibraryProfile(settings, profile.id, name),
+        t("资料库已重命名为：{name}", { name: name.trim() }),
+      );
+      const renamed = (saved.libraryProfiles ?? []).find((item) => item.id === profile.id);
+      if (renamed?.name !== name.trim()) {
+        setMessage(t("资料库重命名未能持久化，请重试。"));
+      }
+    } catch {
+      // 父级已经显示保存错误。
+    }
   }
 
-  function deleteProfile(): void {
+  async function deleteProfile(): Promise<void> {
     const profile = activeLibraryProfile(settings);
     if (!profile) return;
     if (!window.confirm(t("删除资料库配置“{name}”？只删除路径预设，不会删除磁盘上的资料。", { name: profile.name }))) return;
-    setSettings((current) => removeLibraryProfile(current, profile.id));
+    try {
+      await onPersistProfiles(removeLibraryProfile(settings, profile.id), t("资料库配置已删除：{name}", { name: profile.name }));
+    } catch {
+      // 父级已经显示保存错误。
+    }
   }
 
   async function addSharedPack(): Promise<void> {
@@ -1680,12 +1735,18 @@ function SettingsPage({
     <div className="page-stack">
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
 
+      {!profileNativeRuntimeReady ? (
+        <div className="status-line">
+          {t("Desktop Native Runtime 与当前界面版本不一致。请完全退出并重新启动 Desktop；开发环境若仍未更新，请执行一次 Rust clean 后重启。")}
+        </div>
+      ) : null}
+
       <section className="settings-card library-profile-card">
         <div className="section-heading">
           <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("资料库")}</h2></div>
           <div className="button-row">
-            {runtime?.environment === "development" ? <button onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</button> : null}
-            <button className="primary-button" onClick={createProfile}>{t("+ 新建资料库")}</button>
+            <button disabled={busy || !profileNativeRuntimeReady} onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</button>
+            <button className="primary-button" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</button>
           </div>
         </div>
         <p className="muted">{t("新建资料库默认使用“资料库 1、资料库 2…”等中性名称，不预设内容分类；名称可随时修改。每个资料库会记住 Private Library、内容根目录、高级兼容目录和 Shared Packs。")}</p>
@@ -1693,17 +1754,17 @@ function SettingsPage({
           <div className="profile-toolbar">
             <label>
               <span>{t("当前资料库")}</span>
-              <select value={settings.activeLibraryProfileId ?? ""} onChange={(event) => selectProfile(event.target.value)}>
+              <select disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
                 <option value="" disabled>{t("选择资料库…")}</option>
                 {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
               </select>
             </label>
             <div className="button-row">
-              <button disabled={!selectedProfile} onClick={renameProfile}>{t("重命名")}</button>
-              <button className="danger-button" disabled={!selectedProfile} onClick={deleteProfile}>{t("删除资料库")}</button>
+              <button disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={() => void renameProfile()}>{t("重命名")}</button>
+              <button className="danger-button" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={() => void deleteProfile()}>{t("删除资料库")}</button>
             </div>
           </div>
-        ) : <p className="empty-profile-hint">{t("还没有资料库。点击“新建资料库”会创建“资料库 1”；之后选择路径并保存即可。开发环境也可以一键加入“示例库”。")}</p>}
+        ) : <p className="empty-profile-hint">{t("还没有资料库。点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")}</p>}
       </section>
 
       <section className="settings-card source-model-card">
