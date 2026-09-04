@@ -2,27 +2,26 @@
 
 ## 当前阶段
 
-**V1-23：Desktop Governance Parity I。**
+**V1-23：Desktop Governance Parity。**
 
-V1-23 将 Web 已有治理核心带入 Desktop，并继续保持共享 Application Core 与最小 Native 权限：
+V1-23 把 Web 已经成熟的资料治理规则带入 Tauri Desktop，并继续保持 Native Boundary 对真实文件系统写权限的控制。当前阶段已：
 
-- 新增 Desktop Governance 一级入口；
-- Evidence Inbox 支持 pending / committed / ignored；
-- Review 支持字段决策、实体决策、Commit Plan、Blocker / Warning / Operation 预览；
-- Commit Plan 指纹使用平台中立 WebCrypto SHA-256；
-- 显式 Commit 前创建最小 Snapshot，失败时自动恢复；
-- Commit Receipt、Lifecycle、Snapshot、Restore Receipt、Provenance 写入受限 Private Audit；
-- Curation 复用完整度与重复候选服务；
-- History / Restore 支持最新有效 Commit 恢复、引用阻塞、确认码与 Guard Snapshot；
-- Rust 新增 Private Audit Reader 与安全 Snapshot Restore；
-- Evidence 在 Native Writer 边界不可覆盖；
-- V1-22 Presentation / Vocabulary 与 V1-18 Native I/O 稳定实现保持不变。
+- Desktop 新增 Review / Curation / History 一级导航；
+- NFO Preview 可以保存为不可变 Evidence，来源冲突不必直接 Bootstrap Canonical；
+- Review 复用共享 Entity Resolution、字段决策、实体决策与 Commit Plan；
+- Commit Plan fingerprint 改为浏览器中立同步 SHA-256，Web / Desktop 共用同一实现语义；
+- Commit 前 Native 创建最小 before-image Snapshot，并在中途失败时自动恢复；
+- Private Audit Reader/Writer 只开放 evidence、lifecycle、commit receipt、snapshot、restore receipt、provenance 与 media binding receipt；
+- History 可显式 Restore Snapshot，并追加 Restore Receipt / restored Provenance；
+- Curation 复用 Web completeness 与 duplicate detection；
+- Packs 页面新增 Personal Backup / Shared Archive `.localogue-pack` 导入导出；
+- Personal Import 默认不覆盖既有文件，失败会删除本轮新建文件；
+- Shared Import 使用 App Local Data 临时目录，校验后 rename，避免半安装；
+- Shared Pack Native 只读、V1-22 Vocabulary / Presentation 与 V1-18 Native I/O 稳定边界保持不变。
 
-### 明确留到 V1-24
+### 明确留到后续 V1.x
 
-- Native `.localogue-pack` Open / Save / Drag & Drop 导入导出；V1-23 先复用 Web Portable Pack Workbench；
-- Presentation Preference Workbench 的 Desktop 完整编辑；
-- 更完整的人物 Asset 管理与 Asset 孤儿治理。
+Presentation Preference 独立 Desktop Workbench、更多人物 Asset / Gallery 管理、复杂自动 Merge Plan、Community Pack 在线更新检查继续后续实现。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -237,11 +236,11 @@ V1-23 将 Web 已有治理核心带入 Desktop，并继续保持共享 Applicati
 
 ## 下一阶段建议
 
-**V1-23：Desktop Governance Parity。**
+**V1-24：Desktop Personal Presentation & Asset Governance。**
 
-1. 将现有 Desktop Private CRUD 接入 Commit Plan / Audit / History，补齐 Evidence / Review / Curation 等治理交互；
-2. 接入 Shared / Personal Portable Pack Desktop 导入导出，而不是仅管理已挂载目录；
-3. 补更完整的 Presentation Preference 与 Shared Asset 展示/治理边界；
+1. 增加 Presentation Preference Workbench，显式管理 Work Cover / Person Portrait 的私人展示选择；
+2. 补更完整的人物 portrait / gallery Asset 管理与 Shared Asset 展示边界；
+3. Portable Pack 增加更详细的冲突预览与迁移报告；
 4. 继续抽取共享 Presentation / DTO，减少 Web 与 Desktop 表现层重复；
 5. 设计 Asset 孤儿治理、安全物理删除与更完整的本地资源生命周期；
 6. 保持所有 Native 写能力使用最小命令、显式白名单和引用保护。

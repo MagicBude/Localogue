@@ -35,6 +35,16 @@ export interface DesktopImportedAssetFile {
   sha256: string;
 }
 
+
+export interface DesktopPortableFile {
+  path: string;
+  bytes: number[] | Uint8Array;
+}
+
+export interface DesktopPortableImportResult {
+  imported: number;
+  skipped: number;
+}
 export type DesktopWritableLibraryCollection =
   | "works"
   | "people"

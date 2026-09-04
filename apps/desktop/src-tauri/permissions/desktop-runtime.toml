@@ -1,12 +1,19 @@
 [[permission]]
 identifier = "desktop-runtime"
-description = "允许 Localogue 主窗口调用 V1-23 明确暴露的桌面 Runtime 与扫描端口命令；不包含通用 shell execute/spawn。"
+description = "允许 Localogue 主窗口调用 V1-23 明确暴露的桌面 Runtime、治理、Portable Pack 与扫描端口命令；不包含通用 shell execute/spawn。"
 commands.allow = [
   "get_runtime_info",
   "load_desktop_settings",
   "save_desktop_settings",
   "pick_directory",
   "pick_media_file",
+  "pick_portable_pack_file",
+  "read_portable_pack_file",
+  "save_portable_pack_file",
+  "collect_private_portable_files",
+  "import_private_portable_files",
+  "collect_shared_portable_files",
+  "install_shared_portable_files",
   "open_path",
   "reveal_in_folder",
   "open_web_url",
@@ -22,9 +29,10 @@ commands.allow = [
   "sha256_file",
   "inspect_shared_pack",
   "read_library_collection",
-  "read_private_audit_collection",
   "write_library_entity",
+  "read_private_audit_collection",
   "write_private_audit_entity",
-  "restore_private_snapshot",
+  "create_governance_snapshot",
+  "restore_governance_snapshot",
   "delete_library_entity"
 ]

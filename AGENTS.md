@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-23 Desktop Governance Parity I**。
+当前阶段：**V1-23 Desktop Governance Parity**。
 
 V1 当前约束：
 
@@ -64,6 +64,8 @@ V1 当前约束：
 - 导入格式变化 → `docs/import/` 与 `schemas/`
 - 架构选择变化 → `docs/decisions/`
 - 阶段进度变化 → `PROJECT_STATUS.md` 与 `CHANGELOG.md`
+- 根目录只维护一个当前版本说明 `MANIFEST.md`，新版本直接覆盖更新；禁止继续新增 `V*_MANIFEST.md`、`*_HOTFIX_MANIFEST.md` 等版本快照文件。历史变化由 `CHANGELOG.md`、Git Commit 与版本标签承担。
+- 覆盖式补丁只交付实际修改/新增的文件；需要删除的旧文件在交付说明中单独列出，不为每个补丁长期保留额外 README / Manifest。
 
 ## 六、代码可学习性
 
@@ -344,11 +346,15 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - V1-23 再继续 Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack 等完整治理链。
 
 
-## V1-23 Governance 约束
+## V1-23 Desktop Governance 约束
 
-- Desktop Governance 必须复用共享 Review / Commit Plan / Curation 规则，不复制第二套匹配逻辑。
-- Evidence 本体不可变；状态变化只能写 `evidence-lifecycle`。
-- Desktop Audit I/O 只能访问当前 Private Library 的受控集合；Shared Pack 不可写。
-- Canonical Commit 前必须有 Snapshot；失败必须恢复；用户 Restore 必须保留 Receipt / Provenance。
-- Snapshot Restore 不允许任意路径，只允许白名单集合的一层 JSON 相对路径。
-- V1-23 Portable Pack 仍复用 Web Archive Workbench；Native Archive Transport 留 V1-24。
+- Desktop Review 必须复用共享 Evidence / Entity Resolution / Review Decision / Commit Plan Application Service，不得在 React 组件里重写第二套治理算法。
+- Commit Plan fingerprint 必须在 Web 与 Tauri WebView 中确定性一致，不允许共享 Application Core 依赖 `node:crypto`。
+- Canonical Commit 前必须由 Native Boundary 创建最小 before-image Snapshot；失败时优先自动 Restore。
+- `evidence / evidence-lifecycle / review-commits / snapshots / restore-receipts / provenance` 等治理数据只允许写入当前 Desktop Settings 对应的 Private Library。
+- Snapshot/Restore 的相对路径必须使用 Native 白名单；禁止 WebView 提供任意目标路径。
+- Restore 不删除 Commit Receipt，必须追加 Restore Receipt / Provenance。
+- Curation completeness / duplicate candidates 是派生信号，不写回 Canonical。
+- `.localogue-pack` Personal Import 默认不覆盖既有文件；中途失败回滚本轮新建文件。
+- Shared Portable Pack 必须先写临时目录、校验 manifest 与 id/version，再 rename 到正式安装目录；Shared Pack 仍然只读。
+- V1-18 Hotfix 3 Native I/O / SHA-256 / Windows Walker 稳定实现不得因 Governance 功能而退化。

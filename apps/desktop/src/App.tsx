@@ -49,6 +49,8 @@ import {
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { DesktopPersonCard, DesktopPersonExplorer } from "./desktop-person-explorer";
 import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
+import { DesktopGovernance } from "./desktop-governance";
+import { DesktopPortablePackWorkbench } from "./desktop-portable-pack-workbench";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import {
   importLocalAssetPreview,
@@ -66,13 +68,13 @@ import {
 import {
   importNfoPreview,
   previewNfoImport,
+  saveNfoPreviewAsEvidence,
   type NfoImportPreview,
   type NfoImportResult,
   type NfoImportItemStatus,
 } from "./nfo-library-import";
 import { applyVocabularyRepair, previewVocabularyRepair, type VocabularyRepairPreview, type VocabularyRepairResult } from "./vocabulary-repair";
 import { useStableAsyncData } from "./use-stable-async-data";
-import { DesktopGovernance } from "./desktop-governance";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -89,7 +91,7 @@ const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   webUrl: "http://127.0.0.1:3000",
 };
 
-type DesktopPage = "home" | "works" | "people" | "browse" | "media" | "governance" | "packs" | "settings";
+type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings";
 type DetailTarget = { kind: "work" | "person"; id: string } | null;
 
 const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short: string }> = [
@@ -97,8 +99,10 @@ const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short:
   { id: "works", label: "作品", eyebrow: "WORKS", short: "WK" },
   { id: "people", label: "人物", eyebrow: "PEOPLE", short: "PP" },
   { id: "browse", label: "浏览", eyebrow: "BROWSE", short: "BR" },
+  { id: "review", label: "审核", eyebrow: "REVIEW", short: "RV" },
+  { id: "curation", label: "治理", eyebrow: "CURATION", short: "CU" },
+  { id: "history", label: "历史", eyebrow: "HISTORY", short: "HI" },
   { id: "media", label: "媒体", eyebrow: "MEDIA", short: "MD" },
-  { id: "governance", label: "治理", eyebrow: "GOVERNANCE", short: "GV" },
   { id: "packs", label: "资料包", eyebrow: "PACKS", short: "PK" },
   { id: "settings", label: "设置", eyebrow: "SETTINGS", short: "ST" },
 ];
@@ -210,6 +214,15 @@ export default function App() {
     }
   }
 
+  async function installSharedPackPath(path: string): Promise<void> {
+    const current = await desktopBridge.loadSettings();
+    const next = { ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) };
+    const saved = await desktopBridge.saveSettings(next);
+    setSettings(saved);
+    setSavedSettings(saved);
+    await refreshSources(saved);
+  }
+
   const hasLibrarySource = readRoots.length > 0;
 
   return (
@@ -219,7 +232,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span className="brand-copy">
             <strong>Localogue</strong>
-            <small>Desktop · {runtime?.version ?? "…"}</small>
+            <small>Desktop · V1-20</small>
           </span>
         </button>
 
@@ -314,6 +327,12 @@ export default function App() {
           )
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} />
+        ) : page === "review" ? (
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+        ) : page === "curation" ? (
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+        ) : page === "history" ? (
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "media" ? (
           <MediaPage
             repository={repository}
@@ -321,17 +340,6 @@ export default function App() {
             setMessage={setMessage}
             progress={progress}
             onLibraryChanged={refreshLibrary}
-          />
-        ) : page === "governance" ? (
-          <DesktopGovernance
-            repository={repository}
-            privateLibraryPath={savedSettings.libraryPath ?? null}
-            openWork={openWork}
-            openPerson={openPerson}
-            onLibraryChanged={refreshLibrary}
-            setMessage={setMessage}
-            onOpenPortablePacks={() => navigate("packs")}
-            webUrl={savedSettings.webUrl}
           />
         ) : page === "packs" ? (
           <PacksPage
@@ -343,6 +351,8 @@ export default function App() {
             onSave={saveSettings}
             setMessage={setMessage}
             onOpenSettings={() => navigate("settings")}
+            onSharedInstalled={installSharedPackPath}
+            onPrivateImported={refreshLibrary}
           />
         ) : (
           <SettingsPage
@@ -1008,6 +1018,22 @@ function MediaPage({
     }
   }
 
+  async function saveMetadataAsEvidence(): Promise<void> {
+    if (!nfoPreview?.importable) {
+      setMessage("当前预览没有可保存为 Evidence 的 NFO Work 候选。");
+      return;
+    }
+    setMetadataBusy(true);
+    try {
+      const count = await saveNfoPreviewAsEvidence(nfoPreview);
+      setMessage(`已保存 ${count} 条不可变 NFO Evidence；可前往“审核”生成 Commit Plan。`);
+    } catch (error) {
+      setMessage(`保存 Evidence 失败：${toMessage(error)}`);
+    } finally {
+      setMetadataBusy(false);
+    }
+  }
+
   async function importMetadataSource(): Promise<void> {
     if (!nfoPreview && !assetPreview) return;
     setMetadataBusy(true);
@@ -1174,6 +1200,7 @@ function MediaPage({
           </div>
           <div className="button-row">
             <button disabled={metadataBusy} onClick={() => void scanMetadataSource()}>{metadataBusy ? t("处理中…") : t("预览 NFO + 图片")}</button>
+            <button disabled={metadataBusy || !nfoPreview?.importable} onClick={() => void saveMetadataAsEvidence()}>保存为 Evidence</button>
             <button className="primary-button" disabled={metadataBusy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={() => void importMetadataSource()}>{t("导入当前预览")}</button>
           </div>
         </div>
@@ -1315,6 +1342,8 @@ function PacksPage({
   onSave,
   setMessage,
   onOpenSettings,
+  onSharedInstalled,
+  onPrivateImported,
 }: {
   settings: DesktopBootstrapSettings;
   setSettings: Dispatch<SetStateAction<DesktopBootstrapSettings>>;
@@ -1324,6 +1353,8 @@ function PacksPage({
   onSave: () => Promise<void>;
   setMessage: (message: string) => void;
   onOpenSettings: () => void;
+  onSharedInstalled: (path: string) => Promise<void>;
+  onPrivateImported: () => void;
 }) {
   const { t } = useDesktopI18n();
 
@@ -1375,6 +1406,13 @@ function PacksPage({
         {!privateLibraryPath && !settings.sharedPackPaths.length ? <p className="muted">{t("当前没有配置资料源。")} </p> : null}
         {hasDraftChanges ? <p className="status-chip warn">{t("存在未保存的 Shared Pack 变更")}</p> : <p className="status-chip ok">{t("Shared Pack 配置已保存")}</p>}
       </section>
+      <DesktopPortablePackWorkbench
+        privateLibraryPath={privateLibraryPath}
+        packInfos={packInfos}
+        onSharedInstalled={onSharedInstalled}
+        onPrivateImported={onPrivateImported}
+        setMessage={setMessage}
+      />
       <section className="settings-card soft-card">
         <span className="eyebrow">NATIVE READ-ONLY BOUNDARY</span>
         <h2>{t("Shared Pack 不会被 Desktop CRUD 修改")}</h2>

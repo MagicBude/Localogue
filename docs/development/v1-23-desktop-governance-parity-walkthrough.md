@@ -1,50 +1,68 @@
-# V1-23 Desktop Governance Parity I 实现导读
+# V1-23 教材：从 Desktop Evidence 到可恢复 Canonical Commit
 
-## 1. 从哪里看
+## 1. 为什么 Desktop 不能只复制 `/review`
 
-建议按下面顺序阅读：
+Review 页面只是治理流程的表现层。真正重要的是：Evidence 不可变、Decision 可重算、Commit Plan 有 fingerprint、写入前有 Snapshot、失败能恢复、历史 Receipt 不被擦除。
 
-1. `apps/desktop/src/desktop-governance.tsx` — Desktop Governance UI；
-2. `apps/desktop/src/desktop-governance-service.ts` — Desktop 编排层；
-3. `src/application/review/commit-plan-service.ts` — Web/Desktop 共用 Commit Plan；
-4. `src/application/crypto/sha256.ts` — 平台中立 Fingerprint；
-5. `apps/desktop/src/tauri-bridge.ts` — Native Audit / Restore Bridge；
-6. `apps/desktop/src-tauri/src/lib.rs` — Rust 白名单和 Snapshot Restore。
-
-## 2. Evidence 为什么不直接改 Work
-
-Evidence 是“来源事实”，Canonical Work 是“当前采用事实”。V1-23 继续遵守：
+因此 V1-23 的复用层次是：
 
 ```text
-Evidence
-  ↓ analyze
-Review Decisions
-  ↓
-Commit Plan + fingerprint
-  ↓ explicit confirm
-Snapshot
-  ↓
-Canonical writes + Provenance + Receipt
+Desktop React
+   ↓
+Application Review / Curation / Provenance
+   ↓
+TauriLibraryRepository + Desktop Vocabulary Repository
+   ↓
+Tauri Native Audit / Snapshot Commands
+   ↓
+Private Library
 ```
 
-这样来源信息、人工选择和最终写入都有可解释链路。
+## 2. NFO 的两条入口
 
-## 3. Desktop 为什么要 Native Audit Reader
+本地 NFO 仍保留“直接 Bootstrap”用于首次建立私人资料库，同时新增“保存为 Evidence”。后者只写 Evidence，不写 Canonical：
 
-Web 可以通过服务器端 Repository 读文件；Tauri WebView 不应该获得通用 fs 权限。因此 V1-23 新增的是业务级命令，不是 `readFile(path)`：
+```text
+NFO Preview → Evidence → Review → Commit Plan → Snapshot → Commit
+```
 
-- `read_private_audit_collection(collection)`
-- `write_private_audit_entity(collection, entity)`
-- `restore_private_snapshot(snapshot, includeAuditState)`
+来源冲突、已有实体补全和需要解释的更新应优先走治理链。
 
-Rust 自己解析当前 Private Library，并验证 collection、ID、JSON 最小结构和 Restore 路径。
+## 3. 为什么 Commit Plan 要重新计算
 
-## 4. Commit / Restore 安全边界
+用户看到 Plan 后，Library 可能已经被另一项操作修改。执行前再次计算 fingerprint，如果与预览时不同，就拒绝旧计划，要求重新 Review。
 
-Commit 之前保存最小 before-image Snapshot。失败时自动恢复。用户主动 Restore 时只允许同一 Work 的最新有效 Commit，并先检查新建实体是否已经被其他 Work 引用。
+V1-23 把 fingerprint SHA-256 从 Node `crypto` 改为浏览器中立实现，使共享 Application Service 可以直接运行在 Tauri WebView。
 
-Snapshot Restore 不能包含任意路径，也不能覆盖 Shared Pack。Evidence 本体不参与 Restore 覆盖；Evidence Lifecycle 会回到 pending，之后可以重新 Review。
+## 4. Snapshot 如何控制范围
 
-## 5. Portable Pack 为什么仍然打开 Web
+Rust 不接受任意 Snapshot 路径。它只根据 Operations 推导：
 
-`.localogue-pack` 已在 V1-11 拥有完整 Codec 和 Community Validator。V1-23 先完成 Governance Core，不在 WebView 复制 ZIP/Archive 实现。V1-24 再基于 Platform Port / Native Dialog 提供真正 Desktop 导入导出。
+- works / people / organizations / series / genres / tags；
+- 对应 `provenance/<work>.json`；
+- 对应 `evidence-lifecycle/<evidence>.json`。
+
+Restore 再次验证每个 relativePath，防止 Snapshot 被篡改成目录穿越。
+
+## 5. Portable Pack 为什么需要临时安装目录
+
+Shared Pack 如果边写边校验，最后一个文件失败就会留下“看起来存在、实际损坏”的目录。V1-23 改成：
+
+```text
+Envelope Preview
+  → Native temp directory
+  → write allowed files
+  → inspect_shared_pack
+  → verify id/version
+  → rename to packs/<id>-<version>
+```
+
+Personal Backup 不能整体 rename，因为目标是已有 Private Library，所以记录本轮创建文件；中途失败只删除这些新文件，不覆盖已有内容。
+
+## 6. Curation 为什么继续是派生视图
+
+Completeness 和 Duplicate Candidate 不是 Canonical 真相，只是从当前 Library 派生的治理信号。Desktop 直接复用 Web Application Service，不创建第二套状态文件。
+
+## 7. 下一步
+
+V1-23 完成 Governance 基线后，后续可以继续补 Presentation Preference Workbench、更丰富的人物 Asset 管理、Community Pack 更新与更强 Merge Plan，而不需要再次改变 Evidence / Commit / Snapshot 的核心边界。

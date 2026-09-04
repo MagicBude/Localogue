@@ -285,4 +285,9 @@
 - [ADR-025：先建立 Platform Ports，再引入 Tauri Shell](decisions/ADR-025-platform-ports-before-tauri-shell.md)
 - [ADR-026：Snapshot Diff 是扫描基线，Filesystem Watcher 只是增强](decisions/ADR-026-snapshot-diff-before-filesystem-watcher.md)
 
-- `development/v1-23-desktop-governance-parity-walkthrough.md`：Desktop Evidence / Review / Commit / Curation / History / Restore 实现导读。
+## V1-23 · Desktop Governance Parity
+
+- [V1-23 Desktop Governance Parity 实现导读](development/v1-23-desktop-governance-parity-walkthrough.md)
+- [ADR-039：Desktop Governance Native Audit / Snapshot / Portable Pack Boundary](decisions/ADR-039-desktop-governance-native-audit-and-portable-pack-boundary.md)
+- [Portable Pack 便携传输格式](sharing/portable-packs.md)
+

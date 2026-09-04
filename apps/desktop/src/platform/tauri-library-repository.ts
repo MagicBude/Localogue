@@ -31,13 +31,6 @@ export class TauriLibraryRepository implements LibraryRepository {
     private readonly privateRoot: string | null,
   ) {}
 
-  getPrivateRoot(): string | null { return this.privateRoot; }
-
-  async readPrivateCollection<T>(collection: DesktopLibraryCollection): Promise<T[]> {
-    if (!this.privateRoot) return [];
-    return desktopBridge.readLibraryCollection<T>(this.privateRoot, collection);
-  }
-
   async findWorkById(id: string): Promise<Work | null> {
     return (await this.readMerged<Work>("works")).find((item) => item.id === id) ?? null;
   }

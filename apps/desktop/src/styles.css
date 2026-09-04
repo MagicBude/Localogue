@@ -1053,48 +1053,66 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-inline-entity-links button { color: #65a8ff; }
 }
 
-/* V1-23 Desktop Governance */
-.governance-page { min-width: 0; }
-.governance-tabs { display: flex; gap: 8px; flex-wrap: wrap; padding: 4px 0 12px; border-bottom: 1px solid var(--line, #deddd7); }
-.governance-tabs button { border: 1px solid var(--line, #d9d7cf); background: var(--panel, #fff); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
-.governance-tabs button.active { background: #171715; color: #fff; border-color: #171715; }
-.governance-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.governance-list { display: grid; gap: 10px; }
-.governance-card { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 18px; padding: 16px; border: 1px solid var(--line, #ddd); border-radius: 14px; background: var(--panel, #fff); }
-.governance-card h3 { margin: 8px 0 4px; font-size: 1rem; }
-.governance-metrics { display: grid; grid-template-columns: repeat(4, minmax(62px, 1fr)); gap: 6px; }
-.governance-metrics span { min-width: 62px; padding: 7px 8px; border-radius: 9px; background: rgba(127,127,127,.08); font-size: .72rem; }
-.governance-metrics strong { display: block; font-size: 1rem; margin-top: 2px; }
-.decision-table { display: grid; gap: 8px; }
-.decision-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e5e3dd); }
-.decision-row code { white-space: pre-wrap; overflow-wrap: anywhere; padding: 7px; border-radius: 8px; background: rgba(127,127,127,.07); }
-.decision-row button.active { background: #171715; color: white; }
-.entity-decision-row { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(170px, .5fr) minmax(180px, .6fr); gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #e5e3dd); }
-.entity-decision-row > div { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
-.entity-decision-row small { color: var(--muted, #777); }
-.commit-plan-card code { overflow-wrap: anywhere; }
-.governance-stat-grid { grid-template-columns: repeat(4, minmax(130px, 1fr)); }
-.compact-governance-table { display: grid; border: 1px solid var(--line, #ddd); border-radius: 12px; overflow: hidden; }
-.compact-governance-table > button { display: grid; grid-template-columns: 110px minmax(0, 1fr) 120px minmax(180px, .7fr); gap: 12px; align-items: center; text-align: left; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line, #e5e3dd); background: transparent; cursor: pointer; }
-.compact-governance-table > button:last-child { border-bottom: 0; }
-.compact-governance-table > button:hover { background: rgba(127,127,127,.06); }
-.compact-governance-table small { color: var(--muted, #777); overflow-wrap: anywhere; }
-.duplicate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
-.duplicate-grid article { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--line, #ddd); border-radius: 10px; }
-.duplicate-grid code { overflow-wrap: anywhere; }
-.history-list { display: grid; gap: 8px; }
-.history-card { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 16px; align-items: center; padding: 12px 14px; border: 1px solid var(--line, #ddd); border-radius: 10px; }
-.history-card > div:first-child { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.history-card small { color: var(--muted, #777); }
-.restore-confirm-panel { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; }
-.restore-confirm-panel label { display: grid; gap: 4px; }
-.restore-confirm-panel input { min-width: 190px; }
-@media (max-width: 1150px) {
-  .governance-card { grid-template-columns: 1fr; }
-  .decision-row { grid-template-columns: 100px 1fr; }
-  .decision-row > :nth-child(3) { display: none; }
-  .decision-row .button-row { grid-column: 1 / -1; }
-  .entity-decision-row { grid-template-columns: 1fr; }
-  .compact-governance-table > button { grid-template-columns: 100px 1fr; }
-  .governance-stat-grid { grid-template-columns: repeat(2, 1fr); }
+/* V1-23 Governance Parity -------------------------------------------------- */
+.governance-page { gap: 18px; }
+.governance-title { padding: 4px 2px 8px; }
+.governance-title h1 { margin: 6px 0 8px; font-size: clamp(28px, 3vw, 44px); line-height: 1.06; }
+.governance-title p { margin: 0; max-width: 980px; color: var(--muted, #6c6a63); }
+.governance-split { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.governance-inbox { position: sticky; top: 84px; max-height: calc(100vh - 112px); overflow: hidden; display: flex; flex-direction: column; }
+.governance-inbox-list { display: grid; gap: 8px; overflow: auto; padding-right: 4px; }
+.governance-inbox-item { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line, #ddd8ce); background: var(--panel, #fff); }
+.governance-inbox-item:hover, .governance-inbox-item.is-active { border-color: #171713; background: #f7f5ef; }
+.governance-inbox-item span { min-width: 0; display: grid; gap: 4px; }
+.governance-inbox-item b, .governance-inbox-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.governance-inbox-item small { color: var(--muted, #6c6a63); }
+.governance-review-pane { min-width: 0; display: grid; gap: 16px; }
+.governance-status { display: inline-flex; align-items: center; min-height: 26px; padding: 3px 8px; border-radius: 999px; border: 1px solid #d5d0c6; background: #f6f3ec; font-size: 12px; font-style: normal; white-space: nowrap; }
+.governance-status.is-committed, .governance-status.is-matched, .governance-status.is-existing_clean { background: #edf8ef; border-color: #b7dabc; }
+.governance-status.is-ignored { background: #f1f1ef; color: #777; }
+.governance-status.is-new, .governance-status.is-new_work { background: #eef5ff; border-color: #bdd2ef; }
+.governance-status.is-ambiguous, .governance-status.is-existing_conflict { background: #fff5df; border-color: #e7c77e; }
+.governance-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.governance-metrics--wide { grid-template-columns: repeat(4, minmax(160px, 1fr)); }
+.governance-metric { min-width: 0; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line, #ddd8ce); background: var(--panel, #fff); display: grid; gap: 6px; }
+.governance-metric span { color: var(--muted, #6c6a63); font-size: 12px; }
+.governance-metric strong { font-size: 26px; }
+.governance-field-table { display: grid; border-top: 1px solid var(--line, #ddd8ce); }
+.governance-field-row { display: grid; grid-template-columns: minmax(100px, .7fr) minmax(130px, 1.25fr) minmax(130px, 1.25fr) minmax(150px, .8fr); gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #ddd8ce); }
+.governance-field-row > span { min-width: 0; overflow-wrap: anywhere; color: var(--muted, #6c6a63); }
+.governance-resolution-list { display: grid; gap: 8px; }
+.governance-resolution-row { display: grid; grid-template-columns: minmax(150px, 1fr) auto minmax(220px, .9fr); gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line, #ddd8ce); border-radius: 12px; }
+.governance-resolution-row > span:first-child { display: grid; gap: 3px; min-width: 0; }
+.governance-resolution-row small { color: var(--muted, #6c6a63); overflow-wrap: anywhere; }
+.governance-plan { margin-top: 14px; padding: 14px; border-radius: 14px; border: 1px solid #1c1c18; background: #fbfaf6; }
+.governance-plan-head { display: flex; justify-content: space-between; gap: 14px; align-items: center; }
+.governance-plan ol { display: grid; gap: 7px; padding-left: 22px; }
+.governance-plan li small { display: block; color: var(--muted, #6c6a63); margin-top: 2px; }
+.governance-blockers { color: #a73232; }
+.governance-empty { min-height: 140px; display: grid; align-content: center; }
+.curation-list, .history-list { display: grid; gap: 8px; }
+.curation-list > button { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(160px, .8fr); gap: 12px; align-items: center; text-align: left; padding: 10px 12px; border: 1px solid var(--line, #ddd8ce); border-radius: 12px; background: #fff; }
+.curation-list > button span { display: grid; min-width: 0; }
+.curation-list > button small { color: var(--muted, #6c6a63); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.duplicate-list { display: grid; gap: 8px; }
+.duplicate-list > div { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(180px, 1.4fr); gap: 9px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line, #ddd8ce); }
+.duplicate-list small { color: var(--muted, #6c6a63); }
+.history-list article { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line, #ddd8ce); }
+.history-list article > div:first-child { display: grid; gap: 3px; }
+.history-list small { color: var(--muted, #6c6a63); }
+@media (max-width: 1100px) {
+  .governance-split { grid-template-columns: 1fr; }
+  .governance-inbox { position: static; max-height: 360px; }
+  .governance-metrics, .governance-metrics--wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .governance-field-row { grid-template-columns: 1fr 1fr; }
+  .governance-resolution-row { grid-template-columns: 1fr auto; }
+  .governance-resolution-row select { grid-column: 1 / -1; }
 }
+.portable-pack-card { display: grid; gap: 14px; }
+.portable-shared-export-list { display: grid; gap: 8px; }
+.portable-shared-export-list > div { display: flex; justify-content: space-between; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line, #ddd8ce); }
+.portable-shared-export-list span { display: grid; gap: 2px; min-width: 0; }
+.portable-shared-export-list small { color: var(--muted, #6c6a63); }
+.portable-preview { display: grid; gap: 12px; padding: 14px; border-radius: 14px; border: 1px solid var(--line, #ddd8ce); background: #faf9f5; }
+.portable-preview > code { overflow-wrap: anywhere; }
+.portable-metric-value { font-size: 16px !important; overflow-wrap: anywhere; }

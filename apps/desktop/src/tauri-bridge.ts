@@ -8,6 +8,8 @@ import type {
   DesktopTaskProgress,
   DesktopFileEntry,
   DesktopImportedAssetFile,
+  DesktopPortableFile,
+  DesktopPortableImportResult,
   DesktopFileStat,
   DesktopDeletableLibraryCollection,
   DesktopLibraryCollection,
@@ -25,6 +27,14 @@ export const desktopBridge = {
     invoke<DesktopBootstrapSettings>("save_desktop_settings", { settings }),
   pickDirectory: () => invoke<string | null>("pick_directory"),
   pickMediaFile: () => invoke<string | null>("pick_media_file"),
+  pickPortablePackFile: () => invoke<string | null>("pick_portable_pack_file"),
+  readPortablePackFile: (path: string) => invoke<ArrayBuffer>("read_portable_pack_file", { path }),
+  savePortablePackFile: (suggestedName: string, bytes: Uint8Array) =>
+    invoke<string | null>("save_portable_pack_file", { suggestedName, bytes: Array.from(bytes) }),
+  collectPrivatePortableFiles: () => invoke<DesktopPortableFile[]>("collect_private_portable_files"),
+  importPrivatePortableFiles: (files: DesktopPortableFile[]) => invoke<DesktopPortableImportResult>("import_private_portable_files", { files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })) }),
+  collectSharedPortableFiles: (packPath: string) => invoke<DesktopPortableFile[]>("collect_shared_portable_files", { packPath }),
+  installSharedPortableFiles: (sourceId: string, sourceVersion: string, files: DesktopPortableFile[]) => invoke<string>("install_shared_portable_files", { sourceId, sourceVersion, files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })) }),
   openPath: (path: string) => invoke<void>("open_path", { path }),
   revealInFolder: (path: string) => invoke<void>("reveal_in_folder", { path }),
   openWebUrl: (url: string) => invoke<void>("open_web_url", { url }),
@@ -49,8 +59,10 @@ export const desktopBridge = {
     invoke<T[]>("read_private_audit_collection", { collection }),
   writePrivateAuditEntity: (collection: DesktopPrivateAuditCollection, entity: unknown) =>
     invoke<void>("write_private_audit_entity", { collection, entity }),
-  restorePrivateSnapshot: (snapshot: unknown, includeAuditState = false) =>
-    invoke<void>("restore_private_snapshot", { snapshot, includeAuditState }),
+  createGovernanceSnapshot: <T>(plan: unknown) =>
+    invoke<T>("create_governance_snapshot", { plan }),
+  restoreGovernanceSnapshot: (snapshotId: string) =>
+    invoke<number>("restore_governance_snapshot", { snapshotId }),
   deleteLibraryEntity: (collection: DesktopDeletableLibraryCollection, id: string) =>
     invoke<void>("delete_library_entity", { collection, id }),
   deleteMediaFile: (id: string) =>

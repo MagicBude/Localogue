@@ -1,17 +1,19 @@
 # Changelog
 
-## V1-23 - Desktop Governance Parity I
+## V1-23 - Desktop Governance Parity
 
-- Desktop 新增 Governance 一级工作台，覆盖 Evidence Review、Commit Plan、Curation 与 History / Restore。
-- Web / Desktop 共用 Entity Resolution、Review Decisions、Commit Plan 与 Curation Application Core。
-- Commit Plan fingerprint 从 Node `crypto` 收敛为平台中立 WebCrypto SHA-256。
-- 新增受限 Private Audit Reader；Audit Writer 白名单扩展到 Evidence Lifecycle、Commit Receipt、Snapshot、Restore Receipt 与 Provenance。
-- Evidence 在 Rust 边界保持不可变，已存在 Evidence ID 不允许覆盖。
-- Canonical Commit 前创建最小 Snapshot；失败时自动恢复。
-- History 只允许按同一 Work 最新有效 Commit 逐步 Restore，并保留 Restore Receipt / Provenance。
-- Rust Snapshot Restore 只接受明确白名单集合与安全相对路径，不允许 WebView 指定任意文件路径。
-- Portable Pack 在 V1-23 提供 Desktop 入口，但二进制归档暂时复用既有 Web Workbench；Native Open/Save 进入 V1-24。
-- 产品版本升级至 `0.1.23`。
+- Desktop 新增 Review / Curation / History 一级导航。
+- NFO Preview 可保存为不可变 Evidence，并进入字段/实体 Review。
+- 复用共享 Entity Resolution、Review Decision、Commit Plan、Curation 与 Provenance Application Service。
+- Commit Plan fingerprint 去除 `node:crypto` 依赖，改为浏览器中立同步 SHA-256。
+- Native Audit Reader/Writer 新增治理集合白名单，写根只能来自当前 Private Library 设置。
+- Canonical Commit 前创建最小 before-image Snapshot；中途失败自动恢复。
+- History 支持显式 Restore，并追加 Restore Receipt / Provenance，不删除历史 Commit Receipt。
+- Packs 页面新增 Personal Backup 与 Shared Library Archive `.localogue-pack` 导入导出。
+- Personal Import 失败回滚本轮新建文件；Shared Import 使用临时目录校验后 rename。
+- Portable Pack 继续使用严格路径白名单、SHA-256 与 256 MiB 安全上限。
+- Tauri Permission / ACL / TypeScript Contract / Desktop Validator 同步新增 Governance 与 Portable Commands。
+- 产品版本升级为 `0.1.23`。
 
 ## V1-22 Hotfix 3 - Detail Hero Cleanup & Curated Genre Vocabulary
 

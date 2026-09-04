@@ -2,7 +2,7 @@ import { normalizeNfoCode } from "@/application/importers/nfo-filename-metadata"
 import { controlledGenreDefinition, workTypeDefinition } from "@/application/importers/import-classification-normalizer";
 import { normalizeIdentityText } from "@/application/review/entity-resolution-service";
 import type { Genre, Tag } from "@/domain/entities/classification";
-import type { NormalizedImportCandidate } from "@/domain/entities/evidence";
+import type { EvidenceRecord, ImportWarning, NormalizedImportCandidate } from "@/domain/entities/evidence";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Series } from "@/domain/entities/series";
@@ -159,6 +159,36 @@ export async function previewNfoImport(
     items: parsedItems,
     groups,
   };
+}
+
+
+/**
+ * V1-23 Governance path: save one immutable Evidence per importable NFO Work group.
+ *
+ * This does not write Canonical entities. Users can then review differences and
+ * generate a Commit Plan in the Desktop Review workbench.
+ */
+export async function saveNfoPreviewAsEvidence(preview: NfoImportPreview): Promise<number> {
+  const importedAt = new Date().toISOString();
+  let count = 0;
+  for (const [index, group] of preview.groups.filter((item) => isImportable(item.representative) && item.representative.normalized).entries()) {
+    const item = group.representative;
+    const warnings: ImportWarning[] = (item.unmappedTerms ?? []).map((detail) => ({ code: "unmapped_classification", detail }));
+    const record: EvidenceRecord = {
+      schemaVersion: 1,
+      id: `evidence_${Date.now()}_${String(index + 1).padStart(4, "0")}_${crypto.randomUUID().slice(0, 8)}`,
+      sourceType: "nfo",
+      sourceName: item.fileName,
+      importedAt,
+      sourcePath: item.path,
+      raw: { path: item.path, fileName: item.fileName, groupedSources: group.sources.map((source) => source.path) },
+      normalized: structuredClone(item.normalized!),
+      warnings,
+    };
+    await desktopBridge.writePrivateAuditEntity("evidence", record);
+    count += 1;
+  }
+  return count;
 }
 
 /**

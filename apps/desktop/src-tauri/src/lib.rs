@@ -17,6 +17,7 @@ use url::Url;
 
 const PROGRESS_EVENT: &str = "localogue://desktop-task-progress";
 const SETTINGS_FILE: &str = "desktop-settings.json";
+const MAX_PORTABLE_PACK_BYTES: usize = 256 * 1024 * 1024;
 static NATIVE_IO_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 const SAFE_MEDIA_EXTENSIONS: &[&str] = &[
     "mp4", "mkv", "avi", "mov", "wmv", "m4v", "ts", "mts", "m2ts", "webm", "flv",
@@ -147,6 +148,14 @@ struct DesktopImportedAssetFile {
     sha256: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPortableFile {
+    path: String,
+    bytes: Vec<u8>,
+}
+
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct WalkFilesRequest {
@@ -236,6 +245,188 @@ async fn pick_media_file(app: AppHandle) -> Result<Option<String>, String> {
     Ok(picked
         .and_then(|selected| selected.into_path().ok())
         .map(|path| path_to_string(&path)))
+}
+
+#[tauri::command]
+async fn pick_portable_pack_file(app: AppHandle) -> Result<Option<String>, String> {
+    let picked = app.dialog().file().add_filter("Localogue Pack", &["localogue-pack"]).blocking_pick_file();
+    Ok(picked.and_then(|selected| selected.into_path().ok()).map(|path| path_to_string(&path)))
+}
+
+#[tauri::command]
+async fn read_portable_pack_file(path: String) -> Result<Vec<u8>, String> {
+    spawn_native_io("read_portable_pack_file", move || {
+        let file = require_existing_file(&path)?;
+        if file.extension().and_then(|value| value.to_str()).map(|value| value.eq_ignore_ascii_case("localogue-pack")) != Some(true) {
+            return Err("只允许读取 .localogue-pack 文件。".into());
+        }
+        let metadata = fs::metadata(&file).map_err(display_error)?;
+        if metadata.len() > MAX_PORTABLE_PACK_BYTES as u64 { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+        fs::read(file).map_err(display_error)
+    }).await
+}
+
+#[tauri::command]
+async fn save_portable_pack_file(app: AppHandle, suggested_name: String, bytes: Vec<u8>) -> Result<Option<String>, String> {
+    if bytes.len() > MAX_PORTABLE_PACK_BYTES { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+    let safe_name = if suggested_name.ends_with(".localogue-pack") { suggested_name } else { format!("{suggested_name}.localogue-pack") };
+    let picked = app.dialog().file().add_filter("Localogue Pack", &["localogue-pack"]).set_file_name(&safe_name).blocking_save_file();
+    let Some(path) = picked.and_then(|selected| selected.into_path().ok()) else { return Ok(None); };
+    let target = path_to_string(&path);
+    spawn_native_io("save_portable_pack_file", move || fs::write(&path, bytes).map_err(display_error)).await?;
+    Ok(Some(target))
+}
+
+#[tauri::command]
+async fn collect_private_portable_files(app: AppHandle) -> Result<Vec<DesktopPortableFile>, String> {
+    spawn_native_io("collect_private_portable_files", move || {
+        let root = PathBuf::from(configured_private_library_path(&app)?);
+        collect_portable_files(&root, &[
+            "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
+            "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
+            "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+        ])
+    }).await
+}
+
+#[tauri::command]
+async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortableFile>) -> Result<Value, String> {
+    spawn_native_io("import_private_portable_files", move || {
+        let root = PathBuf::from(configured_private_library_path(&app)?);
+        let allowed = [
+            "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
+            "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
+            "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+        ];
+        let total_bytes = files.iter().try_fold(0_usize, |total, file| total.checked_add(file.bytes.len()).ok_or_else(|| "Portable Pack 大小溢出。".to_string()))?;
+        if total_bytes > MAX_PORTABLE_PACK_BYTES { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+        let mut imported = 0_u64;
+        let mut skipped = 0_u64;
+        let mut created: Vec<PathBuf> = Vec::new();
+        let result: Result<(), String> = (|| {
+            for file in files {
+                let target = safe_portable_relative_path(&root, &file.path, &allowed)?;
+                if target.exists() { skipped += 1; continue; }
+                if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+                fs::write(&target, file.bytes).map_err(display_error)?;
+                created.push(target);
+                imported += 1;
+            }
+            Ok(())
+        })();
+        if let Err(error) = result {
+            for path in created.iter().rev() {
+                let _ = fs::remove_file(path);
+            }
+            return Err(format!("Personal Portable Pack 导入失败，已回滚本次新建文件：{error}"));
+        }
+        Ok(serde_json::json!({"imported": imported, "skipped": skipped}))
+    }).await
+}
+
+#[tauri::command]
+async fn collect_shared_portable_files(app: AppHandle, pack_path: String) -> Result<Vec<DesktopPortableFile>, String> {
+    spawn_native_io("collect_shared_portable_files", move || {
+        let settings = load_desktop_settings(app.clone())?;
+        if !settings.shared_pack_paths.iter().any(|item| item == &pack_path) { return Err("只能导出当前 Desktop 已挂载的 Shared Pack。".into()); }
+        let info = inspect_shared_pack(pack_path)?;
+        if !info.valid { return Err(info.error.unwrap_or_else(|| "Shared Pack 无效。".into())); }
+        let root = PathBuf::from(info.absolute_path);
+        let mut files = collect_portable_files(&root, &["library", "sources"])?;
+        let manifest = root.join("localogue-pack.json");
+        files.push(DesktopPortableFile { path: "localogue-pack.json".into(), bytes: fs::read(manifest).map_err(display_error)? });
+        files.sort_by(|a, b| a.path.cmp(&b.path));
+        Ok(files)
+    }).await
+}
+
+#[tauri::command]
+async fn install_shared_portable_files(app: AppHandle, source_id: String, source_version: String, files: Vec<DesktopPortableFile>) -> Result<String, String> {
+    spawn_native_io("install_shared_portable_files", move || {
+        let total_bytes = files.iter().try_fold(0_usize, |total, file| total.checked_add(file.bytes.len()).ok_or_else(|| "Portable Pack 大小溢出。".to_string()))?;
+        if total_bytes > MAX_PORTABLE_PACK_BYTES { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+        if !is_safe_id(&source_id) || source_version.trim().is_empty() || source_version.contains('/') || source_version.contains('\\') {
+            return Err("Shared Portable Pack id/version 不安全。".into());
+        }
+        let base = app.path().app_local_data_dir().map_err(display_error)?.join("packs");
+        fs::create_dir_all(&base).map_err(display_error)?;
+        let version_token: String = source_version.chars().map(|ch| if ch.is_ascii_alphanumeric() || matches!(ch, '.' | '-' | '_') { ch } else { '-' }).collect();
+        let token = format!("{}-{}", source_id, version_token);
+        let root = base.join(&token);
+        if root.exists() {
+            let existing = inspect_shared_pack(path_to_string(&root))?;
+            if existing.valid && existing.id.as_deref() == Some(source_id.as_str()) && existing.version.as_deref() == Some(source_version.as_str()) {
+                return Ok(path_to_string(&root));
+            }
+            return Err("同 id/version 的 Shared Pack 安装目录已存在但无法安全复用，请先在 Desktop 中卸载或手工清理该安装目录。".into());
+        }
+
+        let temp = base.join(format!(".{}.import-{}", token, now_marker()));
+        if temp.exists() { fs::remove_dir_all(&temp).map_err(display_error)?; }
+        fs::create_dir_all(&temp).map_err(display_error)?;
+        let allowed = ["library", "sources"];
+        let install_result: Result<(), String> = (|| {
+            for file in files {
+                let target = if file.path == "localogue-pack.json" {
+                    temp.join("localogue-pack.json")
+                } else {
+                    safe_portable_relative_path(&temp, &file.path, &allowed)?
+                };
+                if target.exists() { return Err(format!("Shared Portable Pack 包内出现重复目标路径：{}", file.path)); }
+                if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+                fs::write(&target, file.bytes).map_err(display_error)?;
+            }
+            let info = inspect_shared_pack(path_to_string(&temp))?;
+            if !info.valid { return Err(info.error.unwrap_or_else(|| "安装后的 Shared Pack 校验失败。".into())); }
+            if info.id.as_deref() != Some(source_id.as_str()) || info.version.as_deref() != Some(source_version.as_str()) {
+                return Err("Portable Envelope 与 localogue-pack.json 的 source id/version 不一致。".into());
+            }
+            fs::rename(&temp, &root).map_err(|error| format!("无法原子完成 Shared Pack 安装：{error}"))?;
+            Ok(())
+        })();
+        if let Err(error) = install_result {
+            let _ = fs::remove_dir_all(&temp);
+            return Err(error);
+        }
+        Ok(path_to_string(&root))
+    }).await
+}
+
+fn collect_portable_files(root: &Path, directories: &[&str]) -> Result<Vec<DesktopPortableFile>, String> {
+    let mut result = Vec::new();
+    let mut total_bytes = 0_usize;
+    for directory in directories {
+        let base = root.join(directory);
+        if !base.is_dir() { continue; }
+        let mut queue = VecDeque::from([base]);
+        while let Some(current) = queue.pop_front() {
+            for entry in fs::read_dir(&current).map_err(display_error)? {
+                let entry = entry.map_err(display_error)?;
+                let file_type = entry.file_type().map_err(display_error)?;
+                if file_type.is_symlink() { continue; }
+                let path = entry.path();
+                if file_type.is_dir() { queue.push_back(path); continue; }
+                if !file_type.is_file() { continue; }
+                let relative = path.strip_prefix(root).map_err(display_error)?.to_string_lossy().replace('\\', "/");
+                let bytes = fs::read(path).map_err(display_error)?;
+                total_bytes = total_bytes.checked_add(bytes.len()).ok_or_else(|| "Portable Pack 大小溢出。".to_string())?;
+                if total_bytes > MAX_PORTABLE_PACK_BYTES { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+                result.push(DesktopPortableFile { path: relative, bytes });
+            }
+        }
+    }
+    result.sort_by(|a, b| a.path.cmp(&b.path));
+    Ok(result)
+}
+
+fn safe_portable_relative_path(root: &Path, relative: &str, allowed: &[&str]) -> Result<PathBuf, String> {
+    let normalized = relative.replace('\\', "/");
+    if normalized.starts_with('/') || normalized.contains('\0') { return Err(format!("Portable 路径不安全：{relative}")); }
+    let parts: Vec<&str> = normalized.split('/').collect();
+    if parts.len() < 2 || parts.iter().any(|part| part.is_empty() || *part == "." || *part == "..") || !allowed.contains(&parts[0]) {
+        return Err(format!("Portable 路径不在白名单：{relative}"));
+    }
+    Ok(parts.into_iter().fold(root.to_path_buf(), |path, part| path.join(part)))
 }
 
 #[tauri::command]
@@ -792,9 +983,6 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
     let directory = safe_writable_collection_directory(&library_path, &collection)?;
     fs::create_dir_all(&directory).map_err(display_error)?;
     let target = directory.join(format!("{id}.json"));
-    if collection == "evidence" && target.exists() {
-        return Err("Evidence 是不可变审计输入；已存在的 Evidence 不允许覆盖。".into());
-    }
     let temporary = directory.join(format!("{id}.json.tmp"));
     let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
     fs::write(&temporary, body).map_err(display_error)?;
@@ -804,24 +992,13 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
 
 #[tauri::command]
 async fn read_private_audit_collection(app: AppHandle, collection: String) -> Result<Vec<Value>, String> {
-    spawn_native_io("read_private_audit_collection", move || read_private_audit_collection_blocking(app, collection)).await
-}
-
-fn read_private_audit_collection_blocking(app: AppHandle, collection: String) -> Result<Vec<Value>, String> {
-    if !is_private_audit_collection(&collection) {
-        return Err("Desktop Governance 只允许读取明确白名单中的 Private Audit 集合。".into());
-    }
-    let library_path = configured_private_library_path(&app)?;
-    let directory = PathBuf::from(library_path).join(&collection);
-    if !directory.exists() { return Ok(Vec::new()); }
-    let mut values = Vec::new();
-    for item in fs::read_dir(directory).map_err(display_error)? {
-        let path = item.map_err(display_error)?.path();
-        if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
-        let raw = fs::read_to_string(&path).map_err(display_error)?;
-        values.push(serde_json::from_str(&raw).map_err(display_error)?);
-    }
-    Ok(values)
+    spawn_native_io("read_private_audit_collection", move || {
+        if !is_private_audit_collection(&collection) {
+            return Err("Desktop Audit Reader 拒绝未授权集合。".into());
+        }
+        let library_path = configured_private_library_path(&app)?;
+        read_json_objects(&PathBuf::from(library_path).join(collection))
+    }).await
 }
 
 #[tauri::command]
@@ -831,20 +1008,130 @@ async fn write_private_audit_entity(app: AppHandle, collection: String, entity: 
 
 fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entity: Value) -> Result<(), String> {
     if !is_private_audit_collection(&collection) {
-        return Err("Desktop Governance 只允许写入明确白名单中的 Private Audit 集合。".into());
+        return Err("Desktop Audit Writer 拒绝未授权集合。".into());
     }
     validate_private_audit_entity(&collection, &entity)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "审计实体缺少稳定 id。".to_string())?;
     if !is_safe_id(id) { return Err("审计实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
-    let directory = PathBuf::from(library_path).join(&collection);
-    fs::create_dir_all(&directory).map_err(display_error)?;
+    atomic_write_json(&PathBuf::from(library_path).join(&collection), id, &entity)
+}
+
+#[tauri::command]
+async fn create_governance_snapshot(app: AppHandle, plan: Value) -> Result<Value, String> {
+    spawn_native_io("create_governance_snapshot", move || create_governance_snapshot_blocking(app, plan)).await
+}
+
+fn create_governance_snapshot_blocking(app: AppHandle, plan: Value) -> Result<Value, String> {
+    let root = PathBuf::from(configured_private_library_path(&app)?);
+    let evidence_id = plan.get("evidenceId").and_then(Value::as_str).ok_or_else(|| "Commit Plan 缺少 evidenceId。".to_string())?;
+    let work_id = plan.get("targetWorkId").and_then(Value::as_str).ok_or_else(|| "Commit Plan 缺少 targetWorkId。".to_string())?;
+    let work_code = plan.get("targetWorkCode").and_then(Value::as_str).ok_or_else(|| "Commit Plan 缺少 targetWorkCode。".to_string())?;
+    let fingerprint = plan.get("fingerprint").and_then(Value::as_str).ok_or_else(|| "Commit Plan 缺少 fingerprint。".to_string())?;
+    for value in [evidence_id, work_id] { if !is_safe_id(value) { return Err("Commit Plan 包含不安全实体 id。".into()); } }
+
+    let mut relative_paths = HashSet::new();
+    if let Some(operations) = plan.get("operations").and_then(Value::as_array) {
+        for operation in operations {
+            let kind = operation.get("kind").and_then(Value::as_str).unwrap_or("");
+            let entity_id = operation.get("entityId").and_then(Value::as_str).unwrap_or("");
+            if !is_safe_id(entity_id) { return Err("Commit Operation 包含不安全 entityId。".into()); }
+            let collection = match kind {
+                "create_person" => Some("people"),
+                "create_organization" => Some("organizations"),
+                "create_series" => Some("series"),
+                "create_genre" => Some("genres"),
+                "create_tag" => Some("tags"),
+                "create_work" | "update_work" => Some("works"),
+                _ => None,
+            };
+            if let Some(collection) = collection { relative_paths.insert(format!("{collection}/{entity_id}.json")); }
+        }
+    }
+    relative_paths.insert(format!("provenance/{work_id}.json"));
+    relative_paths.insert(format!("evidence-lifecycle/{evidence_id}.json"));
+
+    let mut paths: Vec<String> = relative_paths.into_iter().collect();
+    paths.sort();
+    let mut entries = Vec::new();
+    for relative_path in paths {
+        let absolute = safe_governance_relative_path(&root, &relative_path)?;
+        match fs::read_to_string(&absolute) {
+            Ok(content) => entries.push(serde_json::json!({"relativePath": relative_path, "existed": true, "content": content})),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => entries.push(serde_json::json!({"relativePath": relative_path, "existed": false})),
+            Err(error) => return Err(display_error(error)),
+        }
+    }
+    let id = format!("snapshot_{}", now_marker());
+    let snapshot = serde_json::json!({
+        "schemaVersion": 1,
+        "id": id,
+        "createdAt": plan.get("generatedAt").and_then(Value::as_str).unwrap_or(""),
+        "evidenceId": evidence_id,
+        "targetWorkId": work_id,
+        "targetWorkCode": work_code,
+        "fingerprint": fingerprint,
+        "entries": entries,
+    });
+    atomic_write_json(&root.join("snapshots"), snapshot.get("id").and_then(Value::as_str).unwrap_or("snapshot"), &snapshot)?;
+    Ok(snapshot)
+}
+
+#[tauri::command]
+async fn restore_governance_snapshot(app: AppHandle, snapshot_id: String) -> Result<usize, String> {
+    spawn_native_io("restore_governance_snapshot", move || restore_governance_snapshot_blocking(app, snapshot_id)).await
+}
+
+fn restore_governance_snapshot_blocking(app: AppHandle, snapshot_id: String) -> Result<usize, String> {
+    if !is_safe_id(&snapshot_id) { return Err("Snapshot id 不安全。".into()); }
+    let root = PathBuf::from(configured_private_library_path(&app)?);
+    let path = root.join("snapshots").join(format!("{snapshot_id}.json"));
+    let snapshot: Value = serde_json::from_str(&fs::read_to_string(path).map_err(display_error)?).map_err(display_error)?;
+    let entries = snapshot.get("entries").and_then(Value::as_array).ok_or_else(|| "Snapshot 缺少 entries。".to_string())?;
+    for entry in entries {
+        let relative = entry.get("relativePath").and_then(Value::as_str).ok_or_else(|| "Snapshot entry 缺少 relativePath。".to_string())?;
+        let target = safe_governance_relative_path(&root, relative)?;
+        let existed = entry.get("existed").and_then(Value::as_bool).unwrap_or(false);
+        if !existed {
+            if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+            continue;
+        }
+        let content = entry.get("content").and_then(Value::as_str).ok_or_else(|| "Snapshot entry 缺少 content。".to_string())?;
+        if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+        let temporary = target.with_extension("json.restore.tmp");
+        fs::write(&temporary, content).map_err(display_error)?;
+        if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+        fs::rename(temporary, target).map_err(display_error)?;
+    }
+    Ok(entries.len())
+}
+
+fn is_private_audit_collection(collection: &str) -> bool {
+    matches!(collection, "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts")
+}
+
+fn atomic_write_json(directory: &Path, id: &str, entity: &Value) -> Result<(), String> {
+    fs::create_dir_all(directory).map_err(display_error)?;
     let target = directory.join(format!("{id}.json"));
     let temporary = directory.join(format!("{id}.json.tmp"));
-    let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
+    let body = serde_json::to_string_pretty(entity).map_err(display_error)? + "\n";
     fs::write(&temporary, body).map_err(display_error)?;
     if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
     fs::rename(temporary, target).map_err(display_error)
+}
+
+fn safe_governance_relative_path(root: &Path, relative: &str) -> Result<PathBuf, String> {
+    let normalized = relative.replace('\\', "/");
+    let mut parts = normalized.split('/');
+    let collection = parts.next().unwrap_or("");
+    let file = parts.next().unwrap_or("");
+    if parts.next().is_some() || !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "provenance" | "evidence-lifecycle") {
+        return Err(format!("Snapshot 路径不在治理白名单：{relative}"));
+    }
+    if !file.ends_with(".json") { return Err(format!("Snapshot 路径不是 JSON：{relative}")); }
+    let id = file.trim_end_matches(".json");
+    if !is_safe_id(id) { return Err(format!("Snapshot 文件名不安全：{relative}")); }
+    Ok(root.join(collection).join(file))
 }
 
 #[tauri::command]
@@ -1110,92 +1397,32 @@ fn validate_writable_entity(collection: &str, entity: &Value) -> Result<(), Stri
     Ok(())
 }
 
-fn is_private_audit_collection(collection: &str) -> bool {
-    matches!(
-        collection,
-        "evidence"
-            | "evidence-lifecycle"
-            | "review-commits"
-            | "snapshots"
-            | "restore-receipts"
-            | "provenance"
-            | "media-binding-receipts"
-    )
-}
-
 fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(), String> {
     if !is_private_audit_collection(collection) || !entity.is_object() {
         return Err("无效的 Desktop Private Audit 实体。".into());
     }
-    let require_string = |field: &str| -> Result<(), String> {
+    let require = |field: &str| -> Result<(), String> {
         if entity.get(field).and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()).is_none() {
             return Err(format!("{collection} 缺少字符串字段 {field}。"));
         }
         Ok(())
     };
-    require_string("id")?;
+    require("id")?;
     match collection {
-        "evidence" => { require_string("sourceType")?; require_string("sourceName")?; require_string("importedAt")?; },
-        "evidence-lifecycle" => { require_string("evidenceId")?; require_string("status")?; require_string("updatedAt")?; },
-        "review-commits" => { require_string("evidenceId")?; require_string("committedAt")?; require_string("fingerprint")?; require_string("targetWorkId")?; },
-        "snapshots" => { require_string("evidenceId")?; require_string("targetWorkId")?; require_string("fingerprint")?; if !entity.get("entries").map(Value::is_array).unwrap_or(false) { return Err("snapshots 缺少 entries 数组。".into()); } },
-        "restore-receipts" => { require_string("commitReceiptId")?; require_string("snapshotId")?; require_string("targetWorkId")?; require_string("restoredAt")?; },
-        "provenance" => { require_string("workId")?; if !entity.get("events").map(Value::is_array).unwrap_or(false) { return Err("provenance 缺少 events 数组。".into()); } },
+        "evidence" => { require("sourceType")?; require("sourceName")?; require("importedAt")?; },
+        "evidence-lifecycle" => { require("evidenceId")?; require("status")?; require("updatedAt")?; },
+        "review-commits" => { require("evidenceId")?; require("committedAt")?; require("fingerprint")?; require("targetWorkId")?; require("targetWorkCode")?; },
+        "snapshots" => { require("createdAt")?; require("evidenceId")?; require("targetWorkId")?; require("fingerprint")?; if !entity.get("entries").map(Value::is_array).unwrap_or(false) { return Err("snapshots 缺少 entries。".into()); } },
+        "restore-receipts" => { require("commitReceiptId")?; require("snapshotId")?; require("targetWorkId")?; require("restoredAt")?; },
+        "provenance" => { require("workId")?; if !entity.get("events").map(Value::is_array).unwrap_or(false) { return Err("provenance 缺少 events。".into()); } },
         "media-binding-receipts" => {
-            for field in ["mediaFileId", "mediaFilePath", "action", "changedAt"] { require_string(field)?; }
+            for field in ["mediaFileId", "mediaFilePath", "action", "changedAt"] { require(field)?; }
             let action = entity.get("action").and_then(Value::as_str).unwrap_or("");
             if !matches!(action, "bind" | "rebind" | "unbind") { return Err("media-binding-receipts.action 无效。".into()); }
         },
         _ => return Err("无效的 Desktop Private Audit 集合。".into()),
     }
     Ok(())
-}
-
-#[tauri::command]
-async fn restore_private_snapshot(app: AppHandle, snapshot: Value, include_audit_state: bool) -> Result<(), String> {
-    spawn_native_io("restore_private_snapshot", move || restore_private_snapshot_blocking(app, snapshot, include_audit_state)).await
-}
-
-fn restore_private_snapshot_blocking(app: AppHandle, snapshot: Value, include_audit_state: bool) -> Result<(), String> {
-    let entries = snapshot.get("entries").and_then(Value::as_array).ok_or_else(|| "Snapshot 缺少 entries 数组。".to_string())?;
-    let library_path = configured_private_library_path(&app)?;
-    let root = PathBuf::from(library_path);
-    for entry in entries {
-        let relative = entry.get("relativePath").and_then(Value::as_str).ok_or_else(|| "Snapshot 条目缺少 relativePath。".to_string())?;
-        let parts: Vec<&str> = relative.split('/').collect();
-        if parts.len() != 2 || parts[1].contains('/') || !parts[1].ends_with(".json") || parts.iter().any(|part| part.is_empty() || *part == "." || *part == "..") {
-            return Err(format!("Snapshot 包含不安全路径：{relative}"));
-        }
-        let collection = parts[0];
-        if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "evidence-lifecycle" | "provenance") {
-            return Err(format!("Snapshot 包含不允许恢复的集合：{collection}"));
-        }
-        if !include_audit_state && collection == "provenance" { continue; }
-        let target = root.join(collection).join(parts[1]);
-        let existed = entry.get("existed").and_then(Value::as_bool).ok_or_else(|| format!("Snapshot 条目缺少 existed：{relative}"))?;
-        if !existed {
-            if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
-            continue;
-        }
-        let content = entry.get("content").and_then(Value::as_str).ok_or_else(|| format!("Snapshot 条目缺少 content：{relative}"))?;
-        let restored_entity: Value = serde_json::from_str(content).map_err(|error| format!("Snapshot JSON 无效 {relative}: {error}"))?;
-        validate_snapshot_restore_entry(collection, &restored_entity)?;
-        if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
-        let temporary = target.with_extension("json.restore.tmp");
-        fs::write(&temporary, content).map_err(display_error)?;
-        if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
-        fs::rename(&temporary, &target).map_err(display_error)?;
-    }
-    Ok(())
-}
-
-
-fn validate_snapshot_restore_entry(collection: &str, entity: &Value) -> Result<(), String> {
-    match collection {
-        "works" | "people" | "organizations" | "series" | "genres" | "tags" => validate_writable_entity(collection, entity),
-        "evidence-lifecycle" | "provenance" => validate_private_audit_entity(collection, entity),
-        _ => Err("Snapshot 包含不允许恢复的集合。".into()),
-    }
 }
 
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
@@ -1239,6 +1466,13 @@ pub fn run() {
             save_desktop_settings,
             pick_directory,
             pick_media_file,
+            pick_portable_pack_file,
+            read_portable_pack_file,
+            save_portable_pack_file,
+            collect_private_portable_files,
+            import_private_portable_files,
+            collect_shared_portable_files,
+            install_shared_portable_files,
             open_path,
             reveal_in_folder,
             open_web_url,
@@ -1254,10 +1488,11 @@ pub fn run() {
             sha256_file,
             inspect_shared_pack,
             read_library_collection,
-            read_private_audit_collection,
             write_library_entity,
+            read_private_audit_collection,
             write_private_audit_entity,
-            restore_private_snapshot,
+            create_governance_snapshot,
+            restore_governance_snapshot,
             delete_library_entity,
         ])
         .run(tauri::generate_context!())

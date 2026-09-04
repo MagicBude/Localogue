@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-23 Desktop Governance Parity I**。V1-23 在 V1-22 Presentation / Vocabulary 基础上，把 Evidence Review、Commit Plan、Curation、History / Restore 的共享治理核心接入 Desktop。
+当前已推进到 **V1-23 Desktop Governance Parity**。V1-23 将 Evidence / Review / Commit Plan、Curation、History / Restore 与 Personal / Shared Portable Pack 的治理基线迁入 Tauri Desktop，同时保持 Shared Pack Native 只读和 Private Snapshot 安全边界。
 
 已完成重点：
 
@@ -74,6 +74,11 @@
 - ~~Desktop stale-while-refresh，筛选 / 分页 / 切语言保持滚动位置~~（V1-22）；
 - ~~Genre 多语与来源别名治理~~（V1-22；Hotfix 3 改为 33 个 Canonical Genre + 67 条 Approved Source Aliases，不保留完整 1271 条参考表）；
 - ~~Desktop Work Detail 高密度“海报 + Metadata Table”信息架构~~（V1-22）。
+- ~~Desktop Evidence Inbox / 字段与实体 Review / Commit Plan~~（V1-23）；
+- ~~Desktop Native before-image Snapshot / Commit 失败自动恢复~~（V1-23）；
+- ~~Desktop Curation Completeness / Duplicate Candidates~~（V1-23）；
+- ~~Desktop History / Restore Receipt / Provenance~~（V1-23）；
+- ~~Desktop Personal Backup / Shared Library Portable Pack 导入导出~~（V1-23）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
 
@@ -91,28 +96,19 @@
 
 本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。完整外部 Genre 参考表不进入仓库；仅保留人工批准来源别名，不绕过 Canonical Vocabulary 映射边界。
 
-### V1-23：Desktop Governance Parity I
+### V1-23：Desktop Governance Parity
 
-本阶段完成：
+本阶段完成 Evidence → Review → Commit Plan → Native Snapshot → Commit、Curation、History / Restore，以及 Shared / Personal Portable Pack Desktop 导入导出。Desktop 治理规则继续复用 Web Application Core，真实写权限由 Rust Private Boundary 控制。
 
-- Desktop Evidence Inbox / Review / Commit Plan / Explicit Commit；
-- Private Audit Reader / Writer 与 Evidence immutable Native 边界；
-- Commit 前 Snapshot、失败自动恢复、Commit Receipt / Provenance；
-- Desktop Curation 完整度与重复候选；
-- Desktop History / latest-first Restore / Restore Receipt；
-- Commit Plan SHA-256 收敛为 Web/Desktop 共用 WebCrypto。
+### V1-24：Desktop Personal Presentation & Asset Governance（后续）
 
-Portable Pack 二进制归档暂时复用 Web Workbench，避免复制第二套 Archive Codec。
+下一阶段候选：
 
-### V1-24：Desktop Transport & Governance Parity II
-
-下一阶段重点：
-
-- Native `.localogue-pack` Open / Save / Drag & Drop；
-- Shared / Personal Portable Pack Desktop 完整导入导出；
 - Presentation Preference Workbench；
-- 更多人物 Asset 管理、Asset 孤儿治理与安全物理删除；
-- 继续抽取共享 Presentation / DTO。
+- 人物 portrait / gallery Asset 更完整管理；
+- Work Hero / cover 用户偏好治理；
+- Portable / Shared Pack 冲突预览进一步增强；
+- 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复表现逻辑。
 
 ### 后续 Desktop Native Enhancement
 
