@@ -1,0 +1,9 @@
+{
+  "id": "recommended",
+  "names": {
+    "ja": "おすすめ",
+    "zh-CN": "推荐",
+    "en": "Recommended"
+  },
+  "builtIn": true
+}

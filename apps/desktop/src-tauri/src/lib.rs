@@ -38,6 +38,29 @@ struct DesktopRuntimeInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopLibraryProfile {
+    id: String,
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    library_path: Option<String>,
+    #[serde(default)]
+    library_roots: Vec<String>,
+    #[serde(default)]
+    media_scan_paths: Vec<String>,
+    #[serde(default)]
+    nfo_scan_paths: Vec<String>,
+    #[serde(default)]
+    shared_pack_paths: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    created_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    updated_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopBootstrapSettings {
     schema_version: u8,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -50,6 +73,10 @@ struct DesktopBootstrapSettings {
     nfo_scan_paths: Vec<String>,
     #[serde(default)]
     shared_pack_paths: Vec<String>,
+    #[serde(default)]
+    library_profiles: Vec<DesktopLibraryProfile>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    active_library_profile_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     ffprobe_path: Option<String>,
     web_url: String,
@@ -66,6 +93,8 @@ impl Default for DesktopBootstrapSettings {
             media_scan_paths: Vec::new(),
             nfo_scan_paths: Vec::new(),
             shared_pack_paths: Vec::new(),
+            library_profiles: Vec::new(),
+            active_library_profile_id: None,
             ffprobe_path: None,
             web_url: "http://127.0.0.1:3000".into(),
             updated_at: None,
@@ -1299,9 +1328,74 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
     value.nfo_scan_paths = unique_clean_paths(value.nfo_scan_paths)?;
     value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
+    value.library_profiles = normalize_library_profiles(value.library_profiles)?;
+    value.active_library_profile_id = clean_optional_text(value.active_library_profile_id, 160)?;
+    if let Some(active_id) = value.active_library_profile_id.as_deref() {
+        if !value.library_profiles.iter().any(|profile| profile.id == active_id) {
+            value.active_library_profile_id = None;
+        }
+    }
     let web_url = value.web_url.trim();
     value.web_url = if web_url.is_empty() { "http://127.0.0.1:3000".into() } else { web_url.into() };
     Ok(value)
+}
+
+fn normalize_library_profiles(values: Vec<DesktopLibraryProfile>) -> Result<Vec<DesktopLibraryProfile>, String> {
+    if values.len() > 64 {
+        return Err("Library Profile 数量超过 64 个安全上限。".to_string());
+    }
+    let mut output = Vec::new();
+    let mut ids = HashSet::new();
+    for mut profile in values {
+        profile.id = clean_required_text(profile.id, "Library Profile id", 160)?;
+        profile.name = clean_required_text(profile.name, "Library Profile name", 80)?;
+        if !ids.insert(profile.id.clone()) {
+            return Err(format!("Library Profile id 重复：{}", profile.id));
+        }
+        profile.description = clean_optional_text(profile.description, 240)?;
+        profile.library_path = clean_optional_path(profile.library_path)?;
+        profile.library_roots = unique_clean_paths(profile.library_roots)?;
+        profile.media_scan_paths = unique_clean_paths(profile.media_scan_paths)?;
+        profile.nfo_scan_paths = unique_clean_paths(profile.nfo_scan_paths)?;
+        profile.shared_pack_paths = unique_clean_paths(profile.shared_pack_paths)?;
+        profile.created_at = clean_optional_text(profile.created_at, 80)?;
+        profile.updated_at = clean_optional_text(profile.updated_at, 80)?;
+        output.push(profile);
+    }
+    Ok(output)
+}
+
+fn clean_required_text(value: String, label: &str, max_chars: usize) -> Result<String, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Err(format!("{label} 不能为空。"));
+    }
+    if trimmed.chars().count() > max_chars {
+        return Err(format!("{label} 超过 {max_chars} 个字符。"));
+    }
+    if trimmed.chars().any(|character| character.is_control()) {
+        return Err(format!("{label} 不能包含控制字符。"));
+    }
+    Ok(trimmed.to_string())
+}
+
+fn clean_optional_text(value: Option<String>, max_chars: usize) -> Result<Option<String>, String> {
+    match value {
+        None => Ok(None),
+        Some(raw) => {
+            let trimmed = raw.trim();
+            if trimmed.is_empty() {
+                return Ok(None);
+            }
+            if trimmed.chars().count() > max_chars {
+                return Err(format!("Settings 文本超过 {max_chars} 个字符。"));
+            }
+            if trimmed.chars().any(|character| character.is_control()) {
+                return Err("Settings 文本不能包含控制字符。".to_string());
+            }
+            Ok(Some(trimmed.to_string()))
+        }
+    }
 }
 
 fn clean_optional_path(value: Option<String>) -> Result<Option<String>, String> {

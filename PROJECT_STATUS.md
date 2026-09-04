@@ -2,31 +2,27 @@
 
 ## 当前阶段
 
-**V1-24A：Desktop Presentation Preference Workbench + Dev Fixture Foundation。**
+**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture。**
 
-V1-24A 把已经存在于 Domain / Web 的 `PresentationPreference` 私人展示层正式接入 Tauri Desktop，并继续坚持“展示选择不是 Canonical 事实”的边界。当前阶段已：
+V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Desktop 的资料源模型，使它从“很多散落路径设置”升级为用户可以理解和快速切换的资料库工作区：
 
-- Curation 新增独立 Presentation 子视图，可集中管理 Work 首选封面与 Person 首选头像；
-- Work Detail / Person Detail 可直接从当前实体允许的 Asset 候选中选择私人首图，并可一键恢复默认；
-- Works / People 浏览结果与 Desktop Home 同步应用 Private Presentation Preference，避免不同页面显示不一致；
-- Work 候选仅允许 poster / cover，Person 候选仅允许 portrait / gallery，并同时识别 Canonical 引用与 subject 归属；
-- 明确检测已不存在或已脱离实体候选集的 stale preference，不静默篡改 Canonical 进行“修复”；
-- 新增专用 Native Presentation Preference Reader / Writer，写根仍只能来自当前 Desktop Private Library；
-- Native 删除 Asset 时新增 Presentation Preference 引用保护，必须先恢复默认展示才能删除仍被引用的私人 Asset；
-- Shared Pack / Canonical 实体继续保持只读事实语义；选择私人封面或头像不会复制或改写公共实体；
-- V1-23 Governance / Snapshot / Portable Pack 与 V1-18 Native I/O 稳定边界继续保持。
-- 新增标准 `examples/dev-library` Fixture：3 Works / 2 People / 10 Assets / 3 Presentation Preferences；
-- Fixture 图片全部是生成式虚构测试素材，可离线覆盖 portrait / gallery / poster 的真实二进制读取与布局；
-- `desktop:demo:seed / reset / clean` 生成 Git 忽略的运行副本，测试不再污染 Fixture 模板；
-- `validate:fixture` 已纳入 `pnpm check`，持续校验图片 SHA-256、引用与 stale Preference 场景。
-- `examples/people` / `examples/works` 已收敛进 Dev Fixture，不再维护第二份 Canonical Work / Person JSON 样例；
-- Import / Settings / Shared Pack 示例已和 `examples/dev-library` 使用同一套 `LX-*` 虚构测试世界；
-- `sample-existing-work.json` 现在稳定命中 `LX-101` 并制造 duration 差异，可在空本机数据环境复现 Review；
-- Starter Shared Pack 增加同 ID Shared 记录，可与 Private Fixture 一起验证 `Private > Shared` 读取优先级。
+- 新增 **Library Profile**：示例库与用户自建资料库可分别保存 Private Library、Unified Roots、额外 Media / NFO 路径与 Shared Packs；
+- 侧栏直接提供资料库下拉切换与管理入口，切换只替换当前路径配置，不复制或移动磁盘数据；
+- 旧单库 Settings 会平滑迁移为 Profile；Dev Fixture 固定命名为“示例库”，普通新建库使用“资料库 1 / 资料库 2 …”中性默认名；
+- `ffprobe` / Web URL 保持应用级全局设置，不被 Profile 重复保存；
+- 设置页将资料源重新解释为“私人资料库（可写）/ 内容根目录（推荐）/ 只读共享资料 / 高级兼容目录”四层，高级路径默认折叠；
+- 修复 Unified Sync 在多个额外媒体目录下完成状态过早的问题：一键同步现在等待所有媒体根目录真正扫描结束，并显示实际扫描目录列表；
+- `MediaScanCoordinator` 增加 completion wait 能力，手工媒体扫描仍保留异步 Job / Progress / Cancel；
+- Desktop Vite 使用 Rolldown vendor code splitting，而不是调大 chunk warning 阈值隐藏 bundle 膨胀；
+- 标准 Dev Fixture 扩充为 **11 Works / 8 People / 29 Assets / 3 Presentation Preferences**，每部作品都有海报、每位人物都有头像；
+- `LX-*` 保留高质量生成图片用于视觉/展示偏好验收，早期 `DEMO-*` 关系丰富数据并入同一可运行 Fixture；
+- `DEMO-IMPORT-001 / 002` 以兼容 companion 形式恢复，LX Import/Review 场景继续保留；
+- Example Library 明确同时承担开发 Fixture、手工验收、未来自动化测试和新用户功能展示；
+- 新增 Library Profile / Source Model 用户文档与 ADR-040；Community Data 继续保持独立仓库，通过 Shared Pack 被 Profile 挂载，不复制进主仓库。
 
-### 明确留到 V1-24B / V1-24C
+### 后续 V1-24B / V1-24C
 
-人物 portrait / gallery 的完整上传与生命周期治理、Shared Asset 更完整的 Desktop 二进制展示来源、孤儿 Asset 清理，以及 Portable Pack 冲突预览 / 导入报告继续后续实现。
+人物 portrait / gallery 的完整上传与生命周期治理、Shared Asset 更完整的 Desktop 二进制展示来源、孤儿 Asset 清理，以及 Portable Pack 冲突预览 / 导入报告继续后续实现。Library Profile 后续还可增加首次启动向导、Profile 导入导出与 Community Pack Registry，但不阻塞 V1-24B。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 

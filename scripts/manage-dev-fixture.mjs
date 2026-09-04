@@ -67,12 +67,13 @@ printUsage();
 
 function printUsage() {
   console.log("\nDesktop 使用方式：");
-  console.log("1. 打开 设置 → 私人资料库 → 选择目录");
-  console.log(`2. 选择：${targetRoot}`);
-  console.log("3. 点击刷新资料；即可测试首选封面、首选头像、失效偏好与删除保护。");
-  console.log(`4. 可选：在 资料包 中挂载 Shared Pack：${companionSharedPack}`);
+  console.log("1. 打开 设置 → 资料库；开发版点击“+ 添加示例库”即可自动使用本运行副本。");
+  console.log(`2. 如需手工配置，Private Library 选择：${targetRoot}`);
+  console.log("3. 点击“保存设置”，之后左侧栏会显示“示例库”并可快速切换。");
+  console.log("4. 点击刷新资料；即可使用 11 部作品 / 8 位人物 / 29 张生成式图片测试筛选、关系、首选图片与删除保护。");
+  console.log(`5. “+ 添加示例库”会同时尝试挂载配套 Shared Pack：${companionSharedPack}`);
   console.log("   用于验证同 ID 实体的 Private > Shared 读取优先级。");
-  console.log(`5. Review 联动样例：${existingWorkImport}（LX-101，时长故意与 Canonical 不同）。\n`);
+  console.log(`6. Review 联动样例：${existingWorkImport}（LX-101，时长故意与 Canonical 不同）。\n`);
 }
 
 async function exists(value) {

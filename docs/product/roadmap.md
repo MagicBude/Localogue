@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-23 Desktop Governance Parity**。V1-23 将 Evidence / Review / Commit Plan、Curation、History / Restore 与 Personal / Shared Portable Pack 的治理基线迁入 Tauri Desktop，同时保持 Shared Pack Native 只读和 Private Snapshot 安全边界。
+当前已推进到 **V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。V1-24A 已完成 Presentation Preference Workbench；Foundation Cleanup 进一步加入多资料库 Library Profile、资料源设置收敛、全根目录 Unified Sync 完成语义、Desktop bundle 拆分与更丰富的示例/测试资料库，同时保持 V1-23 Governance 与 Shared Pack Native 只读边界。
 
 已完成重点：
 
@@ -79,6 +79,11 @@
 - ~~Desktop Curation Completeness / Duplicate Candidates~~（V1-23）；
 - ~~Desktop History / Restore Receipt / Provenance~~（V1-23）；
 - ~~Desktop Personal Backup / Shared Library Portable Pack 导入导出~~（V1-23）。
+- ~~Desktop Work / Person Presentation Preference Workbench 与 stale Preference 治理~~（V1-24A）；
+- ~~Library Profile：示例库 / 资料库 1 / 资料库 2 等多资料库快速切换~~（V1-24 Foundation Cleanup）；
+- ~~资料源设置四层语义与高级兼容目录收敛~~（V1-24 Foundation Cleanup）；
+- ~~Unified Sync 等待全部媒体根目录并报告实际 roots~~（V1-24 Foundation Cleanup）；
+- ~~11 Works / 8 People / 生成式视觉素材 Rich Dev Fixture~~（V1-24 Foundation Cleanup）。
 
 ### V1-19：Desktop Discovery & Presentation Parity
 
@@ -100,14 +105,21 @@
 
 本阶段完成 Evidence → Review → Commit Plan → Native Snapshot → Commit、Curation、History / Restore，以及 Shared / Personal Portable Pack Desktop 导入导出。Desktop 治理规则继续复用 Web Application Core，真实写权限由 Rust Private Boundary 控制。
 
-### V1-24：Desktop Personal Presentation & Asset Governance（后续）
+### V1-24：Desktop Personal Presentation & Asset Governance
+
+已完成：
+
+- Presentation Preference Workbench；
+- Library Profile 多资料库快速切换与资料源设置收敛；
+- 多根目录 Unified Sync 完成语义修复；
+- Rich Dev / Showcase Fixture 与 Desktop bundle code splitting。
 
 下一阶段候选：
 
-- Presentation Preference Workbench；
 - 人物 portrait / gallery Asset 更完整管理；
-- Work Hero / cover 用户偏好治理；
+- Work Hero / cover 用户偏好治理继续完善；
 - Portable / Shared Pack 冲突预览进一步增强；
+- 首次启动“体验示例库”和 Community Pack Registry；
 - 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复表现逻辑。
 
 ### 后续 Desktop Native Enhancement

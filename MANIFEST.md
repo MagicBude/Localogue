@@ -2,87 +2,78 @@
 
 ## 阶段名称
 
-**V1-24A：Desktop Presentation Preference Workbench**
+**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**
 
-当前版本（`0.1.24`）开始把 V1-10 已存在的 `presentation-preferences` 私人展示层真正接入 Desktop。目标不是把“我喜欢哪张图”写进 Canonical，而是让 Work / Person 在 Desktop 中可以独立选择首选封面与首选头像，并让首页、作品浏览、人物浏览与详情页遵循同一套解析规则。
+当前版本继续保持 `0.1.24`。这一轮不改变 Canonical Domain，而是把 V1-24A 已完成的 Presentation Preference、V1-18 Unified Library 与现有 Desktop Settings 收敛成更适合真实用户长期使用的“多资料库”体验。
 
 ## 本阶段完成
 
-### Private Presentation Preference
+### Library Profile / 多资料库快速切换
 
-- Desktop 增加专用 Native Presentation Reader / Writer；
-- Presentation 写根只从当前 Desktop Settings 的 Private Library 解析；
-- `presentation-preferences` 不进入 Shared Pack 写路径，也不混入 Canonical Writable Collection；
-- Work 支持 `preferredCoverAssetId`；
-- Person 支持 `preferredPortraitAssetId`；
-- 清除偏好后恢复 Canonical / Subject Asset 自动回退；
-- Preference 指向不存在或不再属于当前实体的 Asset 时标记为 stale，而不是偷偷换写 Canonical。
+- Desktop 新增 `Library Profile` 路径预设层；
+- 一个 Profile 保存：Private Library、Unified Library Roots、额外 Media Roots、额外 NFO / 图片 Roots、Shared Pack Paths；
+- `ffprobe` 与 Web URL 等运行环境配置保持全局，不随资料库切换；
+- 示例库与用户自建资料库可以各自拥有独立路径组合；
+- Dev Fixture 固定短名称“示例库”；普通新建 Profile 使用“资料库 N”中性命名，不写死内容分类；
+- 侧栏提供当前资料库下拉，可从任意主页面快速切换；
+- Profile 切换只切换 Settings 中的路径集合，不复制、不移动、不合并磁盘资料；
+- Settings Schema 继续保持 `schemaVersion=1`，新字段为向后兼容的可选扩展；
+- Rust Native Boundary 对 Profile 数量、ID、名称与路径进行规范化和安全校验。
 
-### Desktop Curation Workbench
+### 资料源设置收敛
 
-- Curation 增加“完整度 / 重复”与“展示偏好”两个子视图；
-- Presentation Workbench 可在 Works / People 之间切换；
-- 可搜索作品番号/标题或人物姓名/别名；
-- 集中显示已设置偏好、失效偏好与当前实际首图；
-- 可直接切换首选 Asset 或恢复默认；
-- 可从 Workbench 直接打开对应 Work / Person。
+Desktop 设置页将资料源解释为四层：
 
-### Work / Person Detail
+1. **私人资料库（可写）**：Canonical、Audit、Presentation、MediaFile 等私人真相；
+2. **内容根目录（推荐）**：视频、NFO、poster / cover / fanart / thumb 的统一递归发现入口；
+3. **只读共享资料**：Community Data / Shared Pack，只参与读取与优先级合并；
+4. **高级兼容目录**：确有分散旧目录时才使用的额外 Media 与 NFO / 图片路径。
 
-- Work Detail 新增“首选封面”私人展示选择器；
-- Person Detail 新增“首选头像”私人展示选择器；
-- 候选图只允许当前实体真正可使用的 Asset：
-  - Work：`poster / cover`；
-  - Person：`portrait / gallery`；
-- 详情页明确显示“私人偏好 / 默认显示 / 失效偏好”；
-- 恢复默认不会修改 Canonical 或 Shared Pack。
+高级兼容目录默认折叠，普通用户优先只需要理解前三层。新增 `docs/desktop/library-profiles-and-sources.md` 与 ADR-040 固化这套语义。
 
-### Browse Presentation Parity
+### Multi-root Unified Sync 修复
 
-- 首页最近作品使用 Work Presentation Preference；
-- 首页人物头像使用 Person Presentation Preference；
-- Works 海报墙 / 列表使用首选封面；
-- People 卡片使用首选头像；
-- 人物相关作品列表也复用同一 Presentation 解析逻辑。
+- `MediaScanCoordinator` 新增可等待当前 Job 真正结束的 `waitForCompletion()`；
+- “同步资料库”在 NFO → Asset 完成后，会等待 **全部** Unified Root + 额外 Media Root 扫描完毕再报告成功；
+- 修复配置多个额外媒体目录时，一键同步看起来只处理第一个目录、随后手工媒体扫描才出现其它目录的体验不一致；
+- 扫描结果显示实际扫描目录数量和完整目录列表；
+- 单独“仅扫描视频”仍保留异步进度与取消能力。
 
-### Native Safety
+### Desktop Bundle 拆分
 
-- Asset 若仍被 `presentation-preferences` 引用，Native 删除会拒绝执行；
-- 用户必须先恢复默认展示，再删除对应 Private Asset；
-- Presentation Preference 使用独立 Native Commands，不借用通用 Canonical 写入，也不伪装成 Audit Collection；
-- Shared Pack 继续保持只读。
+- Vite / Rolldown 增加真实 vendor code splitting；
+- React 与其它第三方依赖进入稳定 vendor group，避免 Desktop 主入口长期膨胀为单个 >500 KiB chunk；
+- 不通过单纯调大 `chunkSizeWarningLimit` 隐藏警告。
 
-### Dev Fixture Foundation
+### Rich Dev / Showcase Fixture
 
-- 新增 `examples/dev-library/template/` 完全虚构 Private Library 模板；
-- 包含 3 Work、2 Person、2 Organization、1 Series、3 Genre、3 Tag、10 Asset 与 3 Presentation Preference；
-- 10 张生成式 JPEG 覆盖 portrait / gallery / poster，Asset JSON 保存真实 fileSize / SHA-256；
-- `fixture-manifest.json` 固定有效 Work Preference、有效 Person Preference、默认回退、stale Preference、删除保护等测试场景；
-- 新增 `desktop:demo:seed / reset / clean`，只操作 Git 忽略的 `var/dev-fixture-library/`；
-- Fixture 管理脚本不自动改 `.localogue/settings.json`，避免测试工具静默切换真实资料库；
-- 新增 `validate:fixture` 并纳入 `pnpm check`。
-- 早期顶层 `examples/people` / `examples/works` 结构样例合并进 Dev Fixture，避免 Canonical 示例双份维护；
-- `examples/imports/sample-existing-work.json` 直接命中 Fixture `LX-101`，形成可重复的 Import → Evidence → Review 差异链；
-- `examples/settings` 与 `examples/shared-packs` 作为 Dev Fixture 配套示例联动维护；
-- Starter Shared Pack 提供一个与 Private 同 ID 但显示名不同的人物记录，专门验证 `Private > Shared`；
-- Fixture Validator 同时守护 imports / settings / shared-pack 契约与 examples 目录拓扑。
+- `examples/dev-library/template/` 从 3 Works / 2 People 扩充到 **11 Works / 8 People**；
+- 扩充为 29 张生成式 JPEG：每部作品至少一张独立海报、每位人物至少一张头像，6 位 performer 另有独立 Gallery，并继续覆盖多封面 / Presentation Preference；
+- `LX-*` 用于多图 Presentation 测试，`DEMO-*` 用于人物关系、厂商、厂牌、系列、题材、标签与筛选测试；所有示例 Work / Person 均有生成式视觉素材；
+- 恢复 `DEMO-IMPORT-001` JSON 与 `DEMO-IMPORT-002` NFO 兼容导入示例，同时保留新的 LX Review 示例；
+- Fixture Validator 增加最小规模、旧 Demo identity parity、Profile 示例与 companion examples 校验；Web `settings.example.json` 与 Desktop `desktop-settings.example.json` 分离，避免 Desktop-only Profile 字段破坏 Instance Settings Schema；
+- Example Library 的长期定位升级为“开发 Fixture + 手工验收 + 未来 E2E + 新用户功能展示库”。
+
+### Community Data 接入方向
+
+- `localogue-community-data` 继续作为独立仓库维护公共事实型元数据；
+- Localogue 主仓库保存程序、Schema、词表、文档与虚构 Fixture，不复制真实社区资料成为第二份真相；
+- 当前直接以 Shared Pack 挂载社区仓库；
+- Library Profile 可以为不同资料库保存不同 Shared Pack 组合；
+- 后续优先建设 Community Pack Registry / 一键安装与更新，而不是把两个仓库合并。
 
 ## 安全不变量
 
-1. Presentation Preference 是私人显示选择，不是公共事实。
-2. Shared Pack 永远只读。
-3. Canonical `Work.assetIds / Person.portraitAssetId / galleryAssetIds` 不因为私人选图被改写。
-4. Native Presentation Writer 只能写当前配置的 Private Library。
-5. Asset 删除必须保护 Presentation Preference 引用。
-6. V1-23 Governance / Snapshot / Portable Pack 与 V1-18 Native I/O 安全边界保持不变。
+1. Library Profile 只保存本机路径配置，不保存或复制 Canonical 数据。
+2. Private Library 始终是唯一可写资料层；Shared Pack 永远只读。
+3. 切换 Profile 不删除、移动或合并磁盘上的任何资料。
+4. Media / NFO / Asset 扫描继续通过 Platform/Application 边界，不向 WebView 开放通用文件系统或 Shell。
+5. Presentation Preference 仍只是私人显示选择，不改写 Canonical。
+6. Dev Fixture 模板只存虚构/生成式数据，日常测试只操作 `var/dev-fixture-library` 运行副本。
 
-## 明确留到 V1-24B / V1-24C
+## 后续
 
-- 人物 portrait / gallery 的完整上传与管理工作流；
-- Asset 二进制物理清理与 orphan 检测；
-- Shared Asset 的更完整来源可视化；
-- Personal Pack 导入 Presentation 冲突的更细粒度报告；
-- Presentation DTO / Service 在 Web 与 Desktop 间进一步共享。
+完成本轮实机验收后继续 **V1-24B：Person Portrait / Gallery Asset Governance**，并在此基础上进一步完善首次启动示例库、Profile 管理体验与 Community Pack 安装入口。
 
 ## 版本
 

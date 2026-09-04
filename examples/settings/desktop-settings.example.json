@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "libraryPath": "./var/dev-fixture-library",
+  "libraryRoots": [],
+  "mediaScanPaths": [],
+  "nfoScanPaths": [],
+  "sharedPackPaths": [
+    "./examples/shared-packs/starter-community-pack"
+  ],
+  "libraryProfiles": [
+    {
+      "id": "library_profile_dev_fixture",
+      "name": "示例库",
+      "description": "Localogue 内置开发/功能展示 Fixture",
+      "libraryPath": "./var/dev-fixture-library",
+      "libraryRoots": [],
+      "mediaScanPaths": [],
+      "nfoScanPaths": [],
+      "sharedPackPaths": [
+        "./examples/shared-packs/starter-community-pack"
+      ]
+    }
+  ],
+  "activeLibraryProfileId": "library_profile_dev_fixture",
+  "webUrl": "http://127.0.0.1:3000"
+}

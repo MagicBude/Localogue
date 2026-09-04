@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_mio",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/mio-asakura-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 105644,
+  "sha256": "51115aad1496e61f0443a752388c4b59174c4d11101a6e0ac8bd678d739da10a",
+  "subjectType": "person",
+  "subjectId": "person_asakura_mio",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

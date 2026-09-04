@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_rin_library",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/rin-shiraishi-gallery-library.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1125,
+  "fileSize": 179990,
+  "sha256": "708b48e1c9bb31f4d3c42230ee81f4cf3546ea1dc2910444b24ceef610c6bef2",
+  "subjectType": "person",
+  "subjectId": "person_shiraishi_rin",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

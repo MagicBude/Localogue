@@ -23,7 +23,10 @@ const required = [
   "apps/desktop/src/desktop-governance.tsx",
   "apps/desktop/src/desktop-presentation.ts",
   "apps/desktop/src/desktop-presentation-workbench.tsx",
+  "apps/desktop/src/library-profiles.ts",
   "docs/development/v1-24-desktop-presentation-preference-workbench.md",
+  "docs/desktop/library-profiles-and-sources.md",
+  "docs/decisions/ADR-040-library-profiles-group-desktop-sources.md",
   "apps/desktop/src/desktop-vocabulary-repository.ts",
   "apps/desktop/src/desktop-portable-pack.ts",
   "apps/desktop/src/desktop-portable-pack-workbench.tsx",
@@ -117,6 +120,7 @@ if (!errors.length) {
     errors.push("Desktop Vite 命令必须显式使用 vite.config.mts，禁止重新依赖 Vite 自动配置发现。");
   }
   const desktopContracts = readFileSync(path.join(root, "apps/desktop/src/contracts.ts"), "utf8");
+  const desktopRuntimeContract = readFileSync(path.join(root, "src/application/platform/desktop-runtime-contract.ts"), "utf8");
   const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
@@ -473,6 +477,39 @@ if (!errors.length) {
   if (!desktopWorkExplorer.includes("listPresentationPreferences") || !desktopPersonExplorer.includes("listPresentationPreferences")) {
     errors.push("V1-24 Works / People 浏览结果必须应用 Private Presentation Preference。");
   }
+
+  // V1-24 Foundation Cleanup: Library Profiles + deterministic multi-root sync.
+  const libraryProfiles = readFileSync(path.join(root, "apps/desktop/src/library-profiles.ts"), "utf8");
+  const mediaCoordinator = readFileSync(path.join(root, "src/application/media/media-scan-coordinator.ts"), "utf8");
+  for (const token of ["DesktopLibraryProfile", "activeLibraryProfileId", "libraryProfiles"]) {
+    if (!desktopRuntimeContract.includes(token) || !rust.includes(token === "activeLibraryProfileId" ? "active_library_profile_id" : token === "libraryProfiles" ? "library_profiles" : "DesktopLibraryProfile")) {
+      errors.push(`V1-24 Library Profile TypeScript / Rust 契约缺少：${token}`);
+    }
+  }
+  for (const token of ["createLibraryProfile", "createEmptyLibraryProfile", "nextLibraryProfileName", "ensureLibraryProfiles", "applyLibraryProfile", "syncActiveLibraryProfile", "hasUnsavedLibraryPaths"]) {
+    if (!libraryProfiles.includes(token)) errors.push(`V1-24 Library Profile helper 缺少：${token}`);
+  }
+  if (!desktopApp.includes("switchLibraryProfile") || !desktopApp.includes("source-profile-select") || !desktopApp.includes("source-profile-manage")) {
+    errors.push("V1-24 Desktop 必须在侧栏提供资料库快速切换与管理入口。");
+  }
+  if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopApp.includes('t("+ 新建资料库")')) {
+    errors.push("V1-24 新建资料库必须使用“资料库 N”中性默认命名，并提供明确的新建入口。");
+  }
+  if (!libraryProfiles.includes('"示例库"') || !desktopApp.includes('t("+ 添加示例库")')) {
+    errors.push("V1-24 开发 Fixture 必须以短名称“示例库”接入 Library Profile。");
+  }
+  if (/影视库|成人库/.test(desktopApp + libraryProfiles)) {
+    errors.push("V1-24 Desktop 不允许把具体内容分类名称硬编码为默认 Library Profile。 ");
+  }
+  if (!mediaCoordinator.includes("waitForCompletion") || !desktopApp.includes("startScan({ waitForCompletion: true })")) {
+    errors.push("V1-24 一键同步必须等待完整 MediaScanCoordinator 结束，不能在多媒体根目录尚未全部扫描时提前返回。");
+  }
+  if (!desktopApp.includes("本轮实际扫描的 {count} 个目录") || !desktopApp.includes("scan.result.roots")) {
+    errors.push("V1-24 Media 页面必须显示本轮实际成功扫描的根目录，便于验证多目录行为。");
+  }
+  if (!viteConfig.includes("codeSplitting") || !viteConfig.includes('name: "vendor"')) {
+    errors.push("V1-24 Desktop Vite 必须通过 Rolldown codeSplitting 拆分 vendor，而不是单纯提高 chunk 警告阈值。");
+  }
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -490,7 +527,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-24 Presentation Preference、V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Vocabulary、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-24 Library Profile / Multi-root Sync / Presentation Preference、V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Vocabulary、V1-18 Native I/O 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

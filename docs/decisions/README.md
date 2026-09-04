@@ -80,3 +80,5 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 ### V1-23
 - [ADR-039：Desktop Governance 使用 Native Audit / Snapshot 边界，Portable Pack 使用事务式安装](ADR-039-desktop-governance-native-audit-and-portable-pack-boundary.md)
+
+- [ADR-040：用 Library Profile 组织 Desktop 本机资料源](ADR-040-library-profiles-group-desktop-sources.md)

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "person_asakura_mio",
+  "names": [
+    {
+      "language": "ja",
+      "value": "朝倉みお",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "朝仓澪",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Mio Asakura",
+      "type": "romanized"
+    },
+    {
+      "language": "ja",
+      "value": "朝倉美緒",
+      "type": "alternate"
+    }
+  ],
+  "activityStatus": "hiatus",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2018",
+        "precision": "year"
+      }
+    },
+    {
+      "type": "hiatus_start",
+      "date": {
+        "value": "2025-10",
+        "precision": "month"
+      }
+    }
+  ],
+  "birthDate": {
+    "value": "1996-06-30",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "福岡県",
+    "zh-CN": "福冈县",
+    "en": "Fukuoka, Japan"
+  },
+  "heightCm": 155,
+  "measurements": {
+    "bustCm": 88,
+    "waistCm": 58,
+    "hipCm": 87,
+    "cup": "F"
+  },
+  "biographies": {
+    "ja": "活動休止状態の表示を確認するための架空人物です。",
+    "zh-CN": "用于展示“活动休止”状态及职业时间线的虚构人物。",
+    "en": "A fictional person used to demonstrate hiatus status and career timelines."
+  },
+  "galleryAssetIds": [
+    "asset_gallery_mio_home"
+  ],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-04T15:20:00+08:00",
+  "portraitAssetId": "asset_portrait_mio"
+}

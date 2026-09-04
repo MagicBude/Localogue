@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "person_hoshino_mizuki",
+  "names": [
+    {
+      "language": "ja",
+      "value": "星野みづき",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "星野美月",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Mizuki Hoshino",
+      "type": "romanized"
+    },
+    {
+      "language": "ja",
+      "value": "月島みお",
+      "type": "former_name",
+      "validTo": "2021-05"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2019-07",
+        "precision": "month"
+      }
+    },
+    {
+      "type": "name_change",
+      "date": {
+        "value": "2021-06",
+        "precision": "month"
+      },
+      "note": "示例人物的虚构改名记录"
+    }
+  ],
+  "birthDate": {
+    "value": "1997-11-18",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "神奈川県",
+    "zh-CN": "神奈川县",
+    "en": "Kanagawa, Japan"
+  },
+  "heightCm": 158,
+  "measurements": {
+    "bustCm": 84,
+    "waistCm": 56,
+    "hipCm": 86,
+    "cup": "E"
+  },
+  "biographies": {
+    "ja": "Localogue の画面確認用に作成した架空の人物です。出演履歴や名称履歴の表示を確認できます。",
+    "zh-CN": "用于 Localogue 页面演示的虚构人物，可用于检查人物档案、名称历史和作品时间线等功能。",
+    "en": "A fictional profile created for the Localogue demo, used to test names, career history and work timelines."
+  },
+  "galleryAssetIds": [
+    "asset_gallery_mizuki_rain"
+  ],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-04T15:20:00+08:00",
+  "portraitAssetId": "asset_portrait_mizuki"
+}

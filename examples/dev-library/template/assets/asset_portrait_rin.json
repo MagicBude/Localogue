@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_rin",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/rin-shiraishi-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 115150,
+  "sha256": "53ae8685e86655cd9adecc78efb65346d8927a681ab0601c803a547685d8ea2e",
+  "subjectType": "person",
+  "subjectId": "person_shiraishi_rin",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

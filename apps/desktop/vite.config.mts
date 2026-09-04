@@ -56,5 +56,28 @@ export default defineConfig({
     target: webviewTarget,
     minify: process.env.TAURI_ENV_DEBUG ? false : "oxc",
     sourcemap: Boolean(process.env.TAURI_ENV_DEBUG),
+    rolldownOptions: {
+      output: {
+        // Vite 8 / Rolldown 的默认自动拆包对 Desktop 这个单入口 SPA 不会主动把
+        // node_modules 从主 chunk 分离，V1-24A 因此已经超过 500 kB。这里使用
+        // Rolldown 官方 codeSplitting group，把稳定第三方依赖独立缓存，而不是
+        // 简单调高 chunkSizeWarningLimit 掩盖体积问题。
+        codeSplitting: {
+          minSize: 20_000,
+          groups: [
+            {
+              name: "react-vendor",
+              test: /node_modules[\\/]react(?:-dom)?[\\/]/,
+              priority: 20,
+            },
+            {
+              name: "vendor",
+              test: /node_modules/,
+              priority: 10,
+            },
+          ],
+        },
+      },
+    },
   },
 });

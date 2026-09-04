@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_haruka_bookstore",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/haruka-fujiwara-gallery-bookstore.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1125,
+  "fileSize": 155684,
+  "sha256": "6676997bf29332419b86e25ba1e1b95332f966c04d8ebb25fab84b231dc31943",
+  "subjectType": "person",
+  "subjectId": "person_fujiwara_haruka",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

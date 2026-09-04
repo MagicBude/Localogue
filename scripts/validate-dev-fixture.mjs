@@ -30,10 +30,29 @@ const settingsExample = await readJson(
   path.join(examplesRoot, "settings", "settings.example.json"),
   "settings/settings.example.json",
 );
+const desktopSettingsExample = await readJson(
+  path.join(examplesRoot, "settings", "desktop-settings.example.json"),
+  "settings/desktop-settings.example.json",
+);
+const instanceSettingsSchema = await readJson(
+  path.join(process.cwd(), "schemas", "instance-settings.schema.json"),
+  "schemas/instance-settings.schema.json",
+);
 const sharedPackManifest = await readJson(
   path.join(examplesRoot, "shared-packs", "starter-community-pack", "localogue-pack.json"),
   "shared-packs/starter-community-pack/localogue-pack.json",
 );
+const legacyJsonImport = await readJson(
+  path.join(examplesRoot, "imports", "sample-demo-work.json"),
+  "imports/sample-demo-work.json",
+);
+const legacyNfoImport = await readFile(
+  path.join(examplesRoot, "imports", "sample-demo-work.nfo"),
+  "utf8",
+).catch((error) => {
+  errors.push(`imports/sample-demo-work.nfo: 无法读取 (${error.message})`);
+  return "";
+});
 const collections = {
   works: await readCollection("works"),
   people: await readCollection("people"),
@@ -52,6 +71,8 @@ validateWorks();
 validatePeople();
 await validateAssets();
 validatePreferences();
+validateFixtureCoverage();
+await validateLegacyDemoParity();
 validateScenarioManifest();
 await validateCompanionExamples();
 await validateLegacyExampleLayout();
@@ -70,7 +91,7 @@ if (errors.length) {
     preferences: collections.preferences.length,
     stalePreferences: stale,
     generatedImages: collections.assets.length,
-    companionExamples: 4,
+    companionExamples: 7,
   });
 }
 
@@ -170,6 +191,84 @@ async function validateAssets() {
   }
 }
 
+function validateFixtureCoverage() {
+  const coverage = manifest?.coverage;
+  if (!coverage) {
+    errors.push("fixture-manifest.json: 缺少 coverage，无法约束示例库最小展示规模");
+    return;
+  }
+  if (collections.works.length < (coverage.minimumWorks ?? 0)) {
+    errors.push(`Fixture Work 过少：${collections.works.length} < ${coverage.minimumWorks}`);
+  }
+  if (collections.people.length < (coverage.minimumPeople ?? 0)) {
+    errors.push(`Fixture Person 过少：${collections.people.length} < ${coverage.minimumPeople}`);
+  }
+  if (collections.assets.length < (coverage.minimumAssets ?? 0)) {
+    errors.push(`Fixture Asset 过少：${collections.assets.length} < ${coverage.minimumAssets}`);
+  }
+
+  const visualWorks = new Set(coverage.visualWorks ?? []);
+  const visualPeople = new Set(coverage.visualPeople ?? []);
+  const galleryPeople = new Set(coverage.galleryPeople ?? []);
+  for (const id of visualWorks) requireRef("fixture coverage", "visual work", id, indexes.works);
+  for (const id of visualPeople) requireRef("fixture coverage", "visual person", id, indexes.people);
+  for (const id of galleryPeople) requireRef("fixture coverage", "gallery person", id, indexes.people);
+
+  // 示例库面向开发者和首次体验用户，因此不允许出现灰色占位卡：
+  // 每部 Work 至少有 poster/cover，每位 Person 至少有 portrait。
+  for (const work of collections.works) {
+    if (!visualWorks.has(work.id)) errors.push(`fixture coverage: Work ${work.id} 未纳入 visualWorks`);
+    const artwork = (work.assetIds ?? [])
+      .map((id) => indexes.assets.get(id))
+      .find((asset) => asset && asset.subjectType === "work" && asset.subjectId === work.id && ["poster", "cover"].includes(asset.type));
+    if (!artwork) errors.push(`fixture coverage: Work ${work.id} 缺少可展示 poster / cover Asset`);
+  }
+  for (const person of collections.people) {
+    if (!visualPeople.has(person.id)) errors.push(`fixture coverage: Person ${person.id} 未纳入 visualPeople`);
+    const portrait = person.portraitAssetId ? indexes.assets.get(person.portraitAssetId) : null;
+    if (!portrait || portrait.subjectType !== "person" || portrait.subjectId !== person.id || portrait.type !== "portrait") {
+      errors.push(`fixture coverage: Person ${person.id} 缺少有效 portrait Asset`);
+    }
+    if (galleryPeople.has(person.id)) {
+      const galleries = (person.galleryAssetIds ?? []).map((id) => indexes.assets.get(id)).filter(Boolean);
+      if (!galleries.some((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "gallery")) {
+        errors.push(`fixture coverage: Person ${person.id} 缺少独立 Gallery Asset`);
+      }
+    }
+  }
+
+  if (!(collections.works.some((work) => String(work.code ?? "").startsWith(coverage.relationshipShowcasePrefix ?? "DEMO-")))) {
+    errors.push("Fixture 缺少用于筛选 / 关系展示的 DEMO-* 丰富样例。");
+  }
+}
+
+async function validateLegacyDemoParity() {
+  // Web 目前仍使用 data/demo-library 作为内置 Demo；Desktop Fixture 复用其中的
+  // 关系型 Canonical 记录，但不复制旧文字型 SVG Asset。这里锁住共有实体的
+  // 核心身份，避免两个 Demo 世界在后续重构中悄悄分叉。
+  for (const collection of ["works", "people", "organizations", "series"]) {
+    const sourceRoot = path.join(process.cwd(), "data", "demo-library", collection);
+    let files = [];
+    try { files = (await readdir(sourceRoot)).filter((item) => item.endsWith(".json")); }
+    catch (error) {
+      errors.push(`data/demo-library/${collection}: 无法读取 (${error.message})`);
+      continue;
+    }
+    const targetIndex = indexes[collection];
+    for (const fileName of files) {
+      const source = await readJson(path.join(sourceRoot, fileName), `data/demo-library/${collection}/${fileName}`);
+      if (!source?.id) continue;
+      const target = targetIndex.get(source.id);
+      if (!target) {
+        errors.push(`Dev Fixture 缺少 Web Demo 关系实体：${collection}/${source.id}`);
+        continue;
+      }
+      if (collection === "works" && target.code !== source.code) errors.push(`Dev Fixture / Web Demo Work 番号漂移：${source.id}`);
+      if (collection === "people" && primaryJaName(target) !== primaryJaName(source)) errors.push(`Dev Fixture / Web Demo Person 主名称漂移：${source.id}`);
+    }
+  }
+}
+
 function validatePreferences() {
   for (const preference of collections.preferences) {
     const prefix = `presentation ${preference.id}`;
@@ -223,7 +322,10 @@ async function validateCompanionExamples() {
     existingWorkImport: "examples/imports/sample-existing-work.json",
     newWorkImport: "examples/imports/sample-work.json",
     settingsExample: "examples/settings/settings.example.json",
+    desktopSettingsExample: "examples/settings/desktop-settings.example.json",
     sharedPack: "examples/shared-packs/starter-community-pack",
+    legacyJsonImport: "examples/imports/sample-demo-work.json",
+    legacyNfoImport: "examples/imports/sample-demo-work.nfo",
   };
   for (const [key, value] of Object.entries(expectedCompanions)) {
     if (companions[key] !== value) errors.push(`fixture-manifest.json companions.${key}: 应为 ${value}`);
@@ -254,6 +356,37 @@ async function validateCompanionExamples() {
     if (!Array.isArray(settingsExample.sharedPackPaths) || !settingsExample.sharedPackPaths.includes(sharedPath)) {
       errors.push(`settings/settings.example.json: sharedPackPaths 应包含 ${sharedPath}`);
     }
+    const allowedKeys = new Set(Object.keys(instanceSettingsSchema?.properties ?? {}));
+    for (const key of Object.keys(settingsExample)) {
+      if (!allowedKeys.has(key)) errors.push(`settings/settings.example.json: ${key} 不属于 Instance Settings Schema；Desktop-only 字段请放 desktop-settings.example.json`);
+    }
+    for (const key of instanceSettingsSchema?.required ?? []) {
+      if (!(key in settingsExample)) errors.push(`settings/settings.example.json: 缺少 Schema required 字段 ${key}`);
+    }
+  }
+
+  if (!desktopSettingsExample) {
+    errors.push("settings/desktop-settings.example.json: 文件不可用");
+  } else {
+    if (desktopSettingsExample.libraryPath !== "./var/dev-fixture-library") {
+      errors.push("settings/desktop-settings.example.json: libraryPath 应指向 ./var/dev-fixture-library");
+    }
+    const fixtureProfile = desktopSettingsExample.libraryProfiles?.find((profile) => profile.id === desktopSettingsExample.activeLibraryProfileId);
+    if (!fixtureProfile || fixtureProfile.libraryPath !== "./var/dev-fixture-library") {
+      errors.push("settings/desktop-settings.example.json: 必须包含并激活指向 Dev Fixture 的 Library Profile");
+    } else if (fixtureProfile.name !== "示例库") {
+      errors.push("settings/desktop-settings.example.json: Dev Fixture Profile 必须使用短名称“示例库”");
+    }
+    if (desktopSettingsExample.webUrl !== "http://127.0.0.1:3000") {
+      errors.push("settings/desktop-settings.example.json: 应包含 Desktop 必需的 webUrl 示例");
+    }
+  }
+
+  if (!legacyJsonImport || legacyJsonImport.code !== "DEMO-IMPORT-001") {
+    errors.push("imports/sample-demo-work.json: 必须保留 DEMO-IMPORT-001 兼容导入示例");
+  }
+  if (!legacyNfoImport.includes("<num>DEMO-IMPORT-002</num>") || !legacyNfoImport.includes("白石りん")) {
+    errors.push("imports/sample-demo-work.nfo: 必须保留 DEMO-IMPORT-002 / 白石りん兼容 NFO 示例");
   }
 
   if (!sharedPackManifest) {

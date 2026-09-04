@@ -1,5 +1,23 @@
 # Changelog
 
+## V1-24 Foundation Cleanup - Library Profiles / Source Model / Rich Fixture
+
+- 新增 Desktop `Library Profile`，可把 Private Library、Unified Roots、额外 Media/NFO 路径和 Shared Packs 保存为“示例库 / 资料库 1 / 资料库 2”等独立配置。
+- 侧栏新增当前资料库快速切换；切换只替换路径配置，不复制、移动或合并磁盘资料。
+- Library Profile onboarding 收口：旧单库 Settings 自动迁移为 Profile；Dev Fixture 固定使用短名称“示例库”；普通新建项只生成“资料库 1 / 资料库 2 …”等中性默认名，不预设内容分类。
+- 设置页新增真正的空白“新建资料库”和开发环境“一键添加示例库”，侧栏无论是否已有 Profile 都保留明确的资料库管理入口。
+- Settings UI 收敛为“私人资料库（可写）/ 内容根目录（推荐）/ 只读共享资料 / 高级兼容目录”四层，高级 Media / NFO 路径默认折叠。
+- Desktop Settings Contract 与 Rust Settings 增加向后兼容的 `libraryProfiles / activeLibraryProfileId`，Native 边界规范化 Profile ID、名称与路径。
+- 修复配置多个额外媒体目录时“一键同步资料库”完成过早的问题；Unified Sync 现在等待全部媒体根目录真正扫描完成。
+- 媒体扫描结果新增实际扫描目录数量、完整 roots 列表与 warning 展开，方便定位多目录配置。
+- Desktop Vite / Rolldown 增加 React Vendor + Vendor code splitting，真实拆分大型 bundle，不通过调高 warning 阈值掩盖问题。
+- Dev Fixture 扩充为 11 Works / 8 People / 29 张生成式 JPEG；11 部作品均有独立海报、8 位人物均有头像，6 位 performer 还配有独立 Gallery；DEMO 海报由生成式人物素材重新排版生成，不再使用低清裁切占位。
+- 星野みづき、白石りん、朝倉みお、藤原はるか新增独立人物 Gallery；头像与作品海报均来自独立生成式素材，避免同一张综合预览图被裁切复用。
+- 恢复 `DEMO-IMPORT-001` JSON 与 `DEMO-IMPORT-002` NFO 兼容示例，并继续保留 LX 系列 Import / Review Fixture。
+- `validate:fixture` 增加最小规模、旧 Demo identity parity、Library Profile 示例与 companion examples 校验；新增独立 `desktop-settings.example.json`，不把 Desktop-only Profile 字段混入 Web Instance Settings Schema。
+- 新增 Library Profiles / Sources 用户文档与 ADR-040；明确 `localogue-community-data` 继续独立维护，由 Localogue 作为 Shared Pack 消费。
+- 产品版本继续保持 `0.1.24`，本次属于 V1-24 架构与开发体验收敛。
+
 ## V1-24 Examples / Fixture Integration
 
 - 将早期 `examples/people` 与 `examples/works` 独立结构示例并入 `examples/dev-library/template`，Canonical JSON 文档与可运行 Fixture 只保留一份真相。

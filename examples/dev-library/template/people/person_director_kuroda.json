@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "person_director_kuroda",
+  "names": [
+    {
+      "language": "ja",
+      "value": "黒田修一",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "黑田修一",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Shuichi Kuroda",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2012",
+        "precision": "year"
+      }
+    }
+  ],
+  "birthPlace": {
+    "ja": "東京都",
+    "zh-CN": "东京都",
+    "en": "Tokyo, Japan"
+  },
+  "biographies": {
+    "ja": "監督ロールを確認するための架空人物です。",
+    "zh-CN": "用于验证导演角色和反向关系的虚构人物。",
+    "en": "A fictional director used to test role relationships."
+  },
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-01T17:00:00+08:00",
+  "updatedAt": "2026-09-04T15:20:00+08:00",
+  "portraitAssetId": "asset_portrait_director_kuroda"
+}

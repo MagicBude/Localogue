@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "series_season_letters",
+  "names": {
+    "ja": "季節の手紙",
+    "zh-CN": "四季来信",
+    "en": "Letters of the Seasons"
+  },
+  "descriptions": {
+    "ja": "季節をテーマにした架空シリーズ",
+    "zh-CN": "以季节为主题的虚构系列",
+    "en": "A fictional seasonal series"
+  }
+}

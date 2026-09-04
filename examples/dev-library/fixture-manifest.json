@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "localogue.dev-fixture.presentation-assets",
   "name": "Localogue V1-24 Presentation / Asset Dev Fixture",
-  "fixtureVersion": "2026.09.04.2",
+  "fixtureVersion": "2026.09.04.6",
   "targetProductVersion": "0.1.24",
-  "description": "完全虚构、可重置的 Desktop 开发测试资料库；并与 imports / settings / shared-packs 示例形成一套可联动验收的开发测试宇宙。",
+  "description": "完全虚构、可重置的 Desktop 开发/新用户示例库；11 部作品与 8 位人物均有生成式视觉素材，主要 performer 还配有独立 Gallery，并与 imports / settings / shared-packs 联动。",
   "runtimeTarget": "var/dev-fixture-library",
   "scenarios": {
     "validWorkPreference": {
@@ -51,6 +51,46 @@
     "existingWorkImport": "examples/imports/sample-existing-work.json",
     "newWorkImport": "examples/imports/sample-work.json",
     "settingsExample": "examples/settings/settings.example.json",
-    "sharedPack": "examples/shared-packs/starter-community-pack"
+    "sharedPack": "examples/shared-packs/starter-community-pack",
+    "legacyJsonImport": "examples/imports/sample-demo-work.json",
+    "legacyNfoImport": "examples/imports/sample-demo-work.nfo",
+    "desktopSettingsExample": "examples/settings/desktop-settings.example.json"
+  },
+  "coverage": {
+    "minimumWorks": 11,
+    "minimumPeople": 8,
+    "minimumAssets": 29,
+    "visualWorks": [
+      "work_demo_001",
+      "work_demo_002",
+      "work_demo_003",
+      "work_demo_004",
+      "work_demo_005",
+      "work_demo_006",
+      "work_demo_007",
+      "work_demo_008",
+      "work_fixture_lx_101",
+      "work_fixture_lx_202",
+      "work_fixture_lx_303"
+    ],
+    "visualPeople": [
+      "person_hoshino_mizuki",
+      "person_shiraishi_rin",
+      "person_asakura_mio",
+      "person_fujiwara_haruka",
+      "person_director_kuroda",
+      "person_director_sato",
+      "person_fixture_aiko_mizuno",
+      "person_fixture_rina_tachibana"
+    ],
+    "relationshipShowcasePrefix": "DEMO-",
+    "galleryPeople": [
+      "person_fixture_aiko_mizuno",
+      "person_fixture_rina_tachibana",
+      "person_hoshino_mizuki",
+      "person_shiraishi_rin",
+      "person_asakura_mio",
+      "person_fujiwara_haruka"
+    ]
   }
 }

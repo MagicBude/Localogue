@@ -141,6 +141,7 @@
 ## Desktop
 
 - [Tauri Desktop 开发前置环境](desktop/tauri-prerequisites.md)
+- [Desktop Library Profile 与资料源配置](desktop/library-profiles-and-sources.md)
 - [Desktop Runtime 架构](architecture/desktop-runtime.md)
 - [V1-13 Tauri Desktop Alpha 实现导读](development/v1-13-tauri-desktop-alpha-walkthrough.md)
 - [V1-14 Desktop Runtime Integration 实现导读](development/v1-14-desktop-runtime-integration-walkthrough.md)
@@ -161,6 +162,7 @@
 - [教材：JSON Repository](development/json-repository-walkthrough.md)
 - [代码规范](development/coding-guidelines.md)
 - [测试原则](development/testing.md)
+- [Dev Fixture Library](development/dev-fixture-library.md)
 - [AI 协作](development/ai-collaboration.md)
 
 ## 架构决策记录

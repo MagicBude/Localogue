@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_poster_demo_04",
+  "type": "poster",
+  "storagePath": "asset-files/posters/demo-004-poster.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1200,
+  "fileSize": 174782,
+  "sha256": "b4104f29e83d881395102911d397e7320fe973a8aca2d4dc651946c7019c933a",
+  "subjectType": "work",
+  "subjectId": "work_demo_004",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

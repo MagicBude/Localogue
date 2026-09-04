@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_mizuki_rain",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/mizuki-hoshino-gallery-rain.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1125,
+  "fileSize": 152714,
+  "sha256": "70eb11a6e47840d41d6e62f417c8dd3914bcd0bc29ab3bcf4dde4f842fc9f989",
+  "subjectType": "person",
+  "subjectId": "person_hoshino_mizuki",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

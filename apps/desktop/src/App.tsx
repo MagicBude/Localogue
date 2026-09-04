@@ -77,6 +77,21 @@ import {
 } from "./nfo-library-import";
 import { applyVocabularyRepair, previewVocabularyRepair, type VocabularyRepairPreview, type VocabularyRepairResult } from "./vocabulary-repair";
 import { useStableAsyncData } from "./use-stable-async-data";
+import {
+  activeLibraryProfile,
+  addLibraryProfile,
+  applyLibraryProfile,
+  createEmptyLibraryProfile,
+  createLibraryProfile,
+  createLibraryProfileId,
+  ensureLibraryProfiles,
+  hasUnsavedLibraryPaths,
+  isDevFixtureLibraryPath,
+  nextLibraryProfileName,
+  removeLibraryProfile,
+  renameLibraryProfile,
+  syncActiveLibraryProfile,
+} from "./library-profiles";
 
 const fileDialog = new TauriFileDialogAdapter();
 const fileOpener = new TauriFileOpenerAdapter();
@@ -144,10 +159,11 @@ export default function App() {
     void Promise.all([desktopBridge.runtimeInfo(), desktopBridge.loadSettings()])
       .then(async ([runtimeInfo, saved]) => {
         if (disposed) return;
+        const prepared = ensureLibraryProfiles(saved);
         setRuntime(runtimeInfo);
-        setSettings(saved);
-        setSavedSettings(saved);
-        await refreshSources(saved);
+        setSettings(prepared);
+        setSavedSettings(prepared);
+        await refreshSources(prepared);
         if (!disposed) setMessage(t("Desktop 已连接；正在直接读取 Localogue Canonical Library。"));
       })
       .catch((error: unknown) => {
@@ -182,6 +198,8 @@ export default function App() {
     [readRoots, savedSettings.libraryPath, libraryEpoch],
   );
 
+  const savedActiveProfile = activeLibraryProfile(savedSettings);
+
   const navigate = useCallback((next: DesktopPage) => {
     setPage(next);
     setDetail(null);
@@ -204,11 +222,12 @@ export default function App() {
   async function saveSettings(): Promise<void> {
     setBusy(true);
     try {
-      const saved = await desktopBridge.saveSettings(settings);
+      const prepared = syncActiveLibraryProfile(settings);
+      const saved = await desktopBridge.saveSettings(prepared);
       setSettings(saved);
       setSavedSettings(saved);
       await refreshSources(saved);
-      setMessage(t("Desktop 实例设置已保存；Unified Library Roots、兼容扫描路径与 Shared Packs 已重新加载。"));
+      setMessage(t("Desktop 实例设置已保存；当前资料库配置、资料源与 Shared Packs 已重新加载。"));
     } catch (error) {
       setMessage(t("保存失败：{error}", { error: toMessage(error) }));
     } finally {
@@ -216,9 +235,30 @@ export default function App() {
     }
   }
 
+  async function switchLibraryProfile(profileId: string): Promise<void> {
+    const profile = (savedSettings.libraryProfiles ?? []).find((item) => item.id === profileId);
+    if (!profile || profile.id === savedSettings.activeLibraryProfileId) return;
+    if (hasUnsavedLibraryPaths(settings, savedSettings) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
+
+    setBusy(true);
+    try {
+      const next = applyLibraryProfile(savedSettings, profile);
+      const saved = await desktopBridge.saveSettings(next);
+      setSettings(saved);
+      setSavedSettings(saved);
+      setDetail(null);
+      await refreshSources(saved);
+      setMessage(t("已切换资料库：{name}", { name: profile.name }));
+    } catch (error) {
+      setMessage(t("切换资料库失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function installSharedPackPath(path: string): Promise<void> {
     const current = await desktopBridge.loadSettings();
-    const next = { ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) };
+    const next = syncActiveLibraryProfile({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) });
     const saved = await desktopBridge.saveSettings(next);
     setSettings(saved);
     setSavedSettings(saved);
@@ -254,13 +294,30 @@ export default function App() {
 
         <div className="sidebar-spacer" />
         <div className="source-summary">
-          <span className="eyebrow">{t("资料源")}</span>
-          <strong>{readRoots.length}</strong>
+          <span className="eyebrow">{t("当前资料库")}</span>
+          {savedSettings.libraryProfiles?.length ? (
+            <>
+              <strong className="source-profile-name">{savedActiveProfile?.name ?? t("未绑定配置")}</strong>
+              <select
+                className="source-profile-select"
+                aria-label={t("快速切换资料库")}
+                disabled={busy}
+                value={savedSettings.activeLibraryProfileId ?? ""}
+                onChange={(event) => void switchLibraryProfile(event.target.value)}
+              >
+                <option value="" disabled>{t("选择资料库…")}</option>
+                {savedSettings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
+              </select>
+            </>
+          ) : <strong className="source-profile-name">{t("尚未创建资料库")}</strong>}
           <small>
             {savedSettings.libraryPath
               ? t("Private + {count} Shared", { count: packInfos.filter((item) => item.valid).length })
               : t("{count} Shared", { count: packInfos.filter((item) => item.valid).length })}
           </small>
+          <button className="source-profile-manage" type="button" onClick={() => navigate("settings")}>
+            {t(savedSettings.libraryProfiles?.length ? "管理资料库" : "+ 新建资料库")}
+          </button>
         </div>
         <button
           className="sidebar-collapse-button"
@@ -969,14 +1026,14 @@ function MediaPage({
     return { media, works: new Map(works.items.map((item) => [item.id, item])), assets };
   }, [repository]);
 
-  async function startScan(): Promise<void> {
+  async function startScan(options: { waitForCompletion?: boolean } = {}): Promise<MediaScanJobSnapshot | null> {
     if (!settings.libraryPath) {
       setMessage(t("请先在设置页选择 Private Library。Shared Pack 不能保存 MediaFile。"));
-      return;
+      return null;
     }
     if (!mediaRoots.length) {
       setMessage(t("请先添加 Unified Library Root，或在高级设置里添加媒体扫描目录。"));
-      return;
+      return null;
     }
 
     try {
@@ -990,19 +1047,37 @@ function MediaPage({
       };
       const coordinator = new MediaScanCoordinator(repository, platform);
       scanCoordinator.current = coordinator;
-      setScan(
-        coordinator.start({
-          roots: mediaRoots,
-          ffprobeExecutable: settings.ffprobePath?.trim() || "ffprobe",
-          probeMedia: true,
-          computeSha256: false,
-          pruneMissing: true,
-          // Unified Root 按文件扩展名分流：任何子目录中的视频都会被发现；图片由 Local Asset Ingest 单独处理，避免图片文件占用媒体发现上限。
-          observeImageSidecars: false,
-        }),
-      );
-      setMessage(t("Desktop 增量媒体扫描已启动；Unified Roots 与高级媒体路径已合并去重，Shared Pack Work 也参与匹配。"));
+      const initial = coordinator.start({
+        roots: mediaRoots,
+        ffprobeExecutable: settings.ffprobePath?.trim() || "ffprobe",
+        probeMedia: true,
+        computeSha256: false,
+        pruneMissing: true,
+        // Unified Root 按文件扩展名分流：任何子目录中的视频都会被发现；图片由 Local Asset Ingest 单独处理，避免图片文件占用媒体发现上限。
+        observeImageSidecars: false,
+      });
+      setScan(initial);
+      setMessage(t("Desktop 增量媒体扫描已启动：将依次检查全部 {count} 个媒体根目录。", { count: mediaRoots.length }));
+
       if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
+
+      if (options.waitForCompletion) {
+        scanTimer.current = window.setInterval(() => {
+          setScan(coordinator.getSnapshot());
+        }, 250);
+        const final = await coordinator.waitForCompletion();
+        if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
+        scanTimer.current = null;
+        setScan(final);
+        onLibraryChanged();
+        if (final?.status === "completed") {
+          setMessage(t("媒体扫描完成：已检查 {roots} 个目录，发现 {files} 个视频。", { roots: final.result?.roots.length ?? 0, files: final.result?.discovered ?? 0 }));
+        } else {
+          setMessage(final?.progress.message ?? t("媒体扫描已结束。"));
+        }
+        return final;
+      }
+
       scanTimer.current = window.setInterval(() => {
         const snapshot = coordinator.getSnapshot();
         setScan(snapshot);
@@ -1012,13 +1087,17 @@ function MediaPage({
           onLibraryChanged();
           setMessage(
             snapshot.status === "completed"
-              ? t("Desktop 增量媒体扫描完成。")
+              ? t("媒体扫描完成：已检查 {roots} 个目录，发现 {files} 个视频。", { roots: snapshot.result?.roots.length ?? 0, files: snapshot.result?.discovered ?? 0 })
               : snapshot.progress.message ?? t("媒体扫描已结束。"),
           );
         }
       }, 250);
+      return initial;
     } catch (error) {
+      if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
+      scanTimer.current = null;
       setMessage(t("无法启动扫描：{error}", { error: toMessage(error) }));
+      return null;
     }
   }
 
@@ -1132,7 +1211,10 @@ function MediaPage({
       setMetadataBusy(false);
     }
 
-    await startScan();
+    const media = await startScan({ waitForCompletion: true });
+    if (media?.status === "completed") {
+      setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
+    }
   }
 
   async function auditVocabulary(): Promise<void> {
@@ -1212,13 +1294,21 @@ function MediaPage({
         </div>
         <code className="path-block">{mediaRoots.length ? mediaRoots.join("\n") : t("尚未配置可扫描资料根目录")}</code>
         {scan ? <div className={`progress ${scan.status}`}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></div> : null}
-        {scan?.result ? <div className="mini-stat-grid">
-          <MiniStat label={t("已发现")} value={scan.result.discovered} />
-          <MiniStat label={t("新增")} value={scan.result.added} />
-          <MiniStat label={t("已更新")} value={scan.result.updated} />
-          <MiniStat label={t("未变化")} value={scan.result.unchanged} />
-          <MiniStat label={t("已移除")} value={scan.result.removed} />
-        </div> : null}
+        {scan?.result ? <>
+          <div className="mini-stat-grid">
+            <MiniStat label={t("扫描目录")} value={scan.result.roots.length} />
+            <MiniStat label={t("已发现")} value={scan.result.discovered} />
+            <MiniStat label={t("新增")} value={scan.result.added} />
+            <MiniStat label={t("已更新")} value={scan.result.updated} />
+            <MiniStat label={t("未变化")} value={scan.result.unchanged} />
+            <MiniStat label={t("已移除")} value={scan.result.removed} />
+          </div>
+          <details className="scan-root-report">
+            <summary>{t("本轮实际扫描的 {count} 个目录", { count: scan.result.roots.length })}</summary>
+            <code className="path-block">{scan.result.roots.join("\n")}</code>
+          </details>
+          {scan.result.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: scan.result.warnings.length })}</summary><ul>{scan.result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
+        </> : null}
       </section>
 
       <section className="settings-card table-card">
@@ -1471,10 +1561,86 @@ function SettingsPage({
   setMessage: (message: string) => void;
 }) {
   const { t } = useDesktopI18n();
+  const profiles = settings.libraryProfiles ?? [];
+  const selectedProfile = activeLibraryProfile(settings);
 
   async function chooseLibrary(): Promise<void> {
     const path = await fileDialog.pickDirectory();
     if (path) setSettings((current) => ({ ...current, libraryPath: path }));
+  }
+
+  function createProfile(): void {
+    setSettings((current) => {
+      const prepared = syncActiveLibraryProfile(current);
+      const name = nextLibraryProfileName(prepared, t("资料库"));
+      return addLibraryProfile(prepared, createEmptyLibraryProfile(createLibraryProfileId(), name));
+    });
+    setMessage(t("已新建空白资料库；选择 Private Library / 内容根目录后点击“保存设置”。"));
+  }
+
+  async function addDevFixtureProfile(): Promise<void> {
+    try {
+      const fixturePath = await desktopBridge.resolvePath("./var/dev-fixture-library");
+      if (!await desktopBridge.pathExists(fixturePath)) {
+        setMessage(t("示例库运行副本不存在。请先在仓库根目录运行 pnpm desktop:demo:reset。"));
+        return;
+      }
+
+      const sharedPackPath = await desktopBridge.resolvePath("./examples/shared-packs/starter-community-pack");
+      const sharedPackPaths = await desktopBridge.pathExists(sharedPackPath) ? [sharedPackPath] : [];
+      setSettings((current) => {
+        const prepared = syncActiveLibraryProfile(current);
+        const existing = (prepared.libraryProfiles ?? []).find((profile) => isDevFixtureLibraryPath(profile.libraryPath));
+        const fixtureSettings: DesktopBootstrapSettings = {
+          ...prepared,
+          libraryPath: fixturePath,
+          libraryRoots: [],
+          mediaScanPaths: [],
+          nfoScanPaths: [],
+          sharedPackPaths,
+        };
+        const profile = createLibraryProfile(
+          fixtureSettings,
+          existing?.id ?? "library_profile_dev_fixture",
+          t("示例库"),
+        );
+        return addLibraryProfile(fixtureSettings, {
+          ...profile,
+          description: t("Localogue 内置开发 / 功能展示 Fixture"),
+          createdAt: existing?.createdAt ?? profile.createdAt,
+        });
+      });
+      setMessage(t("示例库已加入当前设置；点击“保存设置”后即可从侧栏快速切换。"));
+    } catch (error) {
+      setMessage(t("无法加入示例库：{error}", { error: toMessage(error) }));
+    }
+  }
+
+  function selectProfile(profileId: string): void {
+    const profile = (settings.libraryProfiles ?? []).find((item) => item.id === profileId);
+    if (!profile || profile.id === settings.activeLibraryProfileId) return;
+
+    if (selectedProfile) {
+      const activeSnapshot = applyLibraryProfile(settings, selectedProfile);
+      if (hasUnsavedLibraryPaths(settings, activeSnapshot) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
+    }
+
+    setSettings((current) => applyLibraryProfile(current, profile));
+  }
+
+  function renameProfile(): void {
+    const profile = activeLibraryProfile(settings);
+    if (!profile) return;
+    const name = window.prompt(t("资料库配置名称"), profile.name);
+    if (!name?.trim()) return;
+    setSettings((current) => renameLibraryProfile(current, profile.id, name));
+  }
+
+  function deleteProfile(): void {
+    const profile = activeLibraryProfile(settings);
+    if (!profile) return;
+    if (!window.confirm(t("删除资料库配置“{name}”？只删除路径预设，不会删除磁盘上的资料。", { name: profile.name }))) return;
+    setSettings((current) => removeLibraryProfile(current, profile.id));
   }
 
   async function addSharedPack(): Promise<void> {
@@ -1512,36 +1678,80 @@ function SettingsPage({
 
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="INSTANCE · STORAGE · SHARING" title={t("桌面设置")} description={t("Desktop 与 Web 使用相同字段语义，但运行入口各自保存本机路径，避免开发/发布环境互相污染。")} />
+      <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
+
+      <section className="settings-card library-profile-card">
+        <div className="section-heading">
+          <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("资料库")}</h2></div>
+          <div className="button-row">
+            {runtime?.environment === "development" ? <button onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</button> : null}
+            <button className="primary-button" onClick={createProfile}>{t("+ 新建资料库")}</button>
+          </div>
+        </div>
+        <p className="muted">{t("新建资料库默认使用“资料库 1、资料库 2…”等中性名称，不预设内容分类；名称可随时修改。每个资料库会记住 Private Library、内容根目录、高级兼容目录和 Shared Packs。")}</p>
+        {profiles.length ? (
+          <div className="profile-toolbar">
+            <label>
+              <span>{t("当前资料库")}</span>
+              <select value={settings.activeLibraryProfileId ?? ""} onChange={(event) => selectProfile(event.target.value)}>
+                <option value="" disabled>{t("选择资料库…")}</option>
+                {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
+              </select>
+            </label>
+            <div className="button-row">
+              <button disabled={!selectedProfile} onClick={renameProfile}>{t("重命名")}</button>
+              <button className="danger-button" disabled={!selectedProfile} onClick={deleteProfile}>{t("删除资料库")}</button>
+            </div>
+          </div>
+        ) : <p className="empty-profile-hint">{t("还没有资料库。点击“新建资料库”会创建“资料库 1”；之后选择路径并保存即可。开发环境也可以一键加入“示例库”。")}</p>}
+      </section>
+
+      <section className="settings-card source-model-card">
+        <span className="eyebrow">HOW SOURCES FIT TOGETHER</span>
+        <h2>{t("四种路径怎么理解")}</h2>
+        <div className="source-model-grid">
+          <article><strong>1 · {t("私人资料库")}</strong><p>{t("Localogue 自己维护的可写 Canonical / Evidence / Asset / MediaFile。每个资料库配置通常只对应一个。")}</p></article>
+          <article><strong>2 · {t("内容根目录")}</strong><p>{t("推荐入口。你的影片、NFO、poster、fanart 可以散在子目录里，Localogue 会递归发现并按番号汇聚。")}</p></article>
+          <article><strong>3 · {t("只读共享资料")}</strong><p>{t("公共元数据基础层，例如 localogue-community-data。只读，且永远低于你的 Private Library。")}</p></article>
+          <article><strong>4 · {t("高级兼容目录")}</strong><p>{t("只有媒体或 NFO / 图片完全放在内容根目录之外时才需要；普通用户可以不展开。")}</p></article>
+        </div>
+      </section>
+
       <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">PRIVATE LIBRARY</span><h2>{t("私人资料库")}</h2></div><button onClick={() => void chooseLibrary()}>{t("选择目录")}</button></div>
+        <div className="section-heading"><div><span className="eyebrow">PRIVATE LIBRARY</span><h2>{t("私人资料库（可写）")}</h2></div><button onClick={() => void chooseLibrary()}>{t("选择目录")}</button></div>
+        <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
         <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
         {settings.libraryPath ? <button className="danger-button" onClick={() => setSettings((current) => ({ ...current, libraryPath: undefined }))}>{t("清除 Private Library")}</button> : null}
       </section>
 
       <section className="settings-card featured-card">
-        <div className="section-heading"><div><span className="eyebrow">UNIFIED LIBRARY ROOTS</span><h2>{t("统一资料源根目录")}</h2></div><button className="primary-button" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</button></div>
-        <p className="muted">{t("推荐配置。一个根目录下可以同时有“VR / 单体 / 封面+元数据 / 字幕”等任意子目录；Desktop 会按文件类型递归发现视频、NFO、poster / fanart / thumb，并按番号跨目录关联。")}</p>
+        <div className="section-heading"><div><span className="eyebrow">CONTENT ROOTS</span><h2>{t("内容根目录（推荐）")}</h2></div><button className="primary-button" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</button></div>
+        <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
         <PathList values={settings.libraryRoots} onRemove={(path) => setSettings((current) => ({ ...current, libraryRoots: current.libraryRoots.filter((item) => item !== path) }))} />
       </section>
 
       <section className="settings-card">
         <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><button onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</button></div>
+        <p className="muted">{t("适合社区公共元数据。推荐继续把 localogue-community-data 作为独立 Shared Pack 维护，而不是复制进每个私人资料库。")}</p>
         <PathList values={settings.sharedPackPaths} onRemove={(path) => setSettings((current) => ({ ...current, sharedPackPaths: current.sharedPackPaths.filter((item) => item !== path) }))} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
       </section>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">ADVANCED MEDIA ROOTS</span><h2>{t("高级：额外媒体目录")}</h2></div><button onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</button></div>
-        <p className="muted">{t("可选。只在媒体不位于 Unified Library Root 中时添加；扫描时会与 Unified Roots 合并去重。")}</p>
-        <PathList values={settings.mediaScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, mediaScanPaths: current.mediaScanPaths.filter((item) => item !== path) }))} />
-      </section>
-
-      <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">ADVANCED METADATA ROOTS</span><h2>{t("高级：额外 NFO / 图片目录")}</h2></div><button onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</button></div>
-        <p className="muted">{t("可选。适合 NFO / 海报完全放在另一块硬盘的情况；这里的目录也会参与 poster / fanart / thumb 发现。")}</p>
-        <PathList values={settings.nfoScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, nfoScanPaths: current.nfoScanPaths.filter((item) => item !== path) }))} />
-      </section>
+      <details className="settings-card advanced-source-settings">
+        <summary><span><span className="eyebrow">ADVANCED COMPATIBILITY</span><strong>{t("高级兼容目录")}</strong></span><small>{t("大多数用户不需要配置")}</small></summary>
+        <div className="advanced-settings-stack">
+          <div>
+            <div className="section-heading"><div><h3>{t("额外媒体目录")}</h3></div><button onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</button></div>
+            <p className="muted">{t("只在影片不位于上面的内容根目录中时添加；多个目录会全部参与同步和媒体扫描。")}</p>
+            <PathList values={settings.mediaScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, mediaScanPaths: current.mediaScanPaths.filter((item) => item !== path) }))} />
+          </div>
+          <div>
+            <div className="section-heading"><div><h3>{t("额外 NFO / 图片目录")}</h3></div><button onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</button></div>
+            <p className="muted">{t("只在 NFO / 海报完全放在另一处时添加；这里也会参与 poster / fanart / thumb 发现。")}</p>
+            <PathList values={settings.nfoScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, nfoScanPaths: current.nfoScanPaths.filter((item) => item !== path) }))} />
+          </div>
+        </div>
+      </details>
 
       <section className="settings-card form-card">
         <label>ffprobe<input value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, ffprobePath: event.target.value }))} /></label>

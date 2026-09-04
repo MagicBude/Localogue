@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<movie>
+  <title>夜の図書館</title>
+  <originaltitle>夜の図書館</originaltitle>
+  <num>DEMO-IMPORT-002</num>
+  <premiered>2026-08-18</premiered>
+  <runtime>132</runtime>
+  <studio>North Studio</studio>
+  <set>静かな夜</set>
+  <actor><name>白石りん</name></actor>
+  <director>架空監督B</director>
+  <genre>ドラマ</genre>
+  <genre>室内</genre>
+  <tag>待整理</tag>
+  <plot>导入功能使用的完全虚构 NFO 示例。</plot>
+</movie>

@@ -39,8 +39,10 @@
   "tagIds": [
     "needs_review"
   ],
-  "assetIds": [],
+  "assetIds": [
+    "asset_fixture_lx303_poster_canonical"
+  ],
   "mediaFileIds": [],
   "createdAt": "2026-09-04T10:55:00+08:00",
-  "updatedAt": "2026-09-04T10:55:00+08:00"
+  "updatedAt": "2026-09-04T14:40:00+08:00"
 }

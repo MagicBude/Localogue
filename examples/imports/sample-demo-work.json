@@ -1,0 +1,29 @@
+{
+  "code": "DEMO-IMPORT-001",
+  "title": "夏日回声",
+  "originalTitle": "夏の日のこだま",
+  "releaseDate": "2026-08-15",
+  "durationMinutes": 124,
+  "performers": [
+    "星野みづき"
+  ],
+  "directors": [
+    "架空監督A"
+  ],
+  "maker": "Aurora Works",
+  "label": "Aurora Label",
+  "series": [
+    "夏の記憶"
+  ],
+  "genres": [
+    "ドラマ",
+    "制服"
+  ],
+  "tags": [
+    "待整理"
+  ],
+  "workTypes": [
+    "solo"
+  ],
+  "description": "兼容旧示例世界的完全虚构 JSON 导入样例；用于验证导入器不依赖 LX Fixture 编号。"
+}

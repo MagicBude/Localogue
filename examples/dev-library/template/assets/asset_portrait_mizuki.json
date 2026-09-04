@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_mizuki",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/mizuki-hoshino-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 82648,
+  "sha256": "b4aac68da5f3d325ac43702e037d440ebeffbd2a16b63f43b21ef4e9916e53dd",
+  "subjectType": "person",
+  "subjectId": "person_hoshino_mizuki",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_lx303_poster_canonical",
+  "type": "poster",
+  "storagePath": "asset-files/posters/lx-303-poster.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1200,
+  "fileSize": 223894,
+  "sha256": "ba63f517ea89a8c9b90b32868bc2cec8094eee454fff88ca2b1f3b3a85b3b947",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_303",
+  "createdAt": "2026-09-04T14:40:00+08:00"
+}

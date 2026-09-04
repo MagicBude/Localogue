@@ -20,6 +20,17 @@ examples/
 
 原 `examples/people/` 与 `examples/works/` 已并入 `dev-library/template/people` 与 `dev-library/template/works`。因此 Canonical JSON 结构示例不再有第二份副本。
 
+## Fixture 同时是产品展示库
+
+V1-24 Foundation Cleanup 把早期 `data/demo-library` 中关系丰富的虚构 Canonical 记录合并进 Desktop Dev Fixture（不复制旧的文字型 SVG Asset）。运行副本现在包含 11 部作品、8 位人物以及多组组织、系列和分类关系；29 张生成式 JPEG 让每部作品至少有一张海报、每位人物至少有一张头像，同时继续保留多封面、多头像、Gallery 与 stale Preference 等专项场景。
+
+因此 Fixture 有两种互补数据：
+
+- `LX-*`：重点测试多封面、多头像、Gallery、Presentation / Asset；
+- `DEMO-*`：关系和筛选更丰富，重点测试 Catalog / Facet / 详情关系，同时也拥有生成式海报与人物头像，不再依赖灰色占位卡。
+
+这套资料未来也可以作为新用户第一次启动 Localogue 时的“示例库”。正式安装包应把模板作为应用资源，并复制到可写 App Local Data 后再使用，不能直接修改安装目录中的模板。
+
 ## Source Template 与 Runtime Copy
 
 ```text
@@ -60,14 +71,17 @@ pnpm desktop:demo:clean
 
 这是 Localogue 的一条开发安全边界：**测试工具可以准备数据，但不能偷偷改变真实实例指向。**
 
-配套的 `examples/settings/settings.example.json` 现在使用：
+配套设置示例分成两份：
 
 ```text
-./var/dev-fixture-library
-./examples/shared-packs/starter-community-pack
+examples/settings/settings.example.json
+  # Web / Instance Settings Schema 兼容示例
+
+examples/settings/desktop-settings.example.json
+  # Desktop Bootstrap Settings + “示例库” Library Profile
 ```
 
-它用于说明“完整测试实例应该如何配置”，但脚本仍不会自动应用它。
+两者都指向 `./var/dev-fixture-library` 与 Starter Shared Pack。之所以分开，是因为 Desktop Profile 属于本机桌面运行配置，不应污染 Web `instance-settings.schema.json`。脚本仍不会自动应用任何一份设置。
 
 ## Shared Pack 联动
 

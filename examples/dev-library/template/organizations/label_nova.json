@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "label_nova",
+  "kind": "label",
+  "names": {
+    "ja": "ノヴァ",
+    "zh-CN": "新星",
+    "en": "Nova"
+  },
+  "parentOrganizationId": "maker_crescent"
+}

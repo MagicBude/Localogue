@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_director_sato",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/kei-sato-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 88889,
+  "sha256": "3c6da8e07e9ee84ce547367497c291641ef7936fcc281390e3f729b0db438985",
+  "subjectType": "person",
+  "subjectId": "person_director_sato",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

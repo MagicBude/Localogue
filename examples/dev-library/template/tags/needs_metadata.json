@@ -1,0 +1,9 @@
+{
+  "id": "needs_metadata",
+  "names": {
+    "ja": "情報補完待ち",
+    "zh-CN": "待补资料",
+    "en": "Needs Metadata"
+  },
+  "builtIn": true
+}

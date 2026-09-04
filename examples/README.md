@@ -11,7 +11,7 @@ V1-24 起这里不再维护两套互相独立的“人物 / 作品示例”。�
 | `dev-library/` | 标准可重置 Private Library Fixture；Work / Person / Asset / Presentation 的主测试真相 | 不直接写模板；先 `pnpm desktop:demo:reset` |
 | `imports/` | JSON / NFO / CSV / XLSX 导入样例；其中“已有作品”样例直接引用 Dev Fixture 的 `LX-101` | 否 |
 | `shared-packs/` | 只读 Shared Pack 示例；与 Dev Fixture 配合测试 Private > Shared | 否，作为 Shared Pack 挂载 |
-| `settings/` | 与 Dev Fixture / Shared Pack 对齐的实例设置示例 | 否 |
+| `settings/` | Web Instance Settings 与 Desktop Library Profile 配置示例 | 否 |
 
 原来的 `people/`、`works/` 独立示例目录不再保留。需要查看 Canonical Work / Person JSON 时，直接阅读：
 
@@ -21,6 +21,15 @@ examples/dev-library/template/people/person_fixture_aiko_mizuno.json
 ```
 
 这样同一份 JSON 既是文档结构示例，也是 Desktop 可实际读取、可被 Validator 校验、未来可被 E2E 复用的 Fixture。
+
+`settings/` 内刻意分成两份：
+
+```text
+settings.example.json          # 遵循 Web / Instance Settings Schema
+desktop-settings.example.json  # Desktop Bootstrap Settings + Library Profile
+```
+
+不要把 Desktop-only 的 Profile 字段塞回 `settings.example.json`，否则会破坏 `schemas/instance-settings.schema.json` 的严格 `additionalProperties=false` 契约。
 
 ## 快速开始
 

@@ -15,6 +15,7 @@ import type { LibraryRepository } from "@/domain/repositories/library-repository
 export class MediaScanCoordinator {
   private snapshot: MediaScanJobSnapshot | null = null;
   private abortController: AbortController | null = null;
+  private completion: Promise<void> | null = null;
 
   constructor(
     private readonly repository: LibraryRepository,
@@ -45,7 +46,8 @@ export class MediaScanCoordinator {
       },
     };
 
-    void this.execute(request, this.abortController.signal);
+    this.completion = this.execute(request, this.abortController.signal);
+    void this.completion;
     return cloneSnapshot(this.snapshot);
   }
 
@@ -62,6 +64,18 @@ export class MediaScanCoordinator {
 
   getSnapshot(): MediaScanJobSnapshot | null {
     return this.snapshot ? cloneSnapshot(this.snapshot) : null;
+  }
+
+  /**
+   * 等待当前扫描真正结束。
+   *
+   * Web 的轮询 UI 可以继续只使用 getSnapshot；Desktop 的“一键同步”则需要
+   * 等所有扫描根目录完成后再向用户报告同步结束，避免多个额外媒体目录时
+   * 第一个目录完成后看起来像整轮任务已经结束。
+   */
+  async waitForCompletion(): Promise<MediaScanJobSnapshot | null> {
+    await this.completion;
+    return this.getSnapshot();
   }
 
   private async execute(request: MediaScanRequest, signal: AbortSignal): Promise<void> {
@@ -110,6 +124,7 @@ export class MediaScanCoordinator {
       }
     } finally {
       this.abortController = null;
+      this.completion = null;
     }
   }
 

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_mio_home",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/mio-asakura-gallery-home.jpg",
+  "mimeType": "image/jpeg",
+  "width": 900,
+  "height": 1125,
+  "fileSize": 181227,
+  "sha256": "18838bf9c1de214477aae08d23f236ef04c9b6518b1fcd6c719d986dc7b2dc76",
+  "subjectType": "person",
+  "subjectId": "person_asakura_mio",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

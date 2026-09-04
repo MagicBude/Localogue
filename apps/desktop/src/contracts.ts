@@ -4,6 +4,7 @@
  */
 export type {
   DesktopBootstrapSettings,
+  DesktopLibraryProfile,
   DesktopMediaProbeRequest,
   DesktopMediaProbeResult,
   DesktopRuntimeInfo,

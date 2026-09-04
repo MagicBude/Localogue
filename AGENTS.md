@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-24A Desktop Presentation Preference Workbench**。
+当前阶段：**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。
 
 V1 当前约束：
 
@@ -386,3 +386,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - `examples/imports / settings / shared-packs` 应尽量与 Dev Fixture 使用同一套稳定 ID 与虚构测试世界；能联动复现的场景不要再新造一套孤立 Demo。
 - `sample-existing-work.json` 必须持续命中 Fixture 中真实存在的 Work，并保留至少一个明确字段差异；`validate:fixture` 负责守住这一契约。
 - Starter Shared Pack 应保留至少一个与 Private Fixture 同稳定 ID、但显示值故意不同的记录，用于肉眼与自动化验证 `Private > Shared`。
+
+## V1-24 Foundation Cleanup / Library Profile 约束
+
+- Desktop 必须允许多个独立 Library Profile 快速切换，用于示例库与用户自建资料库不同收藏；不得要求用户为每个库安装一个新的 Localogue 实例。
+- 一个 Library Profile 只保存本机资料源路径：`libraryPath / libraryRoots / mediaScanPaths / nfoScanPaths / sharedPackPaths`。切换 Profile 不得复制、移动、合并或删除任何 Canonical / Media 数据。
+- `ffprobePath / webUrl` 等运行环境设置是应用级全局配置，不得因为增加 Profile 而在每个资料库重复保存。
+- Settings 普通用户语义固定为四层：私人资料库（可写）、内容根目录（推荐）、只读共享资料、高级兼容目录；`mediaScanPaths / nfoScanPaths` 必须继续作为高级兼容能力，不重新提升为主路径概念。
+- Unified Library 一键同步必须在 NFO → Asset 之后等待**全部**有效 Media Root 扫描完成才可显示“同步完成”；多根目录不得因第一个 root 完成就提前刷新为成功。
+- 媒体扫描结果必须可观察本轮实际 roots，便于多目录配置排错；手工扫描继续保留 Job / Progress / Cancel。
+- Desktop bundle 变大时优先真实 code splitting / lazy loading；禁止仅通过调高 `chunkSizeWarningLimit` 消除告警。
+- Dev Fixture 长期至少维持 10 个 Work、6 个 Person，并同时覆盖有图与无图、关系筛选、Presentation、Import/Review 场景；生成式图片继续作为可公开提交的视觉测试资产。
+- `localogue-community-data` 与主程序保持独立仓库：前者维护可共享事实数据，后者维护代码、Schema、词表与虚构 Fixture。Localogue 通过 Shared Pack / 未来 Registry 消费社区资料，不在主仓库复制第二份真实元数据。
+

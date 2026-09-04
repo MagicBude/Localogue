@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_director_kuroda",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/shuichi-kuroda-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 91731,
+  "sha256": "b2bdcd7c6ab59f140edd2f986d38aed27fa1925152e97c5ab3acf1beb0da412f",
+  "subjectType": "person",
+  "subjectId": "person_director_kuroda",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}

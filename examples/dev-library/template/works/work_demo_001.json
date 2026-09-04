@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "work_demo_001",
+  "code": "DEMO-001",
+  "originalLanguage": "ja",
+  "titles": {
+    "ja": "雨上がりの窓辺",
+    "zh-CN": "雨后的窗边",
+    "en": "After the Rain"
+  },
+  "descriptions": {
+    "ja": "Localogue V1 の画面、検索、関連データ表示を確認するための架空作品です。",
+    "zh-CN": "这是用于 Localogue V1 页面、筛选和关系展示测试的虚构作品数据。 现同时作为 Dev Fixture 的关系/筛选示例。",
+    "en": "A fictional work used to test Localogue V1 pages, filtering and relationships."
+  },
+  "releaseDate": {
+    "value": "2026-08-22",
+    "precision": "day"
+  },
+  "durationMinutes": 128,
+  "workTypeIds": [
+    "solo"
+  ],
+  "personRelations": [
+    {
+      "personId": "person_hoshino_mizuki",
+      "role": "performer",
+      "billingOrder": 1
+    },
+    {
+      "personId": "person_director_kuroda",
+      "role": "director"
+    }
+  ],
+  "makerId": "maker_aurora",
+  "labelId": "label_lumen",
+  "seriesIds": [
+    "series_city_lights"
+  ],
+  "genreIds": [
+    "drama",
+    "slender"
+  ],
+  "tagIds": [
+    "favorite"
+  ],
+  "assetIds": [
+    "asset_poster_demo_01"
+  ],
+  "mediaFileIds": [],
+  "createdAt": "2026-09-01T11:00:00+08:00",
+  "updatedAt": "2026-09-04T15:20:00+08:00"
+}

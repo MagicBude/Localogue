@@ -15,6 +15,20 @@ export interface DesktopRuntimeInfo {
   settingsPath: string;
 }
 
+
+export interface DesktopLibraryProfile {
+  id: string;
+  name: string;
+  description?: string;
+  libraryPath?: string;
+  libraryRoots: string[];
+  mediaScanPaths: string[];
+  nfoScanPaths: string[];
+  sharedPackPaths: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface DesktopBootstrapSettings {
   schemaVersion: 1;
   libraryPath?: string;
@@ -24,6 +38,9 @@ export interface DesktopBootstrapSettings {
   mediaScanPaths: string[];
   nfoScanPaths: string[];
   sharedPackPaths: string[];
+  /** Desktop 本机资料库配置预设；切换时整组替换路径字段，不复制 Canonical 数据。 */
+  libraryProfiles?: DesktopLibraryProfile[];
+  activeLibraryProfileId?: string;
   ffprobePath?: string;
   webUrl: string;
   updatedAt?: string;

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_portrait_haruka",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/haruka-fujiwara-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 720,
+  "height": 900,
+  "fileSize": 89505,
+  "sha256": "b980c71362c85485e5f690d33054c2f114ea2eb91fef9774b457c97b80b5423d",
+  "subjectType": "person",
+  "subjectId": "person_fujiwara_haruka",
+  "createdAt": "2026-09-04T15:20:00+08:00"
+}
