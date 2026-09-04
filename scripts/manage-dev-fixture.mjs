@@ -1,4 +1,4 @@
-import { cp, mkdir, rm, stat } from "node:fs/promises";
+import { copyFile, cp, mkdir, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
@@ -11,6 +11,7 @@ import process from "node:process";
  *   pnpm desktop:demo:seed   # 目标不存在时创建；已存在则保留现状
  *   pnpm desktop:demo:reset  # 删除目标后重新复制干净模板
  *   pnpm desktop:demo:clean  # 删除运行时副本
+ *   pnpm desktop:demo:orphan # 在运行副本制造 1 个未被 Asset JSON 引用的图片，用于测试孤儿清理
  *
  * 脚本不会改写 .localogue/settings.json，也不会偷偷切换用户当前 Private Library。
  */
@@ -33,15 +34,32 @@ const requiredCollections = [
   "asset-files",
 ];
 
-if (!new Set(["seed", "reset", "clean"]).has(action)) {
+if (!new Set(["seed", "reset", "clean", "orphan"]).has(action)) {
   console.error(`未知 Dev Fixture 动作：${action}`);
-  console.error("允许值：seed / reset / clean");
+  console.error("允许值：seed / reset / clean / orphan");
   process.exit(1);
 }
 
 if (action === "clean") {
   await rm(targetRoot, { recursive: true, force: true });
   console.log(`Localogue Dev Fixture 已清理：${targetRoot}`);
+  process.exit(0);
+}
+
+if (action === "orphan") {
+  if (!await exists(targetRoot)) {
+    console.error("Dev Fixture 运行副本不存在。请先运行：pnpm desktop:demo:reset");
+    process.exit(1);
+  }
+  const source = path.join(targetRoot, "asset-files", "posters", "demo-001-poster.jpg");
+  const destination = path.join(targetRoot, "asset-files", "orphan-fixture-test.jpg");
+  if (!await exists(source)) {
+    console.error(`无法找到 Fixture 源图片：${source}`);
+    process.exit(1);
+  }
+  await copyFile(source, destination);
+  console.log(`已制造 1 个孤儿 Asset 文件：${destination}`);
+  console.log("它没有对应 Asset JSON。可在 Desktop → 媒体 → 资源文件健康中检查并清理。\n");
   process.exit(0);
 }
 
@@ -70,7 +88,7 @@ function printUsage() {
   console.log("1. 这个脚本只服务开发者重置仓库内 Fixture；产品里的“+ 添加示例库”会自行初始化 App Local Data 副本。");
   console.log(`2. 如需手工测试仓库副本，Private Library 可选择：${targetRoot}`);
   console.log("3. 保存后左侧栏会显示对应 Profile 并可快速切换。");
-  console.log("4. 点击刷新资料；即可使用 11 部作品 / 8 位人物 / 29 张生成式图片测试筛选、关系、首选图片与删除保护。");
+  console.log("4. 点击刷新资料；即可使用 11 部作品 / 8 位人物 / 43 张生成式图片测试筛选、关系、首选图片与删除保护。");
   console.log(`5. 产品内置示例库也会尝试挂载同一套配套 Shared Pack：${companionSharedPack}`);
   console.log("   用于验证同 ID 实体的 Private > Shared 读取优先级。");
   console.log(`6. Review 联动样例：${existingWorkImport}（LX-101，时长故意与 Canonical 不同）。\n`);

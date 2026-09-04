@@ -10,6 +10,7 @@
 - `pnpm desktop:demo:seed` 会把模板复制到 `var/dev-fixture-library/`；
 - `pnpm desktop:demo:reset` 会删除运行时副本并重新复制干净模板；
 - `pnpm desktop:demo:clean` 只删除运行时副本；
+- `pnpm desktop:demo:orphan` 会在运行副本 `asset-files/` 中制造一个无 Asset JSON 引用的图片，用于验收孤儿文件检查/清理；
 - 脚本**不会修改** `.localogue/settings.json`，避免误切换真实 Private Library；
 - `var/` 属于运行时目录并被 Git 忽略；
 - 所有人物、作品、厂商、名称和图片内容均为虚构/生成式测试素材，不对应真实人物或真实发行作品。
@@ -45,13 +46,21 @@ pnpm desktop:demo:reset
 pnpm desktop:demo:clean
 ```
 
+需要测试 `媒体 → 资源文件健康` 时，先确保当前 Profile 指向 `<仓库>/var/dev-fixture-library`，再执行：
+
+```bash
+pnpm desktop:demo:orphan
+```
+
+检查存储应发现 1 个孤儿文件；执行清理后再次检查应恢复为 0。该命令不会修改 Settings，也不会影响产品 App Local Data 中的内置“示例库”副本。
+
 Fixture 本身可独立校验：
 
 ```bash
 pnpm validate:fixture
 ```
 
-产品内“+ 添加示例库”会把同一模板复制到 App Local Data。V1-24B 起 Native 会比较整棵模板的内容签名：开发模式优先读取当前仓库 `examples/`，发布版读取安装包 `$RESOURCE`，因此新增 Gallery / JSON 后再次点击“添加示例库”即可安全刷新，不再依赖旧 Resource 缓存。
+产品内“+ 添加示例库”会把同一模板复制到 App Local Data。V1-24B 起 Native 会比较整棵模板的内容签名：开发模式优先读取当前仓库 `examples/`，发布版读取安装包 `$RESOURCE`，因此新增 Gallery / JSON 后再次点击“添加示例库”即可安全刷新，不再依赖旧 Resource 缓存。 配套 `examples/shared-packs/starter-community-pack` 还提供 Shared-only 人物 `person_shared_demo_001` 与 `asset_shared_demo_hana_portrait`，用于验证 Shared Pack 图片能显示但保持只读。
 
 ## 当前展示规模
 
@@ -155,7 +164,7 @@ Asset JSON 保存真实 `fileSize` 和 SHA-256；`pnpm validate:fixture` 会重�
 
 新增依赖真实数据条件的功能时，优先给 Fixture 增加一个**最小、明确、可重置**的测试场景。例如：
 
-- V1-24B：人物 Portrait / Gallery 上传、删除、孤儿 Asset；
+- V1-24B：人物 Portrait / Gallery 上传、删除、Shared Asset 只读显示与孤儿 Asset 文件治理；
 - Portable Pack：冲突、跳过、覆盖预览；
 - Media：可复用的小型合法测试媒体；
 - Review：固定 Evidence / Commit / Snapshot 场景。

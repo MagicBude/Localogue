@@ -367,7 +367,8 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Desktop Presentation Preference 必须通过专用、最小 Native Command 写入当前 Settings 对应的 Private Library；禁止恢复成 WebView 可指定任意目录/集合的文件 API。
 - 已失效的 preferred Asset 引用必须显式标记为 stale，并允许用户恢复默认；不得为了消除 stale 状态静默修改 Canonical 引用。
 - 删除 Private Asset 前必须检查 Person / Work Canonical 引用以及 Presentation Preference 引用；仍被引用时必须阻止删除并要求用户先解除引用。
-- V1-24B 若扩展 Shared Asset 二进制展示，应新增受控只读来源解析能力，不得扩大 `read_private_asset_bytes` 为任意本地文件读取器。
+- Shared Asset 二进制展示必须通过 `read_resolved_asset_bytes` 按当前 `Private > Shared Pack` 顺序重新绑定稳定 `Asset.id + storagePath`；每个来源只允许读取自身 `asset-files/`，不得扩大 `read_private_asset_bytes` 为任意本地文件读取器。
+- Private Asset 物理孤儿清理必须由 Native 基于**最新 Asset JSON**重新计算；Webview 不得提交待删除路径。自动清理只允许当前 Private `asset-files/` 内普通文件，必须跳过符号链接/越界路径，且永不清理 Shared Pack。
 - Presentation / Asset 功能变化继续更新固定 `MANIFEST.md`、`PROJECT_STATUS.md` 与 `CHANGELOG.md`；禁止新建 `V*_MANIFEST.md`。
 - 交付给用户的覆盖包继续只包含实际新增/修改文件；需要删除的旧文件直接在对话中列出或提供删除命令。
 

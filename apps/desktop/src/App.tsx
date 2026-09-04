@@ -42,6 +42,7 @@ import {
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { PersonAssetGovernance } from "./desktop-person-asset-governance";
 import {
   buildDesktopWorkCards,
@@ -431,6 +432,7 @@ export default function App() {
             setMessage={setMessage}
             progress={progress}
             onLibraryChanged={refreshLibrary}
+            runtimeContractRevision={runtime?.contractRevision ?? 0}
           />
         ) : page === "packs" ? (
           <PacksPage
@@ -1024,12 +1026,14 @@ function MediaPage({
   setMessage,
   progress,
   onLibraryChanged,
+  runtimeContractRevision,
 }: {
   repository: TauriLibraryRepository;
   settings: DesktopBootstrapSettings;
   setMessage: (message: string) => void;
   progress: DesktopTaskProgress | null;
   onLibraryChanged: () => void;
+  runtimeContractRevision: number;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const [scan, setScan] = useState<MediaScanJobSnapshot | null>(null);
@@ -1482,6 +1486,12 @@ function MediaPage({
           </tbody></table></div> : <p className="muted">{t("尚未扫描到本地媒体。")} </p>}
         </section>
       )}
+
+      <DesktopAssetStorageGovernance
+        hasPrivateLibrary={Boolean(settings.libraryPath)}
+        runtimeContractRevision={runtimeContractRevision}
+        setMessage={setMessage}
+      />
 
       {!data.loading && data.value && bindingMediaId ? (() => {
         const target = data.value.media.find((item) => item.id === bindingMediaId);

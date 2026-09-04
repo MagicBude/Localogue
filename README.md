@@ -15,7 +15,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 资料源设置同时收敛为四层语义：**私人资料库（可写）→ 内容根目录（推荐扫描入口）→ 只读共享资料（Shared Pack）→ 高级兼容目录**。Media 页面的一键同步继续固定按 **NFO → Asset → Media** 编排，并且现在会等待全部 Unified Root + 额外媒体目录扫描完成后才报告成功，扫描结果会明确列出本轮实际检查的全部目录。Desktop Vite 构建也使用 Rolldown vendor code splitting 解决单一主 bundle 持续膨胀的问题，而不是简单调高 warning 阈值。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
-V1-24B 同时把作品详情视觉资源分成明确的两类：竖版 `poster/cover` 用于海报墙与首选封面，横版 `gallery/fanart/screenshot` 用于详情页 Hero Gallery。内置示例库当前提供 11 Works / 8 People / 43 Assets，并通过 Native 内容签名 provision 到 App Local Data；开发环境会优先读取仓库中的最新 Fixture，避免旧 Tauri Resource 缓存造成示例图片不同步。
+V1-24B 同时把作品详情视觉资源分成明确的两类：竖版 `poster/cover` 用于海报墙与首选封面，横版 `gallery/fanart/screenshot` 用于详情页 Hero Gallery。内置示例库当前提供 11 Works / 8 People / 43 Assets，并通过 Native 内容签名 provision 到 App Local Data；开发环境会优先读取仓库中的最新 Fixture，避免旧 Tauri Resource 缓存造成示例图片不同步。 V1-24B 收尾后，Desktop 图片读取也支持受控的 Shared Pack Asset：Native 按当前 Profile 的 `Private > Shared Pack` 优先级重新绑定 `Asset.id + storagePath`，并且每个来源只允许读取自己的 `asset-files/`，不会向 Webview 开放通用文件路径。Media 页同时提供“资源文件健康”，用于报告 Private Asset 孤儿二进制、缺失引用与可回收空间，并在 Native 重新确认最新引用后安全清理真正的孤儿文件。
 
 当前 V1 已完成：
 
@@ -246,9 +246,9 @@ pnpm library:init:demo
 pnpm desktop:demo:reset
 ```
 
-它会把 `examples/dev-library/template/` 复制到 Git 忽略的 `var/dev-fixture-library/`，用于开发者脚本与手工验收。当前 Fixture 已扩充为 **11 Works / 8 People / 43 张生成式 JPEG**：`LX-*` 子集专门覆盖封面、头像、Gallery 与 Presentation Preference，`DEMO-*` 子集覆盖更多人物关系、厂商、厂牌、系列、题材和筛选场景；6 位 performer 都配有独立 Gallery；11 部示例作品现在也全部拥有独立宽幅 Work Gallery，因此 Work Detail 顶部画廊在干净示例库中可以直接验收。Desktop `设置 → 资料库 → 添加示例库` 不再依赖这条 pnpm 命令：安装版与开发版都会从随应用嵌入的同一 Fixture 资源自动创建 App Local Data 可写副本并立即加入“示例库” Profile。`desktop:demo:*` 仍保留给开发者重置仓库测试副本。V1-24 起 `examples/imports`、`examples/settings` 与 `examples/shared-packs` 也围绕这套 Fixture 联动；旧的独立 `examples/people` / `examples/works` 已合并，避免重复示例漂移。
+它会把 `examples/dev-library/template/` 复制到 Git 忽略的 `var/dev-fixture-library/`，用于开发者脚本与手工验收。当前 Fixture 已扩充为 **11 Works / 8 People / 43 张生成式 JPEG**：`LX-*` 子集专门覆盖封面、头像、Gallery 与 Presentation Preference，`DEMO-*` 子集覆盖更多人物关系、厂商、厂牌、系列、题材和筛选场景；6 位 performer 都配有独立 Gallery；11 部示例作品现在也全部拥有独立宽幅 Work Gallery，因此 Work Detail 顶部画廊在干净示例库中可以直接验收。Desktop `设置 → 资料库 → 添加示例库` 不再依赖这条 pnpm 命令：安装版与开发版都会从随应用嵌入的同一 Fixture 资源自动创建 App Local Data 可写副本并立即加入“示例库” Profile。`desktop:demo:*` 仍保留给开发者重置仓库测试副本。 需要验收孤儿文件治理时，可先让 Profile 指向 `var/dev-fixture-library`，再执行 `pnpm desktop:demo:orphan` 制造一个确定无 Asset JSON 引用的测试文件。V1-24 起 `examples/imports`、`examples/settings` 与 `examples/shared-packs` 也围绕这套 Fixture 联动；旧的独立 `examples/people` / `examples/works` 已合并，避免重复示例漂移。
 
-V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓库中只读挂载，而本地同 ID 实体始终拥有更高优先级。
+V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓库中只读挂载，而本地同 ID 实体始终拥有更高优先级。 配套 `starter-community-pack` 现在还带有一个 Shared-only 虚构人物及 Portrait Asset，可直接验证 Desktop 的 Shared Asset 受控只读图片解析。
 
 真实社区资料建议与主程序仓库分离：主仓库只保存代码、Schema、词表、文档和虚构 Demo；可合法共享的事实型元数据放独立 Community Data / Shared Pack。图片、长篇简介等内容则必须额外确认再分发权限。
 
@@ -288,7 +288,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-24A 已在既有 Home / Works / People / Browse / Review / Curation / History / Media / Packs / Settings 应用壳上增加 Presentation Preference Workbench，并让 Work / Person 详情与浏览卡片统一应用私人首图偏好。更多人物 portrait / gallery Asset 生命周期治理与 Portable Pack 冲突报告留到 V1-24B / V1-24C。
+Desktop V1-24A 已增加 Presentation Preference Workbench；V1-24B 已完成 Work Hero Gallery、Person Portrait/Gallery、Private 图片导入、Shared Asset 受控只读解析与孤儿文件健康治理。下一阶段 V1-24C 继续收尾 Portable Pack 冲突预览、导入结果报告和 Presentation / Asset 迁移。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_shared_demo_hana_portrait",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/shared-demo-hana-portrait.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1122,
+  "height": 1402,
+  "fileSize": 192141,
+  "sha256": "46dca55d19189d0557dc4bfacbc1d4e66bb9851195260b545a5e7896a956e3e1",
+  "subjectType": "person",
+  "subjectId": "person_shared_demo_001",
+  "createdAt": "2026-09-04T17:10:00+08:00"
+}

@@ -38,6 +38,29 @@ export interface DesktopImportedAssetFile {
 }
 
 
+
+
+export interface DesktopAssetStorageEntry {
+  storagePath: string;
+  fileSize: number;
+}
+
+export interface DesktopAssetStorageHealth {
+  assetRecords: number;
+  managedReferences: number;
+  storedFiles: number;
+  orphanFiles: DesktopAssetStorageEntry[];
+  missingFiles: string[];
+  unmanagedReferences: string[];
+  reclaimableBytes: number;
+}
+
+export interface DesktopAssetStorageCleanupResult {
+  deletedFiles: number;
+  reclaimedBytes: number;
+  skippedFiles: number;
+}
+
 export interface DesktopPortableFile {
   path: string;
   bytes: number[] | Uint8Array;

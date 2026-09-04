@@ -1342,3 +1342,44 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-person-gallery-stage > img { min-height: 320px; height: 56vh; }
   .desktop-person-asset-list article { align-items: stretch; flex-direction: column; }
 }
+
+
+/* V1-24B closeout: Private asset-files health / orphan cleanup. */
+.desktop-asset-storage-governance .section-heading {
+  align-items: flex-start;
+}
+
+.desktop-asset-storage-stats {
+  margin-top: 16px;
+}
+
+.desktop-asset-storage-details {
+  margin-top: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--panel);
+}
+
+.desktop-asset-storage-details.is-warning {
+  border-color: #d7b56f;
+}
+
+.desktop-asset-storage-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.desktop-asset-storage-file-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.desktop-asset-storage-file-list code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+}

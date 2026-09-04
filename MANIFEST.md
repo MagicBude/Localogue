@@ -2,9 +2,9 @@
 
 ## 阶段名称
 
-**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**
+**V1-24B：Person Portrait / Gallery Asset Governance（收尾）**
 
-当前版本继续保持 `0.1.24`。Foundation Cleanup 已稳定 Library Profile；当前进入 V1-24B，把 Work / Person 的视觉 Asset 从“能显示”推进到可浏览、可导入、可治理。
+当前版本继续保持 `0.1.24`。Library Profile 与 V1-24A Presentation Preference 已稳定；V1-24B 现已把 Work / Person 视觉 Asset 的浏览、导入、Shared 只读显示、引用保护与物理文件健康治理闭环补齐。
 
 ## 本阶段完成
 
@@ -23,7 +23,7 @@
 - 已有 Profile 列表成为事实源，兼容平面路径不再在 active ID 异常时二次创建“幽灵 Profile”；
 - “添加示例库”由 Native Runtime 从 Tauri 内置资源复制到 App Local Data，可直接一键使用，不要求普通用户执行 pnpm。
 - 示例库刷新使用模板目录内容 SHA-256 签名；Debug Runtime 优先读取当前仓库 `examples/`，避免 `tauri dev` 的旧 `$RESOURCE` 副本让新增 Gallery/JSON 无法下发。
-- Desktop Runtime 公开 `contractRevision=3`；若 Webview 已更新但 Native Runtime 仍旧，Profile 管理会被安全禁用并提示重新启动/重编译，避免旧 Rust Settings Contract 把 Profile 字段丢弃；
+- Desktop Runtime 公开 `contractRevision=4`；若 Webview 已更新但 Native Runtime 仍旧，Profile 管理会被安全禁用并提示重新启动/重编译，避免旧 Rust Settings Contract 把 Profile 字段丢弃；
 - Profile 重命名等 metadata mutation 直接持久化完整 Profile 状态，不再被 active path snapshot 二次覆盖。
 
 ### 资料源设置收敛
@@ -82,12 +82,15 @@ Desktop 设置页将资料源解释为四层：
 ### V1-24B Asset Governance
 
 - 11 部示例 Work 均同时拥有 poster/cover 与宽幅 Gallery Asset；Work Detail 顶部只展示横版 Gallery/Fanart/Screenshot/横版 Cover，poster 不进入 Hero Gallery。
-- Person Detail 提供 Portrait / Gallery 浏览与 Private Asset 管理。
-- 新增受限 Native Image Picker；Portrait / Gallery 导入继续写入当前 Private Library 的 content-addressed `asset-files/`。
+- Person Detail 提供 Portrait / Gallery 浏览与 Private Asset 管理；受限 Native Image Picker 把导入图片写入当前 Private Library 的 content-addressed `asset-files/`。
 - 删除人物图片会先解除 Private Person 引用，并继续受 Presentation Preference 与 Shared Pack 只读边界保护。
-- Native Runtime Contract 升至 revision 3。
+- `DesktopAssetImage` 通过 `read_resolved_asset_bytes` 按 `Private > Shared Pack` 优先级解析 Asset 来源；Native 强制 `Asset.id + storagePath` 与最高优先级来源一致，每个来源只能读取自己的 `asset-files/`。
+- Media 页新增 Private Asset Storage Health：报告孤儿二进制、缺失文件与非托管引用；安全清理只删除当前 Private `asset-files/` 内、最新 Asset JSON 已无引用的普通文件，不触碰 Shared Pack。
+- Dev Fixture 新增 `desktop:demo:orphan`，Rust 新增清理单元测试；Native Runtime Contract 升至 revision 4。
 
-后续继续补 Shared Asset 受控只读图片来源、孤儿 Asset 检测/清理与 V1-24C Portable Pack 收尾。
+### 后续 V1-24C
+
+Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾。
 
 ## 版本
 

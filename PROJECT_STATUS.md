@@ -9,7 +9,7 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - 新增 **Library Profile**：示例库与用户自建资料库可分别保存 Private Library、Unified Roots、额外 Media / NFO 路径与 Shared Packs；
 - Profile 新建 / 切换 / 重命名 / 删除已改为立即持久化；active ID 失效时自动回退到现有 Profile，避免新增资料库后旧 Profile 消失或侧栏失去选择器；
 - “添加示例库”由 Desktop Native Runtime 自动从内置资源初始化到 App Local Data，不再依赖用户先运行 pnpm 开发命令；
-- 新增 Native `contractRevision` 防漂移检查：Webview 热更新而 Rust Binary / ACL 未重编译时，Profile 管理不会再显示假成功，而会要求重启或重编译；
+- 新增 Native `contractRevision=4` 防漂移检查：Webview 热更新而 Rust Binary / ACL 未重编译时，Profile 管理不会再显示假成功，而会要求重启或重编译；
 - Profile metadata mutation 与普通路径设置保存分离，重命名会核对 Native 返回值后再确认持久化结果；
 - 侧栏直接提供资料库下拉切换与管理入口，切换只替换当前路径配置，不复制或移动磁盘数据；
 - 旧单库 Settings 会平滑迁移为 Profile；Dev Fixture 固定命名为“示例库”，普通新建库使用“资料库 1 / 资料库 2 …”中性默认名；
@@ -30,7 +30,9 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - 修复产品示例库运行副本刷新：`tauri dev` 不再优先使用旧 Resource 副本，Native Provision 会比较整棵 Fixture 的内容签名后原子刷新 App Local Data，避免模板已有横图但运行库仍只看到 Poster。
 - Person Detail 已加入 Portrait / Gallery 浏览、头像/Gallery 图片导入与 Private Asset 删除治理。
 - 图片导入继续经过 Native Image Picker + content-addressed Private Asset Boundary。
-- 下一步继续补 Shared Pack Asset 的受控只读二进制展示、孤儿 Asset 检测/清理与更清晰的引用状态。
+- Shared Pack Asset 二进制展示已接入受控 Native Source Resolver：按 `Private > Shared` 顺序绑定稳定 Asset ID 与 storagePath，只读各来源自己的 `asset-files/`，不扩大任意路径读取权限。
+- Media 页新增 Private Asset Storage Health：可检查孤儿文件、Asset 引用缺失和非托管路径，并只安全清理当前 Private `asset-files/` 内真正无引用的普通文件。
+- V1-24B 功能闭环完成；下一阶段进入 V1-24C Portable Pack / Presentation / Asset 迁移与冲突报告收尾。
 
 ### 后续 V1-24C
 
@@ -249,14 +251,14 @@ Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移�
 
 ## 下一阶段建议
 
-**V1-24B：Person Portrait / Gallery Asset Governance。**
+**V1-24C：Portable Pack / Presentation / Asset 收尾。**
 
-1. 完善 Person portrait / gallery 的本地图片导入、浏览、设为头像与取消头像流程；
-2. 在 Asset 管理中明确 Private / Shared 来源、归属实体、文件是否可读以及当前引用状态；
-3. 增加孤儿 Asset 检测与受引用保护的安全清理，避免只删 JSON 或只留二进制文件；
-4. 补齐 Shared Pack Asset 在 Desktop 的受控只读展示路径，不扩大任意文件读取权限；
-5. 继续保持 Presentation Preference 只表达私人显示选择，不把个人偏好写回 Canonical / Shared Pack；
-6. V1-24C 再补 Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾。
+1. 为 Personal Portable Pack 增加导入前冲突预览，明确新增 / 已存在 / 跳过 / 冲突的文件与实体；
+2. 为导入执行结果增加结构化报告，覆盖 Canonical、Audit、Presentation Preference、Asset JSON 与 `asset-files/`；
+3. 验证 Portable Pack 导入/导出后的 Asset 引用与二进制完整性，并把缺失/冲突状态显式呈现；
+4. 收口 Presentation Preference / Asset 的迁移规则，保持 Shared Pack 只读与 Private 显示偏好边界；
+5. 评估 Profile 级 Portable Backup / Restore 入口，避免多资料库时代误把不同 Profile 的路径配置混合；
+6. 完成 V1-24C 验收后再进入后续 Community Pack Registry / onboarding 等产品化能力。
 
 ## 当前不做
 

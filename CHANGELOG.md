@@ -2,6 +2,12 @@
 
 ## V1-24B - Person Portrait / Gallery Asset Governance
 
+- V1-24B 收尾：Desktop 图片读取从 Private-only Reader 升级为受控 `Private > Shared Pack` Asset Source Resolver；Webview 只提交 `Asset.id + storagePath`，Native 重新按当前 Profile 的资料源优先级定位 Asset JSON，并且每个来源只能读取自己的 `asset-files/`，Shared Pack 继续只读。
+- Starter Shared Pack 新增 Shared-only 人物 `person_shared_demo_001` 的 Portrait Asset 与真实 JPEG，用于在干净 Fixture 中直接验收“共享人物头像可显示、Shared 资源不可写/不可清理”。
+- Media 页新增“资源文件健康”：统计当前 Private Library 的 Asset 元数据、托管引用、磁盘文件、孤儿文件、缺失文件与可回收空间；清理操作只删除 `asset-files/` 中没有任何当前 Asset JSON 引用的普通孤儿文件。
+- 孤儿清理由 Native 在执行瞬间重新读取最新 Asset JSON 计算，不接受 Webview 传入删除路径；符号链接、越界路径、非 `asset-files/` 引用和 Shared Pack 文件均不会自动删除。
+- 新增 `pnpm desktop:demo:orphan` 固定制造一个无 Asset JSON 引用的 Dev Fixture 图片文件，并新增 `pnpm desktop:rust:test` / Rust 单元测试覆盖“只删孤儿、不删受管文件、缺失引用只报告”的安全行为。
+- Native Runtime Contract 升至 revision 4，并把 Shared Asset Reader / Asset Storage Health / Cleanup 命令加入 Desktop ACL 与 Boundary Validator。
 - 修复开发环境示例库刷新仍命中旧 Tauri Resource 的问题：Debug Runtime 优先解析当前仓库 `examples/`，产品 Release 继续只读取 `$RESOURCE`；示例库 provision 改为比较整个模板目录的确定性 SHA-256 内容签名，而不是只比较 `fixture-info.json`。
 - 将本轮新生成的 3 张 16:9 海滨横图正式并入 `DEMO-002` Work Gallery，示例库扩展为 43 Assets，并增加多图 Gallery 轮播 Fixture 场景。
 - 修正 V1-24B Work Detail Hero Gallery 回归：顶部画廊只接受明确横版 gallery / fanart / screenshot / 横版 cover，竖版 poster 不再作为回退；没有横版资产时直接省略 Hero Gallery。

@@ -428,6 +428,35 @@ async function validateCompanionExamples() {
     errors.push("starter-community-pack: kind 必须是 shared-library");
   }
 
+  const sharedLibraryRoot = path.join(examplesRoot, "shared-packs", "starter-community-pack", "library");
+  const sharedOnlyPerson = await readJson(
+    path.join(sharedLibraryRoot, "people", "person_shared_demo_001.json"),
+    "shared-packs/starter-community-pack/library/people/person_shared_demo_001.json",
+  );
+  const sharedOnlyAsset = await readJson(
+    path.join(sharedLibraryRoot, "assets", "asset_shared_demo_hana_portrait.json"),
+    "shared-packs/starter-community-pack/library/assets/asset_shared_demo_hana_portrait.json",
+  );
+  if (!sharedOnlyPerson || sharedOnlyPerson.portraitAssetId !== "asset_shared_demo_hana_portrait") {
+    errors.push("starter-community-pack: Shared-only Person 必须引用 asset_shared_demo_hana_portrait，用于验收 Shared Asset 只读显示");
+  }
+  if (!sharedOnlyAsset || sharedOnlyAsset.subjectId !== "person_shared_demo_001" || sharedOnlyAsset.type !== "portrait") {
+    errors.push("starter-community-pack: Shared-only Portrait Asset 元数据不完整");
+  } else {
+    const sharedAssetPath = path.join(sharedLibraryRoot, sharedOnlyAsset.storagePath ?? "");
+    try {
+      const bytes = await readFile(sharedAssetPath);
+      if (bytes.length < 3 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) {
+        errors.push("starter-community-pack: Shared-only Portrait 必须是真实 JPEG");
+      }
+      if (sharedOnlyAsset.fileSize !== bytes.length) errors.push("starter-community-pack: Shared-only Portrait fileSize 不匹配");
+      const digest = createHash("sha256").update(bytes).digest("hex");
+      if (sharedOnlyAsset.sha256 !== digest) errors.push("starter-community-pack: Shared-only Portrait SHA-256 不匹配");
+    } catch (error) {
+      errors.push(`starter-community-pack: Shared-only Portrait 文件不可读 (${error.message})`);
+    }
+  }
+
   const priorityScenario = manifest?.scenarios?.privateOverShared;
   const priorityEntityId = priorityScenario?.entityId;
   if (!priorityEntityId || !indexes.people.has(priorityEntityId)) {

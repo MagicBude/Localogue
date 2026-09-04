@@ -93,8 +93,13 @@ Asset 仍被 Presentation Preference 引用；请先恢复默认展示图片。
 
 Shared Pack 消失、外部文件损坏等情况仍可能制造 stale Preference，所以 UI 仍必须具备失效检测。
 
-## 6. V1-24A 不负责什么
+## 6. 后续阶段状态
 
-本阶段只完成“选择与解析”。
+V1-24A 完成“选择与解析”。V1-24B 已继续完成：
 
-完整的人物 Gallery 上传、Asset orphan 二进制清理、Portable Pack Presentation 冲突治理留给 V1-24B / V1-24C。
+- Person Portrait / Gallery 浏览与 Private 图片导入；
+- Work 横版 Hero Gallery；
+- Shared Pack Asset 的受控只读二进制解析；
+- Private `asset-files/` 孤儿文件检查与安全清理。
+
+V1-24C 继续处理 Portable Pack 的 Presentation / Asset 冲突预览、导入结果报告与迁移收尾。

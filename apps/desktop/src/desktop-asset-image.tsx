@@ -12,9 +12,9 @@ interface DesktopAssetImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement
 /**
  * Desktop 不为任意文件路径开启 Tauri asset:// 全盘 scope。
  *
- * 图片由受限 Native Command 从当前 Private Library/asset-files 读取成原始 IPC bytes，
- * React 再创建生命周期受控的 Blob URL。这样既能显示本地海报，又不会把 WebView 变成
- * 任意本地文件读取器。
+ * 图片由受限 Native Command 按 Asset.id 解析真实来源：Private Library 优先，其次是当前
+ * Profile 已挂载且通过 manifest 校验的 Shared Pack。每个来源都只能读取自己的 asset-files/，
+ * 并且必须存在与 Asset.id + storagePath 一致的 Asset JSON。WebView 因此不会获得任意本地文件读取能力。
  */
 export function DesktopAssetImage({ asset, fallback = null, alt = "", ...props }: DesktopAssetImageProps) {
   const [url, setUrl] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export function DesktopAssetImage({ asset, fallback = null, alt = "", ...props }
 
     if (!asset) return () => undefined;
 
-    void desktopBridge.readPrivateAssetBytes(asset.storagePath)
+    void desktopBridge.readResolvedAssetBytes(asset.id, asset.storagePath)
       .then((value) => {
         if (disposed) return;
         const bytes = new Uint8Array(value);

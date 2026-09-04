@@ -187,6 +187,34 @@ struct DesktopImportedAssetFile {
     sha256: String,
 }
 
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopAssetStorageEntry {
+    storage_path: String,
+    file_size: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopAssetStorageHealth {
+    asset_records: usize,
+    managed_references: usize,
+    stored_files: usize,
+    orphan_files: Vec<DesktopAssetStorageEntry>,
+    missing_files: Vec<String>,
+    unmanaged_references: Vec<String>,
+    reclaimable_bytes: u64,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopAssetStorageCleanupResult {
+    deleted_files: usize,
+    reclaimed_bytes: u64,
+    skipped_files: usize,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct DesktopPortableFile {
@@ -228,7 +256,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 3,
+        contract_revision: 4,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -897,26 +925,85 @@ async fn read_private_asset_bytes(app: AppHandle, storage_path: String) -> Resul
 }
 
 fn read_private_asset_bytes_blocking(app: AppHandle, storage_path: String) -> Result<Vec<u8>, String> {
-    const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
+    let library_path = configured_private_library_path(&app)?;
+    read_asset_bytes_from_root(Path::new(&library_path), &storage_path, "Private Asset")
+}
+
+/// 按当前 Repository 的 Private > Shared Pack 顺序解析 Asset.id 的真实来源，再读取该来源自己的 asset-files。
+/// Webview 不能传任意 library root；Shared Pack 也必须先通过 localogue-pack.json 校验。
+#[tauri::command]
+async fn read_resolved_asset_bytes(app: AppHandle, asset_id: String, storage_path: String) -> Result<tauri::ipc::Response, String> {
+    let bytes = spawn_native_io("read_resolved_asset_bytes", move || read_resolved_asset_bytes_blocking(app, asset_id, storage_path)).await?;
+    Ok(tauri::ipc::Response::new(bytes))
+}
+
+fn read_resolved_asset_bytes_blocking(app: AppHandle, asset_id: String, storage_path: String) -> Result<Vec<u8>, String> {
+    if !is_safe_id(&asset_id) { return Err("Asset id 包含不安全字符。".into()); }
     validate_text_path(&storage_path)?;
-    let relative = Path::new(&storage_path);
-    if relative.is_absolute() { return Err("Asset storagePath 必须是 Private Library 内的相对路径。".into()); }
+    let settings = load_desktop_settings(app)?;
+    let mut roots = Vec::<PathBuf>::new();
+    if let Some(private) = settings.library_path {
+        roots.push(normalize_lexical(Path::new(&private)));
+    }
+    for configured in settings.shared_pack_paths {
+        let info = inspect_shared_pack(configured)?;
+        if info.valid {
+            if let Some(library_path) = info.library_path {
+                roots.push(normalize_lexical(Path::new(&library_path)));
+            }
+        }
+    }
+
+    for root in roots {
+        let Some(record) = find_asset_record_at_root(&root, &asset_id)? else { continue; };
+        let expected = record.get("storagePath").and_then(Value::as_str).ok_or_else(|| format!("Asset {asset_id} 缺少 storagePath。"))?;
+        if expected.replace('\\', "/") != storage_path.replace('\\', "/") {
+            // 同 ID 在高优先级来源中已经存在时，不允许 Webview 指定低优先级来源的 storagePath 绕过遮蔽规则。
+            return Err(format!("Asset {asset_id} 的 storagePath 与当前最高优先级来源不一致。"));
+        }
+        return read_asset_bytes_from_root(&root, expected, "Resolved Asset");
+    }
+    Err(format!("当前 Private / Shared 资料源中找不到 Asset：{asset_id}"))
+}
+
+fn find_asset_record_at_root(root: &Path, asset_id: &str) -> Result<Option<Value>, String> {
+    let directory = root.join("assets");
+    if !directory.is_dir() { return Ok(None); }
+    let direct = directory.join(format!("{asset_id}.json"));
+    if direct.is_file() {
+        let raw = fs::read_to_string(&direct).map_err(display_error)?;
+        let value: Value = serde_json::from_str(&raw).map_err(display_error)?;
+        if value.get("id").and_then(Value::as_str) == Some(asset_id) {
+            return Ok(Some(value));
+        }
+        return Ok(None);
+    }
+    // Shared Pack 应按稳定 id 命名文件；这里保留兼容回退，避免旧 Pack 因文件名不同而无法显示。
+    for value in read_json_objects(&directory)? {
+        if value.get("id").and_then(Value::as_str) == Some(asset_id) { return Ok(Some(value)); }
+    }
+    Ok(None)
+}
+
+fn read_asset_bytes_from_root(library_root: &Path, storage_path: &str, label: &str) -> Result<Vec<u8>, String> {
+    const MAX_IMAGE_BYTES: u64 = 25 * 1024 * 1024;
+    validate_text_path(storage_path)?;
+    let relative = Path::new(storage_path);
+    if relative.is_absolute() { return Err("Asset storagePath 必须是资料库内的相对路径。".into()); }
     if relative.components().any(|component| matches!(component, std::path::Component::ParentDir)) {
         return Err("Asset storagePath 不能包含 .. 路径穿越。".into());
     }
 
-    let library_path = configured_private_library_path(&app)?;
-    let asset_root = normalize_lexical(&PathBuf::from(&library_path).join("asset-files"));
-    let target = normalize_lexical(&PathBuf::from(&library_path).join(relative));
+    let library_root = normalize_lexical(library_root);
+    let asset_root = normalize_lexical(&library_root.join("asset-files"));
+    let target = normalize_lexical(&library_root.join(relative));
     if !target.starts_with(&asset_root) {
-        return Err("只允许读取当前 Private Library 的 asset-files。".into());
+        return Err(format!("{label} 只允许读取当前来源的 asset-files。"));
     }
-
-    // 再做一次真实文件系统 canonicalize，防止 asset-files 内的符号链接逃逸到资料库外。
-    let canonical_root = fs::canonicalize(&asset_root).map_err(|error| format!("无法解析 Private asset-files：{error}"))?;
-    let canonical_target = fs::canonicalize(&target).map_err(|error| format!("无法解析 Private Asset：{error}"))?;
+    let canonical_root = fs::canonicalize(&asset_root).map_err(|error| format!("无法解析 {label} asset-files：{error}"))?;
+    let canonical_target = fs::canonicalize(&target).map_err(|error| format!("无法解析 {label}：{error}"))?;
     if !canonical_target.starts_with(&canonical_root) {
-        return Err("Private Asset 真实路径越过了 asset-files 边界。".into());
+        return Err(format!("{label} 真实路径越过了 asset-files 边界。"));
     }
 
     let extension = canonical_target.extension().and_then(|value| value.to_str()).unwrap_or("").to_ascii_lowercase();
@@ -926,12 +1013,12 @@ fn read_private_asset_bytes_blocking(app: AppHandle, storage_path: String) -> Re
         "webp" => "webp",
         "gif" => "gif",
         "avif" => "avif",
-        _ => return Err("当前只允许读取 JPEG、PNG、WebP、GIF、AVIF Private Asset。".into()),
+        _ => return Err("当前只允许读取 JPEG、PNG、WebP、GIF、AVIF Asset。".into()),
     };
-    let metadata = fs::metadata(&canonical_target).map_err(|error| format!("无法读取 Private Asset：{error}"))?;
+    let metadata = fs::metadata(&canonical_target).map_err(|error| format!("无法读取 {label}：{error}"))?;
     if !metadata.is_file() { return Err("Asset storagePath 不是普通文件。".into()); }
-    if metadata.len() == 0 { return Err("Private Asset 文件为空。".into()); }
-    if metadata.len() > MAX_IMAGE_BYTES { return Err("Private Asset 超过 25 MB 安全上限。".into()); }
+    if metadata.len() == 0 { return Err(format!("{label} 文件为空。")); }
+    if metadata.len() > MAX_IMAGE_BYTES { return Err(format!("{label} 超过 25 MB 安全上限。")); }
     validate_image_signature(&canonical_target, canonical_extension)?;
     fs::read(canonical_target).map_err(display_error)
 }
@@ -957,6 +1044,154 @@ fn sha256_path(file_path: &Path) -> Result<String, String> {
         digest.update(&buffer[..count]);
     }
     Ok(format!("{:x}", digest.finalize()))
+}
+
+#[tauri::command]
+async fn inspect_private_asset_storage(app: AppHandle) -> Result<DesktopAssetStorageHealth, String> {
+    spawn_native_io("inspect_private_asset_storage", move || inspect_private_asset_storage_blocking(app)).await
+}
+
+fn inspect_private_asset_storage_blocking(app: AppHandle) -> Result<DesktopAssetStorageHealth, String> {
+    let library_path = configured_private_library_path(&app)?;
+    inspect_asset_storage_at(Path::new(&library_path))
+}
+
+#[tauri::command]
+async fn cleanup_private_asset_orphans(app: AppHandle) -> Result<DesktopAssetStorageCleanupResult, String> {
+    spawn_native_io("cleanup_private_asset_orphans", move || cleanup_private_asset_orphans_blocking(app)).await
+}
+
+fn cleanup_private_asset_orphans_blocking(app: AppHandle) -> Result<DesktopAssetStorageCleanupResult, String> {
+    let library_path = configured_private_library_path(&app)?;
+    cleanup_asset_orphans_at(Path::new(&library_path))
+}
+
+fn cleanup_asset_orphans_at(library_root: &Path) -> Result<DesktopAssetStorageCleanupResult, String> {
+    let library_root = normalize_lexical(library_root);
+    let asset_root = normalize_lexical(&library_root.join("asset-files"));
+    let health = inspect_asset_storage_at(&library_root)?;
+    if health.orphan_files.is_empty() {
+        return Ok(DesktopAssetStorageCleanupResult { deleted_files: 0, reclaimed_bytes: 0, skipped_files: 0 });
+    }
+
+    if !asset_root.is_dir() {
+        return Ok(DesktopAssetStorageCleanupResult { deleted_files: 0, reclaimed_bytes: 0, skipped_files: health.orphan_files.len() });
+    }
+    let canonical_root = fs::canonicalize(&asset_root).map_err(|error| format!("无法解析 Private asset-files：{error}"))?;
+    let mut deleted_files = 0_usize;
+    let mut reclaimed_bytes = 0_u64;
+    let mut skipped_files = 0_usize;
+
+    // 这里故意重新基于最新 Asset JSON 计算 orphan，再执行删除；不会相信 Webview 传入的路径列表。
+    for orphan in health.orphan_files {
+        let target = normalize_lexical(&library_root.join(&orphan.storage_path));
+        if !target.starts_with(&asset_root) {
+            skipped_files += 1;
+            continue;
+        }
+        let metadata = match fs::symlink_metadata(&target) {
+            Ok(value) => value,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                skipped_files += 1;
+                continue;
+            }
+            Err(error) => return Err(format!("无法读取孤儿 Asset 文件 {}：{error}", target.display())),
+        };
+        if !metadata.is_file() || metadata.file_type().is_symlink() {
+            skipped_files += 1;
+            continue;
+        }
+        let canonical_target = fs::canonicalize(&target).map_err(|error| format!("无法解析孤儿 Asset 文件 {}：{error}", target.display()))?;
+        if !canonical_target.starts_with(&canonical_root) {
+            skipped_files += 1;
+            continue;
+        }
+        fs::remove_file(&canonical_target).map_err(|error| format!("无法删除孤儿 Asset 文件 {}：{error}", canonical_target.display()))?;
+        deleted_files += 1;
+        reclaimed_bytes = reclaimed_bytes.saturating_add(metadata.len());
+    }
+
+    Ok(DesktopAssetStorageCleanupResult { deleted_files, reclaimed_bytes, skipped_files })
+}
+
+fn inspect_asset_storage_at(library_root: &Path) -> Result<DesktopAssetStorageHealth, String> {
+    let library_root = normalize_lexical(library_root);
+    let asset_root = normalize_lexical(&library_root.join("asset-files"));
+    let assets = read_json_objects(&library_root.join("assets"))?;
+    let mut managed_targets = HashSet::<PathBuf>::new();
+    let mut missing_files = Vec::<String>::new();
+    let mut unmanaged = HashSet::<String>::new();
+
+    for asset in &assets {
+        let Some(storage_path) = asset.get("storagePath").and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()) else { continue; };
+        let raw = PathBuf::from(storage_path);
+        let target = if raw.is_absolute() {
+            normalize_lexical(&raw)
+        } else {
+            normalize_lexical(&library_root.join(&raw))
+        };
+        if !target.starts_with(&asset_root) {
+            unmanaged.insert(storage_path.replace('\\', "/"));
+            continue;
+        }
+        managed_targets.insert(target.clone());
+        let is_safe_file = fs::symlink_metadata(&target)
+            .map(|metadata| metadata.is_file() && !metadata.file_type().is_symlink())
+            .unwrap_or(false);
+        if !is_safe_file {
+            missing_files.push(storage_path_from_library(&library_root, &target));
+        }
+    }
+
+    let mut orphan_files = Vec::<DesktopAssetStorageEntry>::new();
+    let mut stored_files = 0_usize;
+    if asset_root.is_dir() {
+        let mut queue = VecDeque::from([asset_root.clone()]);
+        while let Some(directory) = queue.pop_front() {
+            for entry in fs::read_dir(&directory).map_err(display_error)? {
+                let entry = entry.map_err(display_error)?;
+                let path = normalize_lexical(&entry.path());
+                let metadata = fs::symlink_metadata(&path).map_err(display_error)?;
+                if metadata.file_type().is_symlink() {
+                    // asset-files 下的符号链接不参与读取/清理，避免跟随链接逃逸 Private Library。
+                    continue;
+                }
+                if metadata.is_dir() {
+                    queue.push_back(path);
+                    continue;
+                }
+                if !metadata.is_file() { continue; }
+                stored_files += 1;
+                if !managed_targets.contains(&path) {
+                    orphan_files.push(DesktopAssetStorageEntry {
+                        storage_path: storage_path_from_library(&library_root, &path),
+                        file_size: metadata.len(),
+                    });
+                }
+            }
+        }
+    }
+
+    orphan_files.sort_by(|a, b| a.storage_path.cmp(&b.storage_path));
+    missing_files.sort();
+    missing_files.dedup();
+    let mut unmanaged_references = unmanaged.into_iter().collect::<Vec<_>>();
+    unmanaged_references.sort();
+    let reclaimable_bytes = orphan_files.iter().fold(0_u64, |sum, file| sum.saturating_add(file.file_size));
+
+    Ok(DesktopAssetStorageHealth {
+        asset_records: assets.len(),
+        managed_references: managed_targets.len(),
+        stored_files,
+        orphan_files,
+        missing_files,
+        unmanaged_references,
+        reclaimable_bytes,
+    })
+}
+
+fn storage_path_from_library(library_root: &Path, target: &Path) -> String {
+    target.strip_prefix(library_root).unwrap_or(target).to_string_lossy().replace('\\', "/")
 }
 
 fn validate_image_signature(file_path: &Path, canonical_extension: &str) -> Result<(), String> {
@@ -1765,6 +2000,46 @@ fn now_marker() -> String {
     SystemTime::now().duration_since(UNIX_EPOCH).map(|value| value.as_millis().to_string()).unwrap_or_else(|_| "0".into())
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn asset_storage_cleanup_deletes_only_current_orphans() {
+        let root = std::env::temp_dir().join(format!("localogue-asset-storage-{}", now_marker()));
+        let assets = root.join("assets");
+        let files = root.join("asset-files");
+        fs::create_dir_all(&assets).expect("create assets");
+        fs::create_dir_all(&files).expect("create asset-files");
+        fs::write(files.join("used.jpg"), b"used").expect("write used");
+        fs::write(files.join("orphan.jpg"), b"orphan").expect("write orphan");
+        fs::write(
+            assets.join("asset_used.json"),
+            r#"{"id":"asset_used","storagePath":"asset-files/used.jpg"}"#,
+        ).expect("write asset json");
+
+        let before = inspect_asset_storage_at(&root).expect("inspect before");
+        assert_eq!(before.asset_records, 1);
+        assert_eq!(before.managed_references, 1);
+        assert_eq!(before.stored_files, 2);
+        assert_eq!(before.orphan_files.len(), 1);
+        assert_eq!(before.orphan_files[0].storage_path, "asset-files/orphan.jpg");
+        assert_eq!(before.missing_files.len(), 0);
+
+        let cleanup = cleanup_asset_orphans_at(&root).expect("cleanup");
+        assert_eq!(cleanup.deleted_files, 1);
+        assert!(files.join("used.jpg").is_file());
+        assert!(!files.join("orphan.jpg").exists());
+
+        fs::remove_file(files.join("used.jpg")).expect("remove used");
+        let after = inspect_asset_storage_at(&root).expect("inspect after");
+        assert_eq!(after.orphan_files.len(), 0);
+        assert_eq!(after.missing_files, vec!["asset-files/used.jpg".to_string()]);
+
+        fs::remove_dir_all(root).expect("cleanup temp library");
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1796,6 +2071,9 @@ pub fn run() {
             read_nfo_text,
             import_private_asset_file,
             read_private_asset_bytes,
+            read_resolved_asset_bytes,
+            inspect_private_asset_storage,
+            cleanup_private_asset_orphans,
             sha256_text,
             sha256_file,
             inspect_shared_pack,

@@ -24,6 +24,7 @@ const required = [
   "apps/desktop/src/desktop-presentation.ts",
   "apps/desktop/src/desktop-presentation-workbench.tsx",
   "apps/desktop/src/desktop-person-asset-governance.tsx",
+  "apps/desktop/src/desktop-asset-storage-governance.tsx",
   "apps/desktop/src/library-profiles.ts",
   "docs/development/v1-24-desktop-presentation-preference-workbench.md",
   "docs/desktop/library-profiles-and-sources.md",
@@ -82,7 +83,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["provision_example_library", "pick_directory", "pick_image_file", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
+  const runtimeCommands = ["provision_example_library", "pick_directory", "pick_image_file", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "read_resolved_asset_bytes", "inspect_private_asset_storage", "cleanup_private_asset_orphans", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -229,11 +230,24 @@ if (!errors.length) {
   for (const token of ['poster:', 'fanart:', 'screenshot:', '海报', '背景图', '缩略图', 'ポスター', '背景画像', 'サムネイル', 'Poster', 'Background', 'Thumbnail']) {
     if (!desktopI18n.includes(token)) errors.push(`V1-20 Asset I18N 语义映射缺少：${token}`);
   }
-  if (!desktopAssetImage.includes("readPrivateAssetBytes") || !rust.includes("read_private_asset_bytes")) {
-    errors.push("V1-18 Desktop 必须通过受限 Private Asset Reader 显示本地图片，不能继续只画占位符。");
+  if (!desktopAssetImage.includes("readResolvedAssetBytes") || !rust.includes("read_resolved_asset_bytes")) {
+    errors.push("V1-24B Desktop Asset 图片必须通过按 Asset.id 解析 Private / Shared 来源的受限 Native Reader 显示。");
+  }
+  const desktopAssetStorage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-storage-governance.tsx"), "utf8");
+  if (!desktopAssetStorage.includes("inspectPrivateAssetStorage") || !desktopAssetStorage.includes("cleanupPrivateAssetOrphans")) {
+    errors.push("V1-24B Asset Storage Governance 必须提供显式检查与孤儿文件清理入口。");
+  }
+  for (const token of ["inspect_private_asset_storage", "cleanup_private_asset_orphans", "asset-files", "symlink_metadata", "canonical_target.starts_with(&canonical_root)"]) {
+    if (!rust.includes(token)) errors.push(`V1-24B Asset Storage Native Boundary 缺少安全约束：${token}`);
+  }
+  if (!rust.includes("重新基于最新 Asset JSON 计算 orphan") || !rust.includes("managed_targets.contains(&path)")) {
+    errors.push("V1-24B 孤儿清理必须由 Native 基于当前 Private Asset JSON 重新计算，禁止相信 Webview 传入待删除路径。");
   }
   if (!rust.includes('target.starts_with(&asset_root)') || !rust.includes('canonical_target.starts_with(&canonical_root)') || !rust.includes('Component::ParentDir')) {
     errors.push("V1-18 Private Asset Reader 必须限制在当前 Private Library/asset-files 并拒绝路径穿越。");
+  }
+  for (const token of ["find_asset_record_at_root", "read_asset_bytes_from_root", "settings.shared_pack_paths", "storagePath 与当前最高优先级来源不一致"]) {
+    if (!rust.includes(token)) errors.push(`V1-24B Shared Asset Reader 缺少来源绑定或路径保护：${token}`);
   }
   if (!desktopApp.includes("syncUnifiedLibrary") || !desktopApp.includes("一键同步 Unified Library")) {
     errors.push("V1-18 Desktop Media 必须提供 NFO -> Asset -> Media 的统一同步入口，避免半同步状态。");
@@ -307,7 +321,7 @@ if (!errors.length) {
   if (!rust.includes("vec![0_u8; 256 * 1024]") || !rust.includes("spawn_native_io")) {
     errors.push("V1-18 Hotfix 3 必须使用堆分配 SHA-256 缓冲，并把高频阻塞 Native I/O 移出 Tauri main thread。");
   }
-  for (const command of ["stat_path", "path_exists", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"]) {
+  for (const command of ["stat_path", "path_exists", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "read_resolved_asset_bytes", "inspect_private_asset_storage", "cleanup_private_asset_orphans", "sha256_file", "read_library_collection", "write_library_entity", "write_private_audit_entity", "delete_library_entity"]) {
     if (!rust.includes(`async fn ${command}`)) errors.push(`V1-18 Hotfix 3 高频 Native I/O 命令必须为 async：${command}`);
   }
 
@@ -511,7 +525,7 @@ if (!errors.length) {
   if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
     errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 3")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 4")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
   if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {

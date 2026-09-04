@@ -31,7 +31,9 @@
     "validate:fixture": "node scripts/validate-dev-fixture.mjs",
     "desktop:demo:seed": "node scripts/manage-dev-fixture.mjs seed",
     "desktop:demo:reset": "node scripts/manage-dev-fixture.mjs reset",
-    "desktop:demo:clean": "node scripts/manage-dev-fixture.mjs clean"
+    "desktop:demo:clean": "node scripts/manage-dev-fixture.mjs clean",
+    "desktop:demo:orphan": "node scripts/manage-dev-fixture.mjs orphan",
+    "desktop:rust:test": "pnpm --filter @localogue/desktop rust:test"
   },
   "dependencies": {
     "next": "16.3.3",

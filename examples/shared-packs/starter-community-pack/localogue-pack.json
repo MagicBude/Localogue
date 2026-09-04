@@ -3,8 +3,8 @@
   "kind": "shared-library",
   "id": "localogue.example.community",
   "name": "Localogue 示例共享资料包",
-  "version": "2026.09.1",
-  "description": "Dev Fixture 的配套只读 Shared Pack；包含独立共享人物与一个和 Private Fixture 同 ID 的人物，用于验证 Private > Shared 优先级。",
+  "version": "2026.09.2",
+  "description": "Dev Fixture 的配套只读 Shared Pack；包含 Shared-only 人物/头像与一个和 Private Fixture 同 ID 的人物，用于验证 Private > Shared 优先级及 Shared Asset 受控只读显示。",
   "languages": [
     "ja",
     "zh-CN",

@@ -9,6 +9,8 @@ import type {
   DesktopTaskProgress,
   DesktopFileEntry,
   DesktopImportedAssetFile,
+  DesktopAssetStorageHealth,
+  DesktopAssetStorageCleanupResult,
   DesktopPortableFile,
   DesktopPortableImportResult,
   DesktopFileStat,
@@ -51,6 +53,9 @@ export const desktopBridge = {
   readNfoText: (path: string) => invoke<string>("read_nfo_text", { path }),
   importPrivateAssetFile: (path: string) => invoke<DesktopImportedAssetFile>("import_private_asset_file", { path }),
   readPrivateAssetBytes: (storagePath: string) => invoke<ArrayBuffer>("read_private_asset_bytes", { storagePath }),
+  readResolvedAssetBytes: (assetId: string, storagePath: string) => invoke<ArrayBuffer>("read_resolved_asset_bytes", { assetId, storagePath }),
+  inspectPrivateAssetStorage: () => invoke<DesktopAssetStorageHealth>("inspect_private_asset_storage"),
+  cleanupPrivateAssetOrphans: () => invoke<DesktopAssetStorageCleanupResult>("cleanup_private_asset_orphans"),
   sha256File: (path: string) => invoke<string>("sha256_file", { path }),
   inspectSharedPack: (packPath: string) =>
     invoke<DesktopSharedPackInfo>("inspect_shared_pack", { packPath }),
