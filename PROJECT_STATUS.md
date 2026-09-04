@@ -2,26 +2,23 @@
 
 ## 当前阶段
 
-**V1-23：Desktop Governance Parity。**
+**V1-24A：Desktop Presentation Preference Workbench。**
 
-V1-23 把 Web 已经成熟的资料治理规则带入 Tauri Desktop，并继续保持 Native Boundary 对真实文件系统写权限的控制。当前阶段已：
+V1-24A 把已经存在于 Domain / Web 的 `PresentationPreference` 私人展示层正式接入 Tauri Desktop，并继续坚持“展示选择不是 Canonical 事实”的边界。当前阶段已：
 
-- Desktop 新增 Review / Curation / History 一级导航；
-- NFO Preview 可以保存为不可变 Evidence，来源冲突不必直接 Bootstrap Canonical；
-- Review 复用共享 Entity Resolution、字段决策、实体决策与 Commit Plan；
-- Commit Plan fingerprint 改为浏览器中立同步 SHA-256，Web / Desktop 共用同一实现语义；
-- Commit 前 Native 创建最小 before-image Snapshot，并在中途失败时自动恢复；
-- Private Audit Reader/Writer 只开放 evidence、lifecycle、commit receipt、snapshot、restore receipt、provenance 与 media binding receipt；
-- History 可显式 Restore Snapshot，并追加 Restore Receipt / restored Provenance；
-- Curation 复用 Web completeness 与 duplicate detection；
-- Packs 页面新增 Personal Backup / Shared Archive `.localogue-pack` 导入导出；
-- Personal Import 默认不覆盖既有文件，失败会删除本轮新建文件；
-- Shared Import 使用 App Local Data 临时目录，校验后 rename，避免半安装；
-- Shared Pack Native 只读、V1-22 Vocabulary / Presentation 与 V1-18 Native I/O 稳定边界保持不变。
+- Curation 新增独立 Presentation 子视图，可集中管理 Work 首选封面与 Person 首选头像；
+- Work Detail / Person Detail 可直接从当前实体允许的 Asset 候选中选择私人首图，并可一键恢复默认；
+- Works / People 浏览结果与 Desktop Home 同步应用 Private Presentation Preference，避免不同页面显示不一致；
+- Work 候选仅允许 poster / cover，Person 候选仅允许 portrait / gallery，并同时识别 Canonical 引用与 subject 归属；
+- 明确检测已不存在或已脱离实体候选集的 stale preference，不静默篡改 Canonical 进行“修复”；
+- 新增专用 Native Presentation Preference Reader / Writer，写根仍只能来自当前 Desktop Private Library；
+- Native 删除 Asset 时新增 Presentation Preference 引用保护，必须先恢复默认展示才能删除仍被引用的私人 Asset；
+- Shared Pack / Canonical 实体继续保持只读事实语义；选择私人封面或头像不会复制或改写公共实体；
+- V1-23 Governance / Snapshot / Portable Pack 与 V1-18 Native I/O 稳定边界继续保持。
 
-### 明确留到后续 V1.x
+### 明确留到 V1-24B / V1-24C
 
-Presentation Preference 独立 Desktop Workbench、更多人物 Asset / Gallery 管理、复杂自动 Merge Plan、Community Pack 在线更新检查继续后续实现。
+人物 portrait / gallery 的完整上传与生命周期治理、Shared Asset 更完整的 Desktop 二进制展示来源、孤儿 Asset 清理，以及 Portable Pack 冲突预览 / 导入报告继续后续实现。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -236,14 +233,14 @@ Presentation Preference 独立 Desktop Workbench、更多人物 Asset / Gallery 
 
 ## 下一阶段建议
 
-**V1-24：Desktop Personal Presentation & Asset Governance。**
+**V1-24B：Person Portrait / Gallery Asset Governance。**
 
-1. 增加 Presentation Preference Workbench，显式管理 Work Cover / Person Portrait 的私人展示选择；
-2. 补更完整的人物 portrait / gallery Asset 管理与 Shared Asset 展示边界；
-3. Portable Pack 增加更详细的冲突预览与迁移报告；
-4. 继续抽取共享 Presentation / DTO，减少 Web 与 Desktop 表现层重复；
-5. 设计 Asset 孤儿治理、安全物理删除与更完整的本地资源生命周期；
-6. 保持所有 Native 写能力使用最小命令、显式白名单和引用保护。
+1. 完善 Person portrait / gallery 的本地图片导入、浏览、设为头像与取消头像流程；
+2. 在 Asset 管理中明确 Private / Shared 来源、归属实体、文件是否可读以及当前引用状态；
+3. 增加孤儿 Asset 检测与受引用保护的安全清理，避免只删 JSON 或只留二进制文件；
+4. 补齐 Shared Pack Asset 在 Desktop 的受控只读展示路径，不扩大任意文件读取权限；
+5. 继续保持 Presentation Preference 只表达私人显示选择，不把个人偏好写回 Canonical / Shared Pack；
+6. V1-24C 再补 Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾。
 
 ## 当前不做
 

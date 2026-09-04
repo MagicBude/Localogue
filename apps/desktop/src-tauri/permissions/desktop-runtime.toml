@@ -1,6 +1,6 @@
 [[permission]]
 identifier = "desktop-runtime"
-description = "允许 Localogue 主窗口调用 V1-23 明确暴露的桌面 Runtime、治理、Portable Pack 与扫描端口命令；不包含通用 shell execute/spawn。"
+description = "允许 Localogue 主窗口调用 V1-24 明确暴露的桌面 Runtime、Presentation、治理、Portable Pack 与扫描端口命令；不包含通用 shell execute/spawn。"
 commands.allow = [
   "get_runtime_info",
   "load_desktop_settings",
@@ -32,6 +32,8 @@ commands.allow = [
   "write_library_entity",
   "read_private_audit_collection",
   "write_private_audit_entity",
+  "read_private_presentation_preferences",
+  "write_private_presentation_preference",
   "create_governance_snapshot",
   "restore_governance_snapshot",
   "delete_library_entity"

@@ -11,7 +11,7 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-23 Desktop Governance Parity**：Desktop 已接入 Evidence Inbox、字段/实体 Review、Commit Plan、Native before-image Snapshot、History / Restore、Curation 与 `.localogue-pack` Personal / Shared 导入导出。V1-22 的 Stable Refresh、高密度 Work Detail 与 **33 个 Canonical Genre + 67 条人工批准来源别名**继续保持不变。
+当前实现已推进到 **V1-24A Desktop Presentation Preference Workbench**：Desktop 已把 Private `presentation-preferences` 正式接入 Curation、Work / Person Detail、Home、Works 与 People 浏览；用户可以选择私人首选封面 / 头像、识别失效偏好并恢复默认，而不会改写 Canonical 或 Shared Pack。V1-23 的 Evidence → Review → Commit Plan、Snapshot / Restore 与 Portable Pack 治理链继续保持不变。
 
 Media 页面新增显式“一键同步资料库”，固定按 **NFO → Asset → Media** 编排：先让 NFO 创建或补充 Work，再关联 poster / fanart / thumb，最后运行既有增量媒体扫描重新匹配 Work。高级用户仍可分别执行视频扫描与 NFO/图片 Preview / Import。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
@@ -278,7 +278,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-23 已提供正式 Home / Works / People / Browse / Review / Curation / History / Media / Packs / Settings 应用壳，并完成 Work / Person CRUD、完整 Discovery、Unified Library、Evidence → Review → Commit Plan、Curation、History / Restore 和 Portable Pack 治理基线。Presentation Preference 独立 Workbench、更多人物 Asset 管理与更复杂 Merge Plan 留到后续 V1.x。
+Desktop V1-24A 已在既有 Home / Works / People / Browse / Review / Curation / History / Media / Packs / Settings 应用壳上增加 Presentation Preference Workbench，并让 Work / Person 详情与浏览卡片统一应用私人首图偏好。更多人物 portrait / gallery Asset 生命周期治理与 Portable Pack 冲突报告留到 V1-24B / V1-24C。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 

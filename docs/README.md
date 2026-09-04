@@ -291,3 +291,7 @@
 - [ADR-039：Desktop Governance Native Audit / Snapshot / Portable Pack Boundary](decisions/ADR-039-desktop-governance-native-audit-and-portable-pack-boundary.md)
 - [Portable Pack 便携传输格式](sharing/portable-packs.md)
 
+## V1-24A · Desktop Presentation Preference Workbench
+
+- [V1-24A Desktop Presentation Preference Workbench 实现导读](development/v1-24-desktop-presentation-preference-workbench.md)
+

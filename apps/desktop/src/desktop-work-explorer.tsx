@@ -74,13 +74,14 @@ export function DesktopWorkExplorer({
       pageSize,
     };
     const result = await repository.listWorks(effectiveQuery);
-    const [peopleResult, organizations, series, genres, tags, assets] = await Promise.all([
+    const [peopleResult, organizations, series, genres, tags, assets, preferences] = await Promise.all([
       repository.listPeople({ page: 1, pageSize: 100000 }),
       repository.listOrganizations(),
       repository.listSeries(),
       repository.listGenres(),
       repository.listTags(),
       repository.listAssets(),
+      repository.listPresentationPreferences(),
     ]);
 
     const peopleById = new Map(peopleResult.items.map((item) => [item.id, item]));
@@ -171,7 +172,7 @@ export function DesktopWorkExplorer({
 
     return {
       result,
-      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage),
+      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage, preferences),
       people,
       directors,
       makers,

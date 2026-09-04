@@ -2,75 +2,73 @@
 
 ## 阶段名称
 
-**Desktop Governance Parity**
+**V1-24A：Desktop Presentation Preference Workbench**
 
-当前版本（0.1.23 / V1-23）的目标不是继续扩张 Desktop 浏览 UI，而是把 Web 已有的资料治理闭环真正带到 Tauri Desktop：来源内容先形成不可变 Evidence，用户在 Review 中逐字段/逐实体决策，生成带 fingerprint 的 Commit Plan，显式提交前由 Native Boundary 保存最小 before-image Snapshot；失败自动恢复，历史页也允许显式 Restore。与此同时，Desktop Packs 页面补齐 Personal Backup / Shared Library Portable Pack 的原生打开、保存、预览、校验与安装。
+当前版本（`0.1.24`）开始把 V1-10 已存在的 `presentation-preferences` 私人展示层真正接入 Desktop。目标不是把“我喜欢哪张图”写进 Canonical，而是让 Work / Person 在 Desktop 中可以独立选择首选封面与首选头像，并让首页、作品浏览、人物浏览与详情页遵循同一套解析规则。
 
 ## 本阶段完成
 
-### Evidence → Review → Commit Plan
+### Private Presentation Preference
 
-- Desktop 新增 Review 一级入口与 Evidence Inbox；
-- NFO Preview 可以“保存为 Evidence”，不要求直接 Bootstrap Canonical；
-- 复用 Web 的 `analyzeSingleEvidenceRecord`、Review Decision 与 `buildCanonicalCommitPlan`；
-- Commit Plan fingerprint 改用浏览器中立的同步 SHA-256，实现不再依赖 `node:crypto`；
-- Commit 前重新计算 fingerprint，资料库或决策变化时拒绝执行旧计划；
-- 字段决策与实体决策继续保持显式人工确认。
+- Desktop 增加专用 Native Presentation Reader / Writer；
+- Presentation 写根只从当前 Desktop Settings 的 Private Library 解析；
+- `presentation-preferences` 不进入 Shared Pack 写路径，也不混入 Canonical Writable Collection；
+- Work 支持 `preferredCoverAssetId`；
+- Person 支持 `preferredPortraitAssetId`；
+- 清除偏好后恢复 Canonical / Subject Asset 自动回退；
+- Preference 指向不存在或不再属于当前实体的 Asset 时标记为 stale，而不是偷偷换写 Canonical。
 
-### Native Audit / Snapshot / Restore
+### Desktop Curation Workbench
 
-- Rust 只允许读取/写入受控 Private Audit 集合：`evidence`、`evidence-lifecycle`、`review-commits`、`snapshots`、`restore-receipts`、`provenance`、`media-binding-receipts`；
-- Audit 根路径只能从当前 Desktop Settings 的 Private Library 解析，WebView 不能传入任意写根；
-- Commit 前按实际 Operations 创建最小 before-image Snapshot；
-- Snapshot 路径只允许受控 Canonical / provenance / lifecycle JSON；
-- Commit 中途失败自动 Restore；
-- History 页面支持显式 Restore，并追加 Restore Receipt 与 restored Provenance，不删除历史 Commit Receipt。
+- Curation 增加“完整度 / 重复”与“展示偏好”两个子视图；
+- Presentation Workbench 可在 Works / People 之间切换；
+- 可搜索作品番号/标题或人物姓名/别名；
+- 集中显示已设置偏好、失效偏好与当前实际首图；
+- 可直接切换首选 Asset 或恢复默认；
+- 可从 Workbench 直接打开对应 Work / Person。
 
-### Curation
+### Work / Person Detail
 
-- Desktop 新增 Curation 一级入口；
-- 复用 Web `buildCurationOverview`；
-- 展示 Work / Person completeness 队列；
-- 展示可解释 Work / Person duplicate candidates；
-- 可直接回到对应 Work / Person 继续维护。
+- Work Detail 新增“首选封面”私人展示选择器；
+- Person Detail 新增“首选头像”私人展示选择器；
+- 候选图只允许当前实体真正可使用的 Asset：
+  - Work：`poster / cover`；
+  - Person：`portrait / gallery`；
+- 详情页明确显示“私人偏好 / 默认显示 / 失效偏好”；
+- 恢复默认不会修改 Canonical 或 Shared Pack。
 
-### Portable Pack
+### Browse Presentation Parity
 
-- Desktop Packs 页面新增 `.localogue-pack` 工作台；
-- Personal Backup 可通过 Native Save Dialog 导出；
-- Shared Pack 可导出为 Shared Library Archive；
-- 导入先 Preview、验证路径、大小与 SHA-256，再显式执行；
-- Portable Envelope 使用与 Web 同语义的 gzip JSON；
-- Personal Backup 默认不覆盖已存在 Private 文件；中途失败会回滚本轮新建文件；
-- Shared Pack 先安装到 App Local Data 临时目录，校验 `localogue-pack.json`、id/version 与目录边界后再 rename 到正式目录；失败删除临时目录；
-- 同 id/version 的正式安装目录只在现有 Pack 校验有效且 id/version 完全一致时复用；
-- 单包继续保持 256 MiB 安全上限；
-- Shared Pack 仍然 Native 强制只读。
+- 首页最近作品使用 Work Presentation Preference；
+- 首页人物头像使用 Person Presentation Preference；
+- Works 海报墙 / 列表使用首选封面；
+- People 卡片使用首选头像；
+- 人物相关作品列表也复用同一 Presentation 解析逻辑。
 
-### Desktop I18N
+### Native Safety
 
-- Review / Curation / History / Portable Pack 的核心标题、按钮和状态进入 Desktop 中 / 日 / 英翻译表；
-- V1-20 的字面量 `t()` 覆盖审计继续生效。
+- Asset 若仍被 `presentation-preferences` 引用，Native 删除会拒绝执行；
+- 用户必须先恢复默认展示，再删除对应 Private Asset；
+- Presentation Preference 使用独立 Native Commands，不借用通用 Canonical 写入，也不伪装成 Audit Collection；
+- Shared Pack 继续保持只读。
 
 ## 安全不变量
 
-1. Shared Pack 永远只读。
-2. Evidence 本体保持不可变，生命周期单独记录。
-3. Canonical Commit 必须显式生成 Commit Plan，不允许来源导入器静默覆盖。
-4. Snapshot / Restore 只能访问 Native 白名单中的 Private JSON 相对路径。
-5. Portable Pack 不获得任意文件系统写权限；Personal 只能写 Private 白名单目录，Shared 只能安装 `library/`、`sources/` 与 manifest。
-6. V1-18 Hotfix 3 的 Native I/O worker、SHA-256 堆缓冲与 Windows 扫描安全实现保持不变。
+1. Presentation Preference 是私人显示选择，不是公共事实。
+2. Shared Pack 永远只读。
+3. Canonical `Work.assetIds / Person.portraitAssetId / galleryAssetIds` 不因为私人选图被改写。
+4. Native Presentation Writer 只能写当前配置的 Private Library。
+5. Asset 删除必须保护 Presentation Preference 引用。
+6. V1-23 Governance / Snapshot / Portable Pack 与 V1-18 Native I/O 安全边界保持不变。
 
-## 明确不在 V1-23 冒充完成的内容
+## 明确留到 V1-24B / V1-24C
 
-- Presentation Preference 的独立 Desktop Workbench；
-- 更完整的人物 Asset / Gallery 管理；
-- 复杂自动 Merge Plan；
-- Community Pack 在线更新/版本检查；
-- SQLite 持久化。
-
-这些进入后续 V1.x / V2，不影响本阶段 Governance 基线闭环。
+- 人物 portrait / gallery 的完整上传与管理工作流；
+- Asset 二进制物理清理与 orphan 检测；
+- Shared Asset 的更完整来源可视化；
+- Personal Pack 导入 Presentation 冲突的更细粒度报告；
+- Presentation DTO / Service 在 Web 与 Desktop 间进一步共享。
 
 ## 版本
 
-`0.1.23`
+`0.1.24`

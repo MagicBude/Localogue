@@ -5,6 +5,7 @@ import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
+import type { PresentationPreference } from "@/domain/entities/presentation-preference";
 import type { Series } from "@/domain/entities/series";
 import type { Work } from "@/domain/entities/work";
 import type { PersonQuery, PersonSearchResult } from "@/domain/queries/person-query";
@@ -128,6 +129,21 @@ export class TauriLibraryRepository implements LibraryRepository {
   saveMediaBindingReceipt(receipt: MediaBindingReceipt): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
     return desktopBridge.writePrivateAuditEntity("media-binding-receipts", receipt);
+  }
+
+  async listPresentationPreferences(): Promise<PresentationPreference[]> {
+    if (!this.privateRoot) return [];
+    return desktopBridge.readPrivatePresentationPreferences<PresentationPreference>();
+  }
+
+  async findPresentationPreference(entityType: "person" | "work", entityId: string): Promise<PresentationPreference | null> {
+    const values = await this.listPresentationPreferences();
+    return values.find((item) => item.entityType === entityType && item.entityId === entityId) ?? null;
+  }
+
+  savePresentationPreference(preference: PresentationPreference): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    return desktopBridge.writePrivatePresentationPreference(preference);
   }
 
   async isPrivateEntity(collection: Exclude<DesktopLibraryCollection, "media-files">, id: string): Promise<boolean> {

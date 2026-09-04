@@ -1018,6 +1018,25 @@ fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entit
 }
 
 #[tauri::command]
+async fn read_private_presentation_preferences(app: AppHandle) -> Result<Vec<Value>, String> {
+    spawn_native_io("read_private_presentation_preferences", move || {
+        let library_path = configured_private_library_path(&app)?;
+        read_json_objects(&PathBuf::from(library_path).join("presentation-preferences"))
+    }).await
+}
+
+#[tauri::command]
+async fn write_private_presentation_preference(app: AppHandle, entity: Value) -> Result<(), String> {
+    spawn_native_io("write_private_presentation_preference", move || {
+        validate_presentation_preference(&entity)?;
+        let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "Presentation Preference 缺少稳定 id。".to_string())?;
+        if !is_safe_id(id) { return Err("Presentation Preference id 包含不安全字符。".into()); }
+        let library_path = configured_private_library_path(&app)?;
+        atomic_write_json(&PathBuf::from(library_path).join("presentation-preferences"), id, &entity)
+    }).await
+}
+
+#[tauri::command]
 async fn create_governance_snapshot(app: AppHandle, plan: Value) -> Result<Value, String> {
     spawn_native_io("create_governance_snapshot", move || create_governance_snapshot_blocking(app, plan)).await
 }
@@ -1201,6 +1220,13 @@ fn ensure_private_delete_is_unreferenced(library_path: &str, collection: &str, i
             let portrait = person.get("portraitAssetId").and_then(Value::as_str) == Some(id);
             let gallery = person.get("galleryAssetIds").and_then(Value::as_array).map(|values| values.iter().any(|value| value.as_str() == Some(id))).unwrap_or(false);
             if portrait || gallery { return Err("Asset 仍被 Private Person 引用；请先移除人物图片引用。".into()); }
+        }
+        let preferences = read_json_objects(&PathBuf::from(library_path).join("presentation-preferences"))?;
+        if preferences.iter().any(|item| {
+            item.get("preferredPortraitAssetId").and_then(Value::as_str) == Some(id)
+                || item.get("preferredCoverAssetId").and_then(Value::as_str) == Some(id)
+        }) {
+            return Err("Asset 仍被 Presentation Preference 引用；请先恢复默认展示图片。".into());
         }
     }
     Ok(())
@@ -1425,6 +1451,26 @@ fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(),
     Ok(())
 }
 
+fn validate_presentation_preference(entity: &Value) -> Result<(), String> {
+    if !entity.is_object() { return Err("Presentation Preference 必须是 JSON 对象。".into()); }
+    let require = |field: &str| -> Result<(), String> {
+        if entity.get(field).and_then(Value::as_str).map(str::trim).filter(|value| !value.is_empty()).is_none() {
+            return Err(format!("Presentation Preference 缺少字符串字段 {field}。"));
+        }
+        Ok(())
+    };
+    for field in ["id", "entityType", "entityId", "updatedAt"] { require(field)?; }
+    let entity_type = entity.get("entityType").and_then(Value::as_str).unwrap_or("");
+    if !matches!(entity_type, "person" | "work") { return Err("Presentation Preference entityType 无效。".into()); }
+    if entity_type == "person" && entity.get("preferredCoverAssetId").and_then(Value::as_str).is_some() {
+        return Err("Person Presentation Preference 不能写 preferredCoverAssetId。".into());
+    }
+    if entity_type == "work" && entity.get("preferredPortraitAssetId").and_then(Value::as_str).is_some() {
+        return Err("Work Presentation Preference 不能写 preferredPortraitAssetId。".into());
+    }
+    Ok(())
+}
+
 fn safe_writable_collection_directory(root: &str, collection: &str) -> Result<PathBuf, String> {
     validate_text_path(root)?;
     if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files") {
@@ -1491,6 +1537,8 @@ pub fn run() {
             write_library_entity,
             read_private_audit_collection,
             write_private_audit_entity,
+            read_private_presentation_preferences,
+            write_private_presentation_preference,
             create_governance_snapshot,
             restore_governance_snapshot,
             delete_library_entity,

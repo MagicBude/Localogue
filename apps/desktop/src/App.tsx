@@ -51,6 +51,8 @@ import { DesktopPersonCard, DesktopPersonExplorer } from "./desktop-person-explo
 import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
 import { DesktopGovernance } from "./desktop-governance";
 import { DesktopPortablePackWorkbench } from "./desktop-portable-pack-workbench";
+import { PresentationAssetPicker } from "./desktop-presentation-workbench";
+import { resolvePersonPresentation, resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import {
   importLocalAssetPreview,
@@ -232,7 +234,7 @@ export default function App() {
           <span className="brand-mark">L</span>
           <span className="brand-copy">
             <strong>Localogue</strong>
-            <small>Desktop · V1-20</small>
+            <small>{`Desktop · ${runtime?.version ?? "…"}`}</small>
           </span>
         </button>
 
@@ -393,13 +395,14 @@ function HomePage({
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const data = useAsyncData(async () => {
-    const [works, people, organizations, series, media, assets] = await Promise.all([
+    const [works, people, organizations, series, media, assets, preferences] = await Promise.all([
       repository.listWorks({ page: 1, pageSize: 6, sort: "release_desc" }),
       repository.listPeople({ page: 1, pageSize: 9999, sort: "name_asc" }),
       repository.listOrganizations(),
       repository.listSeries(),
       repository.listMediaFiles(),
       repository.listAssets(),
+      repository.listPresentationPreferences(),
     ]);
     const performerIds = new Set(
       works.items.flatMap((work) =>
@@ -416,10 +419,9 @@ function HomePage({
       }
     }
     const portraitByPersonId = new Map<string, Asset>();
-    const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
+    const preferenceByPersonId = new Map(preferences.filter((item) => item.entityType === "person").map((item) => [item.entityId, item]));
     for (const person of featuredPeople) {
-      const portrait = (person.portraitAssetId ? assetsById.get(person.portraitAssetId) : undefined)
-        ?? assets.find((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "portrait");
+      const portrait = resolvePersonPresentation(person, assets, preferenceByPersonId.get(person.id)).resolved;
       if (portrait) portraitByPersonId.set(person.id, portrait);
     }
     return {
@@ -431,7 +433,7 @@ function HomePage({
       featuredPeople,
       workCounts,
       portraitByPersonId,
-      recentCards: buildDesktopWorkCards(works.items, people.items, organizations, assets, metadataLanguage),
+      recentCards: buildDesktopWorkCards(works.items, people.items, organizations, assets, metadataLanguage, preferences),
     };
   }, [repository, metadataLanguage]);
 
@@ -447,7 +449,7 @@ function HomePage({
       <section className="hero-panel desktop-hero">
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>{t("你的 Localogue，现在就在桌面端。")}</h1>
-        <p>{t("V1-20 对齐 Desktop 的布局、资产语义与中 / 日 / 英偏好；浏览、筛选和元数据显示继续共用 Web 的领域规则。")}</p>
+        <p>{t("V1-24 把 Private Presentation Preference 接入 Desktop；封面与头像选择不再改写 Canonical / Shared Pack。")}</p>
       </section>
 
       <section className="stat-grid">
@@ -525,15 +527,19 @@ function WorkDetailPage({
   const data = useAsyncData(async () => {
     const work = await repository.findWorkById(id);
     if (!work) return null;
-    const [people, organizations, series, genres, tags, media, assets] = await Promise.all([
+    const [people, organizations, series, genres, tags, media, allAssets, presentationPreference] = await Promise.all([
       repository.listPeople({ page: 1, pageSize: 99999 }),
       repository.listOrganizations(),
       repository.listSeries(),
       repository.listGenres(),
       repository.listTags(),
       repository.listMediaFiles(work.id),
-      repository.listAssetsForSubject("work", work.id),
+      repository.listAssets(),
+      repository.findPresentationPreference("work", work.id),
     ]);
+    const presentation = resolveWorkPresentation(work, allAssets, presentationPreference);
+    const linkedAssetIds = new Set(work.assetIds);
+    const assets = allAssets.filter((asset) => linkedAssetIds.has(asset.id) || (asset.subjectType === "work" && asset.subjectId === work.id));
     return {
       work,
       people: new Map(people.items.map((item) => [item.id, item])),
@@ -543,12 +549,14 @@ function WorkDetailPage({
       tags: new Map(tags.map((item) => [item.id, item])),
       media,
       assets,
+      presentationPreference,
+      presentation,
     };
   }, [repository, id]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error={t("作品不存在。")} /> : <ErrorState error={data.error} />;
-  const { work, people, organizations, series, genres, tags, media, assets } = data.value;
+  const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation } = data.value;
 
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -633,6 +641,18 @@ function WorkDetailPage({
           </dl>
         </div>
       </section>
+
+      <PresentationAssetPicker
+        entityType="work"
+        entityId={work.id}
+        candidates={presentation.candidates}
+        preference={presentationPreference}
+        resolved={presentation.resolved}
+        stalePreferredAssetId={presentation.stalePreferredAssetId}
+        repository={repository}
+        onSaved={onLibraryChanged}
+        setMessage={setMessage}
+      />
 
       <WorkEditor
         repository={repository}
@@ -828,19 +848,18 @@ function PersonDetailPage({
   const data = useAsyncData(async () => {
     const person = await repository.findPersonById(id);
     if (!person) return null;
-    const [workCount, assets] = await Promise.all([
+    const [workCount, assets, presentationPreference] = await Promise.all([
       repository.listWorks({ personIds: [id], page: 1, pageSize: 1 }),
       repository.listAssets(),
+      repository.findPresentationPreference("person", person.id),
     ]);
-    const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
-    const portrait = (person.portraitAssetId ? assetsById.get(person.portraitAssetId) : undefined)
-      ?? assets.find((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "portrait");
-    return { person, workCount: workCount.total, portrait };
+    const presentation = resolvePersonPresentation(person, assets, presentationPreference);
+    return { person, workCount: workCount.total, portrait: presentation.resolved, presentationPreference, presentation };
   }, [repository, id]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error={t("人物不存在。")} /> : <ErrorState error={data.error} />;
-  const { person, workCount, portrait } = data.value;
+  const { person, workCount, portrait, presentationPreference, presentation } = data.value;
   const displayName = getPreferredPersonName(person, metadataLanguage);
 
   return (
@@ -856,6 +875,17 @@ function PersonDetailPage({
           <p>{localizeText(person.biographies, metadataLanguage, t("暂无人物简介"))}</p>
         </div>
       </section>
+      <PresentationAssetPicker
+        entityType="person"
+        entityId={person.id}
+        candidates={presentation.candidates}
+        preference={presentationPreference}
+        resolved={presentation.resolved}
+        stalePreferredAssetId={presentation.stalePreferredAssetId}
+        repository={repository}
+        onSaved={onLibraryChanged}
+        setMessage={setMessage}
+      />
       <PersonEditor
         repository={repository}
         person={person}

@@ -4,7 +4,7 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-23 Desktop Governance Parity**。
+当前阶段：**V1-24A Desktop Presentation Preference Workbench**。
 
 V1 当前约束：
 
@@ -358,3 +358,16 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - `.localogue-pack` Personal Import 默认不覆盖既有文件；中途失败回滚本轮新建文件。
 - Shared Portable Pack 必须先写临时目录、校验 manifest 与 id/version，再 rename 到正式安装目录；Shared Pack 仍然只读。
 - V1-18 Hotfix 3 Native I/O / SHA-256 / Windows Walker 稳定实现不得因 Governance 功能而退化。
+
+## V1-24 Presentation / Asset Governance 约束
+
+- `PresentationPreference` 只表达当前用户“怎样显示”的私人偏好，不是 Canonical 事实；选择头像或封面不得改写 Person / Work 的公共元数据。
+- Work 首图候选只允许与该 Work 有 Canonical 引用或 `subjectType=work / subjectId` 归属关系的 poster / cover；Person 头像候选同理只允许 portrait / gallery。
+- Shared Pack 永远只读。Private Presentation Preference 可以指向合法 Shared Asset，但不得为了保存偏好复制或修改 Shared Entity。
+- Desktop Presentation Preference 必须通过专用、最小 Native Command 写入当前 Settings 对应的 Private Library；禁止恢复成 WebView 可指定任意目录/集合的文件 API。
+- 已失效的 preferred Asset 引用必须显式标记为 stale，并允许用户恢复默认；不得为了消除 stale 状态静默修改 Canonical 引用。
+- 删除 Private Asset 前必须检查 Person / Work Canonical 引用以及 Presentation Preference 引用；仍被引用时必须阻止删除并要求用户先解除引用。
+- V1-24B 若扩展 Shared Asset 二进制展示，应新增受控只读来源解析能力，不得扩大 `read_private_asset_bytes` 为任意本地文件读取器。
+- Presentation / Asset 功能变化继续更新固定 `MANIFEST.md`、`PROJECT_STATUS.md` 与 `CHANGELOG.md`；禁止新建 `V*_MANIFEST.md`。
+- 交付给用户的覆盖包继续只包含实际新增/修改文件；需要删除的旧文件直接在对话中列出或提供删除命令。
+

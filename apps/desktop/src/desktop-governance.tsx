@@ -25,6 +25,7 @@ import type { CanonicalRestoreReceipt, CanonicalSnapshot } from "@/domain/entiti
 import type { Work } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
+import { DesktopPresentationWorkbench } from "./desktop-presentation-workbench";
 import { desktopVocabularyRepository } from "./desktop-vocabulary-repository";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
@@ -54,7 +55,7 @@ export function DesktopGovernance({
     return <GovernanceEmpty title="治理工作台" body="Governance 只允许写入 Private Library。请先在设置中配置私人资料库。" />;
   }
   if (section === "curation") {
-    return <CurationWorkbench repository={repository} openWork={openWork} openPerson={openPerson} />;
+    return <CurationWorkbench repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />;
   }
   if (section === "history") {
     return <HistoryWorkbench privateRoot={privateRoot} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} />;
@@ -330,22 +331,53 @@ function CommitPlanView({ built, onCommit, busy }: { built: BuiltCommitPlan; onC
   </div>;
 }
 
-function CurationWorkbench({ repository, openWork, openPerson }: { repository: TauriLibraryRepository; openWork: (id: string) => void; openPerson: (id: string) => void }) {
+function CurationWorkbench({
+  repository,
+  openWork,
+  openPerson,
+  onLibraryChanged,
+  setMessage,
+}: {
+  repository: TauriLibraryRepository;
+  openWork: (id: string) => void;
+  openPerson: (id: string) => void;
+  onLibraryChanged: () => void;
+  setMessage: (value: string) => void;
+}) {
   const { t } = useDesktopI18n();
+  const [mode, setMode] = useState<"overview" | "presentation">("overview");
   const [data, setData] = useState<Awaited<ReturnType<typeof buildCurationOverview>> | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { void buildCurationOverview(repository).then(setData).catch((value) => setError(message(value))); }, [repository]);
-  if (error) return <GovernanceEmpty title={t("Curation 读取失败")} body={error} />;
-  if (!data) return <GovernanceEmpty title={t("正在计算资料完整度")} body={t("正在分析 Work / Person 完整度与重复候选…")} />;
+  useEffect(() => {
+    if (mode !== "overview") return;
+    void buildCurationOverview(repository)
+      .then((value) => { setData(value); setError(null); })
+      .catch((value) => setError(message(value)));
+  }, [repository, mode]);
+
   return <div className="page-stack governance-page">
-    <GovernanceTitle eyebrow="CURATION · COMPLETENESS · DUPLICATES" title={t("资料治理")} body={t("使用与 Web 相同的 completeness 与 duplicate detection 服务，优先处理资料缺口和疑似重复实体。")} />
-    <div className="governance-metrics governance-metrics--wide">
-      <Metric label={t("Work 待完善")} value={data.stats.worksNeedingAttention} /><Metric label={t("Person 待完善")} value={data.stats.peopleNeedingAttention} /><Metric label={t("Work 重复候选")} value={data.stats.duplicateWorks} /><Metric label={t("Person 重复候选")} value={data.stats.duplicatePeople} />
+    <GovernanceTitle eyebrow="CURATION · COMPLETENESS · PRESENTATION" title={t("资料治理")} body={t("完整度、重复候选与私人展示偏好都在这里治理；Presentation 只影响当前 Private Library 的显示选择。")}/>
+    <div className="desktop-segmented-control governance-subnav" role="tablist" aria-label={t("治理视图")}>
+      <button className={mode === "overview" ? "is-active" : undefined} onClick={() => setMode("overview")} type="button">{t("完整度 / 重复")}</button>
+      <button className={mode === "presentation" ? "is-active" : undefined} onClick={() => setMode("presentation")} type="button">{t("展示偏好")}</button>
     </div>
-    <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">LOW COMPLETENESS</span><h2>{t("优先完善的作品")}</h2></div></div><div className="curation-list">{data.works.slice(0, 80).map(({ work, completeness }) => <button key={work.id} onClick={() => openWork(work.id)}><span><b>{work.code}</b><small>{Object.values(work.titles)[0] ?? work.id}</small></span><strong>{completeness.score}%</strong><small>{completeness.missingIds.join(" · ") || "complete"}</small></button>)}</div></section>
-    <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">PEOPLE</span><h2>{t("优先完善的人物")}</h2></div></div><div className="curation-list">{data.people.slice(0, 80).map(({ person, completeness }) => <button key={person.id} onClick={() => openPerson(person.id)}><span><b>{person.names[0]?.value ?? person.id}</b></span><strong>{completeness.score}%</strong><small>{completeness.missingIds.join(" · ") || "complete"}</small></button>)}</div></section>
-    <DuplicateList title={t("Work 重复候选")} items={data.duplicateWorks} />
-    <DuplicateList title={t("Person 重复候选")} items={data.duplicatePeople} />
+    {mode === "presentation" ? (
+      <DesktopPresentationWorkbench repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />
+    ) : error ? (
+      <GovernanceEmpty title={t("Curation 读取失败")} body={error} />
+    ) : !data ? (
+      <GovernanceEmpty title={t("正在计算资料完整度")} body={t("正在分析 Work / Person 完整度与重复候选…")} />
+    ) : (
+      <>
+        <div className="governance-metrics governance-metrics--wide">
+          <Metric label={t("Work 待完善")} value={data.stats.worksNeedingAttention} /><Metric label={t("Person 待完善")} value={data.stats.peopleNeedingAttention} /><Metric label={t("Work 重复候选")} value={data.stats.duplicateWorks} /><Metric label={t("Person 重复候选")} value={data.stats.duplicatePeople} />
+        </div>
+        <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">LOW COMPLETENESS</span><h2>{t("优先完善的作品")}</h2></div></div><div className="curation-list">{data.works.slice(0, 80).map(({ work, completeness }) => <button key={work.id} onClick={() => openWork(work.id)}><span><b>{work.code}</b><small>{Object.values(work.titles)[0] ?? work.id}</small></span><strong>{completeness.score}%</strong><small>{completeness.missingIds.join(" · ") || "complete"}</small></button>)}</div></section>
+        <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">PEOPLE</span><h2>{t("优先完善的人物")}</h2></div></div><div className="curation-list">{data.people.slice(0, 80).map(({ person, completeness }) => <button key={person.id} onClick={() => openPerson(person.id)}><span><b>{person.names[0]?.value ?? person.id}</b></span><strong>{completeness.score}%</strong><small>{completeness.missingIds.join(" · ") || "complete"}</small></button>)}</div></section>
+        <DuplicateList title={t("Work 重复候选")} items={data.duplicateWorks} />
+        <DuplicateList title={t("Person 重复候选")} items={data.duplicatePeople} />
+      </>
+    )}
   </div>;
 }
 

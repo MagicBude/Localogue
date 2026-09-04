@@ -59,6 +59,10 @@ export const desktopBridge = {
     invoke<T[]>("read_private_audit_collection", { collection }),
   writePrivateAuditEntity: (collection: DesktopPrivateAuditCollection, entity: unknown) =>
     invoke<void>("write_private_audit_entity", { collection, entity }),
+  readPrivatePresentationPreferences: <T>() =>
+    invoke<T[]>("read_private_presentation_preferences"),
+  writePrivatePresentationPreference: (entity: unknown) =>
+    invoke<void>("write_private_presentation_preference", { entity }),
   createGovernanceSnapshot: <T>(plan: unknown) =>
     invoke<T>("create_governance_snapshot", { plan }),
   restoreGovernanceSnapshot: (snapshotId: string) =>

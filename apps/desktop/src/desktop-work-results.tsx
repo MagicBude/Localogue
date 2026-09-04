@@ -1,6 +1,7 @@
 import type { Asset } from "@/domain/entities/asset";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
+import type { PresentationPreference } from "@/domain/entities/presentation-preference";
 import type { Work } from "@/domain/entities/work";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
@@ -8,6 +9,7 @@ import { workTypeDefinition } from "@/application/importers/import-classificatio
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
+import { resolveWorkPresentation } from "./desktop-presentation";
 
 export type DesktopWorkViewMode = "grid" | "list" | "table";
 
@@ -27,9 +29,11 @@ export function buildDesktopWorkCards(
   organizations: Organization[],
   assets: Asset[],
   metadataLanguage: SupportedLanguage,
+  preferences: PresentationPreference[] = [],
 ): DesktopWorkCardViewModel[] {
   const peopleById = new Map(people.map((item) => [item.id, item]));
   const organizationsById = new Map(organizations.map((item) => [item.id, item]));
+  const preferenceByWorkId = new Map(preferences.filter((item) => item.entityType === "work").map((item) => [item.entityId, item]));
   const assetsById = new Map(assets.map((item) => [item.id, item]));
   const subjectAssets = new Map<string, Asset[]>();
   for (const asset of assets) {
@@ -42,7 +46,7 @@ export function buildDesktopWorkCards(
   return works.map((work) => {
     const referenced = work.assetIds.map((id) => assetsById.get(id)).filter((item): item is Asset => Boolean(item));
     const candidates = uniqueAssets([...referenced, ...(subjectAssets.get(work.id) ?? [])]);
-    const poster = chooseWorkPoster(candidates);
+    const poster = resolveWorkPresentation(work, candidates, preferenceByWorkId.get(work.id)).resolved;
     const performerNames = work.personRelations
       .filter((relation) => relation.role === "performer")
       .sort((a, b) => (a.billingOrder ?? 999) - (b.billingOrder ?? 999))

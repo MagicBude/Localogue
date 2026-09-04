@@ -21,6 +21,9 @@ const required = [
   "apps/desktop/src/desktop-management.tsx",
   "apps/desktop/src/desktop-i18n.tsx",
   "apps/desktop/src/desktop-governance.tsx",
+  "apps/desktop/src/desktop-presentation.ts",
+  "apps/desktop/src/desktop-presentation-workbench.tsx",
+  "docs/development/v1-24-desktop-presentation-preference-workbench.md",
   "apps/desktop/src/desktop-vocabulary-repository.ts",
   "apps/desktop/src/desktop-portable-pack.ts",
   "apps/desktop/src/desktop-portable-pack-workbench.tsx",
@@ -75,7 +78,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["pick_directory", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
+  const runtimeCommands = ["pick_directory", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -114,6 +117,7 @@ if (!errors.length) {
     errors.push("Desktop Vite 命令必须显式使用 vite.config.mts，禁止重新依赖 Vite 自动配置发现。");
   }
   const desktopContracts = readFileSync(path.join(root, "apps/desktop/src/contracts.ts"), "utf8");
+  const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
@@ -447,6 +451,28 @@ if (!errors.length) {
   if (!rust.includes('root.exists()') || !rust.includes('existing.id.as_deref()') || !rust.includes('existing.version.as_deref()')) {
     errors.push("V1-23 Shared Portable Pack 已存在安装目录只能在 id/version 完全一致且校验有效时复用。");
   }
+
+  // V1-24 Desktop Presentation Preference: private display choice without Canonical mutation.
+  const desktopPresentation = readFileSync(path.join(root, "apps/desktop/src/desktop-presentation.ts"), "utf8");
+  const desktopPresentationWorkbench = readFileSync(path.join(root, "apps/desktop/src/desktop-presentation-workbench.tsx"), "utf8");
+  for (const token of ["resolveWorkPresentation", "resolvePersonPresentation", "workPresentationCandidates", "personPresentationCandidates"]) {
+    if (!desktopPresentation.includes(token)) errors.push(`V1-24 Desktop Presentation resolver 缺少：${token}`);
+  }
+  for (const token of ["DesktopPresentationWorkbench", "PresentationAssetPicker", "presentation-preferences", "恢复默认"]) {
+    if (!desktopPresentationWorkbench.includes(token) && !desktopContracts.includes(token)) errors.push(`V1-24 Desktop Presentation Workbench 缺少：${token}`);
+  }
+  if (!desktopBridge.includes("readPrivatePresentationPreferences") || !desktopBridge.includes("writePrivatePresentationPreference") || !rust.includes("read_private_presentation_preferences") || !rust.includes("write_private_presentation_preference")) {
+    errors.push("V1-24 presentation-preferences 必须通过专用 TypeScript / Rust Private Boundary 读写。");
+  }
+  if (!rust.includes("Asset 仍被 Presentation Preference 引用；请先恢复默认展示图片。")) {
+    errors.push("V1-24 Native Asset 删除必须保护 Presentation Preference 引用。");
+  }
+  if (!desktopGovernance.includes("DesktopPresentationWorkbench") || !desktopApp.includes("PresentationAssetPicker")) {
+    errors.push("V1-24 Presentation 必须同时进入 Curation Workbench 与 Work / Person Detail。");
+  }
+  if (!desktopWorkExplorer.includes("listPresentationPreferences") || !desktopPersonExplorer.includes("listPresentationPreferences")) {
+    errors.push("V1-24 Works / People 浏览结果必须应用 Private Presentation Preference。");
+  }
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -464,7 +490,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Presentation / Vocabulary、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-24 Presentation Preference、V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Vocabulary、V1-18 Native I/O / Unified Sync 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

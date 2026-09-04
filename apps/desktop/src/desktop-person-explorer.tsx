@@ -3,12 +3,14 @@ import { useState, type ChangeEvent, type ReactNode } from "react";
 import { getPreferredPersonName } from "@/application/services/localization-service";
 import type { Asset } from "@/domain/entities/asset";
 import type { Person } from "@/domain/entities/person";
+import type { PresentationPreference } from "@/domain/entities/presentation-preference";
 import type { PersonQuery, PersonSort } from "@/domain/queries/person-query";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { resolvePersonPresentation } from "./desktop-presentation";
 
 const PAGE_SIZE = 24;
 
@@ -23,11 +25,12 @@ export function DesktopPersonExplorer({
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
   const [page, setPage] = useState(1);
   const data = useAsyncPersonData(async () => {
-    const [filteredPeople, allPeople, allWorks, assets] = await Promise.all([
+    const [filteredPeople, allPeople, allWorks, assets, preferences] = await Promise.all([
       repository.listPeople({ ...query, page: 1, pageSize: 100000 }),
       repository.listPeople({ page: 1, pageSize: 100000 }),
       repository.listWorks({ page: 1, pageSize: 100000 }),
       repository.listAssets(),
+      repository.listPresentationPreferences(),
     ]);
     const performerIds = new Set(
       allWorks.items.flatMap((work) => work.personRelations
@@ -42,7 +45,7 @@ export function DesktopPersonExplorer({
         workCounts.set(personId, (workCounts.get(personId) ?? 0) + 1);
       }
     }
-    const portraits = buildPortraitMap(assets, allPerformers);
+    const portraits = buildPortraitMap(assets, allPerformers, preferences);
     return {
       allPerformers,
       filteredPerformers,
@@ -189,13 +192,12 @@ function personActivityStatusLabel(value: string, t: (source: string) => string)
   }
 }
 
-function buildPortraitMap(assets: Asset[], people: Person[]): Map<string, Asset> {
-  const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
+function buildPortraitMap(assets: Asset[], people: Person[], preferences: PresentationPreference[]): Map<string, Asset> {
+  const preferenceByPersonId = new Map(preferences.filter((item) => item.entityType === "person").map((item) => [item.entityId, item]));
   const result = new Map<string, Asset>();
   for (const person of people) {
-    const referenced = person.portraitAssetId ? assetsById.get(person.portraitAssetId) : undefined;
-    const subject = assets.find((asset) => asset.subjectType === "person" && asset.subjectId === person.id && asset.type === "portrait");
-    if (referenced ?? subject) result.set(person.id, (referenced ?? subject)!);
+    const portrait = resolvePersonPresentation(person, assets, preferenceByPersonId.get(person.id)).resolved;
+    if (portrait) result.set(person.id, portrait);
   }
   return result;
 }

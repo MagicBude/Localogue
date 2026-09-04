@@ -1,5 +1,18 @@
 # Changelog
 
+## V1-24A - Desktop Presentation Preference Workbench
+
+- Curation 新增 Presentation 子视图，集中管理 Work 首选封面与 Person 首选头像。
+- Work Detail / Person Detail 新增私人展示图片 Picker，并支持一键恢复 Canonical / 自动默认。
+- Desktop Home、Works 与 People 浏览统一应用 `PresentationPreference`，避免各页面展示结果漂移。
+- 新增共享 Presentation Resolver：Work 仅接受 poster / cover，Person 仅接受 portrait / gallery，并显式报告 stale preference。
+- Tauri 新增专用 Private Presentation Preference Reader / Writer；写根仍由当前 Desktop Settings 的 Private Library 决定。
+- Native Asset 删除新增 Presentation Preference 引用保护，防止产生静默悬空引用。
+- Presentation Preference 继续只保存私人显示选择，不改写 Canonical Entity，也不写入 Shared Pack。
+- Desktop Permission / ACL / I18N / Boundary Validator 同步覆盖 V1-24A。
+- 根目录继续只维护单一 `MANIFEST.md`，不新增版本化 Manifest。
+- 产品版本升级为 `0.1.24`。
+
 ## V1-23 - Desktop Governance Parity
 
 - Desktop 新增 Review / Curation / History 一级导航。
