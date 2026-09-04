@@ -51,6 +51,8 @@ Fixture 本身可独立校验：
 pnpm validate:fixture
 ```
 
+产品内“+ 添加示例库”会把同一模板复制到 App Local Data。V1-24B 起 Native 会比较整棵模板的内容签名：开发模式优先读取当前仓库 `examples/`，发布版读取安装包 `$RESOURCE`，因此新增 Gallery / JSON 后再次点击“添加示例库”即可安全刷新，不再依赖旧 Resource 缓存。
+
 ## 当前展示规模
 
 Fixture 现在不仅覆盖 Presentation 的边界场景，也合并了早期关系丰富的 Demo Canonical 数据：
@@ -59,10 +61,10 @@ Fixture 现在不仅覆盖 Presentation 的边界场景，也合并了早期关�
 11 部作品
 8 位人物（包含 performer / director）
 多组 Maker / Label / Series / Genre / Tag
-29 张生成式 JPEG 视觉素材
+43 张生成式 JPEG 视觉素材
 ```
 
-其中 `LX-*` 重点验证多封面、多头像、Gallery 与 Presentation；`DEMO-*` 重点验证列表、筛选、导演/演员关系、Maker / Label / Series / Genre / Tag。现在 **11 部 Work 全部至少有一张 poster/cover，8 位 Person 全部至少有一张 portrait，6 位 performer 还各有独立 Gallery**，示例库不再依赖灰色占位卡来展示主要内容。
+其中 `LX-*` 重点验证多封面、多头像、Gallery 与 Presentation；`DEMO-*` 重点验证列表、筛选、导演/演员关系、Maker / Label / Series / Genre / Tag。现在 **11 部 Work 全部至少有一张 poster/cover 与一张横版 Work Gallery，8 位 Person 全部至少有一张 portrait，6 位 performer 还各有独立 Gallery**。`DEMO-002` 额外提供 4 张横版 Work Gallery，用于直接测试详情页 Hero 轮播和示例库运行副本刷新。
 
 原来的 `DEMO-IMPORT-001` JSON 和 `DEMO-IMPORT-002` NFO 也作为兼容导入样例保留在 `examples/imports/`，不会再因为统一 Fixture 而丢掉早期格式示例。
 
@@ -112,7 +114,7 @@ asset_fixture_missing_cover
 
 ## 图片素材
 
-当前包含 29 张生成式 JPEG 测试图：
+当前包含 43 张生成式 JPEG 测试图：
 
 ```text
 asset-files/
@@ -132,13 +134,19 @@ asset-files/
 │  ├─ haruka-fujiwara-portrait.jpg
 │  ├─ shuichi-kuroda-portrait.jpg
 │  └─ kei-sato-portrait.jpg
-└─ gallery/
-   ├─ aiko-gallery-cafe.jpg
-   ├─ rina-gallery-bookstore.jpg
-   ├─ mizuki-hoshino-gallery-rain.jpg
-   ├─ rin-shiraishi-gallery-library.jpg
-   ├─ mio-asakura-gallery-home.jpg
-   └─ haruka-fujiwara-gallery-bookstore.jpg
+├─ gallery/
+│  ├─ aiko-gallery-cafe.jpg
+│  ├─ rina-gallery-bookstore.jpg
+│  ├─ mizuki-hoshino-gallery-rain.jpg
+│  ├─ rin-shiraishi-gallery-library.jpg
+│  ├─ mio-asakura-gallery-home.jpg
+│  └─ haruka-fujiwara-gallery-bookstore.jpg
+└─ work-gallery/
+   ├─ demo-001-gallery-01.jpg … demo-008-gallery-01.jpg
+   ├─ demo-002-gallery-02.jpg … demo-002-gallery-04.jpg
+   ├─ lx-101-gallery-01.jpg
+   ├─ lx-202-gallery-01.jpg
+   └─ lx-303-gallery-01.jpg
 ```
 
 Asset JSON 保存真实 `fileSize` 和 SHA-256；`pnpm validate:fixture` 会重新读取二进制并验证，防止测试图片被替换后 JSON 元数据悄悄过期。

@@ -42,6 +42,7 @@ import {
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { PersonAssetGovernance } from "./desktop-person-asset-governance";
 import {
   buildDesktopWorkCards,
   DesktopWorkResults,
@@ -410,6 +411,7 @@ export default function App() {
               openWork={openWork}
               onLibraryChanged={refreshLibrary}
               setMessage={setMessage}
+              runtimeContractRevision={runtime?.contractRevision ?? 0}
             />
           ) : (
             <PeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
@@ -774,6 +776,15 @@ function WorkDetailPage({
   );
 }
 
+function isLandscapeWorkHeroAsset(asset: Asset): boolean {
+  if (!["gallery", "fanart", "screenshot", "cover"].includes(asset.type)) return false;
+  if (!asset.mimeType?.startsWith("image/")) return false;
+
+  // Native/Fixture 导入会尽量记录尺寸。Hero Gallery 宁可不出现，也不拿未知或竖版图片兜底。
+  if (!asset.width || !asset.height) return false;
+  return asset.width / asset.height >= 1.2;
+}
+
 function WorkAssetGallery({
   assets,
   workCode,
@@ -786,37 +797,21 @@ function WorkAssetGallery({
   assetTypeLabel: (type: Asset["type"]) => string;
 }) {
   const { t } = useDesktopI18n();
-  const imageAssets = useMemo(
-    () => sortWorkAssets(assets).filter((asset) => {
-      const isImage = asset.mimeType?.startsWith("image/") ?? ["poster", "fanart", "screenshot", "cover", "portrait", "gallery", "logo"].includes(asset.type);
-      if (!isImage) return false;
-      // Poster is intentionally excluded from the detail Hero Gallery. It is
-      // optimized for vertical library cards, while the detail Hero is a wide
-      // preview surface for fanart / screenshots / gallery imagery.
-      return asset.type !== "poster" && asset.type !== "portrait" && asset.type !== "logo";
-    }),
-    [assets],
-  );
+  const imageAssets = useMemo(() => {
+    // Work Detail 顶部 Hero Gallery 是横幅视觉区域：
+    // - poster 永远只服务海报墙 / 列表 /封面选择，不进入 Hero；
+    // - gallery / fanart / screenshot 必须是明确横图；
+    // - cover 只有在元数据明确为横图时才允许进入。
+    // 这样即使某个 Work 只有竖版海报，也不会再次把大画廊撑成“竖海报 + 两侧留白”。
+    return sortWorkAssets(assets).filter((asset) => isLandscapeWorkHeroAsset(asset));
+  }, [assets]);
   const [index, setIndex] = useState(0);
-  const [orientation, setOrientation] = useState<"portrait" | "landscape" | "square">("landscape");
 
   useEffect(() => {
     setIndex((current) => imageAssets.length ? Math.min(current, imageAssets.length - 1) : 0);
   }, [imageAssets.length, workCode]);
 
   const current = imageAssets[index];
-
-  useEffect(() => {
-    if (!current) {
-      setOrientation("landscape");
-      return;
-    }
-    if (current.type === "cover") {
-      setOrientation("portrait");
-      return;
-    }
-    setOrientation("landscape");
-  }, [current?.id, current?.type]);
   const canNavigate = imageAssets.length > 1;
   const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
   const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
@@ -825,17 +820,12 @@ function WorkAssetGallery({
 
   return (
     <section className="desktop-work-gallery" aria-label={t("作品媒体画廊")}>
-      <div className={`desktop-work-gallery__stage is-${orientation}`}>
+      <div className="desktop-work-gallery__stage is-landscape">
         {current ? (
           <DesktopAssetImage
             asset={current}
             alt={`${workCode} ${current.type}`}
             fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>}
-            onLoad={(event) => {
-              const image = event.currentTarget;
-              const ratio = image.naturalWidth / Math.max(image.naturalHeight, 1);
-              setOrientation(ratio < 0.88 ? "portrait" : ratio > 1.12 ? "landscape" : "square");
-            }}
           />
         ) : (
           <span className="desktop-work-gallery__empty"><b>{workCode}</b><small>{t("暂无本地图片")}</small></span>
@@ -924,6 +914,7 @@ function PersonDetailPage({
   openWork,
   onLibraryChanged,
   setMessage,
+  runtimeContractRevision,
 }: {
   repository: TauriLibraryRepository;
   id: string;
@@ -931,6 +922,7 @@ function PersonDetailPage({
   openWork: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
+  runtimeContractRevision: number;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const data = useAsyncData(async () => {
@@ -942,12 +934,19 @@ function PersonDetailPage({
       repository.findPresentationPreference("person", person.id),
     ]);
     const presentation = resolvePersonPresentation(person, assets, presentationPreference);
-    return { person, workCount: workCount.total, portrait: presentation.resolved, presentationPreference, presentation };
+    return {
+      person,
+      workCount: workCount.total,
+      portrait: presentation.resolved,
+      presentationPreference,
+      presentation,
+      personAssets: presentation.candidates,
+    };
   }, [repository, id]);
 
   if (data.loading) return <LoadingState />;
   if (data.error || !data.value) return data.value === null ? <ErrorState error={t("人物不存在。")} /> : <ErrorState error={data.error} />;
-  const { person, workCount, portrait, presentationPreference, presentation } = data.value;
+  const { person, workCount, portrait, presentationPreference, presentation, personAssets } = data.value;
   const displayName = getPreferredPersonName(person, metadataLanguage);
 
   return (
@@ -963,6 +962,15 @@ function PersonDetailPage({
           <p>{localizeText(person.biographies, metadataLanguage, t("暂无人物简介"))}</p>
         </div>
       </section>
+      <PersonAssetGovernance
+        person={person}
+        assets={personAssets}
+        resolved={portrait}
+        repository={repository}
+        runtimeContractRevision={runtimeContractRevision}
+        onLibraryChanged={onLibraryChanged}
+        setMessage={setMessage}
+      />
       <PresentationAssetPicker
         entityType="person"
         entityId={person.id}

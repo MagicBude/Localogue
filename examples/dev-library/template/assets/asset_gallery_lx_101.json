@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_lx_101",
+  "type": "gallery",
+  "storagePath": "asset-files/work-gallery/lx-101-gallery-01.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1280,
+  "height": 720,
+  "fileSize": 122669,
+  "sha256": "02d89986ddc721640ab6cb8a2b1dafe22da555d5ecb38fe1b6c21d5219eb3c99",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_101",
+  "createdAt": "2026-09-04T16:10:00+08:00"
+}

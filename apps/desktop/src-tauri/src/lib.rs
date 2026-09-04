@@ -228,7 +228,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 2,
+        contract_revision: 3,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -270,7 +270,19 @@ fn provision_example_library(app: AppHandle) -> Result<DesktopExampleLibraryInfo
     let source_library = locate_example_resource(&app, "examples/dev-library/template")?;
     let local_data = app.path().app_local_data_dir().map_err(display_error)?;
     let destination = local_data.join("example-library");
-    let created = if example_library_is_complete(&destination) {
+
+    // 不只比较 fixture-info.json。开发阶段若 Tauri resource_dir 仍残留上一轮资源，
+    // 或者维护者忘记只改版本号，单文件版本比较都可能让运行副本错误地被判定为“最新”。
+    // 这里对受信任的内置示例目录做确定性内容签名；用户再次点击“添加示例库”时，
+    // 只要模板中任一 JSON / 图片发生变化，就会原子刷新 App Local Data 运行副本。
+    let source_signature = directory_tree_sha256(&source_library)?;
+    let destination_signature = if example_library_is_complete(&destination) {
+        directory_tree_sha256(&destination).ok()
+    } else {
+        None
+    };
+    let current = destination_signature.as_deref() == Some(source_signature.as_str());
+    let created = if current {
         false
     } else {
         let temporary = local_data.join(format!("example-library.tmp-{}", now_marker()));
@@ -312,6 +324,18 @@ async fn pick_media_file(app: AppHandle) -> Result<Option<String>, String> {
         .dialog()
         .file()
         .add_filter("Media", &["mp4", "mkv", "avi", "mov", "wmv", "m4v", "ts", "mts", "m2ts", "webm", "flv"])
+        .blocking_pick_file();
+    Ok(picked
+        .and_then(|selected| selected.into_path().ok())
+        .map(|path| path_to_string(&path)))
+}
+
+#[tauri::command]
+async fn pick_image_file(app: AppHandle) -> Result<Option<String>, String> {
+    let picked = app
+        .dialog()
+        .file()
+        .add_filter("Image", &["jpg", "jpeg", "png", "webp", "gif", "avif"])
         .blocking_pick_file();
     Ok(picked
         .and_then(|selected| selected.into_path().ok())
@@ -1369,24 +1393,31 @@ fn locate_example_resource(app: &AppHandle, relative: &str) -> Result<PathBuf, S
 }
 
 fn locate_example_resource_optional(app: &AppHandle, relative: &str) -> Option<PathBuf> {
+    // `tauri dev` 下 target/debug 的 resource_dir 可能保留上一轮复制出来的示例资源。
+    // Debug 构建优先从当前 Localogue 仓库根目录读取 examples，确保开发者刚覆盖的
+    // Fixture JSON / 图片可以立即 provision；Release 构建则只消费安装包内的 $RESOURCE。
+    #[cfg(debug_assertions)]
+    if let Ok(current) = std::env::current_dir() {
+        let mut cursor = Some(current.as_path());
+        for _ in 0..8 {
+            let Some(base) = cursor else { break; };
+            let looks_like_localogue_root = base.join("pnpm-workspace.yaml").is_file()
+                && base.join("apps/desktop/src-tauri/Cargo.toml").is_file();
+            if looks_like_localogue_root {
+                let candidate = base.join(relative);
+                if candidate.is_dir() {
+                    return Some(candidate);
+                }
+                break;
+            }
+            cursor = base.parent();
+        }
+    }
+
     if let Ok(resource_dir) = app.path().resource_dir() {
         let candidate = resource_dir.join(relative);
         if candidate.is_dir() {
             return Some(candidate);
-        }
-    }
-
-    // tauri dev 的工作目录在不同启动方式下可能落在仓库根、apps/desktop 或 src-tauri。
-    // 这里只向父级查找受信任的项目内 examples，不接受用户传入任意复制源。
-    if let Ok(current) = std::env::current_dir() {
-        let mut cursor = Some(current.as_path());
-        for _ in 0..6 {
-            let Some(base) = cursor else { break; };
-            let candidate = base.join(relative);
-            if candidate.is_dir() {
-                return Some(candidate);
-            }
-            cursor = base.parent();
         }
     }
     None
@@ -1396,6 +1427,48 @@ fn example_library_is_complete(path: &Path) -> bool {
     ["works", "people", "assets", "asset-files", "presentation-preferences"]
         .iter()
         .all(|name| path.join(name).is_dir())
+}
+
+fn directory_tree_sha256(root: &Path) -> Result<String, String> {
+    if !root.is_dir() {
+        return Err(format!("目录不存在：{}", root.display()));
+    }
+
+    fn collect_files(root: &Path, current: &Path, files: &mut Vec<PathBuf>) -> Result<(), String> {
+        for entry in fs::read_dir(current).map_err(display_error)? {
+            let entry = entry.map_err(display_error)?;
+            let path = entry.path();
+            let file_type = entry.file_type().map_err(display_error)?;
+            if file_type.is_dir() {
+                collect_files(root, &path, files)?;
+            } else if file_type.is_file() {
+                let relative = path.strip_prefix(root).map_err(display_error)?.to_path_buf();
+                files.push(relative);
+            }
+        }
+        Ok(())
+    }
+
+    let mut files = Vec::new();
+    collect_files(root, root, &mut files)?;
+    files.sort();
+
+    let mut digest = Sha256::new();
+    for relative in files {
+        let normalized = relative.to_string_lossy().replace('\\', "/");
+        digest.update(normalized.as_bytes());
+        digest.update([0]);
+        let mut file = File::open(root.join(&relative)).map_err(display_error)?;
+        let mut buffer = [0_u8; 64 * 1024];
+        loop {
+            let read = file.read(&mut buffer).map_err(display_error)?;
+            if read == 0 { break; }
+            digest.update(&buffer[..read]);
+        }
+        digest.update([0xff]);
+    }
+    let digest = digest.finalize();
+    Ok(format!("{digest:x}"))
 }
 
 fn copy_directory_tree(source: &Path, destination: &Path) -> Result<(), String> {
@@ -1704,6 +1777,7 @@ pub fn run() {
             provision_example_library,
             pick_directory,
             pick_media_file,
+            pick_image_file,
             pick_portable_pack_file,
             read_portable_pack_file,
             save_portable_pack_file,

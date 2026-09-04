@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "localogue.dev-fixture.presentation-assets",
   "name": "Localogue V1-24 Presentation / Asset Dev Fixture",
-  "fixtureVersion": "2026.09.04.6",
+  "fixtureVersion": "2026.09.04.9",
   "targetProductVersion": "0.1.24",
-  "description": "完全虚构、可重置的 Desktop 开发/新用户示例库；11 部作品与 8 位人物均有生成式视觉素材，主要 performer 还配有独立 Gallery，并与 imports / settings / shared-packs 联动。",
+  "description": "完全虚构、可重置的 Desktop 开发/新用户示例库；11 部作品与 8 位人物均有生成式视觉素材，所有作品同时提供竖版海报与横版 Gallery，DEMO-002 额外提供多图 Gallery 场景用于轮播测试，主要 performer 配有独立 Portrait / Gallery，并与 imports / settings / shared-packs 联动。",
   "runtimeTarget": "var/dev-fixture-library",
   "scenarios": {
     "validWorkPreference": {
@@ -44,6 +44,11 @@
       "entityId": "person_fixture_aiko_mizuno",
       "sharedPrimaryName": "水野あいこ・共有版",
       "privatePrimaryName": "水野あいこ"
+    },
+    "multiWorkGallery": {
+      "entityId": "work_demo_002",
+      "minimumGalleryAssets": 4,
+      "purpose": "验证作品详情顶部横版 Gallery 的多图轮播与示例库刷新。"
     }
   },
   "generatedImageNotice": "All people, works, names and image contents in this fixture are fictional/synthetic and are not intended to depict real persons or real releases.",
@@ -59,7 +64,7 @@
   "coverage": {
     "minimumWorks": 11,
     "minimumPeople": 8,
-    "minimumAssets": 29,
+    "minimumAssets": 43,
     "visualWorks": [
       "work_demo_001",
       "work_demo_002",
@@ -91,6 +96,19 @@
       "person_shiraishi_rin",
       "person_asakura_mio",
       "person_fujiwara_haruka"
+    ],
+    "galleryWorks": [
+      "work_demo_001",
+      "work_demo_002",
+      "work_demo_003",
+      "work_demo_004",
+      "work_demo_005",
+      "work_demo_006",
+      "work_demo_007",
+      "work_demo_008",
+      "work_fixture_lx_101",
+      "work_fixture_lx_202",
+      "work_fixture_lx_303"
     ]
   }
 }

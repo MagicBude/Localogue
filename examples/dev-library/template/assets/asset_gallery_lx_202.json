@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_lx_202",
+  "type": "gallery",
+  "storagePath": "asset-files/work-gallery/lx-202-gallery-01.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1280,
+  "height": 720,
+  "fileSize": 115874,
+  "sha256": "cad93b87e85417429807efb009b591a3582e964f4386f72265f58618a73e7674",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_202",
+  "createdAt": "2026-09-04T16:10:00+08:00"
+}

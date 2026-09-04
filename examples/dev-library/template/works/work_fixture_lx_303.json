@@ -40,7 +40,8 @@
     "needs_review"
   ],
   "assetIds": [
-    "asset_fixture_lx303_poster_canonical"
+    "asset_fixture_lx303_poster_canonical",
+    "asset_gallery_lx_303"
   ],
   "mediaFileIds": [],
   "createdAt": "2026-09-04T10:55:00+08:00",

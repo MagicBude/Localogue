@@ -29,6 +29,7 @@ export const desktopBridge = {
   provisionExampleLibrary: () => invoke<DesktopExampleLibraryInfo>("provision_example_library"),
   pickDirectory: () => invoke<string | null>("pick_directory"),
   pickMediaFile: () => invoke<string | null>("pick_media_file"),
+  pickImageFile: () => invoke<string | null>("pick_image_file"),
   pickPortablePackFile: () => invoke<string | null>("pick_portable_pack_file"),
   readPortablePackFile: (path: string) => invoke<ArrayBuffer>("read_portable_pack_file", { path }),
   savePortablePackFile: (suggestedName: string, bytes: Uint8Array) =>

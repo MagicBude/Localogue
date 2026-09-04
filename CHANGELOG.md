@@ -1,5 +1,19 @@
 # Changelog
 
+## V1-24B - Person Portrait / Gallery Asset Governance
+
+- 修复开发环境示例库刷新仍命中旧 Tauri Resource 的问题：Debug Runtime 优先解析当前仓库 `examples/`，产品 Release 继续只读取 `$RESOURCE`；示例库 provision 改为比较整个模板目录的确定性 SHA-256 内容签名，而不是只比较 `fixture-info.json`。
+- 将本轮新生成的 3 张 16:9 海滨横图正式并入 `DEMO-002` Work Gallery，示例库扩展为 43 Assets，并增加多图 Gallery 轮播 Fixture 场景。
+- 修正 V1-24B Work Detail Hero Gallery 回归：顶部画廊只接受明确横版 gallery / fanart / screenshot / 横版 cover，竖版 poster 不再作为回退；没有横版资产时直接省略 Hero Gallery。
+- Dev Fixture 为全部 11 部作品新增独立宽幅 Work Gallery Asset，并为 DEMO-002 增加 3 张额外 16:9 多图轮播素材，示例库从 29 Assets 扩展为 43 Assets。
+- Person Detail 新增 Portrait / Gallery 浏览与 Private Asset 管理工作台，可直接导入头像或 Gallery 图片。
+- 新增受限 Native Image Picker；图片仍必须经过 `import_private_asset_file` 的扩展名、签名、25 MB 与 Private `asset-files/` 边界。
+- 人物 Gallery 导入会更新 Private Person 的 `galleryAssetIds`；首次 Portrait 可补默认 `portraitAssetId`，后续显示选择继续由 Presentation Preference 控制。
+- Person Asset 删除先解除 Private Person 引用，并继续受 Presentation Preference / Shared Pack 只读保护；二进制 content-addressed 文件默认保留。
+- Native Runtime Contract 升至 revision 3，避免新图片管理 UI 与旧 Rust Runtime 混用。
+- `validate:fixture` 开始要求所有示例 Work 同时拥有 poster/cover 与详情 Gallery/Fanart 资产；`validate:desktop` 同步锁定 V1-24B Native/Image 边界。
+- 产品版本继续保持 `0.1.24`。
+
 ## V1-24 Foundation Cleanup - Library Profiles / Source Model / Rich Fixture
 
 - 修复 Webview 已热更新但 Rust Native Runtime 仍停留在旧版本时的 Profile 假成功问题：Runtime 新增 `contractRevision=2`，Profile UI 在版本不匹配时阻止增删改切换并明确提示重启/重编译。

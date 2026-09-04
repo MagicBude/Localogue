@@ -41,7 +41,8 @@
     "fixture_alt_art"
   ],
   "assetIds": [
-    "asset_fixture_lx101_poster_summer"
+    "asset_fixture_lx101_poster_summer",
+    "asset_gallery_lx_101"
   ],
   "mediaFileIds": [],
   "createdAt": "2026-09-04T10:55:00+08:00",

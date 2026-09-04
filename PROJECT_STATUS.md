@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture。**
+**V1-24B：Person Portrait / Gallery Asset Governance。**
 
 V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Desktop 的资料源模型，使它从“很多散落路径设置”升级为用户可以理解和快速切换的资料库工作区：
 
@@ -18,15 +18,23 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - 修复 Unified Sync 在多个额外媒体目录下完成状态过早的问题：一键同步现在等待所有媒体根目录真正扫描结束，并显示实际扫描目录列表；
 - `MediaScanCoordinator` 增加 completion wait 能力，手工媒体扫描仍保留异步 Job / Progress / Cancel；
 - Desktop Vite 使用 Rolldown vendor code splitting，而不是调大 chunk warning 阈值隐藏 bundle 膨胀；
-- 标准 Dev Fixture 扩充为 **11 Works / 8 People / 29 Assets / 3 Presentation Preferences**，每部作品都有海报、每位人物都有头像；
+- 标准 Dev Fixture 扩充为 **11 Works / 8 People / 43 Assets / 3 Presentation Preferences**，每部作品都有竖版海报与横版 Work Gallery、每位人物都有头像；`DEMO-002` 额外提供多图 Gallery 轮播场景；
 - `LX-*` 保留高质量生成图片用于视觉/展示偏好验收，早期 `DEMO-*` 关系丰富数据并入同一可运行 Fixture；
 - `DEMO-IMPORT-001 / 002` 以兼容 companion 形式恢复，LX Import/Review 场景继续保留；
 - Example Library 明确同时承担开发 Fixture、手工验收、未来自动化测试和新用户功能展示；
 - 新增 Library Profile / Source Model 用户文档与 ADR-040；Community Data 继续保持独立仓库，通过 Shared Pack 被 Profile 挂载，不复制进主仓库。
 
-### 后续 V1-24B / V1-24C
+### 当前 V1-24B
 
-人物 portrait / gallery 的完整上传与生命周期治理、Shared Asset 更完整的 Desktop 二进制展示来源、孤儿 Asset 清理，以及 Portable Pack 冲突预览 / 导入报告继续后续实现。Library Profile 后续还可增加首次启动向导、Profile 导入导出与 Community Pack Registry，但不阻塞 V1-24B。
+- Work Detail 顶部 Hero Gallery 严格只展示横版 Gallery / Fanart / Screenshot / 横版 Cover；竖版 poster 仅用于海报墙和封面，不再作为顶部画廊回退。示例库 11 部作品全部有宽幅 Gallery。
+- 修复产品示例库运行副本刷新：`tauri dev` 不再优先使用旧 Resource 副本，Native Provision 会比较整棵 Fixture 的内容签名后原子刷新 App Local Data，避免模板已有横图但运行库仍只看到 Poster。
+- Person Detail 已加入 Portrait / Gallery 浏览、头像/Gallery 图片导入与 Private Asset 删除治理。
+- 图片导入继续经过 Native Image Picker + content-addressed Private Asset Boundary。
+- 下一步继续补 Shared Pack Asset 的受控只读二进制展示、孤儿 Asset 检测/清理与更清晰的引用状态。
+
+### 后续 V1-24C
+
+Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾继续后续实现。Library Profile 后续还可增加首次启动向导、Profile 导入导出与 Community Pack Registry。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 

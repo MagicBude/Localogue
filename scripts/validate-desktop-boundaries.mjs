@@ -23,6 +23,7 @@ const required = [
   "apps/desktop/src/desktop-governance.tsx",
   "apps/desktop/src/desktop-presentation.ts",
   "apps/desktop/src/desktop-presentation-workbench.tsx",
+  "apps/desktop/src/desktop-person-asset-governance.tsx",
   "apps/desktop/src/library-profiles.ts",
   "docs/development/v1-24-desktop-presentation-preference-workbench.md",
   "docs/desktop/library-profiles-and-sources.md",
@@ -81,7 +82,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["provision_example_library", "pick_directory", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
+  const runtimeCommands = ["provision_example_library", "pick_directory", "pick_image_file", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -146,11 +147,11 @@ if (!errors.length) {
   if (!desktopApp.includes("function WorkAssetGallery") || !desktopApp.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
     errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
-  if (!desktopApp.includes('setOrientation(ratio < 0.88 ? "portrait" : ratio > 1.12 ? "landscape" : "square")')) {
-    errors.push("V1-22 Hotfix 2 Work Media Gallery 必须根据真实图片宽高比切换 portrait / landscape / square 展示策略，不能恢复固定横向画布。");
+  if (!desktopApp.includes("isLandscapeWorkHeroAsset") || !desktopApp.includes('asset.width / asset.height >= 1.2')) {
+    errors.push("V1-24B Work Detail Hero Gallery 必须严格筛选横版资产，避免竖版图片撑坏顶部画廊。");
   }
-  if (!desktopApp.includes('asset.type !== "poster"') || !desktopApp.includes("Poster is intentionally excluded from the detail Hero Gallery")) {
-    errors.push("V1-22 Hotfix 3 Work Detail Hero Gallery 必须排除 poster；Poster 只用于作品墙/列表封面和资产管理，不能再强塞进宽屏 Hero。 ");
+  if (!desktopApp.includes('["gallery", "fanart", "screenshot", "cover"]') || desktopApp.includes('images.filter((asset) => asset.type === "poster" || asset.type === "cover")')) {
+    errors.push("V1-22/V1-24B Work Detail Hero Gallery 不得使用 poster 作为回退；没有横版资产时应直接不显示 Hero Gallery。");
   }
   const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
@@ -162,8 +163,8 @@ if (!errors.length) {
   const desktopCatalogBrowser = readFileSync(path.join(root, "apps/desktop/src/desktop-catalog-browser.tsx"), "utf8");
   const desktopI18n = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n.tsx"), "utf8");
   const desktopStyles = readFileSync(path.join(root, "apps/desktop/src/styles.css"), "utf8");
-  if (!desktopStyles.includes(".desktop-work-gallery__stage.is-portrait") || !desktopStyles.includes(".desktop-work-gallery__stage.is-landscape") || !desktopStyles.includes(".desktop-work-gallery__stage.is-square")) {
-    errors.push("V1-22 Hotfix 2 Gallery 样式必须保留 portrait / landscape / square 三种真实宽高比策略。");
+  if (!desktopStyles.includes(".desktop-work-gallery__stage.is-landscape")) {
+    errors.push("V1-24B Work Hero Gallery 必须保留横版展示样式。");
   }
   if (!desktopStyles.includes(".content-shell") || !desktopStyles.includes("max-width: none")) {
     errors.push("V1-22 Hotfix 2 Desktop 主内容区必须保持流式宽度，不能恢复固定 1460px max-width 导致大屏右侧空白。");
@@ -501,10 +502,16 @@ if (!errors.length) {
   if (!desktopApp.includes("provisionExampleLibrary") || !rust.includes("provision_example_library") || !permission.includes('"provision_example_library"')) {
     errors.push("V1-24 示例库必须由 Desktop 自行初始化，不能要求普通用户先运行 pnpm desktop:demo:reset。");
   }
+  if (!rust.includes("directory_tree_sha256") || !rust.includes("source_signature") || !rust.includes("destination_signature")) {
+    errors.push("V1-24B 示例库刷新必须比较整棵 Fixture 内容签名，不能只靠 fixtureVersion 判定运行副本是否最新。");
+  }
+  if (!rust.includes("#[cfg(debug_assertions)]") || !rust.includes('base.join("pnpm-workspace.yaml")') || !rust.includes('base.join("apps/desktop/src-tauri/Cargo.toml")')) {
+    errors.push("V1-24B tauri dev 必须优先解析当前仓库 examples，避免旧 Resource 缓存遮蔽新 Gallery / JSON。");
+  }
   if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
     errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 2")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 3")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
   if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
@@ -539,6 +546,17 @@ if (!errors.length) {
   if (!viteConfig.includes("codeSplitting") || !viteConfig.includes('name: "vendor"')) {
     errors.push("V1-24 Desktop Vite 必须通过 Rolldown codeSplitting 拆分 vendor，而不是单纯提高 chunk 警告阈值。");
   }
+  // V1-24B Person Portrait / Gallery Asset Governance + strict landscape Work Hero Gallery.
+  const personAssetGovernance = readFileSync(path.join(root, "apps/desktop/src/desktop-person-asset-governance.tsx"), "utf8");
+  for (const token of ["pickImageFile", "importPrivateAssetFile", "saveAsset", "deletePrivateAsset", "galleryAssetIds", 'subjectType: "person"']) {
+    if (!personAssetGovernance.includes(token)) errors.push(`V1-24B Person Asset Governance 缺少：${token}`);
+  }
+  if (!rust.includes("pick_image_file") || !permission.includes('"pick_image_file"') || !desktopBridge.includes("pickImageFile")) {
+    errors.push("V1-24B 图片导入必须通过受限 Image Picker + import_private_asset_file Native Boundary。");
+  }
+  if (!desktopApp.includes("isLandscapeWorkHeroAsset") || !desktopApp.includes('return asset.width / asset.height >= 1.2')) {
+    errors.push("V1-24B Work Detail Gallery 必须只接受明确横版 Gallery/Fanart/Screenshot/横版 Cover，禁止 poster 回退。");
+  }
   const rootPackage = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
   if (!rootPackage.scripts?.check?.startsWith("pnpm desktop:clean:legacy")) {
     errors.push("根 pnpm check 必须先清理 V1-13 历史 Vite 配置产物，保证 ZIP 覆盖升级具有确定性。");
@@ -556,7 +574,7 @@ if (errors.length) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log("Localogue Desktop Boundary 校验通过：V1-24 Library Profile / Multi-root Sync / Presentation Preference、V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Vocabulary、V1-18 Native I/O 安全边界均符合规则。");
+  console.log("Localogue Desktop Boundary 校验通过：V1-24B Portrait / Gallery Asset Governance、V1-24 Library Profile / Multi-root Sync / Presentation Preference、V1-23 Governance / Snapshot / Portable Pack，以及 V1-22 Vocabulary、V1-18 Native I/O 安全边界均符合规则。");
 }
 
 function collectDesktopTranslationKeys(source, language) {

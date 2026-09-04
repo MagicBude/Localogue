@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_lx_303",
+  "type": "gallery",
+  "storagePath": "asset-files/work-gallery/lx-303-gallery-01.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1280,
+  "height": 720,
+  "fileSize": 100405,
+  "sha256": "1716a7f6fd02ffaadb70e8aa4347e5e75302014c892641f3da79af991c04af2b",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_303",
+  "createdAt": "2026-09-04T16:10:00+08:00"
+}

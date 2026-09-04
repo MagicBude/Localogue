@@ -22,6 +22,7 @@ const examplesRoot = path.join(process.cwd(), "examples");
 const errors = [];
 
 const manifest = await readJson(manifestPath, "fixture-manifest.json");
+const fixtureInfo = await readJson(path.join(libraryRoot, "fixture-info.json"), "template/fixture-info.json");
 const existingWorkImport = await readJson(
   path.join(examplesRoot, "imports", "sample-existing-work.json"),
   "imports/sample-existing-work.json",
@@ -66,6 +67,10 @@ const collections = {
 const indexes = Object.fromEntries(
   Object.entries(collections).map(([name, items]) => [name, indexById(name, items)]),
 );
+
+if (!fixtureInfo || fixtureInfo.fixtureVersion !== manifest?.fixtureVersion) {
+  errors.push("template/fixture-info.json: fixtureVersion 必须与 fixture-manifest.json 一致，供产品示例库安全刷新。");
+}
 
 validateWorks();
 validatePeople();
@@ -210,9 +215,11 @@ function validateFixtureCoverage() {
   const visualWorks = new Set(coverage.visualWorks ?? []);
   const visualPeople = new Set(coverage.visualPeople ?? []);
   const galleryPeople = new Set(coverage.galleryPeople ?? []);
+  const galleryWorks = new Set(coverage.galleryWorks ?? []);
   for (const id of visualWorks) requireRef("fixture coverage", "visual work", id, indexes.works);
   for (const id of visualPeople) requireRef("fixture coverage", "visual person", id, indexes.people);
   for (const id of galleryPeople) requireRef("fixture coverage", "gallery person", id, indexes.people);
+  for (const id of galleryWorks) requireRef("fixture coverage", "gallery work", id, indexes.works);
 
   // 示例库面向开发者和首次体验用户，因此不允许出现灰色占位卡：
   // 每部 Work 至少有 poster/cover，每位 Person 至少有 portrait。
@@ -222,6 +229,15 @@ function validateFixtureCoverage() {
       .map((id) => indexes.assets.get(id))
       .find((asset) => asset && asset.subjectType === "work" && asset.subjectId === work.id && ["poster", "cover"].includes(asset.type));
     if (!artwork) errors.push(`fixture coverage: Work ${work.id} 缺少可展示 poster / cover Asset`);
+    if (galleryWorks.has(work.id)) {
+      const gallery = (work.assetIds ?? [])
+        .map((id) => indexes.assets.get(id))
+        .find((asset) => asset && asset.subjectType === "work" && asset.subjectId === work.id && ["gallery", "fanart", "screenshot"].includes(asset.type));
+      if (!gallery) errors.push(`fixture coverage: Work ${work.id} 缺少详情页 Gallery / Fanart Asset`);
+      else if (!gallery.width || !gallery.height || gallery.width / gallery.height < 1.2) {
+        errors.push(`fixture coverage: Work ${work.id} 的 Hero Gallery 必须是横图（>= 1.2:1），不能用竖版 poster 冒充`);
+      }
+    }
   }
   for (const person of collections.people) {
     if (!visualPeople.has(person.id)) errors.push(`fixture coverage: Person ${person.id} 未纳入 visualPeople`);
@@ -308,6 +324,23 @@ function validateScenarioManifest() {
   }
   const stalePreference = collections.preferences.find((item) => item.entityId === scenarios.staleWorkPreference?.entityId);
   if (stalePreference?.preferredCoverAssetId !== staleId) errors.push("staleWorkPreference: 没有构造预期的 stale Preference");
+
+  const multiGallery = scenarios.multiWorkGallery;
+  if (multiGallery?.entityId) {
+    requireRef("manifest multiWorkGallery", "work", multiGallery.entityId, indexes.works);
+    const work = indexes.works.get(multiGallery.entityId);
+    const galleries = (work?.assetIds ?? [])
+      .map((id) => indexes.assets.get(id))
+      .filter((asset) => asset && asset.subjectType === "work" && asset.subjectId === multiGallery.entityId && ["gallery", "fanart", "screenshot"].includes(asset.type));
+    if (galleries.length < (multiGallery.minimumGalleryAssets ?? 0)) {
+      errors.push(`multiWorkGallery: ${multiGallery.entityId} 横版 Gallery 数量不足：${galleries.length} < ${multiGallery.minimumGalleryAssets}`);
+    }
+    for (const asset of galleries) {
+      if (!asset.width || !asset.height || asset.width / asset.height < 1.2) {
+        errors.push(`multiWorkGallery: ${asset.id} 不是横版 Gallery`);
+      }
+    }
+  }
 }
 
 

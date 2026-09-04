@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_gallery_demo_002",
+  "type": "gallery",
+  "storagePath": "asset-files/work-gallery/demo-002-gallery-01.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1280,
+  "height": 720,
+  "fileSize": 134563,
+  "sha256": "92d6f5c888b2126d6cb53250139d5bd86f29f40faffb4922be1a42f03ce44b89",
+  "subjectType": "work",
+  "subjectId": "work_demo_002",
+  "createdAt": "2026-09-04T16:10:00+08:00"
+}

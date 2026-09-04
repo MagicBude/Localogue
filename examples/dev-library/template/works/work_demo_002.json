@@ -50,7 +50,11 @@
     "recommended"
   ],
   "assetIds": [
-    "asset_poster_demo_02"
+    "asset_poster_demo_02",
+    "asset_gallery_demo_002",
+    "asset_gallery_demo_002_02",
+    "asset_gallery_demo_002_03",
+    "asset_gallery_demo_002_04"
   ],
   "mediaFileIds": [],
   "createdAt": "2026-09-01T12:00:00+08:00",
