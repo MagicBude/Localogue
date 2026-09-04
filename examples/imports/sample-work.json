@@ -1,15 +1,29 @@
 {
-  "code": "DEMO-IMPORT-001",
-  "title": "夏日回声",
-  "originalTitle": "夏の日のこだま",
-  "releaseDate": "2026-08-15",
-  "durationMinutes": 124,
-  "performers": ["星野みづき"],
-  "directors": ["架空監督A"],
-  "maker": "Aurora Works",
-  "label": "Aurora Label",
-  "series": ["夏の記憶"],
-  "genres": ["ドラマ", "制服"],
-  "tags": ["待整理"],
-  "workTypes": ["solo"]
+  "code": "LX-404",
+  "title": "夜风来信",
+  "originalTitle": "夜風の手紙",
+  "releaseDate": "2026-09-01",
+  "durationMinutes": 126,
+  "performers": [
+    "立花りな"
+  ],
+  "directors": [
+    "架空監督B"
+  ],
+  "maker": "ルーメン・フィクスチャー",
+  "label": "LX テストレーベル",
+  "series": [
+    "ビジュアル・ノーツ"
+  ],
+  "genres": [
+    "ドラマ",
+    "OL"
+  ],
+  "tags": [
+    "要確認"
+  ],
+  "workTypes": [
+    "image_video"
+  ],
+  "description": "与 Dev Fixture 使用同一套虚构人物和厂商，但番号不存在，用于测试“新作品候选”。"
 }

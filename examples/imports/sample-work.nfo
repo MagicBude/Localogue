@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <movie>
-  <title>夜の図書館</title>
-  <originaltitle>夜の図書館</originaltitle>
-  <num>DEMO-IMPORT-002</num>
-  <premiered>2026-08-18</premiered>
-  <runtime>132</runtime>
-  <studio>North Studio</studio>
-  <set>静かな夜</set>
-  <actor><name>白石りん</name></actor>
-  <director>架空監督B</director>
+  <title>午后书页</title>
+  <originaltitle>午後のページ</originaltitle>
+  <num>LX-405</num>
+  <premiered>2026-09-02</premiered>
+  <runtime>104</runtime>
+  <studio>ルーメン・フィクスチャー</studio>
+  <set>ビジュアル・ノーツ</set>
+  <actor><name>水野あいこ</name></actor>
+  <director>架空監督A</director>
   <genre>ドラマ</genre>
-  <genre>室内</genre>
-  <tag>待整理</tag>
-  <plot>导入功能使用的完全虚构 NFO 示例。</plot>
+  <genre>スレンダー</genre>
+  <tag>要確認</tag>
+  <plot>Dev Fixture 世界观中的完全虚构 NFO 示例，用于验证 NFO Adapter 与实体解析。</plot>
 </movie>

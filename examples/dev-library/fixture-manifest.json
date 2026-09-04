@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "localogue.dev-fixture.presentation-assets",
+  "name": "Localogue V1-24 Presentation / Asset Dev Fixture",
+  "fixtureVersion": "2026.09.04.2",
+  "targetProductVersion": "0.1.24",
+  "description": "完全虚构、可重置的 Desktop 开发测试资料库；并与 imports / settings / shared-packs 示例形成一套可联动验收的开发测试宇宙。",
+  "runtimeTarget": "var/dev-fixture-library",
+  "scenarios": {
+    "validWorkPreference": {
+      "entityId": "work_fixture_lx_101",
+      "canonicalAssetId": "asset_fixture_lx101_poster_summer",
+      "preferredAssetId": "asset_fixture_lx101_poster_midnight"
+    },
+    "validPersonPreference": {
+      "entityId": "person_fixture_aiko_mizuno",
+      "canonicalAssetId": "asset_fixture_aiko_portrait_primary",
+      "preferredAssetId": "asset_fixture_aiko_portrait_window"
+    },
+    "defaultWorkFallback": {
+      "entityId": "work_fixture_lx_202",
+      "canonicalAssetId": "asset_fixture_lx202_poster_blue",
+      "alternateAssetId": "asset_fixture_lx202_poster_sea"
+    },
+    "defaultPersonFallback": {
+      "entityId": "person_fixture_rina_tachibana",
+      "canonicalAssetId": "asset_fixture_rina_portrait_primary",
+      "alternateAssetId": "asset_fixture_rina_portrait_pink"
+    },
+    "staleWorkPreference": {
+      "entityId": "work_fixture_lx_303",
+      "missingAssetId": "asset_fixture_missing_cover"
+    },
+    "deletionProtection": {
+      "workAssetId": "asset_fixture_lx101_poster_midnight",
+      "personAssetId": "asset_fixture_aiko_portrait_window"
+    },
+    "unreferencedCandidates": {
+      "workAssetId": "asset_fixture_lx202_poster_sea",
+      "personAssetId": "asset_fixture_rina_portrait_pink"
+    },
+    "privateOverShared": {
+      "entityType": "person",
+      "entityId": "person_fixture_aiko_mizuno",
+      "sharedPrimaryName": "水野あいこ・共有版",
+      "privatePrimaryName": "水野あいこ"
+    }
+  },
+  "generatedImageNotice": "All people, works, names and image contents in this fixture are fictional/synthetic and are not intended to depict real persons or real releases.",
+  "companions": {
+    "existingWorkImport": "examples/imports/sample-existing-work.json",
+    "newWorkImport": "examples/imports/sample-work.json",
+    "settingsExample": "examples/settings/settings.example.json",
+    "sharedPack": "examples/shared-packs/starter-community-pack"
+  }
+}

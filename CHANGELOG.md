@@ -1,5 +1,27 @@
 # Changelog
 
+## V1-24 Examples / Fixture Integration
+
+- 将早期 `examples/people` 与 `examples/works` 独立结构示例并入 `examples/dev-library/template`，Canonical JSON 文档与可运行 Fixture 只保留一份真相。
+- `sample-existing-work.json` 改为直接命中 Fixture `LX-101`，并故意将时长从 118 写成 121，任何干净环境都可稳定复现已有 Work 字段差异。
+- JSON / NFO / CSV / XLSX 导入样例统一到 `LX-*` 虚构测试世界，复用 Fixture 人物、Maker、Label、Series 与 Vocabulary。
+- `settings.example.json` 改为指向 `var/dev-fixture-library` 与 Starter Shared Pack，示例配置可以完整对应标准测试环境。
+- Starter Shared Pack 新增与 Private 同稳定 ID 的 `person_fixture_aiko_mizuno` 共享层记录，显示名故意不同，用于验证 `Private > Shared` 优先级。
+- `fixture-manifest.json` 新增 companions 与 `privateOverShared` 场景；`validate:fixture` 开始校验 Import / Settings / Shared Pack 联动，并阻止旧 `examples/people` / `examples/works` 被重新引入。
+- `desktop:demo:*` 输出同时提示配套 Shared Pack 与 Review Import 路径，减少手工验收准备步骤。
+- 产品版本继续保持 `0.1.24`；本次仍属于 V1-24 开发测试基础设施整理。
+
+## V1-24 Dev Fixture Foundation
+
+- 新增 `examples/dev-library/` 可重置 Desktop 开发 Fixture，不再依赖开发者本机真实 Private Library。
+- Fixture 提供 3 部虚构 Work、2 位虚构 Person、10 个 Private Asset、3 条 Presentation Preference，并覆盖有效偏好、默认回退与 stale 偏好。
+- 10 张 portrait / gallery / poster 图片由生成式模型制作并压缩为仓库内 JPEG，离线即可测试 Native Asset Reader 与真实图片布局。
+- 新增 `fixture-manifest.json` 固定测试 Scenario ID，供手工验收和未来 E2E 复用。
+- 新增 `pnpm desktop:demo:seed / reset / clean`，运行副本固定写入 Git 忽略的 `var/dev-fixture-library/`；脚本不会自动修改用户 Settings。
+- 新增 `pnpm validate:fixture`，校验 JSON 引用、Asset 路径、JPEG 签名、fileSize、SHA-256 与 Presentation 场景完整性。
+- `pnpm check` 开始包含 Fixture 校验，避免后续 Domain / Asset 重构让开发样例悄悄失效。
+- 产品版本继续保持 `0.1.24`；本包属于 V1-24 开发基础设施，不单独提升产品版本。
+
 ## V1-24A - Desktop Presentation Preference Workbench
 
 - Curation 新增 Presentation 子视图，集中管理 Work 首选封面与 Person 首选头像。

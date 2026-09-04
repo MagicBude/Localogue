@@ -1,0 +1,9 @@
+{
+  "id": "fixture_alt_art",
+  "names": {
+    "ja": "別アート確認",
+    "zh-CN": "备用图片测试",
+    "en": "Alternate Art Fixture"
+  },
+  "builtIn": false
+}

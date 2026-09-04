@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "person_fixture_aiko_mizuno",
+  "names": [
+    {
+      "language": "ja",
+      "value": "水野あいこ",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "水野爱子",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Aiko Mizuno",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2024-04",
+        "precision": "month"
+      },
+      "note": "Dev Fixture fictional debut"
+    }
+  ],
+  "birthDate": {
+    "value": "2001-05-16",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "東京都",
+    "zh-CN": "东京都",
+    "en": "Tokyo, Japan"
+  },
+  "heightCm": 162,
+  "biographies": {
+    "ja": "Localogue の開発・手動テスト専用に作られた完全な架空人物です。画像も生成テスト素材です。",
+    "zh-CN": "Localogue 开发与手工验收专用的完全虚构人物；人物与图片均为测试素材。",
+    "en": "A fully fictional person created only for Localogue development and manual acceptance testing; all images are synthetic fixtures."
+  },
+  "portraitAssetId": "asset_fixture_aiko_portrait_primary",
+  "galleryAssetIds": [
+    "asset_fixture_aiko_gallery_cafe"
+  ],
+  "createdAt": "2026-09-04T10:55:00+08:00",
+  "updatedAt": "2026-09-04T10:55:00+08:00"
+}

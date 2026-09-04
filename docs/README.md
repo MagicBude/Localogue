@@ -294,4 +294,5 @@
 ## V1-24A · Desktop Presentation Preference Workbench
 
 - [V1-24A Desktop Presentation Preference Workbench 实现导读](development/v1-24-desktop-presentation-preference-workbench.md)
+- [Dev Fixture Library：没有真实资料也能稳定开发](development/dev-fixture-library.md)
 

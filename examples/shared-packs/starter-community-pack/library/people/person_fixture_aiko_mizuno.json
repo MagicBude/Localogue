@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "person_fixture_aiko_mizuno",
+  "names": [
+    {
+      "language": "ja",
+      "value": "水野あいこ・共有版",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "水野爱子·共享版",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Aiko Mizuno · Shared",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [],
+  "biographies": {
+    "ja": "Private > Shared の優先順位を確認するための共有側テストレコードです。",
+    "zh-CN": "用于验证 Private > Shared 读取优先级的共享层测试记录。",
+    "en": "Shared-layer fixture used to verify that the Private record wins for the same stable ID."
+  },
+  "galleryAssetIds": [],
+  "createdAt": "2026-09-04T12:40:00+08:00",
+  "updatedAt": "2026-09-04T12:40:00+08:00"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_rina_portrait_pink",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/rina-portrait-pink.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 190458,
+  "sha256": "fbf85bf2fe489a0dc3dd5a1fb32b0d9fdeffc69779fa69c2127af95ec9461339",
+  "subjectType": "person",
+  "subjectId": "person_fixture_rina_tachibana",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

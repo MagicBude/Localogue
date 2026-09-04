@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_lx101_poster_summer",
+  "type": "poster",
+  "storagePath": "asset-files/posters/lx-101-poster-summer-echo.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 260321,
+  "sha256": "0fb28b208eb930a8585e1fbe453082388afec2d0778b3171d0bbe167383fc7d8",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_101",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

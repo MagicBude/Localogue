@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_lx202_poster_blue",
+  "type": "poster",
+  "storagePath": "asset-files/posters/lx-202-poster-blue-morning.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 233840,
+  "sha256": "c08e3a9ea087d053bf0eabb63cce4e590846e9cdcfea0c3d94a7f200a3dc7341",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_202",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

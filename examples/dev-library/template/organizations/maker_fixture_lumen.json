@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "maker_fixture_lumen",
+  "kind": "maker",
+  "names": {
+    "ja": "ルーメン・フィクスチャー",
+    "zh-CN": "流明测试映像",
+    "en": "Lumen Fixture Studio"
+  },
+  "descriptions": {
+    "ja": "開発用の架空メーカー",
+    "zh-CN": "仅用于开发测试的虚构厂商",
+    "en": "Fictional maker for development fixtures."
+  }
+}

@@ -371,3 +371,18 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Presentation / Asset 功能变化继续更新固定 `MANIFEST.md`、`PROJECT_STATUS.md` 与 `CHANGELOG.md`；禁止新建 `V*_MANIFEST.md`。
 - 交付给用户的覆盖包继续只包含实际新增/修改文件；需要删除的旧文件直接在对话中列出或提供删除命令。
 
+
+
+## V1-24 Dev Fixture 约束
+
+- 依赖特定数据条件才能验收的新功能，优先同步维护 `examples/dev-library/` 可复现 Fixture，不得默认开发者本机一定有真实资料。
+- `examples/dev-library/template/` 是 Git 中的只读测试真相；Desktop 手工测试应使用 `var/dev-fixture-library/` 运行副本，禁止直接修改模板来完成日常操作。
+- Fixture 中禁止加入真实私人资料；人物、作品、图片、媒体与来源内容必须是可公开提交的虚构/生成式测试素材。
+- Fixture Asset 必须保存真实 `storagePath / mimeType / fileSize / sha256`，并由 `pnpm validate:fixture` 校验二进制存在、签名与 Hash。
+- 新增测试场景时应把稳定 Entity / Asset ID 写入 `examples/dev-library/fixture-manifest.json`，后续 E2E 不依赖列表顺序或界面文案寻找测试对象。
+- `desktop:demo:*` 脚本不得自动改 `.localogue/settings.json` 或真实 Private Library 路径；测试工具只能准备数据，实例切换必须由用户显式完成。
+- `var/` 只放可重建运行数据并保持 Git 忽略。
+- Canonical Work / Person 结构示例统一复用 `examples/dev-library/template/works` 与 `template/people`；不要重新创建顶层 `examples/works` / `examples/people`，避免两份 Schema 示例漂移。
+- `examples/imports / settings / shared-packs` 应尽量与 Dev Fixture 使用同一套稳定 ID 与虚构测试世界；能联动复现的场景不要再新造一套孤立 Demo。
+- `sample-existing-work.json` 必须持续命中 Fixture 中真实存在的 Work，并保留至少一个明确字段差异；`validate:fixture` 负责守住这一契约。
+- Starter Shared Pack 应保留至少一个与 Private Fixture 同稳定 ID、但显示值故意不同的记录，用于肉眼与自动化验证 `Private > Shared`。

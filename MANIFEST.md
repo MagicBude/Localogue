@@ -52,6 +52,21 @@
 - Presentation Preference 使用独立 Native Commands，不借用通用 Canonical 写入，也不伪装成 Audit Collection；
 - Shared Pack 继续保持只读。
 
+### Dev Fixture Foundation
+
+- 新增 `examples/dev-library/template/` 完全虚构 Private Library 模板；
+- 包含 3 Work、2 Person、2 Organization、1 Series、3 Genre、3 Tag、10 Asset 与 3 Presentation Preference；
+- 10 张生成式 JPEG 覆盖 portrait / gallery / poster，Asset JSON 保存真实 fileSize / SHA-256；
+- `fixture-manifest.json` 固定有效 Work Preference、有效 Person Preference、默认回退、stale Preference、删除保护等测试场景；
+- 新增 `desktop:demo:seed / reset / clean`，只操作 Git 忽略的 `var/dev-fixture-library/`；
+- Fixture 管理脚本不自动改 `.localogue/settings.json`，避免测试工具静默切换真实资料库；
+- 新增 `validate:fixture` 并纳入 `pnpm check`。
+- 早期顶层 `examples/people` / `examples/works` 结构样例合并进 Dev Fixture，避免 Canonical 示例双份维护；
+- `examples/imports/sample-existing-work.json` 直接命中 Fixture `LX-101`，形成可重复的 Import → Evidence → Review 差异链；
+- `examples/settings` 与 `examples/shared-packs` 作为 Dev Fixture 配套示例联动维护；
+- Starter Shared Pack 提供一个与 Private 同 ID 但显示名不同的人物记录，专门验证 `Private > Shared`；
+- Fixture Validator 同时守护 imports / settings / shared-pack 契约与 examples 目录拓扑。
+
 ## 安全不变量
 
 1. Presentation Preference 是私人显示选择，不是公共事实。

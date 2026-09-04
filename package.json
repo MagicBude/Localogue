@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
+    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:fixture && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
     "validate:audit": "node scripts/validate-audit.mjs",
@@ -27,7 +27,11 @@
     "desktop:build": "pnpm --filter @localogue/desktop tauri:build",
     "desktop:doctor": "node scripts/check-tauri-prerequisites.mjs",
     "desktop:rust:check": "pnpm --filter @localogue/desktop rust:check",
-    "desktop:clean:legacy": "node scripts/clean-desktop-generated-artifacts.mjs"
+    "desktop:clean:legacy": "node scripts/clean-desktop-generated-artifacts.mjs",
+    "validate:fixture": "node scripts/validate-dev-fixture.mjs",
+    "desktop:demo:seed": "node scripts/manage-dev-fixture.mjs seed",
+    "desktop:demo:reset": "node scripts/manage-dev-fixture.mjs reset",
+    "desktop:demo:clean": "node scripts/manage-dev-fixture.mjs clean"
   },
   "dependencies": {
     "next": "16.3.3",

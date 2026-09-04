@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-24A：Desktop Presentation Preference Workbench。**
+**V1-24A：Desktop Presentation Preference Workbench + Dev Fixture Foundation。**
 
 V1-24A 把已经存在于 Domain / Web 的 `PresentationPreference` 私人展示层正式接入 Tauri Desktop，并继续坚持“展示选择不是 Canonical 事实”的边界。当前阶段已：
 
@@ -15,6 +15,14 @@ V1-24A 把已经存在于 Domain / Web 的 `PresentationPreference` 私人展示
 - Native 删除 Asset 时新增 Presentation Preference 引用保护，必须先恢复默认展示才能删除仍被引用的私人 Asset；
 - Shared Pack / Canonical 实体继续保持只读事实语义；选择私人封面或头像不会复制或改写公共实体；
 - V1-23 Governance / Snapshot / Portable Pack 与 V1-18 Native I/O 稳定边界继续保持。
+- 新增标准 `examples/dev-library` Fixture：3 Works / 2 People / 10 Assets / 3 Presentation Preferences；
+- Fixture 图片全部是生成式虚构测试素材，可离线覆盖 portrait / gallery / poster 的真实二进制读取与布局；
+- `desktop:demo:seed / reset / clean` 生成 Git 忽略的运行副本，测试不再污染 Fixture 模板；
+- `validate:fixture` 已纳入 `pnpm check`，持续校验图片 SHA-256、引用与 stale Preference 场景。
+- `examples/people` / `examples/works` 已收敛进 Dev Fixture，不再维护第二份 Canonical Work / Person JSON 样例；
+- Import / Settings / Shared Pack 示例已和 `examples/dev-library` 使用同一套 `LX-*` 虚构测试世界；
+- `sample-existing-work.json` 现在稳定命中 `LX-101` 并制造 duration 差异，可在空本机数据环境复现 Review；
+- Starter Shared Pack 增加同 ID Shared 记录，可与 Private Fixture 一起验证 `Private > Shared` 读取优先级。
 
 ### 明确留到 V1-24B / V1-24C
 

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_rina_gallery_bookstore",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/rina-gallery-bookstore.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 214470,
+  "sha256": "cc27f2be8f700565193f3e0103781bb8e42ae98c9a0835023decd7eaf911e339",
+  "subjectType": "person",
+  "subjectId": "person_fixture_rina_tachibana",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

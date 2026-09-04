@@ -1,16 +1,10 @@
 {
   "schemaVersion": 1,
-  "libraryPath": "./data/library",
+  "libraryPath": "./var/dev-fixture-library",
   "sharedPackPaths": [
     "./examples/shared-packs/starter-community-pack"
   ],
-  "mediaScanPaths": [
-    "D:/Media"
-  ],
-  "nfoScanPaths": [
-    "D:/Metadata/NFO"
-  ],
-  "libraryRoots": [
-    "D:/Library/石川澪 DMM原档合集"
-  ]
+  "libraryRoots": [],
+  "mediaScanPaths": [],
+  "nfoScanPaths": []
 }

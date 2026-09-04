@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "id": "presentation_fixture_person_aiko",
+  "entityType": "person",
+  "entityId": "person_fixture_aiko_mizuno",
+  "preferredPortraitAssetId": "asset_fixture_aiko_portrait_window",
+  "updatedAt": "2026-09-04T10:55:00+08:00"
+}

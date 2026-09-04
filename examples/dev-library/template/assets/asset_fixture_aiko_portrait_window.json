@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_aiko_portrait_window",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/aiko-portrait-window.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 187545,
+  "sha256": "6bca7b4430dc8f249ded3f985df1f38e6bc95a99f6c95cb2d4b2c7cd5089ce5f",
+  "subjectType": "person",
+  "subjectId": "person_fixture_aiko_mizuno",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

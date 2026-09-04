@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_rina_portrait_primary",
+  "type": "portrait",
+  "storagePath": "asset-files/portraits/rina-portrait-primary.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 180507,
+  "sha256": "1ee2cf1f9a49c42fbc7e96b40c73c73020e17f40eec970b07810ca5b430c7b70",
+  "subjectType": "person",
+  "subjectId": "person_fixture_rina_tachibana",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

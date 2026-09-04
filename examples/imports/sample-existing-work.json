@@ -1,29 +1,29 @@
 {
-  "code": "DEMO-001",
-  "title": "雨后的窗边",
-  "originalTitle": "雨上がりの窓辺",
-  "releaseDate": "2026-08-22",
-  "durationMinutes": 130,
+  "code": "LX-101",
+  "title": "夏日回声",
+  "originalTitle": "夏のこだま",
+  "releaseDate": "2026-07-18",
+  "durationMinutes": 121,
   "performers": [
-    "星野みづき"
+    "水野あいこ"
   ],
   "directors": [
-    "黒田修一"
+    "架空監督A"
   ],
-  "maker": "オーロラ映像",
-  "label": "ルーメン",
+  "maker": "ルーメン・フィクスチャー",
+  "label": "LX テストレーベル",
   "series": [
-    "街の灯り"
+    "ビジュアル・ノーツ"
   ],
   "genres": [
-    "ドラマ",
     "スレンダー"
   ],
   "tags": [
-    "favorite"
+    "お気に入り",
+    "別アート確認"
   ],
   "workTypes": [
-    "solo"
+    "image_video"
   ],
-  "description": "这是用于 Localogue V1 页面、筛选和关系展示测试的虚构作品数据。"
+  "description": "这是 Dev Fixture 的 LX-101 导入证据示例；Canonical 时长为 118 分钟，这里故意写成 121 分钟，用于稳定复现字段差异。"
 }

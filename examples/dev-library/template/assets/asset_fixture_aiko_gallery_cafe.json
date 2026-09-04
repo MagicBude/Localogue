@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_aiko_gallery_cafe",
+  "type": "gallery",
+  "storagePath": "asset-files/gallery/aiko-gallery-cafe.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 232006,
+  "sha256": "8259f9779b747086fba71f9a2c90632e8f7c1a70de54bc29dd312dbbeb2040e6",
+  "subjectType": "person",
+  "subjectId": "person_fixture_aiko_mizuno",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

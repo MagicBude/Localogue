@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "person_fixture_rina_tachibana",
+  "names": [
+    {
+      "language": "ja",
+      "value": "立花りな",
+      "type": "primary"
+    },
+    {
+      "language": "zh-CN",
+      "value": "立花里奈",
+      "type": "localized"
+    },
+    {
+      "language": "en",
+      "value": "Rina Tachibana",
+      "type": "romanized"
+    }
+  ],
+  "activityStatus": "active",
+  "careerEvents": [
+    {
+      "type": "debut",
+      "date": {
+        "value": "2025-02",
+        "precision": "month"
+      },
+      "note": "Dev Fixture fictional debut"
+    }
+  ],
+  "birthDate": {
+    "value": "2000-11-08",
+    "precision": "day"
+  },
+  "birthPlace": {
+    "ja": "神奈川県",
+    "zh-CN": "神奈川县",
+    "en": "Kanagawa, Japan"
+  },
+  "heightCm": 158,
+  "biographies": {
+    "ja": "複数 portrait / gallery / poster の表示切替を確認するための架空人物です。",
+    "zh-CN": "用于验证多 portrait / gallery / poster 展示切换的虚构人物。",
+    "en": "A fictional person for testing multiple portrait, gallery, and poster presentation paths."
+  },
+  "portraitAssetId": "asset_fixture_rina_portrait_primary",
+  "galleryAssetIds": [
+    "asset_fixture_rina_gallery_bookstore"
+  ],
+  "createdAt": "2026-09-04T10:55:00+08:00",
+  "updatedAt": "2026-09-04T10:55:00+08:00"
+}

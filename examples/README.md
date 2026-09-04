@@ -1,35 +1,78 @@
-# 示例数据
+# 示例与开发 Fixture
 
-这里的资料全部是结构示例，不代表真实作品或真实人物。
+`examples/` 只保存**完全虚构、可以公开提交**的结构示例、导入样例和开发测试 Fixture；不允许放真实私人资料。
 
-用途：
+V1-24 起这里不再维护两套互相独立的“人物 / 作品示例”。原来的 `examples/people/` 与 `examples/works/` 已并入可运行的 `dev-library/template/`，避免文档示例、Desktop 手工测试与未来 E2E 使用不同数据而逐渐漂移。
 
-- 让开发者直观看懂 Domain Model；
-- V1 初期作为页面假数据；
-- 用于 JSON 校验和 Repository 测试；
-- 避免测试依赖真实私人资料。
+## 目录职责
 
+| 目录 | 用途 | 是否直接作为 Private Library 使用 |
+| --- | --- | --- |
+| `dev-library/` | 标准可重置 Private Library Fixture；Work / Person / Asset / Presentation 的主测试真相 | 不直接写模板；先 `pnpm desktop:demo:reset` |
+| `imports/` | JSON / NFO / CSV / XLSX 导入样例；其中“已有作品”样例直接引用 Dev Fixture 的 `LX-101` | 否 |
+| `shared-packs/` | 只读 Shared Pack 示例；与 Dev Fixture 配合测试 Private > Shared | 否，作为 Shared Pack 挂载 |
+| `settings/` | 与 Dev Fixture / Shared Pack 对齐的实例设置示例 | 否 |
 
-## V1-05 审核示例
-
-`imports/sample-existing-work.json` 使用已经存在于 Demo Library 的 `DEMO-001`，并故意把时长从正式资料的 128 分钟写成 130 分钟。
-
-它用于学习：
+原来的 `people/`、`works/` 独立示例目录不再保留。需要查看 Canonical Work / Person JSON 时，直接阅读：
 
 ```text
-Evidence
-  ↓
-按番号匹配已有 Work
-  ↓
-实体匹配
-  ↓
-字段差异
+examples/dev-library/template/works/work_fixture_lx_101.json
+examples/dev-library/template/people/person_fixture_aiko_mizuno.json
 ```
 
-导入并保存后，到 `/review` 查看审核结果。
+这样同一份 JSON 既是文档结构示例，也是 Desktop 可实际读取、可被 Validator 校验、未来可被 E2E 复用的 Fixture。
 
+## 快速开始
 
-## V1-09
+```bash
+pnpm desktop:demo:reset
+pnpm desktop:dev
+```
 
-- `shared-packs/starter-community-pack/`：完全虚构的 Shared Pack 示例。
-- `settings/settings.example.json`：实例设置文件示例。
+然后在 Desktop：
+
+```text
+设置 → 私人资料库
+→ <仓库>/var/dev-fixture-library
+→ 刷新资料
+```
+
+如果还要验证 Private > Shared：
+
+```text
+资料包 → 挂载 Shared Pack
+→ <仓库>/examples/shared-packs/starter-community-pack
+```
+
+此时 `person_fixture_aiko_mizuno` 同时存在于 Private 和 Shared；界面必须使用 Private 记录 `水野あいこ`，而不是 Shared 记录 `水野あいこ・共有版`。
+
+## 导入 / Review 联动
+
+`imports/sample-existing-work.json` 不再依赖旧的 `DEMO-001`。它直接指向 Dev Fixture 中已存在的：
+
+```text
+LX-101
+```
+
+Fixture Canonical 时长为 `118` 分钟，Evidence 样例故意写成 `121` 分钟，因此可以稳定复现：
+
+```text
+导入
+→ Evidence
+→ 匹配已有 Work
+→ durationMinutes 字段差异
+→ Review / Commit Plan
+```
+
+`imports/sample-work.json` 以及 NFO / CSV / XLSX 样例则继续使用同一套 `LX-*` 虚构人物、厂商、系列和词表，但使用不存在的新番号，用于观察“新作品候选”和实体解析。
+
+## 相关命令
+
+```bash
+pnpm validate:fixture
+pnpm desktop:demo:seed
+pnpm desktop:demo:reset
+pnpm desktop:demo:clean
+```
+
+完整 Fixture 场景见 `dev-library/README.md`。

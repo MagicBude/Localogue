@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_lx101_poster_midnight",
+  "type": "poster",
+  "storagePath": "asset-files/posters/lx-101-poster-midnight-bloom.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 218164,
+  "sha256": "20a9c78193023e58762d117a91281db7f5dde53827075e37396b5f49b4124302",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_101",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

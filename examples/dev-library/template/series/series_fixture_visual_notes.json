@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "series_fixture_visual_notes",
+  "names": {
+    "ja": "ビジュアル・ノーツ",
+    "zh-CN": "视觉札记",
+    "en": "Visual Notes"
+  },
+  "descriptions": {
+    "ja": "Presentation / Asset テスト用シリーズ",
+    "zh-CN": "用于 Presentation / Asset 测试的虚构系列",
+    "en": "A fictional series for Presentation and Asset testing."
+  }
+}

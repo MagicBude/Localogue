@@ -128,7 +128,7 @@ pnpm check
 它依次执行：
 
 ```text
-validate:data → validate:audit → lint → typecheck → build
+validate:data → validate:audit → validate:fixture → validate:platform → validate:desktop → lint → typecheck → desktop:check → build
 ```
 
 ## 推荐学习顺序
@@ -237,6 +237,14 @@ pnpm library:init
 ```bash
 pnpm library:init:demo
 ```
+
+如果要开发或验收 Desktop 的封面、头像、Gallery、Presentation Preference 等“必须有真实图片才能测试”的功能，优先使用可重置的标准 Fixture：
+
+```bash
+pnpm desktop:demo:reset
+```
+
+它会把 `examples/dev-library/template/` 复制到 Git 忽略的 `var/dev-fixture-library/`。然后在 Desktop `设置 → 私人资料库` 中选择这个目录即可。需要清空运行副本时执行 `pnpm desktop:demo:clean`。Fixture 中的人物、作品和图片均为完全虚构/生成式测试素材。V1-24 起 `examples/imports`、`examples/settings` 与 `examples/shared-packs` 也围绕这套 Fixture 联动；旧的独立 `examples/people` / `examples/works` 已合并，避免重复示例漂移。
 
 V1-09 同时支持 Shared Pack：公共基础资料可以放在独立目录/仓库中只读挂载，而本地同 ID 实体始终拥有更高优先级。
 

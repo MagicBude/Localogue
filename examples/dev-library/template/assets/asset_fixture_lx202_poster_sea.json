@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_fixture_lx202_poster_sea",
+  "type": "poster",
+  "storagePath": "asset-files/posters/lx-202-poster-sea-breeze.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1086,
+  "height": 1448,
+  "fileSize": 285605,
+  "sha256": "81f5e89e0b0b7a34e8a410824855756e66869ed8418c21d24d8909585c48431c",
+  "subjectType": "work",
+  "subjectId": "work_fixture_lx_202",
+  "createdAt": "2026-09-04T10:55:00+08:00"
+}

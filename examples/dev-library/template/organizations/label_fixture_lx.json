@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "label_fixture_lx",
+  "kind": "label",
+  "names": {
+    "ja": "LX テストレーベル",
+    "zh-CN": "LX 测试厂牌",
+    "en": "LX Test Label"
+  },
+  "descriptions": {
+    "ja": "開発用の架空レーベル",
+    "zh-CN": "仅用于开发测试的虚构厂牌",
+    "en": "Fictional label for development fixtures."
+  }
+}
