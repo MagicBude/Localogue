@@ -136,6 +136,7 @@ if (!errors.length) {
   const desktopRuntimeContract = readFileSync(path.join(root, "src/application/platform/desktop-runtime-contract.ts"), "utf8");
   const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
+  const desktopAppShell = readFileSync(path.join(root, "apps/desktop/src/desktop-app-shell.tsx"), "utf8");
   const desktopWorkPages = readFileSync(path.join(root, "apps/desktop/src/desktop-work-pages.tsx"), "utf8");
   const desktopWorkSurface = desktopApp + desktopWorkPages;
   const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
@@ -207,7 +208,7 @@ if (!errors.length) {
   for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
     if (!desktopCatalogBrowser.includes(token)) errors.push(`V1-19 Desktop 分类浏览缺少目录维度：${token}`);
   }
-  if (!desktopApp.includes('{ id: "browse", label: "浏览"')) {
+  if (!desktopAppShell.includes('{ id: "browse", label: "浏览"')) {
     errors.push("V1-19 Desktop 主导航必须提供分类浏览入口。");
   }
   if (!desktopI18n.includes("DesktopI18nProvider") || !desktopI18n.includes("DesktopLanguageControls") || !desktopI18n.includes("useDesktopI18n")) {
@@ -549,7 +550,7 @@ if (!errors.length) {
   for (const token of ["createLibraryProfile", "createEmptyLibraryProfile", "nextLibraryProfileName", "ensureLibraryProfiles", "applyLibraryProfile", "syncActiveLibraryProfile", "hasUnsavedLibraryPaths"]) {
     if (!libraryProfiles.includes(token)) errors.push(`V1-24 Library Profile helper 缺少：${token}`);
   }
-  if (!desktopApp.includes("switchLibraryProfile") || !desktopApp.includes("source-profile-select") || !desktopApp.includes("source-profile-manage")) {
+  if (!desktopApp.includes("switchLibraryProfile") || !desktopAppShell.includes("source-profile-select") || !desktopAppShell.includes("source-profile-manage")) {
     errors.push("V1-24 Desktop 必须在侧栏提供资料库快速切换与管理入口。");
   }
   if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建资料库")')) {

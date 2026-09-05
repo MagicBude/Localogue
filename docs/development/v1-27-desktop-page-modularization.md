@@ -33,3 +33,5 @@ Desktop 早期为了快速建立完整产品壳，把首页、作品、人物、
 第三批已将 Media 工作台迁入独立模块，并删除 `App.tsx` 中只为 Media 服务的 Adapter、Importer 与展示 helper。页面继续复用 `MediaScanCoordinator` 和各 Application Service；资料刷新使用 stale-while-refresh，避免列表闪烁和滚动位置跳动。
 
 Media 内部继续把扫描状态、NFO / 图片预览、词表审计、单文件诊断和媒体列表提取到 `desktop-media-sections.tsx`。这些 Section 只接收数据与回调，不创建 Coordinator、不写 Repository；页面控制器继续统一持有任务状态和执行顺序。
+
+Desktop 外壳使用相同原则：`desktop-app-shell.tsx` 只渲染侧栏和顶栏，并通过回调上报导航、刷新、折叠和 Profile 切换意图；`App.tsx` 继续负责持久化与 Native Bridge。这样展示组件不会因为复用而获得不必要的平台权限。

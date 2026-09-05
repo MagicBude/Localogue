@@ -15,7 +15,8 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
 import { DesktopGovernance } from "./desktop-governance";
-import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
+import { useDesktopI18n } from "./desktop-i18n";
+import { DesktopSidebar, DesktopTopbar, type DesktopPage } from "./desktop-app-shell";
 import { DesktopWorkDetailPage, DesktopWorksPage } from "./desktop-work-pages";
 import { DesktopPeoplePage, DesktopPersonDetailPage } from "./desktop-person-pages";
 import { DesktopHomePage } from "./desktop-home-page";
@@ -43,21 +44,7 @@ const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   webUrl: "http://127.0.0.1:3000",
 };
 
-type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings";
 type DetailTarget = { kind: "work" | "person"; id: string } | null;
-
-const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short: string }> = [
-  { id: "home", label: "首页", eyebrow: "HOME", short: "HM" },
-  { id: "works", label: "作品", eyebrow: "WORKS", short: "WK" },
-  { id: "people", label: "人物", eyebrow: "PEOPLE", short: "PP" },
-  { id: "browse", label: "浏览", eyebrow: "BROWSE", short: "BR" },
-  { id: "review", label: "审核", eyebrow: "REVIEW", short: "RV" },
-  { id: "curation", label: "治理", eyebrow: "CURATION", short: "CU" },
-  { id: "history", label: "历史", eyebrow: "HISTORY", short: "HI" },
-  { id: "media", label: "媒体", eyebrow: "MEDIA", short: "MD" },
-  { id: "packs", label: "资料包", eyebrow: "PACKS", short: "PK" },
-  { id: "settings", label: "设置", eyebrow: "SETTINGS", short: "ST" },
-];
 
 export default function App() {
   const { t } = useDesktopI18n();
@@ -264,88 +251,30 @@ export default function App() {
 
   return (
     <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
-      <aside className="sidebar">
-        <button className="brand" onClick={() => navigate("home")}>
-          <span className="brand-mark">L</span>
-          <span className="brand-copy">
-            <strong>Localogue</strong>
-            <small>{`Desktop · ${runtime?.version ?? "…"}`}</small>
-          </span>
-        </button>
-
-        <nav className="nav-list" aria-label="Desktop navigation">
-          {NAV_ITEMS.map((item) => (
-            <button
-              className={page === item.id ? "nav-item active" : "nav-item"}
-              key={item.id}
-              onClick={() => navigate(item.id)}
-            >
-              <span className="nav-item-short" aria-hidden="true">{item.short}</span>
-              <span className="nav-item-label">{t(item.label)}</span>
-              <small>{item.eyebrow}</small>
-            </button>
-          ))}
-        </nav>
-
-        <div className="sidebar-spacer" />
-        <div className="source-summary">
-          <span className="eyebrow">{t("当前资料库")}</span>
-          {savedSettings.libraryProfiles?.length ? (
-            <>
-              <strong className="source-profile-name">{savedActiveProfile?.name ?? t("未绑定配置")}</strong>
-              <select
-                className="source-profile-select"
-                aria-label={t("快速切换资料库")}
-                disabled={busy || !profileNativeRuntimeReady}
-                value={savedSettings.activeLibraryProfileId ?? ""}
-                onChange={(event) => void switchLibraryProfile(event.target.value)}
-              >
-                <option value="" disabled>{t("选择资料库…")}</option>
-                {savedSettings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
-              </select>
-            </>
-          ) : <strong className="source-profile-name">{t("尚未创建资料库")}</strong>}
-          <small>
-            {savedSettings.libraryPath
-              ? t("Private + {count} Shared", { count: packInfos.filter((item) => item.valid).length })
-              : t("{count} Shared", { count: packInfos.filter((item) => item.valid).length })}
-          </small>
-          <button className="source-profile-manage" type="button" onClick={() => navigate("settings")}>
-            {t(savedSettings.libraryProfiles?.length ? "管理资料库" : "+ 新建资料库")}
-          </button>
-        </div>
-        <button
-          className="sidebar-collapse-button"
-          title={sidebarCollapsed ? t("展开侧边栏") : t("收起侧边栏")}
-          aria-label={sidebarCollapsed ? t("展开侧边栏") : t("收起侧边栏")}
-          onClick={() => setSidebarCollapsed((value) => {
-            const next = !value;
-            window.localStorage.setItem("localogue.desktop.sidebar-collapsed", String(next));
-            return next;
-          })}
-          type="button"
-        >
-          <span aria-hidden="true">{sidebarCollapsed ? "→" : "←"}</span>
-          <span className="sidebar-collapse-label">{sidebarCollapsed ? t("展开侧边栏") : t("收起侧边栏")}</span>
-        </button>
-        <div className="runtime-pill">
-          <span className={runtime ? "runtime-dot online" : "runtime-dot"} />
-          <span>{runtime ? `${runtime.environment} · ${runtime.version}` : "connecting"}</span>
-        </div>
-      </aside>
+      <DesktopSidebar
+        page={page}
+        collapsed={sidebarCollapsed}
+        runtime={runtime}
+        settings={savedSettings}
+        packInfos={packInfos}
+        busy={busy}
+        profileSwitchEnabled={profileNativeRuntimeReady}
+        onNavigate={navigate}
+        onSwitchProfile={(profileId) => void switchLibraryProfile(profileId)}
+        onToggleCollapsed={() => setSidebarCollapsed((value) => {
+          const next = !value;
+          window.localStorage.setItem("localogue.desktop.sidebar-collapsed", String(next));
+          return next;
+        })}
+      />
 
       <main className="content-shell">
-        <header className="topbar">
-          <div>
-            <span className="eyebrow">{`LOCAL FIRST · DESKTOP · ${runtime?.version ?? "…"}`}</span>
-            <strong>{t(NAV_ITEMS.find((item) => item.id === page)?.label ?? "首页")}</strong>
-          </div>
-          <div className="topbar-actions">
-            <DesktopLanguageControls />
-            <button className="ghost-button" onClick={refreshLibrary}>{t("刷新资料")}</button>
-            <button className="ghost-button" onClick={() => navigate("settings")}>{t("实例设置")}</button>
-          </div>
-        </header>
+        <DesktopTopbar
+          page={page}
+          version={runtime?.version}
+          onRefresh={refreshLibrary}
+          onOpenSettings={() => navigate("settings")}
+        />
 
         <div className="status-line">{message}</div>
 
