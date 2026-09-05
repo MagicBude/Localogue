@@ -77,6 +77,7 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 - [ADR-037：Desktop Stable Refresh 与 Source Genre Localization](ADR-037-desktop-stable-refresh-and-source-genre-localization.md)
 
 - [ADR-038：Curated Genre Aliases 与 Work Detail Hero Asset Policy](ADR-038-curated-genre-aliases-and-detail-hero-assets.md)
+- [ADR-041：作品画廊完整显示所有视觉资源](ADR-041-work-gallery-shows-complete-visual-assets.md)
 
 ### V1-23
 - [ADR-039：Desktop Governance 使用 Native Audit / Snapshot 边界，Portable Pack 使用事务式安装](ADR-039-desktop-governance-native-audit-and-portable-pack-boundary.md)

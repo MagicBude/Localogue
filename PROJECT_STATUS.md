@@ -4,6 +4,8 @@
 
 **V1-27D：Entity Localization & Browse Relationship Presentation。**
 
+当前维护修正已统一文档、Community Catalog 审计口径与作品画廊行为：`registry:audit` 默认审计社区目录；作品详情画廊可完整浏览 poster / cover / gallery / fanart / screenshot，并按图片真实比例适配，不再固定为横版舞台。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：
@@ -338,5 +340,4 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 ## V1-27C 当前状态
 
 Maker / Label / Series Registry Foundation 已通过 V1-27A/V1-27B 验证；V1-27C 首次建立 Registry Evidence → Community Catalog 的 Canonical 晋升链路。当前 Community Catalog 为 22 Maker / 13 Label / 9 Series；当前 Demo / Private Library 自身仍可保留独立自定义实体，Browse 会在“无作品 / 全部”中与只读 Community Catalog 合并显示。
-
 

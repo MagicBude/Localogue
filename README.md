@@ -139,7 +139,7 @@ pnpm check
 它依次执行：
 
 ```text
-validate:data → validate:audit → validate:fixture → validate:platform → validate:desktop → lint → typecheck → desktop:check → build
+desktop:clean:legacy → validate:data → validate:audit → validate:fixture → validate:vocabulary → validate:provider-coverage → validate:registry → validate:catalog → validate:platform → validate:desktop → lint → typecheck → desktop:check → build
 ```
 
 ## 推荐学习顺序
@@ -716,7 +716,7 @@ V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.
 
 ### V1-24B Gallery / Presentation compatibility
 
-真实本地图片即使缺少历史 `width / height` 元数据，也会在运行时按实际图片尺寸恢复横版 Hero Gallery；Work 私人显示首图可从 poster / cover / gallery / fanart / screenshot 中选择，默认仍优先 poster / cover。
+真实作品图片即使缺少历史 `width / height` 元数据，也会在运行时按实际图片尺寸切换 portrait / square / landscape 舞台；Work Detail 画廊与私人显示首图均支持 poster / cover / gallery / fanart / screenshot，主舞台以图片固有比例和双向最大尺寸约束完整显示。
 
 ### Organization / Series Registry 与 Community Catalog
 
@@ -732,4 +732,3 @@ pnpm validate:catalog
 pnpm registry:audit
 pnpm registry:coverage
 ```
-

@@ -67,4 +67,4 @@ Hotfix 2 不改变 Asset / Work 数据模型，而把 Presentation 改成：
 
 ## Hotfix 3 修订
 
-完整 1271 条 Source Genre Catalog 已移出仓库，只保留 67 条人工批准来源别名，并将 Canonical Genre 收敛为 33 个明确题材。Work Detail 顶部 Hero Gallery 同时不再展示 poster，poster 继续服务作品墙/列表封面。
+完整 1271 条 Source Genre Catalog 已移出仓库，只保留 67 条人工批准来源别名，并将 Canonical Genre 收敛为 33 个明确题材。V1-22 当时曾让 Work Detail 顶部 Hero Gallery 排除 poster；这项 Presentation 决策后来由 ADR-041 取代，当前画廊会完整显示属于作品的 poster / cover / gallery / fanart / screenshot，并按真实比例适配。

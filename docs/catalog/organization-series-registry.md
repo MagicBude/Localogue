@@ -58,7 +58,7 @@ pnpm registry:audit
 ```
 
 `validate:registry` 负责 Registry JSON/CSV 一致性、Provider ID 身份和 Evidence 状态；
-`registry:audit` 负责 Maker → Label → Series 结构关系。
+`registry:audit` 默认检查 Community Catalog 的 Maker → Label → Series 结构关系，并报告缺少 parent 的 Label / Series。需要检查某个具体 JSON Library 时使用 `pnpm registry:audit -- --library <path>`。
 
 ## 后续数据建设顺序
 
@@ -95,4 +95,3 @@ Community Catalog
 Community Catalog 不属于任何 Library Profile，也不会改变 Private Library 或自动挂载 Shared Pack。Desktop 的“有作品”仍严格以当前 Profile 的 Work 关系计算；“无作品 / 全部”才补充 Catalog 参考实体。
 
 完整概念说明见 `docs/catalog/library-profile-registry-community-catalog.md`。
-

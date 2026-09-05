@@ -4,24 +4,30 @@ import process from "node:process";
 
 const args = process.argv.slice(2);
 const libraryIndex = args.indexOf("--library");
-const libraryRoot = path.resolve(libraryIndex >= 0 && args[libraryIndex + 1] ? args[libraryIndex + 1] : "data/demo-library");
-const readDir = (name) => {
-  const directory = path.join(libraryRoot, name);
+const libraryRoot = libraryIndex >= 0 && args[libraryIndex + 1]
+  ? path.resolve(args[libraryIndex + 1])
+  : null;
+const readDir = (root, name) => {
+  const directory = path.join(root, name);
   if (!existsSync(directory)) return [];
   return readdirSync(directory)
     .filter((file) => file.endsWith(".json"))
     .map((file) => JSON.parse(readFileSync(path.join(directory, file), "utf8")));
 };
 
-const organizations = readDir("organizations");
-const series = readDir("series");
-const works = readDir("works");
+const readCatalog = (name) => JSON.parse(readFileSync(path.resolve("resources/catalogs", name), "utf8")).items ?? [];
+const organizations = libraryRoot ? readDir(libraryRoot, "organizations") : readCatalog("community-organizations.json");
+const series = libraryRoot ? readDir(libraryRoot, "series") : readCatalog("community-series.json");
+const works = libraryRoot ? readDir(libraryRoot, "works") : [];
 const organizationById = new Map(organizations.map((item) => [item.id, item]));
 const errors = [];
 const warnings = [];
 
 for (const organization of organizations) {
-  if (!organization.parentOrganizationId) continue;
+  if (!organization.parentOrganizationId) {
+    if (organization.kind === "label") warnings.push(`Label 尚未记录归属 Maker：${organization.id}`);
+    continue;
+  }
   const parent = organizationById.get(organization.parentOrganizationId);
   if (!parent) {
     errors.push(`Organization parent 不存在：${organization.id} -> ${organization.parentOrganizationId}`);
@@ -59,6 +65,7 @@ const counts = {
 };
 
 console.log("# Organization & Series Audit");
+console.log(libraryRoot ? `Scope: Library (${libraryRoot})` : "Scope: Community Catalog");
 console.table(counts);
 if (warnings.length) {
   console.log("\nWarnings:");

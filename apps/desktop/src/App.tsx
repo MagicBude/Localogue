@@ -42,6 +42,7 @@ import {
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { PersonAssetGovernance } from "./desktop-person-asset-governance";
 import {
@@ -728,7 +729,7 @@ function WorkDetailPage({
     <div className="page-stack desktop-work-detail-page">
       <button className="back-button" onClick={onBack}>← {t("返回作品库")}</button>
 
-      <WorkAssetGallery
+      <DesktopWorkAssetGallery
         assets={assets}
         workCode={work.code}
         mediaCount={media.length}
@@ -742,7 +743,7 @@ function WorkDetailPage({
               <span className="code-badge">{work.code}</span>
               <span className="desktop-work-record__summary-counts">
                 <span>{t("本地媒体")} <strong>{media.length}</strong></span>
-                <span>{t("本地图片")} <strong>{assets.length}</strong></span>
+                <span>{t("作品图片")} <strong>{assets.length}</strong></span>
               </span>
             </div>
             <h1>{localizeText(work.titles, metadataLanguage, work.code)}</h1>
@@ -790,7 +791,7 @@ function WorkDetailPage({
 
       <section className="settings-card desktop-local-assets-section">
         <div className="section-heading">
-          <div><span className="eyebrow">LOCAL ASSETS</span><h2>{t("本地图片资产")}</h2></div>
+          <div><span className="eyebrow">WORK ASSETS</span><h2>{t("作品图片资产")}</h2></div>
           <small className="muted">{t("{count} 个资产", { count: assets.length })}</small>
         </div>
         {assets.length ? (
@@ -809,127 +810,6 @@ function WorkDetailPage({
         ) : <p className="muted">{t("尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / fanart / thumb 导入。")}</p>}
       </section>
     </div>
-  );
-}
-
-function isLandscapeWorkHeroAsset(asset: Asset): boolean {
-  if (!["gallery", "fanart", "screenshot", "cover"].includes(asset.type)) return false;
-  if (asset.mimeType && !asset.mimeType.startsWith("image/")) return false;
-
-  // 有尺寸时直接按尺寸过滤；旧版 Desktop 导入的本地图片可能没有 width / height，
-  // fanart / gallery / screenshot 仍应进入候选，由 <img> 的 naturalWidth / naturalHeight
-  // 在运行时做第二次方向校验。未知尺寸的 cover 仍保守排除，避免竖版封面回到 Hero。
-  if (asset.width && asset.height) return asset.width / asset.height >= 1.2;
-  return asset.type !== "cover";
-}
-
-function WorkAssetGallery({
-  assets,
-  workCode,
-  mediaCount,
-  assetTypeLabel,
-}: {
-  assets: Asset[];
-  workCode: string;
-  mediaCount: number;
-  assetTypeLabel: (type: Asset["type"]) => string;
-}) {
-  const { t } = useDesktopI18n();
-  const candidates = useMemo(
-    () => sortWorkAssets(assets).filter((asset) => isLandscapeWorkHeroAsset(asset)),
-    [assets],
-  );
-  const candidateKey = useMemo(() => candidates.map((asset) => asset.id).join("\0"), [candidates]);
-  const [index, setIndex] = useState(0);
-  const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
-  const [validatedIds, setValidatedIds] = useState<Set<string>>(() => new Set());
-
-  useEffect(() => {
-    setIndex(0);
-    setRejectedIds(new Set());
-    setValidatedIds(new Set());
-  }, [workCode, candidateKey]);
-
-  const imageAssets = useMemo(
-    () => candidates.filter((asset) => !rejectedIds.has(asset.id)),
-    [candidates, rejectedIds],
-  );
-
-  useEffect(() => {
-    setIndex((current) => imageAssets.length ? Math.min(current, imageAssets.length - 1) : 0);
-  }, [imageAssets.length]);
-
-  const current = imageAssets[index];
-  const canNavigate = imageAssets.length > 1;
-  const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
-  const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
-  const needsRuntimeValidation = Boolean(current && (!current.width || !current.height));
-  const runtimeValidated = Boolean(current && validatedIds.has(current.id));
-
-  if (!imageAssets.length) return null;
-
-  return (
-    <section className="desktop-work-gallery" aria-label={t("作品媒体画廊")}>
-      <div className="desktop-work-gallery__stage is-landscape">
-        {current ? (
-          <DesktopAssetImage
-            asset={current}
-            alt={`${workCode} ${current.type}`}
-            fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>}
-            style={needsRuntimeValidation && !runtimeValidated ? { visibility: "hidden" } : undefined}
-            onLoad={(event) => {
-              const image = event.currentTarget;
-              const ratio = image.naturalWidth / Math.max(image.naturalHeight, 1);
-              if (ratio >= 1.2) {
-                setValidatedIds((currentIds) => {
-                  if (currentIds.has(current.id)) return currentIds;
-                  const nextIds = new Set(currentIds);
-                  nextIds.add(current.id);
-                  return nextIds;
-                });
-                return;
-              }
-              setRejectedIds((currentIds) => {
-                if (currentIds.has(current.id)) return currentIds;
-                const nextIds = new Set(currentIds);
-                nextIds.add(current.id);
-                return nextIds;
-              });
-            }}
-          />
-        ) : (
-          <span className="desktop-work-gallery__empty"><b>{workCode}</b><small>{t("暂无本地图片")}</small></span>
-        )}
-        {canNavigate ? <>
-          <button className="desktop-work-gallery__arrow is-prev" type="button" onClick={previous} aria-label={t("上一张")}>‹</button>
-          <button className="desktop-work-gallery__arrow is-next" type="button" onClick={next} aria-label={t("下一张")}>›</button>
-        </> : null}
-        <div className="desktop-work-gallery__overlay">
-          <span>{current ? assetTypeLabel(current.type) : t("本地图片")}</span>
-          <span>{imageAssets.length ? `${index + 1} / ${imageAssets.length}` : `0 / 0`}</span>
-        </div>
-      </div>
-      <div className="desktop-work-gallery__rail">
-        <div className="desktop-work-gallery__tabs" role="tablist" aria-label={t("作品图片")}>
-          {imageAssets.map((asset, assetIndex) => (
-            <button
-              className={assetIndex === index ? "is-active" : ""}
-              key={asset.id}
-              onClick={() => setIndex(assetIndex)}
-              role="tab"
-              type="button"
-              aria-selected={assetIndex === index}
-            >
-              {assetTypeLabel(asset.type)} <small>{assetIndex + 1}</small>
-            </button>
-          ))}
-        </div>
-        <div className="desktop-work-gallery__counts">
-          <span>{t("本地媒体")} <strong>{mediaCount}</strong></span>
-          <span>{t("本地图片")} <strong>{assets.length}</strong></span>
-        </div>
-      </div>
-    </section>
   );
 }
 

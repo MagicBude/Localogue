@@ -7,10 +7,9 @@ Series 是独立实体，用于把同一作品企划或系列下的多个 Work �
 - `id`
 - `names`
 - `descriptions`
-- `makerId`
-- `labelId`
-- `assetIds`
-- `externalRefs`
+- `parentOrganizationId`（可选，优先指向已确认的 Label；只有 Maker 证据时可指向 Maker）
+
+V1 当前不在 Series 上同时保存 `makerId` 与 `labelId`。两份可互相矛盾的父级字段会让关系治理和未来 SQLite 外键映射变复杂，因此只保存一条有 Evidence 支持的最具体父级关系；没有可靠证据时保持为空。
 
 ## 页面能力
 

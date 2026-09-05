@@ -136,6 +136,7 @@ if (!errors.length) {
   const desktopRuntimeContract = readFileSync(path.join(root, "src/application/platform/desktop-runtime-contract.ts"), "utf8");
   const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
+  const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
     errors.push("V1-18 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
@@ -156,14 +157,14 @@ if (!errors.length) {
   for (const collection of ["works", "people", "genres", "tags", "assets", "media-files"]) {
     if (!desktopContracts.includes(`| "${collection}"`)) errors.push(`V1-22 DesktopDeletableLibraryCollection 缺少 Native 已受控开放的集合：${collection}`);
   }
-  if (!desktopApp.includes("function WorkAssetGallery") || !desktopApp.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
+  if (!desktopApp.includes("DesktopWorkAssetGallery") || !desktopWorkGallery.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
     errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
-  if (!desktopApp.includes("isLandscapeWorkHeroAsset") || !desktopApp.includes('asset.width / asset.height >= 1.2')) {
-    errors.push("V1-24B Work Detail Hero Gallery 必须严格筛选横版资产，避免竖版图片撑坏顶部画廊。");
+  if (!desktopWorkGallery.includes("isWorkGalleryAsset") || !desktopWorkGallery.includes('["poster", "cover", "gallery", "fanart", "screenshot"]')) {
+    errors.push("ADR-041 Work Detail Gallery 必须完整包含 poster / cover / gallery / fanart / screenshot 视觉资源。");
   }
-  if (!desktopApp.includes('["gallery", "fanart", "screenshot", "cover"]') || desktopApp.includes('images.filter((asset) => asset.type === "poster" || asset.type === "cover")')) {
-    errors.push("V1-22/V1-24B Work Detail Hero Gallery 不得使用 poster 作为回退；没有横版资产时应直接不显示 Hero Gallery。");
+  if (!desktopWorkGallery.includes("galleryOrientation") || !desktopWorkGallery.includes("naturalWidth") || !desktopWorkGallery.includes("naturalHeight")) {
+    errors.push("ADR-041 Work Detail Gallery 必须根据 Asset 尺寸与图片真实尺寸适配方向。");
   }
   const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
@@ -594,7 +595,7 @@ if (!errors.length) {
   if (!viteConfig.includes("codeSplitting") || !viteConfig.includes('name: "vendor"')) {
     errors.push("V1-24 Desktop Vite 必须通过 Rolldown codeSplitting 拆分 vendor，而不是单纯提高 chunk 警告阈值。");
   }
-  // V1-24B Person Portrait / Gallery Asset Governance + strict landscape Work Hero Gallery.
+  // V1-24B Person Portrait / Gallery Asset Governance + ADR-041 complete Work Gallery.
   const personAssetGovernance = readFileSync(path.join(root, "apps/desktop/src/desktop-person-asset-governance.tsx"), "utf8");
   for (const token of ["pickImageFile", "importPrivateAssetFile", "saveAsset", "deletePrivateAsset", "galleryAssetIds", 'subjectType: "person"']) {
     if (!personAssetGovernance.includes(token)) errors.push(`V1-24B Person Asset Governance 缺少：${token}`);
@@ -602,11 +603,8 @@ if (!errors.length) {
   if (!rust.includes("pick_image_file") || !permission.includes('"pick_image_file"') || !desktopBridge.includes("pickImageFile")) {
     errors.push("V1-24B 图片导入必须通过受限 Image Picker + import_private_asset_file Native Boundary。");
   }
-  if (!desktopApp.includes("isLandscapeWorkHeroAsset") || !desktopApp.includes('return asset.width / asset.height >= 1.2')) {
-    errors.push("V1-24B Work Detail Gallery 必须只接受明确横版 Gallery/Fanart/Screenshot/横版 Cover，禁止 poster 回退。");
-  }
-  if (!desktopApp.includes("naturalWidth") || !desktopApp.includes("rejectedIds") || !desktopApp.includes('return asset.type !== "cover"')) {
-    errors.push("V1-24B Work Detail Gallery 必须兼容旧版无 width/height 的 fanart/gallery/screenshot，并在图片加载后用 naturalWidth/naturalHeight 二次拒绝竖图。");
+  if (!desktopStyles.includes("object-fit: contain") || !desktopStyles.includes("position: absolute") || !desktopStyles.includes(".desktop-work-gallery__stage.is-portrait") || !desktopStyles.includes(".desktop-work-gallery__stage.is-square")) {
+    errors.push("ADR-041 Work Detail Gallery 必须完整显示图片，并为 portrait / square 提供自适应舞台。");
   }
   if (!desktopPresentation.includes('["poster", "cover", "gallery", "fanart", "screenshot"]')) {
     errors.push("V1-24 Presentation Work 候选必须包含 poster / cover / gallery / fanart / screenshot，不能只剩 poster / cover。");

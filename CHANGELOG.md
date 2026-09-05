@@ -1,5 +1,12 @@
 # Changelog
 
+## V1-27 Maintenance - Documentation / Gallery Consistency
+
+- 修正文档与当前实现的偏移：README 完整列出 `pnpm check` 检查链，Series 模型统一记录当前 `parentOrganizationId` 关系。
+- `registry:audit` 默认改为检查 Community Catalog，避免把 Demo Library 的 2 Maker / 2 Label / 3 Series 误报成社区目录审计结果；仍可通过 `--library` 检查指定资料库。
+- Work Detail 画廊恢复 `poster / cover` 浏览，并继续显示 gallery / fanart / screenshot；图片使用与舞台同尺寸的绝对定位图像框，避免 Grid 固有最小尺寸让横图和竖版封面溢出后被截断，并按实际宽高切换 portrait / square / landscape 舞台。
+- 新增 ADR-041，明确完整封面可见性优先于旧版“横图 Hero only”策略，且不改变 Canonical 或 Native 读取边界。
+
 ## V1-27D - Entity Localization & Browse Relationship Presentation
 
 - Community Catalog 增加 `nameKinds`，区分来源原名、审核品牌写法、社区翻译与社区转写，避免把社区显示名伪装成官方名称。
@@ -715,4 +722,3 @@
 - Series 新增可选 `parentOrganizationId`，补齐 Maker → Label → Series 归属链。
 - 新增 `validate:registry` 与 `registry:audit`，并把 Registry Validator 接入 `pnpm check`。
 - 不进行基于名称相似度的自动 Organization 合并。
-

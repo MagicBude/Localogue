@@ -2,7 +2,7 @@
 
 ## 状态
 
-Accepted — V1-22 Hotfix 3
+Superseded in part — V1-22 Hotfix 3；画廊 Asset Policy 由 ADR-041 取代
 
 ## 背景
 
@@ -27,6 +27,8 @@ V1-22 曾把用户提供的 1271 条跨站 `genre.csv` 完整镜像进仓库，�
 `デビュー作`、`周年`、`ハイビジョン`、`有码`、`Blu-ray` 等保持 source-only 或等待未来专门 Domain 字段。
 
 ### 3. Poster 不进入 Work Detail Hero Gallery
+
+> 此小节记录 V1-22 当时的决定，已由 ADR-041 取代。Genre 相关决定继续有效。
 
 Poster 继续用于：
 

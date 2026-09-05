@@ -6,6 +6,8 @@
 
 当前产品版本继续为 `0.1.25`。V1-27A/B/C 已建立 Organization / Series Registry Evidence 与 Community Catalog；V1-27D 完善多语言显示和父级关系展示，不把 Browse 扩展成级联作品筛选器。
 
+维护修正：README 与 Series 模型文档已和当前实现对齐；`registry:audit` 默认审计 Community Catalog；作品详情画廊完整显示 poster / cover / gallery / fanart / screenshot，并根据真实图片比例切换舞台布局。
+
 
 
 ## V1-27D Entity Localization / Browse Boundary

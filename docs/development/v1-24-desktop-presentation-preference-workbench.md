@@ -98,7 +98,7 @@ Shared Pack 消失、外部文件损坏等情况仍可能制造 stale Preference
 V1-24A 完成“选择与解析”。V1-24B 已继续完成：
 
 - Person Portrait / Gallery 浏览与 Private 图片导入；
-- Work 横版 Hero Gallery；
+- Work 完整图片画廊（当前由 ADR-041 统一支持 poster / cover / gallery / fanart / screenshot）；
 - Shared Pack Asset 的受控只读二进制解析；
 - Private `asset-files/` 孤儿文件检查与安全清理。
 
