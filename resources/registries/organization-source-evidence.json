@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "stage": "V1-27A",
-  "catalogStatus": "verified-slice-and-name-evidence",
+  "stage": "V1-27B",
+  "catalogStatus": "verified-slices-and-name-evidence",
   "items": [
     {
       "provider": "javbus",
@@ -182,6 +182,406 @@
       "canonicalId": null,
       "evidence": "JAVLibrary public item/post metadata",
       "noteZh": ""
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "3152",
+      "name": "エスワン ナンバーワンスタイル",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=3152",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "1509",
+      "name": "ムーディーズ",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=1509",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "2661",
+      "name": "マドンナ",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=2661",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "1219",
+      "name": "アイデアポケット",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=1219",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "6329",
+      "name": "Fitch",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=6329",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "1227",
+      "name": "アタッカーズ",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=1227",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "5032",
+      "name": "E-BODY",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=5032",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "3890",
+      "name": "プレミアム",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=3890",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "6304",
+      "name": "本中",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=6304",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "1548",
+      "name": "レッド",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=1548",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "5238",
+      "name": "OPPAI",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=5238",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "6602",
+      "name": "えむっ娘ラボ",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=6602",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "4469",
+      "name": "kawaii",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=4469",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "4581",
+      "name": "kira☆kira",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=4581",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "4641",
+      "name": "ダスッ！",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=4641",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "45103",
+      "name": "溜池ゴロー",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=45103",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "5552",
+      "name": "痴女ヘブン",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=5552",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "40147",
+      "name": "はじめ企画",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=40147",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "45287",
+      "name": "Hunter",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=45287",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "5486",
+      "name": "BeFree",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=5486",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "308264",
+      "name": "Hsoda",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=308264",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "maker",
+      "sourceId": "5665",
+      "name": "ROOKIE",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/av/list/?maker=5665",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 maker ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Maker 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2066254",
+      "name": "素人寝起きすっぴん倶楽部",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2066254",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2066397",
+      "name": "素人ホイホイtower",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2066397",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "46092",
+      "name": "素人ムクムク",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=46092",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2066780",
+      "name": "素人ムクムク-X-",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2066780",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2065719",
+      "name": "素人ムクムク-クスリ-",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2065719",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2063761",
+      "name": "素人ムクムク-塩-",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2063761",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2065611",
+      "name": "素人ムクムク-職-",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2065611",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2063416",
+      "name": "東京恋人",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2063416",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2065078",
+      "name": "東京恋人酔拳",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2065078",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "2063000",
+      "name": "Buzzシロウト",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=2063000",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "25221",
+      "name": "ガチ素人",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=25221",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": "5051",
+      "name": "出会い系素人",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "https://video.dmm.co.jp/amateur/list/?label=5051",
+      "noteZh": "公开 FANZA 目录中的名称链接直接包含该 label ID；作为可复核 URL ID/name 证据保存，不据此声明完整 Label 目录。"
+    },
+    {
+      "provider": "s1-official",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "エスワン ナンバーワンスタイル",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "https://s1s1s1.com/",
+      "noteZh": "官方 Maker 网站自我标识，仅作为名称证据；不把站内 Series ID 当作 FANZA Maker ID。"
+    },
+    {
+      "provider": "ideapocket-official",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "アイデアポケット",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "https://ideapocket.com/",
+      "noteZh": "官方 Maker 网站自我标识，仅作为名称证据；不把站内 Series ID 当作 FANZA Maker ID。"
+    },
+    {
+      "provider": "moodyz-official",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "MOODYZ",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "https://moodyz.com/",
+      "noteZh": "官方 Maker 网站自我标识，仅作为名称证据；不把站内 Series ID 当作 FANZA Maker ID。"
+    },
+    {
+      "provider": "madonna-official",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "マドンナ",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "https://madonna-av.com/",
+      "noteZh": "官方 Maker 网站自我标识，仅作为名称证据；不把站内 Series ID 当作 FANZA Maker ID。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "ティッシュ",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "DMM rental detail sample / IPZZ-698",
+      "noteZh": "真实作品样本中的 Label 名称；没有独立 Provider ID 证据，因此不自动与其它 Label 合并。"
+    },
+    {
+      "provider": "fanza",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Dish",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "Javinfo FANZA sample / IPZZ-597",
+      "noteZh": "真实作品样本中的 Label 名称；没有独立 Provider ID 证据，因此不自动与其它 Label 合并。"
     }
   ]
 }

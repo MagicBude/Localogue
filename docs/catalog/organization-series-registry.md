@@ -1,54 +1,71 @@
-# V1-27A：Maker / Label / Series Registry Foundation
+# Organization & Series Registry
 
-## 当前模型审计
+## 目标
 
-Localogue 的 `Organization` 已经区分 `maker / label / agency / other`，并允许 `parentOrganizationId`，因此 Maker → Label 不需要另起一套实体模型。V1-27A 给 `Series` 增加可选 `parentOrganizationId`，补齐 `Maker → Label → Series` 的表达能力。
+Localogue Community Data 优先建设数量相对有限的 Maker、Label、Series Registry。
+这个仓库保存经过人工审核、可复核的静态资料；它不是 Provider 抓取器，也不承担在线采集。
 
-父子关系必须来源明确：系列优先挂到 Label；只有 Maker 证据时可暂挂 Maker；没有证据保持空值。
+## 实体关系
 
+```text
+Maker
+  └─ Label
+       └─ Series
+```
 
-## 当前示例库审计基线
+- Label 的 `parentOrganizationId` 只能指向 Maker。
+- Series 的 `parentOrganizationId` 可以指向最具体、且有证据支持的 Label 或 Maker。
+- 没有足够证据时保持空值，不根据名称相似度自动猜测关系。
 
-当前 `data/demo-library` 的结构基线为：
+## Evidence 与 Canonical 的边界
 
-- Maker：2
-- Label：2
-- Maker → Label：2 组关系均已通过 `parentOrganizationId` 表达
-- Series：3
-- 已关联父 Organization 的 Series：0
-- 尚未关联的 Series：3
-- Works：8
+Provider Evidence 只回答“某来源公开出现过什么名称/ID”。
+它不会因为名称相似就直接变成 Canonical Maker / Label / Series，也不会跨 Provider 复用 ID。
 
-这 3 个未关联 Series 不代表数据错误；它们是旧模型没有归属字段留下的历史空值，因此 V1-27A 只 warning，不自动猜测归属。
+Evidence 状态：
 
-## Provider 能力
+- `verified`：当前来源内的 ID/name 配对有可复核证据。
+- `name-only`：只确认名称出现，不声称存在稳定 Provider ID。
 
-| Provider | Maker | Label | Series | 本轮定位 |
-| --- | --- | --- | --- | --- |
-| FANZA/DMM v3 | MakerSearch 可枚举 | 暂未确认独立枚举 | SeriesSearch 可枚举 | 下一轮主数据源 |
-| JAVDB | typed maker search + detail ID | 未单独确认 | typed series search + detail ID | ID 交叉验证 / Web index |
-| JAVBus | detail producer ID | detail publisher ID | detail series ID | 稳定 ID/name 证据 |
-| JAVLibrary | detail name | detail name | 本轮未验证 | 名称证据 / 别名辅助 |
+## V1-27B 静态覆盖
 
-## V1-27A 首批真实证据
+本轮继续使用公开页面、厂商官网、已有真实样本以及外部资料整理静态 Evidence：
 
-首批 Registry 只写入可以解释来源的记录。JAVBus 的示例详情明确给出 `producer 7q = エスワン ナンバーワンスタイル`、`publisher 9x = S1 NO.1 STYLE`；JAVLibrary 只作为 Maker/Label 名称证据，不伪造站内 ID。
+- FANZA：公开目录 URL 中可复核的 Maker / Label ID/name 切片；
+- JAVBus：影片详情中的 Maker / Label 稳定 ID/name；
+- JAVLibrary：Maker / Label 名称证据；
+- S1 / IDEAPOCKET / MOODYZ / Madonna 官方站：Series 页面中的站内 Series ID/name。
 
-## 为什么现在不直接做自动合并
+注意：
 
-`S1 NO.1 STYLE`、`エスワン ナンバーワンスタイル` 这类名称很可能属于同一商业实体的不同角色/显示名，但 Maker 与 Label 是不同语义层。V1-27A 只保存证据，不因字符串相近自动合并。后续需要 Canonical Organization alias + Provider ID 映射规则后再审核绑定。
+1. “已验证切片”不等于“Provider 全量目录”。
+2. 官方 Maker 站自己的 Series ID 只属于该站 namespace，不能当作 FANZA/JAVBus/JAVDB 的 Series ID。
+3. Localogue 不集成这些站点的抓取/API 客户端；新增资料通过人工整理或外部工具获取后审核进入 Registry。
 
-## 命令
+## 覆盖报告
+
+```bash
+pnpm registry:coverage
+```
+
+报告只统计仓库内已经审核保存的静态 Evidence，不进行联网，不访问任何 Provider。
+
+## 校验
 
 ```bash
 pnpm validate:registry
 pnpm registry:audit
 ```
 
-`registry:audit` 默认检查 `data/demo-library`；也可以：
+`validate:registry` 负责 Registry JSON/CSV 一致性、Provider ID 身份和 Evidence 状态；
+`registry:audit` 负责 Maker → Label → Series 结构关系。
 
-```bash
-node scripts/audit-organization-series.mjs --library /path/to/library
-```
+## 后续数据建设顺序
 
-未填写 Series 父组织当前只作为 warning，不阻塞旧资料库；引用不存在的 Organization 才是 error。
+1. 继续补主流 Maker 的公开名称、别名与来源证据；
+2. 补每个 Maker 下可公开确认的 Label；
+3. 以厂商官网 Series 页面和公开数据库交叉补 Series；
+4. 对同名/改名/历史名称进行人工 Alias 合并；
+5. 有充分证据后再建立 Canonical parent 关系。
+
+整个过程遵循“先有限集合，再逐步扩无限作品”的资料库建设原则。

@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "stage": "V1-27A",
+  "stage": "V1-27B",
   "items": [
     {
       "provider": "fanza",
-      "sourceType": "official-api",
-      "organizationSupport": "maker-enumeration",
-      "seriesSupport": "series-enumeration",
+      "sourceType": "distributor-web",
+      "organizationSupport": "maker-label-id-url-evidence",
+      "seriesSupport": "work-detail-name-evidence",
       "stableIds": true,
-      "catalogStatus": "enumerable-with-credentials",
-      "requiresCredentials": true,
-      "notesZh": "DMM/FANZA Affiliate API v3 提供 MakerSearch 与 SeriesSearch；Label 暂不假设存在独立枚举端点。"
+      "catalogStatus": "verified-id-slice-not-enumerated",
+      "requiresCredentials": false,
+      "notesZh": "Localogue 不集成采集 API 或抓取工具。本轮仅保存公开 FANZA 页面/目录中可复核的 Maker、Label ID/name 切片，以及外部真实作品样本中的 Series/Label 名称证据；不声明完整目录。"
     },
     {
       "provider": "javdb",
@@ -41,6 +41,46 @@
       "catalogStatus": "name-evidence-only",
       "requiresCredentials": false,
       "notesZh": "公开页面可稳定观察 Maker/Label 名称，但本轮未验证可枚举的稳定 ID 目录。"
+    },
+    {
+      "provider": "s1-official",
+      "sourceType": "official-maker-site",
+      "organizationSupport": "self-name-evidence",
+      "seriesSupport": "public-series-index",
+      "stableIds": true,
+      "catalogStatus": "verified-series-id-slice",
+      "requiresCredentials": false,
+      "notesZh": "S1 官方站 Series 页面使用稳定数字路径 ID；本轮收录可公开复核的 Series ID/name。"
+    },
+    {
+      "provider": "ideapocket-official",
+      "sourceType": "official-maker-site",
+      "organizationSupport": "self-name-evidence",
+      "seriesSupport": "public-series-index",
+      "stableIds": true,
+      "catalogStatus": "verified-series-id-slice",
+      "requiresCredentials": false,
+      "notesZh": "IDEAPOCKET 官方站 Series 页面使用稳定数字路径 ID；本轮收录可公开复核的 Series ID/name。"
+    },
+    {
+      "provider": "moodyz-official",
+      "sourceType": "official-maker-site",
+      "organizationSupport": "self-name-evidence",
+      "seriesSupport": "public-series-index",
+      "stableIds": true,
+      "catalogStatus": "verified-series-id-slice",
+      "requiresCredentials": false,
+      "notesZh": "MOODYZ 官方站 Series 页面使用稳定数字路径 ID；本轮收录可公开复核的 Series ID/name。"
+    },
+    {
+      "provider": "madonna-official",
+      "sourceType": "official-maker-site",
+      "organizationSupport": "self-name-evidence",
+      "seriesSupport": "public-series-index",
+      "stableIds": true,
+      "catalogStatus": "verified-series-id-slice",
+      "requiresCredentials": false,
+      "notesZh": "Madonna 官方站 Series 页面使用稳定数字路径 ID；本轮收录可公开复核的 Series ID/name。"
     }
   ]
 }

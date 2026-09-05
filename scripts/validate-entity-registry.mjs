@@ -64,12 +64,12 @@ const assertCsvMatches = (csvName, items, columns) => {
 };
 
 const sources = loadJson("provider-entity-sources.json");
-const evidence = loadJson("organization-source-evidence.json");
-const validProviders = new Set(["fanza", "javdb", "javbus", "javlibrary"]);
+const organizationEvidence = loadJson("organization-source-evidence.json");
+const seriesEvidence = loadJson("series-source-evidence.json");
 const seenProvider = new Set();
 
 for (const item of sources.items ?? []) {
-  if (!validProviders.has(item.provider)) errors.push(`未知 Provider：${item.provider}`);
+  if (!String(item.provider ?? "").trim()) errors.push("Provider 缺少 provider key。");
   if (seenProvider.has(item.provider)) errors.push(`Provider 重复：${item.provider}`);
   else seenProvider.add(item.provider);
   if (!item.catalogStatus) errors.push(`Provider 缺少 catalogStatus：${item.provider}`);
@@ -77,25 +77,43 @@ for (const item of sources.items ?? []) {
   if (typeof item.requiresCredentials !== "boolean") errors.push(`Provider requiresCredentials 必须是 boolean：${item.provider}`);
 }
 
+const validProviders = seenProvider;
 const idOwners = new Set();
-for (const item of evidence.items ?? []) {
-  if (!validProviders.has(item.provider)) errors.push(`Evidence Provider 非法：${item.provider}`);
-  if (!["maker", "label"].includes(item.entityKind)) errors.push(`Evidence entityKind 非法：${item.entityKind}`);
-  if (!String(item.name ?? "").trim()) errors.push(`Evidence 缺少 name：${item.provider}`);
-  if (!["verified", "name-only"].includes(item.idStatus)) errors.push(`Evidence idStatus 非法：${item.provider}/${item.name}`);
-  if (item.idStatus === "verified" && !item.sourceId) errors.push(`verified Evidence 必须有 sourceId：${item.provider}/${item.name}`);
-  if (item.idStatus === "name-only" && item.sourceId) errors.push(`name-only Evidence 不应伪造 sourceId：${item.provider}/${item.name}`);
-  if (item.sourceId) {
-    const key = `${item.provider}::${item.entityKind}::${item.sourceId}`;
-    if (idOwners.has(key)) errors.push(`Provider/entityKind/sourceId 重复：${key}`);
-    else idOwners.add(key);
+const validateEvidence = (items, allowedKinds, sourceName) => {
+  const seenNameEvidence = new Set();
+  for (const item of items ?? []) {
+    if (!validProviders.has(item.provider)) errors.push(`${sourceName} Provider 非法：${item.provider}`);
+    if (!allowedKinds.includes(item.entityKind)) errors.push(`${sourceName} entityKind 非法：${item.entityKind}`);
+    if (!String(item.name ?? "").trim()) errors.push(`${sourceName} 缺少 name：${item.provider}`);
+    if (!["verified", "name-only"].includes(item.idStatus)) errors.push(`${sourceName} idStatus 非法：${item.provider}/${item.name}`);
+    if (item.idStatus === "verified" && !String(item.sourceId ?? "").trim()) {
+      errors.push(`verified ${sourceName} 必须有 sourceId：${item.provider}/${item.name}`);
+    }
+    if (item.idStatus === "name-only" && String(item.sourceId ?? "").trim()) {
+      errors.push(`name-only ${sourceName} 不应伪造 sourceId：${item.provider}/${item.name}`);
+    }
+    if (item.sourceId) {
+      const key = `${item.provider}::${item.entityKind}::${item.sourceId}`;
+      if (idOwners.has(key)) errors.push(`Provider/entityKind/sourceId 重复：${key}`);
+      else idOwners.add(key);
+    } else {
+      const nameKey = `${item.provider}::${item.entityKind}::${String(item.name).normalize("NFKC").trim().toLowerCase()}`;
+      if (seenNameEvidence.has(nameKey)) errors.push(`${sourceName} name-only 重复：${nameKey}`);
+      else seenNameEvidence.add(nameKey);
+    }
   }
-}
+};
+
+validateEvidence(organizationEvidence.items, ["maker", "label"], "Organization Evidence");
+validateEvidence(seriesEvidence.items, ["series"], "Series Evidence");
 
 assertCsvMatches("provider-entity-sources.csv", sources.items ?? [], [
   "provider", "sourceType", "organizationSupport", "seriesSupport", "stableIds", "catalogStatus", "requiresCredentials", "notesZh",
 ]);
-assertCsvMatches("organization-source-evidence.csv", evidence.items ?? [], [
+assertCsvMatches("organization-source-evidence.csv", organizationEvidence.items ?? [], [
+  "provider", "entityKind", "sourceId", "name", "idStatus", "canonicalId", "evidence", "noteZh",
+]);
+assertCsvMatches("series-source-evidence.csv", seriesEvidence.items ?? [], [
   "provider", "entityKind", "sourceId", "name", "idStatus", "canonicalId", "evidence", "noteZh",
 ]);
 
@@ -104,8 +122,10 @@ if (errors.length) {
   process.exit(1);
 }
 
+const allEvidence = [...(organizationEvidence.items ?? []), ...(seriesEvidence.items ?? [])];
 console.log("✓ Entity registry validation passed");
 console.log(`  Provider capabilities: ${(sources.items ?? []).length}`);
-console.log(`  Organization evidence: ${(evidence.items ?? []).length}`);
-console.log(`  Verified provider IDs: ${(evidence.items ?? []).filter((item) => item.idStatus === "verified").length}`);
-console.log(`  Name-only evidence: ${(evidence.items ?? []).filter((item) => item.idStatus === "name-only").length}`);
+console.log(`  Organization evidence: ${(organizationEvidence.items ?? []).length}`);
+console.log(`  Series evidence: ${(seriesEvidence.items ?? []).length}`);
+console.log(`  Verified provider IDs: ${allEvidence.filter((item) => item.idStatus === "verified").length}`);
+console.log(`  Name-only evidence: ${allEvidence.filter((item) => item.idStatus === "name-only").length}`);

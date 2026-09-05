@@ -1,5 +1,18 @@
 # Changelog
 
+## V1-27B - Provider Registry Coverage Round 1
+
+- Organization / Series Registry 从 Foundation 进入第一轮真实 Provider 覆盖。
+- Provider capability 从 4 扩展到 8，加入 S1、IDEAPOCKET、MOODYZ、Madonna 官方站独立 ID namespace。
+- Organization Evidence 从 18 扩展到 58；新增 FANZA 22 个 Maker ID、12 个 Label ID 的可复核切片，并保留 2 条作品样本 Label name-only Evidence。
+- 新增 `series-source-evidence.{json,csv}`，首批收录 9 个 Maker 官方站可公开复核的 Series 数字路径 ID。
+- Registry 累计 45 个 verified Provider ID + 22 条 name-only Evidence。
+- Validator 不再硬编码 Provider 列表，而是以 `provider-entity-sources.*` 为来源注册表；新增 Series Evidence、name-only 重复和跨文件 Provider/entityKind/sourceId 唯一性检查。
+- 新增 `pnpm registry:coverage`，按 Provider / Maker / Label / Series 汇总仓库内静态 Evidence 的 verified 与 name-only 覆盖；命令不访问网络。
+- Snapshot 工具支持 `--input` 离线归一化，用于测试或处理手工保存的官方 API JSON。
+- 本轮仍不根据名称相似度自动合并 Maker / Label / Series，也不把 Maker 官方站 Series ID 当作 FANZA/JAVBus/JAVDB ID。
+
+
 ## V1-25C - Provider ID Identity / Coverage Round 2
 
 - 产品版本继续保持 `0.1.25`；继续建立在尚未提交的 V1-25A/B Provider Coverage 工作上。

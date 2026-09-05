@@ -150,3 +150,11 @@ Desktop 设置页将资料源解释为四层：
 - `docs/catalog/organization-series-registry.md`
 - `src/domain/entities/series.ts`：新增可选父 Organization。
 
+### V1-27B Provider Registry Coverage Round 1
+
+- `resources/registries/series-source-evidence.{json,csv}`：Maker 官方站 Series ID/name Evidence。
+- `resources/registries/provider-entity-sources.{json,csv}`：扩展为 8 个 Provider/官方来源 namespace。
+- `resources/registries/organization-source-evidence.{json,csv}`：FANZA Maker/Label verified slice 与官方名称 Evidence。
+- `scripts/report-entity-registry-coverage.mjs`：Registry Provider 覆盖报告。
+- `scripts/validate-entity-registry.mjs`：Series Evidence、动态 Provider 注册与跨文件 ID 约束。
+- `docs/catalog/organization-series-registry.md` / `resources/registries/README.md`：V1-27B 静态 Registry 维护边界与人工审核流程。

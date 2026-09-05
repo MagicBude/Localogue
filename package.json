@@ -39,7 +39,8 @@
     "validate:provider-coverage": "node scripts/report-provider-coverage.mjs --check",
     "vocabulary:provider-coverage": "node scripts/report-provider-coverage.mjs",
     "validate:registry": "node scripts/validate-entity-registry.mjs",
-    "registry:audit": "node scripts/audit-organization-series.mjs"
+    "registry:audit": "node scripts/audit-organization-series.mjs",
+    "registry:coverage": "node scripts/report-entity-registry-coverage.mjs"
   },
   "dependencies": {
     "next": "16.3.3",

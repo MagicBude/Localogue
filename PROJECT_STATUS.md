@@ -2,7 +2,16 @@
 
 ## 当前阶段
 
-**V1-25C：Provider ID Identity / Coverage Round 2。**
+**V1-27B：Provider Registry Coverage Round 1。**
+
+
+V1-27B 已进入有限目录的真实 Provider 覆盖：
+
+- Registry Provider capability 从 4 扩展到 8，加入 S1 / IDEAPOCKET / MOODYZ / Madonna 官方站独立 namespace；
+- Organization Evidence 58 条，Series Evidence 9 条；累计 45 个 verified Provider ID + 22 条 name-only Evidence；
+- FANZA 当前静态切片包含 22 Maker ID、12 Label ID，并保留 2 条 Label name-only 真实作品样本；本仓库不负责在线采集。
+- Maker 官方站当前收录 9 个可公开复核的 Series ID；这些 ID 不与 FANZA/JAVBus/JAVDB 混用；
+- 新增 `registry:coverage`；
 
 V1-25A 已建立分类治理骨架；当前继续优先构建 Provider Coverage，而不是先做 Onboarding：
 
@@ -271,14 +280,14 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ## 下一阶段建议
 
-**下一阶段：继续 Provider Coverage，暂缓 Onboarding。**
+**下一阶段：V1-27C Canonical Organization / Series Mapping Round 1。**
 
-1. 获取 JAVDB `/api/v2/tags?type=0..4` 的实时完整 `category_id + id + name` 导出；
-2. 找到/生成可复核的 JAVBus 完整 Genre ID 表，不把当前 35 条 verified slice 误称为全量；
-3. 使用 FANZA `GenreSearch` 对目标 Adult floor 生成 ID 级快照；
-4. 比较 JAVLibrary 2024 / 2025 Snapshot，标记新增、移除和改名；
-5. 新来源词继续按 Genre / Work Type / Source-only / Review 分流，禁止为了覆盖率把促销、画质和平台属性升级为 Genre；
-6. Provider Coverage 稳定后，再恢复 Community Pack Registry / Onboarding。
+2. 用 `registry:coverage -- --snapshot ...` 对比仓库静态 Evidence，确认完整分页与静态 ID 切片的一致性；
+3. 为高频 Maker 建立第一批 Canonical Organization Alias + FANZA/JAVBus/官方站 Provider ID Mapping；
+4. Series 优先从官方 Maker 站和公开数据库双向交叉验证，再绑定最具体的 Label/Maker；
+5. JAVDB typed maker/series search 与 JAVBus detail ID 继续作为交叉验证，不把 Web 搜索结果误称为全量目录；
+6. Label 继续单独治理，不因 Maker/Label 名称相近自动合并；
+7. Registry 稳定后再扩大桌面 Browse 的来源/别名详情展示。
 
 ## 当前不做
 
@@ -308,7 +317,8 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 
 - V1-24C Shared-only 可见性 Fixture 已补齐：示例 Shared Pack 中的“共享示例花”现在关联 `SHARED-DEMO-001` performer Work，不再因人物库的 performer 关系收口规则而被过滤。
 
-## V1-27A 当前状态
+## V1-27B 当前状态
 
-Maker / Label / Series Registry Foundation 已建立。当前 Demo 基线：2 Maker、2 Label、3 Series；两组 Maker→Label 已有关联，3 个 Series 暂无父 Organization，保持 warning 而不猜测。下一步优先使用 FANZA/DMM MakerSearch + SeriesSearch 形成可枚举快照，再用 JAVDB/JAVBus 稳定 ID 做交叉验证；Label 继续以作品详情与 Provider 证据保守补齐。
+Maker / Label / Series Registry Foundation 已通过 V1-27A 验证；V1-27B 已开始真实 Provider 覆盖。当前 Demo 基线仍为 2 Maker、2 Label、3 Series，3 个 Series 的历史未归属只 warning。
+
 

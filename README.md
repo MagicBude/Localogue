@@ -717,5 +717,12 @@ V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.
 
 ### Organization / Series Registry
 
-V1-27A 开始把 Maker、Label、Series 作为有限目录治理：Provider ID 与名称证据进入 `resources/registries/`，Maker → Label 使用 Organization 父子关系，Series 可选关联最具体的已确认 Organization。运行 `pnpm validate:registry` 与 `pnpm registry:audit` 可检查 Registry 与资料库关系。
+V1-27A/V1-27B 开始把 Maker、Label、Series 作为有限目录治理：Provider ID 与名称证据进入 `resources/registries/`，Maker → Label 使用 Organization 父子关系，Series 可选关联最具体的已确认 Organization。Registry 由公开页面、厂商官网、现成数据集或外部工具取得资料后人工审核维护，Localogue 本身不承担 Provider 抓取。
+
+
+```bash
+pnpm validate:registry
+pnpm registry:audit
+pnpm registry:coverage
+```
 
