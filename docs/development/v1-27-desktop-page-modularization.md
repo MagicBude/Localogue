@@ -39,3 +39,5 @@ Desktop 外壳使用相同原则：`desktop-app-shell.tsx` 只渲染侧栏和顶
 页面文件拆开后，`App.tsx` 使用 `React.lazy` 按导航目标加载页面模块。源代码模块化和运行时分包是两件事：前者改善维护，后者才会缩小首次加载的入口包。`Suspense` fallback 保持内容区稳定，避免加载页面代码时 WebView 高度突然收缩。
 
 分类浏览把 `CatalogKind`、选择到 `WorkQuery` 的映射、搜索规则和 Genre 分组规则收口到 `desktop-catalog-model.ts`。这个文件不依赖 React，适合先学习稳定业务规则；页面文件只负责读取 Repository、维护交互状态和渲染。
+
+治理工作台先把 Curation 迁到 `desktop-curation-page.tsx`。完整度和重复候选是可重算的派生信号，Curation 页面只读取并展示它们；Review Commit 与 History Restore 仍留在 Governance 控制器，避免一次重构同时移动两条写入链。

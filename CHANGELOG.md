@@ -15,6 +15,7 @@
 - Desktop 页面改为 `React.lazy` 按需加载，使文件级模块化同时形成 Vite 页面分包，并用稳定 Loading fallback 避免切页抖动。
 - 分类浏览的 Genre Facet 工具栏样式收口到 CSS，移除组件中的大段内联布局配置。
 - 分类浏览的查询映射、使用状态筛选、Genre 分组与三语说明迁入浏览器中立的 Catalog Model，React 页面只保留读取和交互。
+- Curation 从 Governance 控制器迁入独立页面，并为异步完整度计算增加卸载保护；Review Commit 与 History Restore 写入链保持不变。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency
