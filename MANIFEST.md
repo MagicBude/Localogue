@@ -6,6 +6,8 @@
 
 当前产品版本继续为 `0.1.25`。V1-27A/B/C 已建立 Organization / Series Registry Evidence 与 Community Catalog；V1-27D 完善多语言显示和父级关系展示，不把 Browse 扩展成级联作品筛选器。
 
+Desktop 页面模块化维护已完成第一批：Home、Works、People 及其详情使用独立模块，`App.tsx` 保留顶层 Runtime / Profile / Navigation；首页显示最多 12 条最近作品并提供完整作品库入口。
+
 维护修正：README 与 Series 模型文档已和当前实现对齐；`registry:audit` 默认审计 Community Catalog；作品详情画廊完整显示 poster / cover / gallery / fanart / screenshot，并根据真实图片比例切换舞台布局。
 
 

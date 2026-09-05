@@ -164,6 +164,7 @@
 - [测试原则](development/testing.md)
 - [Dev Fixture Library](development/dev-fixture-library.md)
 - [AI 协作](development/ai-collaboration.md)
+- [Desktop 页面模块化整理](development/v1-27-desktop-page-modularization.md)
 
 ## 架构决策记录
 
@@ -297,4 +298,3 @@
 
 - [V1-24A Desktop Presentation Preference Workbench 实现导读](development/v1-24-desktop-presentation-preference-workbench.md)
 - [Dev Fixture Library：没有真实资料也能稳定开发](development/dev-fixture-library.md)
-

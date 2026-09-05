@@ -136,6 +136,11 @@ if (!errors.length) {
   const desktopRuntimeContract = readFileSync(path.join(root, "src/application/platform/desktop-runtime-contract.ts"), "utf8");
   const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
+  const desktopWorkPages = readFileSync(path.join(root, "apps/desktop/src/desktop-work-pages.tsx"), "utf8");
+  const desktopWorkSurface = desktopApp + desktopWorkPages;
+  const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
+  const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;
+  const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
@@ -151,13 +156,13 @@ if (!errors.length) {
   if (!desktopManagement.includes("Private Override") || !desktopManagement.includes("saveMediaBindingReceipt")) {
     errors.push("V1-18 Shared 实体编辑必须写 Private Override，Media 手工绑定必须保留审计 Receipt。");
   }
-  if (!desktopApp.includes("removePrivateAsset") || !desktopApp.includes("deletePrivateAsset")) {
+  if (!desktopWorkSurface.includes("removePrivateAsset") || !desktopWorkSurface.includes("deletePrivateAsset")) {
     errors.push("V1-18 Work 详情必须提供显式 Private Asset 解除/删除入口，避免引用保护导致 Work 无法完成删除闭环。");
   }
   for (const collection of ["works", "people", "genres", "tags", "assets", "media-files"]) {
     if (!desktopContracts.includes(`| "${collection}"`)) errors.push(`V1-22 DesktopDeletableLibraryCollection 缺少 Native 已受控开放的集合：${collection}`);
   }
-  if (!desktopApp.includes("DesktopWorkAssetGallery") || !desktopWorkGallery.includes("desktop-work-gallery__arrow") || !desktopApp.includes("desktop-work-record--stacked")) {
+  if (!desktopWorkSurface.includes("DesktopWorkAssetGallery") || !desktopWorkGallery.includes("desktop-work-gallery__arrow") || !desktopWorkSurface.includes("desktop-work-record--stacked")) {
     errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
   if (!desktopWorkGallery.includes("isWorkGalleryAsset") || !desktopWorkGallery.includes('["poster", "cover", "gallery", "fanart", "screenshot"]')) {
@@ -191,7 +196,7 @@ if (!errors.length) {
   for (const token of ["statuses", "birthYears", "debutYears", "retirementYears", "heightMin", "heightMax", "PersonSort"]) {
     if (!desktopPersonExplorer.includes(token)) errors.push(`V1-19 Desktop 人物高级筛选缺少条件：${token}`);
   }
-  if (!desktopApp.includes("fixedPersonId={id}") || !desktopApp.includes("recentCards") || !desktopApp.includes('view="grid"')) {
+  if (!desktopPersonPages.includes("fixedPersonId={id}") || !desktopHomePage.includes("recentCards") || !desktopHomePage.includes('view="grid"')) {
     errors.push("V1-19 首页最近作品与 Person 相关作品必须复用真实海报 Work Explorer / Work Results，而不是旧占位 Tile。");
   }
   for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
@@ -400,7 +405,7 @@ if (!errors.length) {
   if (!vocabularyRepair.includes('isPrivateEntity("works", work.id)')) {
     errors.push("V1-21 历史 Vocabulary Repair 必须显式限制为 Private Work，不能因为 Shared ID 恰好匹配旧 NFO 前缀而创建 Override。");
   }
-  if (!desktopApp.includes("分类词表审计") || !desktopApp.includes("workTypeDefinition") || !desktopApp.includes("DenseDetailRow") || !desktopApp.includes('label={t("作品类型")}') || !desktopApp.includes('label={t("题材")}') || !desktopApp.includes('label={t("标签")}')) {
+  if (!desktopWorkSurface.includes("分类词表审计") || !desktopWorkSurface.includes("workTypeDefinition") || !desktopWorkSurface.includes("DenseDetailRow") || !desktopWorkSurface.includes('label={t("作品类型")}') || !desktopWorkSurface.includes('label={t("题材")}') || !desktopWorkSurface.includes('label={t("标签")}')) {
     errors.push("V1-21/V1-22 Desktop 必须在 Work Detail 主信息区分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
   }
 
@@ -459,7 +464,7 @@ if (!errors.length) {
     errors.push("V1-22 Works / People / Catalog 必须统一使用 Stable Async Refresh。 ");
   }
   for (const token of ["desktop-work-record", "desktop-metadata-table", "DenseDetailRow", "DenseChips", 't("题材")', 't("标签")']) {
-    if (!desktopApp.includes(token) && !desktopStyles.includes(token)) errors.push(`V1-22 Work Detail 高密度信息架构缺少：${token}`);
+    if (!desktopWorkSurface.includes(token) && !desktopStyles.includes(token)) errors.push(`V1-22 Work Detail 高密度信息架构缺少：${token}`);
   }
   if (!desktopI18n.includes("语言（界面 + 元数据）") || !desktopI18n.includes("setMetadataLanguage(language)")) {
     errors.push("V1-22 顶部主语言切换必须默认联动 UI + Metadata，保留 Metadata Advanced 独立覆盖。 ");
@@ -521,7 +526,7 @@ if (!errors.length) {
   if (!rust.includes("Asset 仍被 Presentation Preference 引用；请先恢复默认展示图片。")) {
     errors.push("V1-24 Native Asset 删除必须保护 Presentation Preference 引用。");
   }
-  if (!desktopGovernance.includes("DesktopPresentationWorkbench") || !desktopApp.includes("PresentationAssetPicker")) {
+  if (!desktopGovernance.includes("DesktopPresentationWorkbench") || !desktopDetailSurfaces.includes("PresentationAssetPicker")) {
     errors.push("V1-24 Presentation 必须同时进入 Curation Workbench 与 Work / Person Detail。");
   }
   if (!desktopWorkExplorer.includes("listPresentationPreferences") || !desktopPersonExplorer.includes("listPresentationPreferences")) {

@@ -11,18 +11,11 @@ import {
 } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
-import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
-import { findApprovedGenreAlias, localizeGenre } from "@/application/services/genre-localization-service";
-import {
-  getPreferredPersonName,
-  localizeText,
-} from "@/application/services/localization-service";
+import { findApprovedGenreAlias } from "@/application/services/genre-localization-service";
+import { localizeText } from "@/application/services/localization-service";
 import type { Asset } from "@/domain/entities/asset";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
-import type { Organization } from "@/domain/entities/organization";
-import type { Person } from "@/domain/entities/person";
-import type { Work } from "@/domain/entities/work";
 
 import type {
   DesktopBootstrapSettings,
@@ -41,21 +34,11 @@ import {
 } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
-import { DesktopAssetImage } from "./desktop-asset-image";
-import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
-import { PersonAssetGovernance } from "./desktop-person-asset-governance";
-import {
-  buildDesktopWorkCards,
-  DesktopWorkResults,
-} from "./desktop-work-results";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
-import { DesktopPersonCard, DesktopPersonExplorer } from "./desktop-person-explorer";
 import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
 import { DesktopGovernance } from "./desktop-governance";
 import { DesktopPortablePackWorkbench } from "./desktop-portable-pack-workbench";
-import { PresentationAssetPicker } from "./desktop-presentation-workbench";
-import { resolvePersonPresentation, resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import {
   importLocalAssetPreview,
@@ -64,12 +47,11 @@ import {
   type LocalAssetImportResult,
 } from "./local-asset-import";
 import {
-  CreatePersonPanel,
-  CreateWorkPanel,
   MediaBindingPanel,
-  PersonEditor,
-  WorkEditor,
 } from "./desktop-management";
+import { DesktopWorkDetailPage, DesktopWorksPage } from "./desktop-work-pages";
+import { DesktopPeoplePage, DesktopPersonDetailPage } from "./desktop-person-pages";
+import { DesktopHomePage } from "./desktop-home-page";
 import {
   importNfoPreview,
   previewNfoImport,
@@ -422,10 +404,10 @@ export default function App() {
         {!hasLibrarySource && page !== "settings" ? (
           <EmptyLibrary onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
-          <HomePage repository={repository} openWork={openWork} openPerson={openPerson} />
+          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} />
         ) : page === "works" ? (
           detail?.kind === "work" ? (
-            <WorkDetailPage
+          <DesktopWorkDetailPage
               repository={repository}
               id={detail.id}
               onBack={() => setDetail(null)}
@@ -434,11 +416,11 @@ export default function App() {
               setMessage={setMessage}
             />
           ) : (
-            <WorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+            <DesktopWorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
         ) : page === "people" ? (
           detail?.kind === "person" ? (
-            <PersonDetailPage
+            <DesktopPersonDetailPage
               repository={repository}
               id={detail.id}
               onBack={() => setDetail(null)}
@@ -448,7 +430,7 @@ export default function App() {
               runtimeContractRevision={runtime?.contractRevision ?? 0}
             />
           ) : (
-            <PeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+            <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} />
@@ -508,463 +490,6 @@ function EmptyLibrary({ onConfigure }: { onConfigure: () => void }) {
       <p>{t("Desktop 不再依赖浏览器页面。配置 Private Library 或挂载 Shared Pack 后，Works / People / Media 会直接在这个窗口读取同一套 Canonical JSON。")}</p>
       <button className="primary-button" onClick={onConfigure}>{t("打开设置")}</button>
     </section>
-  );
-}
-
-function HomePage({
-  repository,
-  openWork,
-  openPerson,
-}: {
-  repository: TauriLibraryRepository;
-  openWork: (id: string) => void;
-  openPerson: (id: string) => void;
-}) {
-  const { t, metadataLanguage } = useDesktopI18n();
-  const data = useAsyncData(async () => {
-    const [works, people, organizations, series, media, assets, preferences] = await Promise.all([
-      repository.listWorks({ page: 1, pageSize: 6, sort: "release_desc" }),
-      repository.listPeople({ page: 1, pageSize: 9999, sort: "name_asc" }),
-      repository.listOrganizations(),
-      repository.listSeries(),
-      repository.listMediaFiles(),
-      repository.listAssets(),
-      repository.listPresentationPreferences(),
-    ]);
-    const performerIds = new Set(
-      works.items.flatMap((work) =>
-        work.personRelations
-          .filter((relation) => relation.role === "performer")
-          .map((relation) => relation.personId),
-      ),
-    );
-    const featuredPeople = people.items.filter((person) => performerIds.has(person.id)).slice(0, 6);
-    const workCounts = new Map<string, number>();
-    for (const work of (await repository.listWorks({ page: 1, pageSize: 100000 })).items) {
-      for (const personId of new Set(work.personRelations.filter((relation) => relation.role === "performer").map((relation) => relation.personId))) {
-        workCounts.set(personId, (workCounts.get(personId) ?? 0) + 1);
-      }
-    }
-    const portraitByPersonId = new Map<string, Asset>();
-    const preferenceByPersonId = new Map(preferences.filter((item) => item.entityType === "person").map((item) => [item.entityId, item]));
-    for (const person of featuredPeople) {
-      const portrait = resolvePersonPresentation(person, assets, preferenceByPersonId.get(person.id)).resolved;
-      if (portrait) portraitByPersonId.set(person.id, portrait);
-    }
-    return {
-      works,
-      people,
-      organizations,
-      series,
-      media,
-      featuredPeople,
-      workCounts,
-      portraitByPersonId,
-      recentCards: buildDesktopWorkCards(works.items, people.items, organizations, assets, metadataLanguage, preferences),
-    };
-  }, [repository, metadataLanguage]);
-
-  if (data.loading) return <LoadingState />;
-  if (data.error || !data.value) return <ErrorState error={data.error} />;
-
-  const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
-  const workCount = works.total;
-  const peopleCount = people.total;
-
-  return (
-    <div className="page-stack">
-      <section className="hero-panel desktop-hero">
-        <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
-        <h1>{t("你的 Localogue，现在就在桌面端。")}</h1>
-        <p>{t("V1-24 把 Private Presentation Preference 接入 Desktop；封面与头像选择不再改写 Canonical / Shared Pack。")}</p>
-      </section>
-
-      <section className="stat-grid">
-        <Stat label={t("作品")} value={workCount} note="Canonical" />
-        <Stat label={t("人物")} value={peopleCount} note="Canonical" />
-        <Stat label={t("厂商")} value={organizations.filter((item) => item.kind === "maker").length} note="Organizations" />
-        <Stat label={t("系列")} value={series.length} note="Canonical" />
-        <Stat label={t("媒体")} value={media.length} note="Private" />
-      </section>
-
-      <SectionTitle eyebrow="RECENT WORKS" title={t("最近作品")} />
-      <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} />
-
-      {featuredPeople.length ? (
-        <>
-          <SectionTitle eyebrow="PEOPLE" title={t("相关人物")} />
-          <div className="desktop-person-grid desktop-home-people-grid">
-            {featuredPeople.map((person) => (
-              <DesktopPersonCard
-                key={person.id}
-                person={person}
-                portrait={portraitByPersonId.get(person.id)}
-                workCount={workCounts.get(person.id) ?? 0}
-                onOpen={() => openPerson(person.id)}
-              />
-            ))}
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-function WorksPage({
-  repository,
-  openWork,
-  onLibraryChanged,
-  setMessage,
-}: {
-  repository: TauriLibraryRepository;
-  openWork: (id: string) => void;
-  onLibraryChanged: () => void;
-  setMessage: (message: string) => void;
-}) {
-  const { t } = useDesktopI18n();
-  return (
-    <div className="page-stack">
-      <PageTitle
-        eyebrow="CANONICAL WORKS · FACETED SEARCH · PRESENTATION PARITY"
-        title={t("作品库")}
-        description={t("对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。")}
-      />
-      <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} storageKey="localogue.desktop.work-view" />
-    </div>
-  );
-}
-
-function WorkDetailPage({
-  repository,
-  id,
-  onBack,
-  openPerson,
-  onLibraryChanged,
-  setMessage,
-}: {
-  repository: TauriLibraryRepository;
-  id: string;
-  onBack: () => void;
-  openPerson: (id: string) => void;
-  onLibraryChanged: () => void;
-  setMessage: (message: string) => void;
-}) {
-  const { t, metadataLanguage, assetTypeLabel } = useDesktopI18n();
-  const data = useAsyncData(async () => {
-    const work = await repository.findWorkById(id);
-    if (!work) return null;
-    const [people, organizations, series, genres, tags, media, allAssets, presentationPreference] = await Promise.all([
-      repository.listPeople({ page: 1, pageSize: 99999 }),
-      repository.listOrganizations(),
-      repository.listSeries(),
-      repository.listGenres(),
-      repository.listTags(),
-      repository.listMediaFiles(work.id),
-      repository.listAssets(),
-      repository.findPresentationPreference("work", work.id),
-    ]);
-    const presentation = resolveWorkPresentation(work, allAssets, presentationPreference);
-    const linkedAssetIds = new Set(work.assetIds);
-    const assets = allAssets.filter((asset) => linkedAssetIds.has(asset.id) || (asset.subjectType === "work" && asset.subjectId === work.id));
-    return {
-      work,
-      people: new Map(people.items.map((item) => [item.id, item])),
-      organizations: new Map(organizations.map((item) => [item.id, item])),
-      series: new Map(series.map((item) => [item.id, item])),
-      genres: new Map(genres.map((item) => [item.id, item])),
-      tags: new Map(tags.map((item) => [item.id, item])),
-      media,
-      assets,
-      presentationPreference,
-      presentation,
-    };
-  }, [repository, id]);
-
-  if (data.loading) return <LoadingState />;
-  if (data.error || !data.value) return data.value === null ? <ErrorState error={t("作品不存在。")} /> : <ErrorState error={data.error} />;
-  const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation } = data.value;
-
-  const performers = work.personRelations.filter((item) => item.role === "performer");
-  const directors = work.personRelations.filter((item) => item.role === "director");
-
-  async function removePrivateAsset(assetId: string, storagePath: string): Promise<void> {
-    try {
-      const isPrivateAsset = await repository.isPrivateEntity("assets", assetId);
-      if (!isPrivateAsset) {
-        setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
-        return;
-      }
-      if (!window.confirm(t("从 {code} 解除并删除这个 Private Asset 元数据？\n\n{path}\n\n原始图片与 content-addressed 文件不会由 Desktop 自动物理删除。", { code: work.code, path: storagePath }))) return;
-      const nextWork: Work = {
-        ...work,
-        assetIds: work.assetIds.filter((value) => value !== assetId),
-        updatedAt: new Date().toISOString(),
-      };
-      await repository.saveWork(nextWork);
-      try {
-        await repository.deletePrivateAsset(assetId);
-      } catch (error) {
-        await repository.saveWork(work);
-        throw error;
-      }
-      setMessage(t("已从 {code} 解除并删除 Private Asset 元数据；图片文件保留。", { code: work.code }));
-      onLibraryChanged();
-    } catch (error) {
-      setMessage(t("删除 Asset 失败：{error}", { error: toMessage(error) }));
-    }
-  }
-
-  const makerName = work.makerId ? localizeText(organizations.get(work.makerId)?.names, metadataLanguage, work.makerId) : undefined;
-  const labelName = work.labelId ? localizeText(organizations.get(work.labelId)?.names, metadataLanguage, work.labelId) : undefined;
-  const seriesNames = work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, metadataLanguage, seriesId));
-  const workTypeNames = work.workTypeIds.map((workTypeId) => {
-    const definition = workTypeDefinition(workTypeId);
-    return definition ? localizeText(definition.names, metadataLanguage, workTypeId) : workTypeId;
-  });
-  const genreNames = work.genreIds.map((genreId) => localizeGenre(genres.get(genreId), metadataLanguage, genreId));
-  const tagNames = work.tagIds.map((tagId) => localizeText(tags.get(tagId)?.names, metadataLanguage, tagId));
-
-  return (
-    <div className="page-stack desktop-work-detail-page">
-      <button className="back-button" onClick={onBack}>← {t("返回作品库")}</button>
-
-      <DesktopWorkAssetGallery
-        assets={assets}
-        workCode={work.code}
-        mediaCount={media.length}
-        assetTypeLabel={assetTypeLabel}
-      />
-
-      <section className="desktop-work-record desktop-work-record--stacked">
-        <div className="desktop-work-record__content">
-          <header className="desktop-work-record__header">
-            <div className="desktop-work-record__headline">
-              <span className="code-badge">{work.code}</span>
-              <span className="desktop-work-record__summary-counts">
-                <span>{t("本地媒体")} <strong>{media.length}</strong></span>
-                <span>{t("作品图片")} <strong>{assets.length}</strong></span>
-              </span>
-            </div>
-            <h1>{localizeText(work.titles, metadataLanguage, work.code)}</h1>
-            <p>{localizeText(work.descriptions, metadataLanguage, t("暂无简介"))}</p>
-          </header>
-
-          <dl className="desktop-metadata-table">
-            <DenseDetailRow label={t("发行日期")} value={work.releaseDate?.value} />
-            <DenseDetailRow label={t("时长")} value={work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : undefined} />
-            <DenseDetailRow label={t("演员")}>
-              <DensePersonLinks relations={performers} people={people} language={metadataLanguage} onOpen={openPerson} />
-            </DenseDetailRow>
-            <DenseDetailRow label={t("导演")}>
-              <DensePersonLinks relations={directors} people={people} language={metadataLanguage} onOpen={openPerson} />
-            </DenseDetailRow>
-            <DenseDetailRow label={t("厂商")} value={makerName} />
-            <DenseDetailRow label={t("厂牌")} value={labelName} />
-            <DenseDetailRow label={t("系列")}><DenseChips values={seriesNames} /></DenseDetailRow>
-            <DenseDetailRow label={t("作品类型")}><DenseChips values={workTypeNames} emphasis /></DenseDetailRow>
-            <DenseDetailRow label={t("题材")}><DenseChips values={genreNames} /></DenseDetailRow>
-            <DenseDetailRow label={t("标签")}><DenseChips values={tagNames} /></DenseDetailRow>
-          </dl>
-        </div>
-      </section>
-
-      <PresentationAssetPicker
-        entityType="work"
-        entityId={work.id}
-        candidates={presentation.candidates}
-        preference={presentationPreference}
-        resolved={presentation.resolved}
-        stalePreferredAssetId={presentation.stalePreferredAssetId}
-        repository={repository}
-        onSaved={onLibraryChanged}
-        setMessage={setMessage}
-      />
-
-      <WorkEditor
-        repository={repository}
-        work={work}
-        onSaved={onLibraryChanged}
-        onDeleted={() => { onLibraryChanged(); onBack(); }}
-        setMessage={setMessage}
-      />
-
-      <section className="settings-card desktop-local-assets-section">
-        <div className="section-heading">
-          <div><span className="eyebrow">WORK ASSETS</span><h2>{t("作品图片资产")}</h2></div>
-          <small className="muted">{t("{count} 个资产", { count: assets.length })}</small>
-        </div>
-        {assets.length ? (
-          <div className="desktop-asset-management-list">
-            {sortWorkAssets(assets).map((asset) => (
-              <article className="desktop-asset-management-row" key={asset.id}>
-                <div>
-                  <strong>{assetTypeLabel(asset.type)}</strong>
-                  <span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span>
-                  <code className="desktop-asset-management-path">{asset.storagePath}</code>
-                </div>
-                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除")}</button>
-              </article>
-            ))}
-          </div>
-        ) : <p className="muted">{t("尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / fanart / thumb 导入。")}</p>}
-      </section>
-    </div>
-  );
-}
-
-function DenseDetailRow({ label, value, children }: { label: string; value?: string; children?: ReactNode }) {
-  return <div className="desktop-metadata-row"><dt>{label}</dt><dd>{children ?? (value && value !== "—" ? value : "—")}</dd></div>;
-}
-
-function DenseChips({ values, emphasis = false }: { values: string[]; emphasis?: boolean }) {
-  const visible = values.filter((value) => value && value !== "—");
-  if (!visible.length) return <>—</>;
-  return <span className="desktop-dense-chips">{visible.map((value) => <span className={emphasis ? "desktop-dense-chip is-strong" : "desktop-dense-chip"} key={value}>{value}</span>)}</span>;
-}
-
-function DensePersonLinks({ relations, people, language, onOpen }: { relations: Work["personRelations"]; people: Map<string, Person>; language: "ja" | "zh-CN" | "en"; onOpen: (id: string) => void }) {
-  if (!relations.length) return <>—</>;
-  return <span className="desktop-inline-entity-links">{relations.map((relation) => {
-    const person = people.get(relation.personId);
-    const label = person ? getPreferredPersonName(person, language) : relation.personId;
-    return <button key={`${relation.role}:${relation.personId}`} onClick={() => onOpen(relation.personId)} type="button">{label}</button>;
-  })}</span>;
-}
-
-function PeoplePage({
-  repository,
-  openPerson,
-  onLibraryChanged,
-  setMessage,
-}: {
-  repository: TauriLibraryRepository;
-  openPerson: (id: string) => void;
-  onLibraryChanged: () => void;
-  setMessage: (message: string) => void;
-}) {
-  const { t } = useDesktopI18n();
-  return (
-    <div className="page-stack">
-      <PageTitle
-        eyebrow="PEOPLE · PROFILE · ADVANCED FILTER"
-        title={t("人物库")}
-        description={t("对齐 Web 的人物高级筛选：姓名 / 别名、活动状态、出道年份、引退年份、出生年份、身高区间和排序；人物库仍按有 performer 作品关系的人物收口。")}
-      />
-      <CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />
-      <DesktopPersonExplorer repository={repository} onOpen={openPerson} />
-    </div>
-  );
-}
-
-function PersonDetailPage({
-  repository,
-  id,
-  onBack,
-  openWork,
-  onLibraryChanged,
-  setMessage,
-  runtimeContractRevision,
-}: {
-  repository: TauriLibraryRepository;
-  id: string;
-  onBack: () => void;
-  openWork: (id: string) => void;
-  onLibraryChanged: () => void;
-  setMessage: (message: string) => void;
-  runtimeContractRevision: number;
-}) {
-  const { t, metadataLanguage } = useDesktopI18n();
-  const data = useAsyncData(async () => {
-    const person = await repository.findPersonById(id);
-    if (!person) return null;
-    const [workCount, assets, presentationPreference] = await Promise.all([
-      repository.listWorks({ personIds: [id], page: 1, pageSize: 1 }),
-      repository.listAssets(),
-      repository.findPresentationPreference("person", person.id),
-    ]);
-    const presentation = resolvePersonPresentation(person, assets, presentationPreference);
-    return {
-      person,
-      workCount: workCount.total,
-      portrait: presentation.resolved,
-      presentationPreference,
-      presentation,
-      personAssets: presentation.candidates,
-    };
-  }, [repository, id]);
-
-  if (data.loading) return <LoadingState />;
-  if (data.error || !data.value) return data.value === null ? <ErrorState error={t("人物不存在。")} /> : <ErrorState error={data.error} />;
-  const { person, workCount, portrait, presentationPreference, presentation, personAssets } = data.value;
-  const displayName = getPreferredPersonName(person, metadataLanguage);
-
-  return (
-    <div className="page-stack">
-      <button className="back-button" onClick={onBack}>← {t("返回人物库")}</button>
-      <section className="detail-hero person-detail-hero desktop-person-detail-hero">
-        <div className="desktop-person-detail-portrait">
-          <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />
-        </div>
-        <div className="desktop-person-detail-copy">
-          <span className="status-chip">{person.activityStatus}</span>
-          <h1>{displayName}</h1>
-          <p>{localizeText(person.biographies, metadataLanguage, t("暂无人物简介"))}</p>
-        </div>
-      </section>
-      <PersonAssetGovernance
-        person={person}
-        assets={personAssets}
-        resolved={portrait}
-        repository={repository}
-        runtimeContractRevision={runtimeContractRevision}
-        onLibraryChanged={onLibraryChanged}
-        setMessage={setMessage}
-      />
-      <PresentationAssetPicker
-        entityType="person"
-        entityId={person.id}
-        candidates={presentation.candidates}
-        preference={presentationPreference}
-        resolved={presentation.resolved}
-        stalePreferredAssetId={presentation.stalePreferredAssetId}
-        repository={repository}
-        onSaved={onLibraryChanged}
-        setMessage={setMessage}
-      />
-      <PersonEditor
-        repository={repository}
-        person={person}
-        onSaved={onLibraryChanged}
-        onDeleted={() => { onLibraryChanged(); onBack(); }}
-        setMessage={setMessage}
-      />
-      <section className="detail-grid">
-        <InfoCard label={t("出生日期")} value={person.birthDate?.value} />
-        <InfoCard label={t("出生地")} value={localizeText(person.birthPlace, metadataLanguage)} />
-        <InfoCard label={t("身高")} value={person.heightCm ? `${person.heightCm} cm` : undefined} />
-        <InfoCard label={t("作品数")} value={String(workCount)} />
-      </section>
-      <section className="settings-card">
-        <span className="eyebrow">NAMES</span>
-        <h2>{t("名称 / 别名")}</h2>
-        <div className="name-list">
-          {person.names.map((name, index) => (
-            <div key={`${name.language}-${name.type}-${index}`}>
-              <span>{name.language} · {name.type}</span>
-              <strong>{name.value}</strong>
-            </div>
-          ))}
-        </div>
-      </section>
-      <SectionTitle eyebrow="RELATED WORKS · FACETED SEARCH" title={t("相关作品")} />
-      <DesktopWorkExplorer
-        repository={repository}
-        onOpen={openWork}
-        fixedPersonId={id}
-        storageKey="localogue.desktop.person-related-work-view"
-      />
-    </div>
   );
 }
 

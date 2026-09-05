@@ -1,5 +1,14 @@
 # Changelog
 
+## V1-27 Maintenance - Desktop Page Modularization I
+
+- 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。
+- 页面继续通过 `TauriLibraryRepository` 与共享 Query/Application Core 工作，没有扩大 Native 文件权限或复制业务规则。
+- 首页最近作品从固定 6 条扩展为最多 12 条，并增加“查看全部作品”入口，进入现有 Works Explorer。
+- 首页合并重复 Works 查询：同一次结果同时计算总数、最近作品、相关人物和人物作品数，减少 JSON Repository 全量扫描。
+- Desktop Boundary Validator 跟随模块边界读取对应页面文件，继续守住详情页、Gallery、Presentation 与查询语义。
+- 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
+
 ## V1-27 Maintenance - Documentation / Gallery Consistency
 
 - 修正文档与当前实现的偏移：README 完整列出 `pnpm check` 检查链，Series 模型统一记录当前 `parentOrganizationId` 关系。
