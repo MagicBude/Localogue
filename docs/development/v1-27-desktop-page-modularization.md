@@ -37,3 +37,5 @@ Media 内部继续把扫描状态、NFO / 图片预览、词表审计、单文�
 Desktop 外壳使用相同原则：`desktop-app-shell.tsx` 只渲染侧栏和顶栏，并通过回调上报导航、刷新、折叠和 Profile 切换意图；`App.tsx` 继续负责持久化与 Native Bridge。这样展示组件不会因为复用而获得不必要的平台权限。
 
 页面文件拆开后，`App.tsx` 使用 `React.lazy` 按导航目标加载页面模块。源代码模块化和运行时分包是两件事：前者改善维护，后者才会缩小首次加载的入口包。`Suspense` fallback 保持内容区稳定，避免加载页面代码时 WebView 高度突然收缩。
+
+分类浏览把 `CatalogKind`、选择到 `WorkQuery` 的映射、搜索规则和 Genre 分组规则收口到 `desktop-catalog-model.ts`。这个文件不依赖 React，适合先学习稳定业务规则；页面文件只负责读取 Repository、维护交互状态和渲染。
