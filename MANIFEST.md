@@ -139,3 +139,14 @@ Desktop 设置页将资料源解释为四层：
 - Starter Shared Pack 现在包含 Shared-only Person `person_shared_demo_001`、Shared-only Work `work_shared_demo_hana_001` 与对应只读 Poster；人物库可直接显示“共享示例花”。
 
 - V1-24C Portable Import Target Lock：Import Plan 绑定预览时 Private Library；Profile 切换后 Webview + Native 双层拒绝旧预览写入；Native Contract revision 6。
+
+### V1-27A Registry Foundation
+
+- `resources/registries/provider-entity-sources.{json,csv}`
+- `resources/registries/organization-source-evidence.{json,csv}`
+- `resources/registries/README.md`
+- `scripts/validate-entity-registry.mjs`
+- `scripts/audit-organization-series.mjs`
+- `docs/catalog/organization-series-registry.md`
+- `src/domain/entities/series.ts`：新增可选父 Organization。
+

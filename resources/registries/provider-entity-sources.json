@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-27A",
+  "items": [
+    {
+      "provider": "fanza",
+      "sourceType": "official-api",
+      "organizationSupport": "maker-enumeration",
+      "seriesSupport": "series-enumeration",
+      "stableIds": true,
+      "catalogStatus": "enumerable-with-credentials",
+      "requiresCredentials": true,
+      "notesZh": "DMM/FANZA Affiliate API v3 提供 MakerSearch 与 SeriesSearch；Label 暂不假设存在独立枚举端点。"
+    },
+    {
+      "provider": "javdb",
+      "sourceType": "database-api",
+      "organizationSupport": "maker-typed-search",
+      "seriesSupport": "series-typed-search",
+      "stableIds": true,
+      "catalogStatus": "lookup-and-web-index",
+      "requiresCredentials": false,
+      "notesZh": "公开签名 API 已验证 type=maker / type=series 与稳定详情 ID；typed 搜索分页行为不足以证明可完整枚举。"
+    },
+    {
+      "provider": "javbus",
+      "sourceType": "database-web",
+      "organizationSupport": "detail-studio-label-id",
+      "seriesSupport": "detail-series-id",
+      "stableIds": true,
+      "catalogStatus": "verified-detail-slice",
+      "requiresCredentials": false,
+      "notesZh": "影片详情暴露 producer/publisher/series 的 ID/name，且 studio/label/series ID 可作为影片筛选值；未验证全局目录端点。"
+    },
+    {
+      "provider": "javlibrary",
+      "sourceType": "database-web",
+      "organizationSupport": "detail-maker-label-name",
+      "seriesSupport": "not-verified",
+      "stableIds": false,
+      "catalogStatus": "name-evidence-only",
+      "requiresCredentials": false,
+      "notesZh": "公开页面可稳定观察 Maker/Label 名称，但本轮未验证可枚举的稳定 ID 目录。"
+    }
+  ]
+}

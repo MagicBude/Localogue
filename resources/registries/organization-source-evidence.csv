@@ -1,0 +1,19 @@
+provider,entityKind,sourceId,name,idStatus,canonicalId,evidence,noteZh
+javbus,maker,7q,エスワン ナンバーワンスタイル,verified,,javbus-api SSIS-406 detail example,producer 字段。
+javbus,label,9x,S1 NO.1 STYLE,verified,,javbus-api SSIS-406 detail example,publisher 字段。
+javlibrary,maker,,S1 NO.1 STYLE,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,S1 NO.1 STYLE,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,MOODYZ,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Moodyz Diva,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Madonna,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Madonna,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Fitch,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Fitch,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Aroma Kikaku,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Aroma,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Crystal Eizou,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,NITRO,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Rocket,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Rocket,name-only,,JAVLibrary public item/post metadata,
+javlibrary,maker,,Venus,name-only,,JAVLibrary public item/post metadata,
+javlibrary,label,,Jukujin PROJECT,name-only,,JAVLibrary public item/post metadata,

@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-27A",
+  "catalogStatus": "verified-slice-and-name-evidence",
+  "items": [
+    {
+      "provider": "javbus",
+      "entityKind": "maker",
+      "sourceId": "7q",
+      "name": "エスワン ナンバーワンスタイル",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "javbus-api SSIS-406 detail example",
+      "noteZh": "producer 字段。"
+    },
+    {
+      "provider": "javbus",
+      "entityKind": "label",
+      "sourceId": "9x",
+      "name": "S1 NO.1 STYLE",
+      "idStatus": "verified",
+      "canonicalId": null,
+      "evidence": "javbus-api SSIS-406 detail example",
+      "noteZh": "publisher 字段。"
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "S1 NO.1 STYLE",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "S1 NO.1 STYLE",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "MOODYZ",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Moodyz Diva",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Madonna",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Madonna",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Fitch",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Fitch",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Aroma Kikaku",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Aroma",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Crystal Eizou",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "NITRO",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Rocket",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Rocket",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "maker",
+      "sourceId": null,
+      "name": "Venus",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    },
+    {
+      "provider": "javlibrary",
+      "entityKind": "label",
+      "sourceId": null,
+      "name": "Jukujin PROJECT",
+      "idStatus": "name-only",
+      "canonicalId": null,
+      "evidence": "JAVLibrary public item/post metadata",
+      "noteZh": ""
+    }
+  ]
+}

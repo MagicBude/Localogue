@@ -714,3 +714,8 @@ V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.
 ### V1-24B Gallery / Presentation compatibility
 
 真实本地图片即使缺少历史 `width / height` 元数据，也会在运行时按实际图片尺寸恢复横版 Hero Gallery；Work 私人显示首图可从 poster / cover / gallery / fanart / screenshot 中选择，默认仍优先 poster / cover。
+
+### Organization / Series Registry
+
+V1-27A 开始把 Maker、Label、Series 作为有限目录治理：Provider ID 与名称证据进入 `resources/registries/`，Maker → Label 使用 Organization 父子关系，Series 可选关联最具体的已确认 Organization。运行 `pnpm validate:registry` 与 `pnpm registry:audit` 可检查 Registry 与资料库关系。
+

@@ -671,3 +671,12 @@
 - 补齐 Tauri Desktop 应用图标资源：32x32、128x128、256x256、Windows ICO 与 macOS ICNS。
 - `tauri.conf.json` 显式声明 bundle icon 列表，修复 Windows `tauri-build` / `cargo check` 生成 Resource 时缺少 `icons/icon.ico` 的失败。
 - `validate:desktop` 增加 Desktop Icon 资源与 Bundle 声明检查，防止后续重新遗漏构建资源。
+
+## V1-27A - Organization & Series Registry Foundation
+
+- 建立 Provider Entity Source Capability Registry。
+- 加入首批 JAVBus 稳定 Maker/Label ID 证据与 JAVLibrary 名称证据。
+- Series 新增可选 `parentOrganizationId`，补齐 Maker → Label → Series 归属链。
+- 新增 `validate:registry` 与 `registry:audit`，并把 Registry Validator 接入 `pnpm check`。
+- 不进行基于名称相似度的自动 Organization 合并。
+

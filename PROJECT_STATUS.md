@@ -307,3 +307,8 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 - 迭代扫描、junction/reparse 目录防环和后台 worker 继续保留。
 
 - V1-24C Shared-only 可见性 Fixture 已补齐：示例 Shared Pack 中的“共享示例花”现在关联 `SHARED-DEMO-001` performer Work，不再因人物库的 performer 关系收口规则而被过滤。
+
+## V1-27A 当前状态
+
+Maker / Label / Series Registry Foundation 已建立。当前 Demo 基线：2 Maker、2 Label、3 Series；两组 Maker→Label 已有关联，3 个 Series 暂无父 Organization，保持 warning 而不猜测。下一步优先使用 FANZA/DMM MakerSearch + SeriesSearch 形成可枚举快照，再用 JAVDB/JAVBus 稳定 ID 做交叉验证；Label 继续以作品详情与 Provider 证据保守补齐。
+

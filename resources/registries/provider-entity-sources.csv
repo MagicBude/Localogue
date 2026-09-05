@@ -1,0 +1,5 @@
+provider,sourceType,organizationSupport,seriesSupport,stableIds,catalogStatus,requiresCredentials,notesZh
+fanza,official-api,maker-enumeration,series-enumeration,true,enumerable-with-credentials,true,DMM/FANZA Affiliate API v3 提供 MakerSearch 与 SeriesSearch；Label 暂不假设存在独立枚举端点。
+javdb,database-api,maker-typed-search,series-typed-search,true,lookup-and-web-index,false,公开签名 API 已验证 type=maker / type=series 与稳定详情 ID；typed 搜索分页行为不足以证明可完整枚举。
+javbus,database-web,detail-studio-label-id,detail-series-id,true,verified-detail-slice,false,影片详情暴露 producer/publisher/series 的 ID/name，且 studio/label/series ID 可作为影片筛选值；未验证全局目录端点。
+javlibrary,database-web,detail-maker-label-name,not-verified,false,name-evidence-only,false,公开页面可稳定观察 Maker/Label 名称，但本轮未验证可枚举的稳定 ID 目录。

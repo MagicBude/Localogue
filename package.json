@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:fixture && pnpm validate:vocabulary && pnpm validate:provider-coverage && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
+    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:fixture && pnpm validate:vocabulary && pnpm validate:provider-coverage && pnpm validate:registry && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
     "validate:audit": "node scripts/validate-audit.mjs",
@@ -37,7 +37,9 @@
     "validate:vocabulary": "node scripts/validate-vocabulary.mjs",
     "vocabulary:coverage": "node scripts/report-vocabulary-coverage.mjs",
     "validate:provider-coverage": "node scripts/report-provider-coverage.mjs --check",
-    "vocabulary:provider-coverage": "node scripts/report-provider-coverage.mjs"
+    "vocabulary:provider-coverage": "node scripts/report-provider-coverage.mjs",
+    "validate:registry": "node scripts/validate-entity-registry.mjs",
+    "registry:audit": "node scripts/audit-organization-series.mjs"
   },
   "dependencies": {
     "next": "16.3.3",
