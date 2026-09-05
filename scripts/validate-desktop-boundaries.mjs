@@ -141,13 +141,15 @@ if (!errors.length) {
   const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
   const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;
   const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
+  const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
+  const desktopPacksPage = readFileSync(path.join(root, "apps/desktop/src/desktop-packs-page.tsx"), "utf8");
   const desktopSettingsPage = readFileSync(path.join(root, "apps/desktop/src/desktop-settings-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
-  if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
+  if (!desktopMediaPage.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
     errors.push("V1-18 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
   }
-  if (!desktopApp.includes("previewNfoImport") || !desktopApp.includes("importNfoPreview")) {
+  if (!desktopMediaPage.includes("previewNfoImport") || !desktopMediaPage.includes("importNfoPreview")) {
     errors.push("V1-18 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
   }
   const desktopManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-management.tsx"), "utf8");
@@ -240,7 +242,7 @@ if (!errors.length) {
     errors.push("V1-20 Work Facet Rail 必须加宽并允许长筛选项换行，避免标签被窄栏截断。");
   }
   for (const token of ['poster: 0', 'fanart: 1', 'screenshot: 2', 'cover: 3']) {
-    if (!desktopApp.includes(token)) errors.push(`V1-20 Work Asset 展示顺序缺少：${token}`);
+    if (!desktopWorkSurface.includes(token) && !desktopWorkGallery.includes(token)) errors.push(`V1-20 Work Asset 展示顺序缺少：${token}`);
   }
   if (desktopApp.includes("本地海报 / 封面 / Fanart")) {
     errors.push("V1-20 不允许继续使用中英混排且语义不明确的本地海报 / 封面 / Fanart 标题。");
@@ -290,7 +292,7 @@ if (!errors.length) {
   for (const token of ["find_asset_record_at_root", "read_asset_bytes_from_root", "settings.shared_pack_paths", "storagePath 与当前最高优先级来源不一致"]) {
     if (!rust.includes(token)) errors.push(`V1-24B Shared Asset Reader 缺少来源绑定或路径保护：${token}`);
   }
-  if (!desktopApp.includes("syncUnifiedLibrary") || !desktopApp.includes("一键同步 Unified Library")) {
+  if (!desktopMediaPage.includes("syncUnifiedLibrary") || !desktopMediaPage.includes("一键同步 Unified Library")) {
     errors.push("V1-18 Desktop Media 必须提供 NFO -> Asset -> Media 的统一同步入口，避免半同步状态。");
   }
   if (!adapters.includes("class TauriFileSystemAdapter") || !adapters.includes("class TauriFileHashAdapter")) {
@@ -406,7 +408,7 @@ if (!errors.length) {
   if (!vocabularyRepair.includes('isPrivateEntity("works", work.id)')) {
     errors.push("V1-21 历史 Vocabulary Repair 必须显式限制为 Private Work，不能因为 Shared ID 恰好匹配旧 NFO 前缀而创建 Override。");
   }
-  if (!desktopWorkSurface.includes("分类词表审计") || !desktopWorkSurface.includes("workTypeDefinition") || !desktopWorkSurface.includes("DenseDetailRow") || !desktopWorkSurface.includes('label={t("作品类型")}') || !desktopWorkSurface.includes('label={t("题材")}') || !desktopWorkSurface.includes('label={t("标签")}')) {
+  if (!desktopMediaPage.includes("分类词表审计") || !desktopWorkSurface.includes("workTypeDefinition") || !desktopWorkSurface.includes("DenseDetailRow") || !desktopWorkSurface.includes('label={t("作品类型")}') || !desktopWorkSurface.includes('label={t("题材")}') || !desktopWorkSurface.includes('label={t("标签")}')) {
     errors.push("V1-21/V1-22 Desktop 必须在 Work Detail 主信息区分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
   }
 
@@ -496,13 +498,13 @@ if (!errors.length) {
   if (!stableSha.includes("TextEncoder") || !stableSha.includes("export function sha256Text")) {
     errors.push("V1-23 stable-sha256 必须保持浏览器 / Tauri WebView 中立的同步 SHA-256 实现。");
   }
-  if (!nfoLibraryImport.includes("saveNfoPreviewAsEvidence") || !desktopApp.includes("saveNfoPreviewAsEvidence")) {
+  if (!nfoLibraryImport.includes("saveNfoPreviewAsEvidence") || !desktopMediaPage.includes("saveNfoPreviewAsEvidence")) {
     errors.push("V1-23 Desktop NFO Preview 必须支持保存为不可变 Evidence，而不只允许直接 Bootstrap Canonical。");
   }
   for (const token of ["CompressionStream", "DecompressionStream", "crypto.subtle.digest", "personal-backup", "shared-library", "MAX_PACK_BYTES"]) {
     if (!desktopPortable.includes(token)) errors.push(`V1-23 Desktop Portable Pack 缺少：${token}`);
   }
-  if (!desktopPortableWorkbench.includes("DesktopPortablePackWorkbench") || !desktopApp.includes("DesktopPortablePackWorkbench")) {
+  if (!desktopPortableWorkbench.includes("DesktopPortablePackWorkbench") || !desktopPacksPage.includes("DesktopPortablePackWorkbench")) {
     errors.push("V1-23 Packs 页面必须提供完整 Desktop Portable Pack 导入 / 导出工作台。");
   }
   for (const token of ["MAX_PORTABLE_PACK_BYTES", "Personal Portable Pack 导入失败，已回滚本次新建文件", "fs::rename(&temp, &root)", "safe_portable_relative_path", "install_shared_portable_files"]) {
@@ -592,10 +594,10 @@ if (!errors.length) {
   if (/影视库|成人库/.test(desktopApp + libraryProfiles)) {
     errors.push("V1-24 Desktop 不允许把具体内容分类名称硬编码为默认 Library Profile。 ");
   }
-  if (!mediaCoordinator.includes("waitForCompletion") || !desktopApp.includes("startScan({ waitForCompletion: true })")) {
+  if (!mediaCoordinator.includes("waitForCompletion") || !desktopMediaPage.includes("startScan({ waitForCompletion: true })")) {
     errors.push("V1-24 一键同步必须等待完整 MediaScanCoordinator 结束，不能在多媒体根目录尚未全部扫描时提前返回。");
   }
-  if (!desktopApp.includes("本轮实际扫描的 {count} 个目录") || !desktopApp.includes("scan.result.roots")) {
+  if (!desktopMediaPage.includes("本轮实际扫描的 {count} 个目录") || !desktopMediaPage.includes("scan.result.roots")) {
     errors.push("V1-24 Media 页面必须显示本轮实际成功扫描的根目录，便于验证多目录行为。");
   }
   if (!viteConfig.includes("codeSplitting") || !viteConfig.includes('name: "vendor"')) {

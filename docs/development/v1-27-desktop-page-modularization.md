@@ -30,4 +30,6 @@ Desktop 早期为了快速建立完整产品壳，把首页、作品、人物、
 
 第二批已经拆出 Packs 与 Settings：前者只组合 Shared Pack 配置和 Portable Pack 工作台，后者集中管理 Library Profile、资料源路径与 Runtime 信息。
 
-下一批单独拆分 Media 页面。Media 同时包含扫描 Job、NFO Preview、Asset Import、Vocabulary Repair 和人工绑定，拆分时应继续按 Application 能力划分子组件，不能把扫描规则复制进 React。
+第三批已将 Media 工作台迁入独立模块，并删除 `App.tsx` 中只为 Media 服务的 Adapter、Importer 与展示 helper。页面继续复用 `MediaScanCoordinator` 和各 Application Service；资料刷新使用 stale-while-refresh，避免列表闪烁和滚动位置跳动。
+
+后续优化应继续把 Media 的大段展示 JSX 按“同步状态、导入预览、词表修复、媒体列表”提取为纯展示组件，但编排状态和任务执行仍保留在同一个页面控制器中，避免子组件各自启动扫描或写入。
