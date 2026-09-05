@@ -10,6 +10,7 @@
 - 第二批将资料包与设置页迁入独立模块，`App.tsx` 只负责全局状态、持久化和页面组合。
 - 第三批迁出 Media 工作台及其专属 Adapter / Importer / 状态展示 helper，并明确扫描编排与 React 展示的边界。
 - Media 扫描状态与媒体结果列表进一步提取为纯展示 Section，避免任务执行逻辑与表格 JSX 混杂。
+- NFO / 图片预览、词表审计与单文件诊断继续提取为纯展示 Section，并消除页面渲染中的重复路径去重。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency

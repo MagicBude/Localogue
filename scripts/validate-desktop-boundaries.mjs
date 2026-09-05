@@ -410,7 +410,7 @@ if (!errors.length) {
   if (!vocabularyRepair.includes('isPrivateEntity("works", work.id)')) {
     errors.push("V1-21 历史 Vocabulary Repair 必须显式限制为 Private Work，不能因为 Shared ID 恰好匹配旧 NFO 前缀而创建 Override。");
   }
-  if (!desktopMediaPage.includes("分类词表审计") || !desktopWorkSurface.includes("workTypeDefinition") || !desktopWorkSurface.includes("DenseDetailRow") || !desktopWorkSurface.includes('label={t("作品类型")}') || !desktopWorkSurface.includes('label={t("题材")}') || !desktopWorkSurface.includes('label={t("标签")}')) {
+  if (!desktopMediaSurface.includes("分类词表审计") || !desktopWorkSurface.includes("workTypeDefinition") || !desktopWorkSurface.includes("DenseDetailRow") || !desktopWorkSurface.includes('label={t("作品类型")}') || !desktopWorkSurface.includes('label={t("题材")}') || !desktopWorkSurface.includes('label={t("标签")}')) {
     errors.push("V1-21/V1-22 Desktop 必须在 Work Detail 主信息区分开展示 Work Type / Genre / Tag，并提供分类词表审计入口。");
   }
 

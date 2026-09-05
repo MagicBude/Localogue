@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
-import { findApprovedGenreAlias } from "@/application/services/genre-localization-service";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { MediaBindingPanel } from "./desktop-management";
-import { MediaLibrarySection, MediaScanSection } from "./desktop-media-sections";
+import { MediaLibrarySection, MediaProbeSection, MediaScanSection, MetadataImportSection, VocabularyAuditSection } from "./desktop-media-sections";
 import {
   importLocalAssetPreview,
   previewLocalAssetImport,
@@ -19,7 +18,6 @@ import {
   importNfoPreview,
   previewNfoImport,
   saveNfoPreviewAsEvidence,
-  type NfoImportItemStatus,
   type NfoImportPreview,
   type NfoImportResult,
 } from "./nfo-library-import";
@@ -73,7 +71,7 @@ export function DesktopMediaPage({
   onLibraryChanged: () => void;
   runtimeContractRevision: number;
 }) {
-  const { t, metadataLanguage } = useDesktopI18n();
+  const { t } = useDesktopI18n();
   const [scan, setScan] = useState<MediaScanJobSnapshot | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [probe, setProbe] = useState<DesktopMediaProbeResult | null>(null);
@@ -97,6 +95,9 @@ export function DesktopMediaPage({
   const mediaRoots = effectiveMediaRoots(settings);
   const nfoRoots = effectiveNfoRoots(settings);
   const assetRoots = effectiveAssetRoots(settings);
+  // 组合路径只计算一次，避免 JSX 为“是否为空”和“实际展示”重复做去重工作。
+  const unifiedRoots = unique(settings.libraryRoots);
+  const metadataRoots = unique([...nfoRoots, ...assetRoots]);
 
   // 使用 stale-while-refresh Hook：资料变化时保留旧列表，避免整个工作台闪烁并丢失滚动位置。
   const data = useStableAsyncData(async () => {
@@ -360,7 +361,7 @@ export function DesktopMediaPage({
             {metadataBusy || scan?.status === "running" ? t("同步中…") : t("同步资料库")}
           </button>
         </div>
-        <code className="path-block">{unique([...settings.libraryRoots]).length ? unique([...settings.libraryRoots]).join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
+        <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
       </section>
       <MediaScanSection
         roots={mediaRoots}
@@ -369,120 +370,35 @@ export function DesktopMediaPage({
         onCancel={() => setScan(scanCoordinator.current?.cancel() ?? null)}
       />
 
-      <section className="settings-card table-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">UNIFIED METADATA SOURCE</span>
-            <h2>{t("NFO + 本地图片")}</h2>
-            <p className="muted">{t("推荐只配置一个大目录。Desktop 会递归发现子目录中的 NFO、poster、fanart、thumb，再按番号或同 stem 汇聚到同一个 Work；原始图片不会移动。")}</p>
-          </div>
-          <div className="button-row">
-            <button disabled={metadataBusy} onClick={() => void scanMetadataSource()}>{metadataBusy ? t("处理中…") : t("预览 NFO + 图片")}</button>
-            <button disabled={metadataBusy || !nfoPreview?.importable} onClick={() => void saveMetadataAsEvidence()}>保存为 Evidence</button>
-            <button className="primary-button" disabled={metadataBusy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={() => void importMetadataSource()}>{t("导入当前预览")}</button>
-          </div>
-        </div>
-        <code className="path-block">{unique([...nfoRoots, ...assetRoots]).length ? unique([...nfoRoots, ...assetRoots]).join("\n") : t("尚未配置 Unified Library Root / 兼容扫描路径")}</code>
+      <MetadataImportSection
+        roots={metadataRoots}
+        busy={metadataBusy}
+        nfoPreview={nfoPreview}
+        assetPreview={assetPreview}
+        nfoResult={nfoResult}
+        assetResult={assetResult}
+        onPreview={() => void scanMetadataSource()}
+        onSaveEvidence={() => void saveMetadataAsEvidence()}
+        onImport={() => void importMetadataSource()}
+      />
 
-        {nfoPreview ? <>
-          <SectionTitle eyebrow="NFO GROUPS" title={t("NFO 作品组")} />
-          <div className="mini-stat-grid">
-            <MiniStat label={t("NFO 文件")} value={nfoPreview.discovered} />
-            <MiniStat label={t("Work 候选")} value={nfoPreview.importable} />
-            <MiniStat label={t("新 Work")} value={nfoPreview.newWorks} />
-            <MiniStat label={t("已有 Work")} value={nfoPreview.existingWorks} />
-            <MiniStat label={t("跳过文件")} value={nfoPreview.skipped + nfoPreview.errors} />
-          </div>
-          <div className="table-wrap nfo-preview-table"><table className="data-table"><thead><tr><th>{t("作品组 / NFO 来源")}</th><th>{t("番号")}</th><th>{t("标题")}</th><th>{t("状态")}</th></tr></thead><tbody>
-            {nfoPreview.groups.slice(0, 100).map((group) => <tr key={group.key}>
-              <td>
-                <strong>{group.sourceCount > 1 ? t("{count} 个 NFO 来源", { count: group.sourceCount }) : group.representative.fileName}</strong>
-                {group.sourceCount > 1 ? <details><summary>{t("查看文件")}</summary><small className="path-text">{group.sources.map((item) => item.fileName).join("\n")}</small></details> : <small className="path-text">{group.representative.path}</small>}
-              </td>
-              <td>{group.code ?? "—"}</td>
-              <td>{group.title ?? group.representative.error ?? "—"}{group.representative.unmappedTerms?.length ? <small className="path-text">{t("Unmapped 来源词")}: {group.representative.unmappedTerms.length}</small> : null}</td>
-              <td><span className={nfoStatusClass(group.status)}>{nfoStatusLabel(group.status, t)}{group.sourceCount > 1 ? ` · ${t("{count} 个 NFO 来源", { count: group.sourceCount })}` : ""}</span></td>
-            </tr>)}
-          </tbody></table></div>
-          {nfoPreview.groups.length > 100 ? <p className="muted">{t("NFO 预览只显示前 100 个作品组；导入会处理全部 {count} 个可识别 Work 候选。", { count: nfoPreview.importable })}</p> : null}
-        </> : <p className="muted">{t("多段 NFO（例如 MDVR-195.part1～part6）会聚合成一个 Work 组，不再把其余文件显示成一长串“重复番号”。")}</p>}
+      <VocabularyAuditSection
+        busy={vocabularyBusy}
+        preview={vocabularyPreview}
+        result={vocabularyResult}
+        onPreview={() => void auditVocabulary()}
+        onApply={() => void repairVocabulary()}
+      />
 
-        {assetPreview ? <>
-          <SectionTitle eyebrow="LOCAL ASSET CANDIDATES" title={t("本地图片资产")} />
-          <div className="mini-stat-grid">
-            <MiniStat label={t("图片")} value={assetPreview.discovered} />
-            <MiniStat label={t("可关联")} value={assetPreview.linkable} />
-            <MiniStat label={t("等待 Work")} value={assetPreview.pendingWork} />
-            <MiniStat label={t("跳过")} value={assetPreview.skipped} />
-          </div>
-          <div className="table-wrap"><table className="data-table"><thead><tr><th>{t("图片")}</th><th>{t("番号")}</th><th>{t("类型")}</th><th>{t("匹配")}</th><th>{t("状态")}</th></tr></thead><tbody>
-            {assetPreview.items.slice(0, 100).map((item) => <tr key={item.path}>
-              <td><strong>{item.fileName}</strong><small className="path-text">{item.path}</small></td>
-              <td>{item.code ?? "—"}</td>
-              <td>{item.type ?? "—"}</td>
-              <td>{item.matchedBy === "nfo-stem" ? t("同 NFO stem") : item.matchedBy === "filename-code" ? t("文件名番号") : "—"}</td>
-              <td><span className={assetStatusClass(item.status)}>{assetStatusLabel(item.status, t)}</span></td>
-            </tr>)}
-          </tbody></table></div>
-          {assetPreview.items.length > 100 ? <p className="muted">{t("图片预览只显示前 100 条；实际导入会处理全部 {count} 张可关联图片。", { count: assetPreview.linkable })}</p> : null}
-        </> : null}
-
-        {nfoResult ? <p className="success-message">{t("NFO：导入 {imported} · 新建 Work {works} · 更新 {updated} · 新建 Person {people} · 新建 Organization {organizations}", { imported: nfoResult.imported, works: nfoResult.createdWorks, updated: nfoResult.updatedWorks, people: nfoResult.createdPeople, organizations: nfoResult.createdOrganizations })}</p> : null}
-        {assetResult ? <p className="success-message">{t("图片：关联 {imported} · 新建 Asset {created} · 复用 {reused} · 更新 Work {works}", { imported: assetResult.imported, created: assetResult.createdAssets, reused: assetResult.reusedAssets, works: assetResult.updatedWorks })}</p> : null}
-        {nfoResult?.warnings.length ? <details><summary>{t("{count} 条 NFO 导入警告", { count: nfoResult.warnings.length })}</summary><ul>{nfoResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
-        {assetResult?.warnings.length ? <details><summary>{t("{count} 条 Asset 导入警告", { count: assetResult.warnings.length })}</summary><ul>{assetResult.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
-      </section>
-
-      <section className="settings-card vocabulary-audit-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">VOCABULARY AUDIT</span>
-            <h2>{t("分类词表审计")}</h2>
-            <p className="muted">{t("检查早期 NFO 导入把“系列: … / 单体作品 / イメージビデオ”等混入 Genre / Tag 的情况。先预览，再显式修复；用户手工 Tag 不会被删除。")}</p>
-          </div>
-          <div className="button-row">
-            <button disabled={vocabularyBusy} onClick={() => void auditVocabulary()}>{vocabularyBusy ? t("处理中…") : t("检查分类")}</button>
-            <button className="primary-button" disabled={vocabularyBusy || !vocabularyPreview?.affectedWorks} onClick={() => void repairVocabulary()}>{t("应用修复")}</button>
-          </div>
-        </div>
-        {vocabularyPreview ? <>
-          <div className="mini-stat-grid">
-            <MiniStat label={t("扫描 Work")} value={vocabularyPreview.scannedWorks} />
-            <MiniStat label={t("需要修复")} value={vocabularyPreview.affectedWorks} />
-            <MiniStat label={t("移入 Series")} value={vocabularyPreview.movedToSeries} />
-            <MiniStat label={t("移入作品类型")} value={vocabularyPreview.movedToWorkTypes} />
-            <MiniStat label={t("移入 Genre")} value={vocabularyPreview.movedToGenres} />
-            <MiniStat label={t("Unmapped 来源词")} value={vocabularyPreview.unmappedTerms.length} />
-          </div>
-          {vocabularyPreview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{vocabularyPreview.unmappedTerms.slice(0, 200).map((term) => {
-            const reference = findApprovedGenreAlias(term);
-            const localized = reference ? (metadataLanguage === "zh-CN" ? reference["zh-CN"] : metadataLanguage === "en" ? reference.en : reference.ja) : undefined;
-            return <code key={term} title={reference ? `${reference.sources.join(" / ")} · ${reference.note ?? "approved genre alias"}` : undefined}>{localized && localized !== term ? `${term} → ${localized}` : term}{reference ? ` · ${t("词表参考")}` : ""}</code>;
-          })}</div></details> : null}
-          <p className="muted">{t("将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。", { genres: vocabularyPreview.removedImportedGenres, tags: vocabularyPreview.removedImportedTags })}</p>
-        </> : <p className="muted">{t("尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。")}</p>}
-        {vocabularyResult ? <p className="success-message">{t("上次修复：更新 {works} 个 Work · 新建 Series {series} · 新建 Genre {genres}", { works: vocabularyResult.updatedWorks, series: vocabularyResult.createdSeries, genres: vocabularyResult.createdGenres })}</p> : null}
-      </section>
-
-      <section className="settings-card">
-        <div className="section-heading">
-          <div><span className="eyebrow">NATIVE PROBE</span><h2>{t("单文件检查")}</h2></div>
-          <button onClick={() => void chooseAndProbe()} disabled={probing}>{t("选择 MP4 / MKV…")}</button>
-        </div>
-        {selectedPath ? <code className="path-block">{selectedPath}</code> : <p className="muted">{t("可选择任意受支持视频验证 ffprobe、打开与定位能力。")}</p>}
-        <div className="button-row">
-          <button disabled={!selectedPath} onClick={() => void fileOpener.openPath(selectedPath)}>{t("默认播放器打开")}</button>
-          <button disabled={!selectedPath} onClick={() => void fileOpener.revealInFolder(selectedPath)}>{t("资源管理器中定位")}</button>
-        </div>
-        {progress ? <div className={`progress ${progress.stage}`}><strong>{progress.stage}</strong><span>{progress.message}</span></div> : null}
-        {probe ? <div className="detail-grid compact-grid">
-          <InfoCard label={t("时长")} value={formatDuration(probe.durationSeconds)} />
-          <InfoCard label={t("分辨率")} value={probe.width && probe.height ? `${probe.width} × ${probe.height}` : undefined} />
-          <InfoCard label={t("视频编码")} value={probe.videoCodec} />
-          <InfoCard label={t("音频编码")} value={probe.audioCodec} />
-          <InfoCard label={t("封装格式")} value={probe.container} />
-        </div> : null}
-      </section>
+      <MediaProbeSection
+        selectedPath={selectedPath}
+        probing={probing}
+        progress={progress}
+        probe={probe}
+        onChoose={() => void chooseAndProbe()}
+        onOpen={() => void fileOpener.openPath(selectedPath)}
+        onReveal={() => void fileOpener.revealInFolder(selectedPath)}
+      />
 
       <MediaLibrarySection
         loading={data.loading}
@@ -511,35 +427,6 @@ export function DesktopMediaPage({
   );
 }
 
-function nfoStatusLabel(status: NfoImportItemStatus, t: (source: string) => string): string {
-  switch (status) {
-    case "new_work": return t("新 Work");
-    case "existing_work": return t("补充已有 Work");
-    case "missing_code": return t("缺少番号");
-    case "missing_title": return t("缺少标题");
-    case "duplicate_code": return t("重复番号");
-    case "parse_error": return t("解析失败");
-  }
-}
-
-function nfoStatusClass(status: NfoImportItemStatus): string {
-  return status === "new_work" || status === "existing_work" ? "status-chip ok" : "status-chip warn";
-}
-
-function assetStatusLabel(status: LocalAssetImportPreview["items"][number]["status"], t: (source: string) => string): string {
-  switch (status) {
-    case "ready": return t("可关联");
-    case "pending_work": return t("等待本轮 NFO 创建 Work");
-    case "missing_code": return t("缺少番号");
-    case "work_not_found": return t("找不到 Work");
-    case "unknown_asset_type": return t("未识别图片角色");
-  }
-}
-
-function assetStatusClass(status: LocalAssetImportPreview["items"][number]["status"]): string {
-  return status === "ready" || status === "pending_work" ? "status-chip ok" : "status-chip warn";
-}
-
 function effectiveMediaRoots(settings: DesktopBootstrapSettings): string[] {
   return unique([...settings.libraryRoots, ...settings.mediaScanPaths]);
 }
@@ -553,29 +440,8 @@ function effectiveAssetRoots(settings: DesktopBootstrapSettings): string[] {
   return unique([...settings.libraryRoots, ...settings.nfoScanPaths, ...settings.mediaScanPaths]);
 }
 
-function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
-  return <div className="section-title"><span className="eyebrow">{eyebrow}</span><h2>{title}</h2></div>;
-}
-
 function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return <section className="page-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></section>;
-}
-
-function InfoCard({ label, value }: { label: string; value?: string }) {
-  return <article className="info-card"><span>{label}</span><strong>{value && value !== "—" ? value : "—"}</strong></article>;
-}
-
-function formatDuration(value?: number): string | undefined {
-  if (!value || !Number.isFinite(value)) return undefined;
-  const total = Math.round(value);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
-  return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}` : `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function MiniStat({ label, value }: { label: string; value: number }) {
-  return <div><span>{label}</span><strong>{value}</strong></div>;
 }
 
 function unique(values: string[]): string[] {
