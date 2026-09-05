@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "work_shared_demo_hana_001",
+  "code": "SHARED-DEMO-001",
+  "originalLanguage": "ja",
+  "titles": {
+    "ja": "共有デモ・花だより",
+    "zh-CN": "共享示例花信",
+    "en": "Shared Demo Bloom"
+  },
+  "descriptions": {
+    "ja": "Shared Pack の人物・作品・画像読み取りを一度に確認するための架空作品です。",
+    "zh-CN": "用于同时验证 Shared Pack 人物、作品与图片只读解析的虚构作品。",
+    "en": "A fictional work used to verify Shared Pack people, works, and read-only assets together."
+  },
+  "releaseDate": {
+    "value": "2026-09-01",
+    "precision": "day"
+  },
+  "durationMinutes": 90,
+  "workTypeIds": [],
+  "personRelations": [
+    {
+      "personId": "person_shared_demo_001",
+      "role": "performer",
+      "billingOrder": 1
+    }
+  ],
+  "seriesIds": [],
+  "genreIds": [],
+  "tagIds": [],
+  "assetIds": [
+    "asset_shared_demo_hana_work_poster"
+  ],
+  "mediaFileIds": [],
+  "createdAt": "2026-09-05T09:00:00+08:00",
+  "updatedAt": "2026-09-05T09:00:00+08:00"
+}

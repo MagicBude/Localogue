@@ -2,9 +2,9 @@
 
 ## 阶段名称
 
-**V1-24B：Person Portrait / Gallery Asset Governance（收尾）**
+**V1-24C：Portable Pack / Presentation / Asset Closeout**
 
-当前版本继续保持 `0.1.24`。Library Profile 与 V1-24A Presentation Preference 已稳定；V1-24B 现已把 Work / Person 视觉 Asset 的浏览、导入、Shared 只读显示、引用保护与物理文件健康治理闭环补齐。
+当前版本继续保持 `0.1.24`。V1-24C 在 Library Profile、Presentation Preference 与 V1-24B Asset Governance 基础上，收口当前资料库的 Portable Backup / Import Plan、Presentation / Asset 迁移完整性，并补齐示例库 Starter Shared Pack 的稳定 provision。
 
 ## 本阶段完成
 
@@ -23,7 +23,7 @@
 - 已有 Profile 列表成为事实源，兼容平面路径不再在 active ID 异常时二次创建“幽灵 Profile”；
 - “添加示例库”由 Native Runtime 从 Tauri 内置资源复制到 App Local Data，可直接一键使用，不要求普通用户执行 pnpm。
 - 示例库刷新使用模板目录内容 SHA-256 签名；Debug Runtime 优先读取当前仓库 `examples/`，避免 `tauri dev` 的旧 `$RESOURCE` 副本让新增 Gallery/JSON 无法下发。
-- Desktop Runtime 公开 `contractRevision=4`；若 Webview 已更新但 Native Runtime 仍旧，Profile 管理会被安全禁用并提示重新启动/重编译，避免旧 Rust Settings Contract 把 Profile 字段丢弃；
+- Desktop Runtime 公开 `contractRevision=5`；若 Webview 已更新但 Native Runtime 仍旧，Profile 管理会被安全禁用并提示重新启动/重编译，避免旧 Rust Settings Contract 把 Profile 字段丢弃；
 - Profile 重命名等 metadata mutation 直接持久化完整 Profile 状态，不再被 active path snapshot 二次覆盖。
 
 ### 资料源设置收敛
@@ -68,6 +68,23 @@ Desktop 设置页将资料源解释为四层：
 - Library Profile 可以为不同资料库保存不同 Shared Pack 组合；
 - 后续优先建设 Community Pack Registry / 一键安装与更新，而不是把两个仓库合并。
 
+### V1-24B Gallery / Presentation 回归修复
+
+- 真实 Local Asset 的历史记录可能没有 `width / height`；Hero Gallery 不再因此直接过滤 fanart / gallery / screenshot，而是在 `DesktopAssetImage` 实际加载后用 `naturalWidth / naturalHeight` 验证横版比例；
+- `poster` 仍明确禁止进入顶部 Hero Gallery；未知尺寸的 `cover` 也继续保守排除，避免竖版封面重新撑坏横向画廊；
+- Work 的私人显示首图候选统一扩展为 `poster / cover / gallery / fanart / screenshot`，默认回退仍优先 `poster → cover`，只有显式私人偏好才会覆盖默认；
+- Web Presentation API / Workbench 与 Desktop Resolver 同步相同候选语义，避免同一 `presentation-preferences` 在两个入口表现不同。
+
+### V1-24C Portable Pack / Example Shared 收尾
+
+- 示例库 provision 同时复制 Private Fixture 与 Starter Shared Pack 到 App Local Data；旧 `Private + 0 Shared` 示例 Profile 自动修复为 `Private + 1 Shared`，普通自建 Profile 不自动挂共享资料；
+- Personal Backup 明确只备份当前 Profile 对应的 Private Library 内容，不包含 Profile 路径、实例设置、视频媒体或 Shared Pack；
+- Personal Import 增加 Native Import Plan，区分新增 / 完全相同 / 内容冲突，并按 Canonical / Asset Metadata / Asset Files / Presentation / Audit 分类；
+- 冲突文件默认安全跳过，不覆盖目标 Private Library；导入结果返回结构化分类统计；
+- 导入前检查 Asset JSON 与二进制的存在/摘要一致性以及 Preference 外部 Asset 引用，导入后重新检查 Asset Storage Health；
+- Native 写入继续使用 Portable 目录白名单，并拒绝目标路径树中的 symlink / Windows Reparse Point；Shared Pack 仍临时目录校验后原子安装且保持只读；
+- 新增 `docs/desktop/portable-pack-and-profile-backup.md` 固化多 Profile 时代的备份/迁移语义。
+
 ## 安全不变量
 
 1. Library Profile 只保存本机路径配置，不保存或复制 Canonical 数据。
@@ -88,10 +105,20 @@ Desktop 设置页将资料源解释为四层：
 - Media 页新增 Private Asset Storage Health：报告孤儿二进制、缺失文件与非托管引用；安全清理只删除当前 Private `asset-files/` 内、最新 Asset JSON 已无引用的普通文件，不触碰 Shared Pack。
 - Dev Fixture 新增 `desktop:demo:orphan`，Rust 新增清理单元测试；Native Runtime Contract 升至 revision 4。
 
-### 后续 V1-24C
+### V1-24C Portable Pack Closeout
 
-Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾。
+- 当前 Profile 的 Personal Backup / Import Plan、冲突跳过、结构化导入结果与 Asset / Presentation 完整性检查已收口；
+- 示例库会稳定 provision `Private + 1 Shared`，普通资料库默认保持 `Private + 0 Shared`；
+- Native Runtime Contract 当前为 revision 5。
+
+### 下一阶段
+
+优先进入 Community Pack Registry / 首次启动与资料库 Onboarding：让用户不依赖 Git clone 或手工路径即可安装、更新并为当前 Library Profile 挂载社区 Shared Pack。
 
 ## 版本
 
 `0.1.24`
+
+- Starter Shared Pack 现在包含 Shared-only Person `person_shared_demo_001`、Shared-only Work `work_shared_demo_hana_001` 与对应只读 Poster；人物库可直接显示“共享示例花”。
+
+- V1-24C Portable Import Target Lock：Import Plan 绑定预览时 Private Library；Profile 切换后 Webview + Native 双层拒绝旧预览写入；Native Contract revision 6。

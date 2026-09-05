@@ -163,7 +163,39 @@ export default function App() {
     void Promise.all([desktopBridge.runtimeInfo(), desktopBridge.loadSettings()])
       .then(async ([runtimeInfo, saved]) => {
         if (disposed) return;
-        const prepared = ensureLibraryProfiles(saved);
+        let prepared = ensureLibraryProfiles(saved);
+
+        // V1-24C：旧版本创建的“示例库”可能只有 Private Fixture，没有配套 Starter Shared Pack。
+        // 只对内置示例 Profile 做一次向前修复；普通用户资料库绝不自动挂载任何 Shared Pack。
+        const exampleProfile = (prepared.libraryProfiles ?? []).find((profile) =>
+          isDevFixtureLibraryPath(profile.libraryPath) && profile.sharedPackPaths.length === 0,
+        );
+        if (exampleProfile && (runtimeInfo.contractRevision ?? 0) >= 5) {
+          try {
+            const provisioned = await desktopBridge.provisionExampleLibrary();
+            if (provisioned.sharedPackPath) {
+              const updatedProfile = {
+                ...exampleProfile,
+                libraryPath: provisioned.libraryPath,
+                sharedPackPaths: [provisioned.sharedPackPath],
+                updatedAt: new Date().toISOString(),
+              };
+              let repaired: DesktopBootstrapSettings = {
+                ...prepared,
+                libraryProfiles: (prepared.libraryProfiles ?? []).map((profile) =>
+                  profile.id === exampleProfile.id ? updatedProfile : profile,
+                ),
+              };
+              if (prepared.activeLibraryProfileId === exampleProfile.id) {
+                repaired = applyLibraryProfile(repaired, updatedProfile);
+              }
+              prepared = ensureLibraryProfiles(await desktopBridge.saveSettings(repaired));
+            }
+          } catch {
+            // 示例 Shared Pack 修复失败不阻断 Desktop 启动；设置页“添加示例库”仍可显式重试。
+          }
+        }
+
         setRuntime(runtimeInfo);
         setSettings(prepared);
         setSavedSettings(prepared);
@@ -439,6 +471,8 @@ export default function App() {
             settings={settings}
             setSettings={setSettings}
             privateLibraryPath={savedSettings.libraryPath}
+            profileName={savedActiveProfile?.name}
+            runtimeContractRevision={runtime?.contractRevision ?? 0}
             packInfos={packInfos}
             busy={busy}
             onSave={saveSettings}
@@ -780,11 +814,13 @@ function WorkDetailPage({
 
 function isLandscapeWorkHeroAsset(asset: Asset): boolean {
   if (!["gallery", "fanart", "screenshot", "cover"].includes(asset.type)) return false;
-  if (!asset.mimeType?.startsWith("image/")) return false;
+  if (asset.mimeType && !asset.mimeType.startsWith("image/")) return false;
 
-  // Native/Fixture 导入会尽量记录尺寸。Hero Gallery 宁可不出现，也不拿未知或竖版图片兜底。
-  if (!asset.width || !asset.height) return false;
-  return asset.width / asset.height >= 1.2;
+  // 有尺寸时直接按尺寸过滤；旧版 Desktop 导入的本地图片可能没有 width / height，
+  // fanart / gallery / screenshot 仍应进入候选，由 <img> 的 naturalWidth / naturalHeight
+  // 在运行时做第二次方向校验。未知尺寸的 cover 仍保守排除，避免竖版封面回到 Hero。
+  if (asset.width && asset.height) return asset.width / asset.height >= 1.2;
+  return asset.type !== "cover";
 }
 
 function WorkAssetGallery({
@@ -799,24 +835,36 @@ function WorkAssetGallery({
   assetTypeLabel: (type: Asset["type"]) => string;
 }) {
   const { t } = useDesktopI18n();
-  const imageAssets = useMemo(() => {
-    // Work Detail 顶部 Hero Gallery 是横幅视觉区域：
-    // - poster 永远只服务海报墙 / 列表 /封面选择，不进入 Hero；
-    // - gallery / fanart / screenshot 必须是明确横图；
-    // - cover 只有在元数据明确为横图时才允许进入。
-    // 这样即使某个 Work 只有竖版海报，也不会再次把大画廊撑成“竖海报 + 两侧留白”。
-    return sortWorkAssets(assets).filter((asset) => isLandscapeWorkHeroAsset(asset));
-  }, [assets]);
+  const candidates = useMemo(
+    () => sortWorkAssets(assets).filter((asset) => isLandscapeWorkHeroAsset(asset)),
+    [assets],
+  );
+  const candidateKey = useMemo(() => candidates.map((asset) => asset.id).join("\0"), [candidates]);
   const [index, setIndex] = useState(0);
+  const [rejectedIds, setRejectedIds] = useState<Set<string>>(() => new Set());
+  const [validatedIds, setValidatedIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    setIndex(0);
+    setRejectedIds(new Set());
+    setValidatedIds(new Set());
+  }, [workCode, candidateKey]);
+
+  const imageAssets = useMemo(
+    () => candidates.filter((asset) => !rejectedIds.has(asset.id)),
+    [candidates, rejectedIds],
+  );
 
   useEffect(() => {
     setIndex((current) => imageAssets.length ? Math.min(current, imageAssets.length - 1) : 0);
-  }, [imageAssets.length, workCode]);
+  }, [imageAssets.length]);
 
   const current = imageAssets[index];
   const canNavigate = imageAssets.length > 1;
   const previous = () => setIndex((currentIndex) => (currentIndex - 1 + imageAssets.length) % imageAssets.length);
   const next = () => setIndex((currentIndex) => (currentIndex + 1) % imageAssets.length);
+  const needsRuntimeValidation = Boolean(current && (!current.width || !current.height));
+  const runtimeValidated = Boolean(current && validatedIds.has(current.id));
 
   if (!imageAssets.length) return null;
 
@@ -828,6 +876,26 @@ function WorkAssetGallery({
             asset={current}
             alt={`${workCode} ${current.type}`}
             fallback={<span className="desktop-poster-placeholder"><b>{workCode}</b></span>}
+            style={needsRuntimeValidation && !runtimeValidated ? { visibility: "hidden" } : undefined}
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              const ratio = image.naturalWidth / Math.max(image.naturalHeight, 1);
+              if (ratio >= 1.2) {
+                setValidatedIds((currentIds) => {
+                  if (currentIds.has(current.id)) return currentIds;
+                  const nextIds = new Set(currentIds);
+                  nextIds.add(current.id);
+                  return nextIds;
+                });
+                return;
+              }
+              setRejectedIds((currentIds) => {
+                if (currentIds.has(current.id)) return currentIds;
+                const nextIds = new Set(currentIds);
+                nextIds.add(current.id);
+                return nextIds;
+              });
+            }}
           />
         ) : (
           <span className="desktop-work-gallery__empty"><b>{workCode}</b><small>{t("暂无本地图片")}</small></span>
@@ -842,7 +910,7 @@ function WorkAssetGallery({
         </div>
       </div>
       <div className="desktop-work-gallery__rail">
-        <div className="desktop-work-gallery__tabs" role="tablist" aria-label={t("作品图片") }>
+        <div className="desktop-work-gallery__tabs" role="tablist" aria-label={t("作品图片")}>
           {imageAssets.map((asset, assetIndex) => (
             <button
               className={assetIndex === index ? "is-active" : ""}
@@ -1506,6 +1574,8 @@ function PacksPage({
   settings,
   setSettings,
   privateLibraryPath,
+  profileName,
+  runtimeContractRevision,
   packInfos,
   busy,
   onSave,
@@ -1517,6 +1587,8 @@ function PacksPage({
   settings: DesktopBootstrapSettings;
   setSettings: Dispatch<SetStateAction<DesktopBootstrapSettings>>;
   privateLibraryPath?: string;
+  profileName?: string;
+  runtimeContractRevision: number;
   packInfos: DesktopSharedPackInfo[];
   busy: boolean;
   onSave: () => Promise<void>;
@@ -1577,6 +1649,8 @@ function PacksPage({
       </section>
       <DesktopPortablePackWorkbench
         privateLibraryPath={privateLibraryPath}
+        profileName={profileName}
+        runtimeContractRevision={runtimeContractRevision}
         packInfos={packInfos}
         onSharedInstalled={onSharedInstalled}
         onPrivateImported={onPrivateImported}

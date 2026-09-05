@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "asset_shared_demo_hana_work_poster",
+  "type": "poster",
+  "storagePath": "asset-files/posters/shared-demo-hana-work-poster.jpg",
+  "mimeType": "image/jpeg",
+  "width": 1122,
+  "height": 1402,
+  "fileSize": 192141,
+  "sha256": "46dca55d19189d0557dc4bfacbc1d4e66bb9851195260b545a5e7896a956e3e1",
+  "subjectType": "work",
+  "subjectId": "work_shared_demo_hana_001",
+  "createdAt": "2026-09-05T09:00:00+08:00"
+}

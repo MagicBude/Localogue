@@ -67,8 +67,8 @@ async function assertAssetCanBeUsed(type: PresentationEntityType, entityId: stri
     return;
   }
 
-  if (!["poster", "cover"].includes(asset.type)) {
-    throw new Error("作品首图只能选择 poster / cover 图片。");
+  if (!["poster", "cover", "gallery", "fanart", "screenshot"].includes(asset.type)) {
+    throw new Error("作品显示首图只能选择 poster / cover / gallery / fanart / screenshot 图片。");
   }
   const work = await libraryRepository.findWorkById(entityId);
   if (!work) throw new Error(`找不到 work ${entityId}。`);

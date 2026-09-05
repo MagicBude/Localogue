@@ -1,4 +1,21 @@
 # Changelog
+- 修复 V1-24B 之后真实本地 Work 图片回归：早期 Desktop 导入的 fanart / screenshot 没有 width / height 时不再被 Hero Gallery 静默过滤；未知尺寸候选会在实际图片加载后用 naturalWidth / naturalHeight 二次校验，竖图仍不会进入顶部横版画廊。
+- Work Presentation 候选从仅 poster / cover 扩展为 poster / cover / gallery / fanart / screenshot；默认仍优先 poster → cover，只有用户显式选择时才会用其它作品图片作为私人显示首图，Web / Desktop 语义同步。
+- 修正 Starter Shared Pack 的 Shared-only 人物演示：新增 `SHARED-DEMO-001` performer Work 与只读 Poster，使“共享示例花”符合 Desktop 人物库按 performer 作品关系收口的规则，并可直接验证 Shared-only Person / Work / Asset。
+
+## V1-24C - Portable Pack / Presentation / Asset Closeout
+
+- Personal Portable Import 增加多 Profile 目标锁：Import Plan 记录生成预览时的 Private Library；切换资料库后 UI 禁用旧预览确认，Native 写入前再次核对 expectedLibraryPath，避免把 A 库备份误导入 B 库；Native Contract 升至 revision 6。
+- Portable Workbench 明确显示“导入目标”，并提供“放弃预览”；目标 Profile 改变后要求重新选择 Pack，而不是继续使用过期 Import Plan。
+- “添加示例库”现在同时把 Dev Fixture Private Library 与 Starter Shared Pack provision 到 App Local Data；旧版只有 `Private + 0 Shared` 的示例 Profile 会在 Native Contract revision 5 下自动修复为稳定的 `Private + 1 Shared`，普通用户自建资料库仍默认不挂 Shared Pack。
+- Personal Portable Pack 增加导入前结构化 Import Plan：逐文件区分新增、完全相同与内容冲突，并按 Canonical / Asset Metadata / Asset Files / Presentation / Audit 分类统计；既有冲突继续安全跳过，不覆盖本地资料。
+- Portable Pack 预览增加 Presentation / Asset 完整性检查：缺失 Private Asset 二进制、Asset JSON 与二进制 SHA-256 不一致、Preference 引用 Pack 外 Asset 都会显式呈现，其中摘要冲突会阻止导入。
+- Personal Import 返回结构化结果报告，显示导入/跳过数量、完全相同/冲突跳过和分类统计；导入后重新执行 Private Asset Storage Health，继续报告 Asset 文件缺失。
+- Portable Pack UI 明确显示当前 Library Profile / Private Library，Personal Backup 改为“当前资料库备份”，不把 Profile 路径、实例设置、媒体视频或 Shared Pack 内容混入备份。
+- Native Personal Import 除目录白名单外继续检查目标路径树中的 symlink / Windows Reparse Point，避免已有子目录把写入重定向到 Private Library 之外。
+- Shared Portable Pack 继续使用临时目录校验后原子安装；Native Runtime Contract 升至 revision 5，并新增 `preview_private_portable_files` 最小命令与 ACL。
+- 新增 `docs/desktop/portable-pack-and-profile-backup.md`，固化多 Profile 场景下的备份范围、冲突策略、Presentation / Asset 迁移与安全边界。
+- 产品版本继续保持 `0.1.24`。
 
 ## V1-24B - Person Portrait / Gallery Asset Governance
 

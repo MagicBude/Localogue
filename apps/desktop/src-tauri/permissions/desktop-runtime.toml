@@ -13,6 +13,7 @@ commands.allow = [
   "read_portable_pack_file",
   "save_portable_pack_file",
   "collect_private_portable_files",
+  "preview_private_portable_files",
   "import_private_portable_files",
   "collect_shared_portable_files",
   "install_shared_portable_files",

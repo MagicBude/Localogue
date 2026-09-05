@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
-    collections::{HashSet, VecDeque},
+    collections::{BTreeMap, HashSet, VecDeque},
     fs::{self, File},
     io::Read,
     path::{Path, PathBuf},
@@ -18,6 +18,11 @@ use url::Url;
 const PROGRESS_EVENT: &str = "localogue://desktop-task-progress";
 const SETTINGS_FILE: &str = "desktop-settings.json";
 const MAX_PORTABLE_PACK_BYTES: usize = 256 * 1024 * 1024;
+const PERSONAL_PORTABLE_DIRECTORIES: &[&str] = &[
+    "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
+    "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
+    "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+];
 static NATIVE_IO_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 const SAFE_MEDIA_EXTENSIONS: &[&str] = &[
     "mp4", "mkv", "avi", "mov", "wmv", "m4v", "ts", "mts", "m2ts", "webm", "flv",
@@ -222,6 +227,43 @@ struct DesktopPortableFile {
     bytes: Vec<u8>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPortableFileDigest {
+    path: String,
+    sha256: String,
+    size: u64,
+}
+
+#[derive(Debug, Clone, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPortableCategoryCount {
+    new_files: u64,
+    identical_files: u64,
+    conflict_files: u64,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPortablePlanEntry {
+    path: String,
+    category: String,
+    status: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    existing_size: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopPortablePrivatePreview {
+    target_library_path: String,
+    new_files: u64,
+    identical_files: u64,
+    conflict_files: u64,
+    categories: BTreeMap<String, DesktopPortableCategoryCount>,
+    entries: Vec<DesktopPortablePlanEntry>,
+}
+
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -256,7 +298,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 4,
+        contract_revision: 6,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -296,42 +338,36 @@ fn save_desktop_settings(app: AppHandle, settings: DesktopBootstrapSettings) -> 
 #[tauri::command]
 fn provision_example_library(app: AppHandle) -> Result<DesktopExampleLibraryInfo, String> {
     let source_library = locate_example_resource(&app, "examples/dev-library/template")?;
+    let source_shared_pack = locate_example_resource(&app, "examples/shared-packs/starter-community-pack")?;
     let local_data = app.path().app_local_data_dir().map_err(display_error)?;
-    let destination = local_data.join("example-library");
+    let library_destination = local_data.join("example-library");
+    let shared_destination = local_data.join("example-shared-pack");
 
-    // 不只比较 fixture-info.json。开发阶段若 Tauri resource_dir 仍残留上一轮资源，
-    // 或者维护者忘记只改版本号，单文件版本比较都可能让运行副本错误地被判定为“最新”。
-    // 这里对受信任的内置示例目录做确定性内容签名；用户再次点击“添加示例库”时，
-    // 只要模板中任一 JSON / 图片发生变化，就会原子刷新 App Local Data 运行副本。
-    let source_signature = directory_tree_sha256(&source_library)?;
-    let destination_signature = if example_library_is_complete(&destination) {
-        directory_tree_sha256(&destination).ok()
-    } else {
-        None
-    };
-    let current = destination_signature.as_deref() == Some(source_signature.as_str());
-    let created = if current {
-        false
-    } else {
-        let temporary = local_data.join(format!("example-library.tmp-{}", now_marker()));
-        if temporary.exists() {
-            fs::remove_dir_all(&temporary).map_err(display_error)?;
-        }
-        copy_directory_tree(&source_library, &temporary)?;
-        if destination.exists() {
-            fs::remove_dir_all(&destination).map_err(display_error)?;
-        }
-        fs::rename(&temporary, &destination).map_err(display_error)?;
-        true
-    };
+    // 示例库与配套 Shared Pack 都复制到 App Local Data，避免 Profile 指向开发仓库或
+    // 安装包内部资源路径。内容签名发生变化时采用临时目录 + rename 原子刷新。
+    let library_created = provision_resource_snapshot(
+        &source_library,
+        &library_destination,
+        |path| example_library_is_complete(path),
+    )?;
+    provision_resource_snapshot(
+        &source_shared_pack,
+        &shared_destination,
+        |path| path.join("localogue-pack.json").is_file() && path.join("library").is_dir(),
+    )?;
 
-    let shared_pack_path = locate_example_resource_optional(&app, "examples/shared-packs/starter-community-pack")
-        .map(|path| path_to_string(&path));
+    let shared_info = inspect_shared_pack(path_to_string(&shared_destination))?;
+    if !shared_info.valid {
+        return Err(format!(
+            "内置示例 Shared Pack 刷新后校验失败：{}",
+            shared_info.error.unwrap_or_else(|| "未知错误".into())
+        ));
+    }
 
     Ok(DesktopExampleLibraryInfo {
-        library_path: path_to_string(&destination),
-        shared_pack_path,
-        created,
+        library_path: path_to_string(&library_destination),
+        shared_pack_path: Some(path_to_string(&shared_destination)),
+        created: library_created,
     })
 }
 
@@ -404,36 +440,54 @@ async fn save_portable_pack_file(app: AppHandle, suggested_name: String, bytes: 
 async fn collect_private_portable_files(app: AppHandle) -> Result<Vec<DesktopPortableFile>, String> {
     spawn_native_io("collect_private_portable_files", move || {
         let root = PathBuf::from(configured_private_library_path(&app)?);
-        collect_portable_files(&root, &[
-            "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
-            "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
-            "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
-        ])
+        collect_portable_files(&root, PERSONAL_PORTABLE_DIRECTORIES)
     }).await
 }
 
 #[tauri::command]
-async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortableFile>) -> Result<Value, String> {
-    spawn_native_io("import_private_portable_files", move || {
+async fn preview_private_portable_files(app: AppHandle, files: Vec<DesktopPortableFileDigest>) -> Result<DesktopPortablePrivatePreview, String> {
+    spawn_native_io("preview_private_portable_files", move || {
         let root = PathBuf::from(configured_private_library_path(&app)?);
-        let allowed = [
-            "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
-            "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
-            "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
-        ];
+        preview_private_portable_files_at(&root, &files)
+    }).await
+}
+
+#[tauri::command]
+async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortableFile>, expected_library_path: String) -> Result<Value, String> {
+    spawn_native_io("import_private_portable_files", move || {
+        let configured = configured_private_library_path(&app)?;
+        if !same_library_path(&configured, &expected_library_path) {
+            return Err("当前资料库已在预览后发生切换；为避免导入到错误资料库，请重新选择 Portable Pack 生成预览。".into());
+        }
+        let root = PathBuf::from(configured);
         let total_bytes = files.iter().try_fold(0_usize, |total, file| total.checked_add(file.bytes.len()).ok_or_else(|| "Portable Pack 大小溢出。".to_string()))?;
         if total_bytes > MAX_PORTABLE_PACK_BYTES { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
         let mut imported = 0_u64;
         let mut skipped = 0_u64;
+        let mut skipped_identical = 0_u64;
+        let mut skipped_conflicts = 0_u64;
+        let mut imported_by_category: BTreeMap<String, u64> = BTreeMap::new();
+        let mut skipped_by_category: BTreeMap<String, u64> = BTreeMap::new();
         let mut created: Vec<PathBuf> = Vec::new();
         let result: Result<(), String> = (|| {
             for file in files {
-                let target = safe_portable_relative_path(&root, &file.path, &allowed)?;
-                if target.exists() { skipped += 1; continue; }
+                let target = safe_portable_relative_path(&root, &file.path, PERSONAL_PORTABLE_DIRECTORIES)?;
+                ensure_portable_target_tree_is_safe(&root, &target)?;
+                let category = portable_category(&file.path).to_string();
+                if target.exists() {
+                    skipped += 1;
+                    *skipped_by_category.entry(category).or_default() += 1;
+                    let incoming_sha256 = format!("{:x}", Sha256::digest(&file.bytes));
+                    let identical = fs::metadata(&target).map(|meta| meta.is_file() && meta.len() == file.bytes.len() as u64).unwrap_or(false)
+                        && sha256_path(&target).map(|value| value == incoming_sha256).unwrap_or(false);
+                    if identical { skipped_identical += 1; } else { skipped_conflicts += 1; }
+                    continue;
+                }
                 if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
                 fs::write(&target, file.bytes).map_err(display_error)?;
                 created.push(target);
                 imported += 1;
+                *imported_by_category.entry(category).or_default() += 1;
             }
             Ok(())
         })();
@@ -443,7 +497,14 @@ async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortabl
             }
             return Err(format!("Personal Portable Pack 导入失败，已回滚本次新建文件：{error}"));
         }
-        Ok(serde_json::json!({"imported": imported, "skipped": skipped}))
+        Ok(serde_json::json!({
+            "imported": imported,
+            "skipped": skipped,
+            "skippedIdentical": skipped_identical,
+            "skippedConflicts": skipped_conflicts,
+            "importedByCategory": imported_by_category,
+            "skippedByCategory": skipped_by_category
+        }))
     }).await
 }
 
@@ -515,6 +576,68 @@ async fn install_shared_portable_files(app: AppHandle, source_id: String, source
     }).await
 }
 
+fn preview_private_portable_files_at(root: &Path, files: &[DesktopPortableFileDigest]) -> Result<DesktopPortablePrivatePreview, String> {
+    let total_size = files.iter().try_fold(0_u64, |total, file| total.checked_add(file.size).ok_or_else(|| "Portable Pack 大小溢出。".to_string()))?;
+    if total_size > MAX_PORTABLE_PACK_BYTES as u64 { return Err("Portable Pack 超过 256 MB 安全上限。".into()); }
+
+    let mut preview = DesktopPortablePrivatePreview {
+        target_library_path: path_to_string(root),
+        new_files: 0,
+        identical_files: 0,
+        conflict_files: 0,
+        categories: BTreeMap::new(),
+        entries: Vec::with_capacity(files.len()),
+    };
+
+    for file in files {
+        if file.sha256.len() != 64 || !file.sha256.chars().all(|ch| ch.is_ascii_hexdigit()) {
+            return Err(format!("{}: SHA-256 摘要格式无效。", file.path));
+        }
+        let target = safe_portable_relative_path(root, &file.path, PERSONAL_PORTABLE_DIRECTORIES)?;
+        ensure_portable_target_tree_is_safe(root, &target)?;
+        let category = portable_category(&file.path).to_string();
+        let counts = preview.categories.entry(category.clone()).or_default();
+        let metadata = fs::symlink_metadata(&target).ok();
+        let (status, existing_size) = match metadata {
+            None => {
+                preview.new_files += 1;
+                counts.new_files += 1;
+                ("new".to_string(), None)
+            }
+            Some(meta) if meta.file_type().is_symlink() || !meta.is_file() => {
+                preview.conflict_files += 1;
+                counts.conflict_files += 1;
+                ("conflict".to_string(), Some(meta.len()))
+            }
+            Some(meta) => {
+                let identical = meta.len() == file.size
+                    && sha256_path(&target).map(|digest| digest.eq_ignore_ascii_case(&file.sha256)).unwrap_or(false);
+                if identical {
+                    preview.identical_files += 1;
+                    counts.identical_files += 1;
+                    ("identical".to_string(), Some(meta.len()))
+                } else {
+                    preview.conflict_files += 1;
+                    counts.conflict_files += 1;
+                    ("conflict".to_string(), Some(meta.len()))
+                }
+            }
+        };
+        preview.entries.push(DesktopPortablePlanEntry { path: file.path.clone(), category, status, existing_size });
+    }
+    Ok(preview)
+}
+
+fn portable_category(path: &str) -> &'static str {
+    match path.replace('\\', "/").split('/').next().unwrap_or("") {
+        "works" | "people" | "organizations" | "series" | "genres" | "tags" => "canonical",
+        "assets" => "assetMetadata",
+        "asset-files" => "assetFiles",
+        "presentation-preferences" => "presentation",
+        _ => "audit",
+    }
+}
+
 fn collect_portable_files(root: &Path, directories: &[&str]) -> Result<Vec<DesktopPortableFile>, String> {
     let mut result = Vec::new();
     let mut total_bytes = 0_usize;
@@ -550,6 +673,32 @@ fn safe_portable_relative_path(root: &Path, relative: &str, allowed: &[&str]) ->
         return Err(format!("Portable 路径不在白名单：{relative}"));
     }
     Ok(parts.into_iter().fold(root.to_path_buf(), |path, part| path.join(part)))
+}
+
+// Personal Portable Pack 只能写入 Private Library 自己管理的目录树。除了词法层面的
+// `..` 白名单检查，还要阻止已有子目录通过 symlink / Windows reparse point 把写入
+// 重定向到资料库之外。Private Library 根目录本身允许由用户放在 junction/挂载点上；
+// 从根目录以下的每一个已存在组件开始检查。
+fn ensure_portable_target_tree_is_safe(root: &Path, target: &Path) -> Result<(), String> {
+    let relative = target
+        .strip_prefix(root)
+        .map_err(|_| "Portable 目标不属于当前 Private Library。".to_string())?;
+    let mut cursor = root.to_path_buf();
+    for component in relative.components() {
+        cursor.push(component.as_os_str());
+        let metadata = match fs::symlink_metadata(&cursor) {
+            Ok(value) => value,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => break,
+            Err(error) => return Err(display_error(error)),
+        };
+        if metadata.file_type().is_symlink() || is_filesystem_reparse_point(&metadata) {
+            return Err(format!(
+                "Portable 目标经过符号链接或 Reparse Point，已拒绝写入：{}",
+                cursor.display()
+            ));
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -1658,6 +1807,25 @@ fn locate_example_resource_optional(app: &AppHandle, relative: &str) -> Option<P
     None
 }
 
+fn provision_resource_snapshot<F>(source: &Path, destination: &Path, is_complete: F) -> Result<bool, String>
+where
+    F: Fn(&Path) -> bool,
+{
+    let source_signature = directory_tree_sha256(source)?;
+    let destination_signature = if is_complete(destination) { directory_tree_sha256(destination).ok() } else { None };
+    if destination_signature.as_deref() == Some(source_signature.as_str()) { return Ok(false); }
+
+    let parent = destination.parent().ok_or_else(|| "示例资源目标缺少父目录。".to_string())?;
+    fs::create_dir_all(parent).map_err(display_error)?;
+    let file_name = destination.file_name().and_then(|value| value.to_str()).unwrap_or("example-resource");
+    let temporary = parent.join(format!("{file_name}.tmp-{}", now_marker()));
+    if temporary.exists() { fs::remove_dir_all(&temporary).map_err(display_error)?; }
+    copy_directory_tree(source, &temporary)?;
+    if destination.exists() { fs::remove_dir_all(destination).map_err(display_error)?; }
+    fs::rename(&temporary, destination).map_err(display_error)?;
+    Ok(true)
+}
+
 fn example_library_is_complete(path: &Path) -> bool {
     ["works", "people", "assets", "asset-files", "presentation-preferences"]
         .iter()
@@ -1994,6 +2162,13 @@ fn normalize_lexical(path: &Path) -> PathBuf {
     result
 }
 
+fn same_library_path(left: &str, right: &str) -> bool {
+    if left.trim().is_empty() || right.trim().is_empty() { return false; }
+    let left = path_to_string(&normalize_lexical(Path::new(left.trim()))).replace('\\', "/");
+    let right = path_to_string(&normalize_lexical(Path::new(right.trim()))).replace('\\', "/");
+    if cfg!(windows) { left.eq_ignore_ascii_case(&right) } else { left == right }
+}
+
 fn path_to_string(path: &Path) -> String { path.to_string_lossy().into_owned() }
 fn display_error(error: impl std::fmt::Display) -> String { error.to_string() }
 fn now_marker() -> String {
@@ -2038,6 +2213,70 @@ mod tests {
 
         fs::remove_dir_all(root).expect("cleanup temp library");
     }
+
+    #[test]
+    fn portable_preview_separates_new_identical_and_conflict_files() {
+        let root = std::env::temp_dir().join(format!("localogue-portable-preview-{}", now_marker()));
+        fs::create_dir_all(root.join("works")).expect("create works");
+        fs::create_dir_all(root.join("presentation-preferences")).expect("create presentation");
+        fs::write(root.join("works/same.json"), b"same").expect("write same");
+        fs::write(root.join("works/conflict.json"), b"local").expect("write conflict");
+
+        let digest = |path: &str, bytes: &[u8]| DesktopPortableFileDigest {
+            path: path.to_string(),
+            sha256: format!("{:x}", Sha256::digest(bytes)),
+            size: bytes.len() as u64,
+        };
+        let files = vec![
+            digest("works/same.json", b"same"),
+            digest("works/conflict.json", b"incoming"),
+            digest("presentation-preferences/new.json", b"{}"),
+        ];
+        let preview = preview_private_portable_files_at(&root, &files).expect("preview");
+        assert_eq!(preview.target_library_path, path_to_string(&root));
+        assert_eq!(preview.new_files, 1);
+        assert_eq!(preview.identical_files, 1);
+        assert_eq!(preview.conflict_files, 1);
+        assert_eq!(preview.categories.get("canonical").expect("canonical").identical_files, 1);
+        assert_eq!(preview.categories.get("canonical").expect("canonical").conflict_files, 1);
+        assert_eq!(preview.categories.get("presentation").expect("presentation").new_files, 1);
+
+        fs::remove_dir_all(root).expect("cleanup portable preview");
+    }
+
+
+    #[test]
+    fn portable_target_lock_compares_library_paths_safely() {
+        let root = std::env::temp_dir().join("localogue-portable-target-lock");
+        let root_text = path_to_string(&root);
+        assert!(same_library_path(&root_text, &root_text));
+        assert!(!same_library_path(&root_text, &format!("{}-other", root_text)));
+        assert!(!same_library_path(&root_text, ""));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn portable_preview_rejects_symlink_parent() {
+        use std::os::unix::fs::symlink;
+
+        let root = std::env::temp_dir().join(format!("localogue-portable-symlink-test-{}", now_marker()));
+        let outside = std::env::temp_dir().join(format!("localogue-portable-outside-test-{}", now_marker()));
+        fs::create_dir_all(&root).expect("root");
+        fs::create_dir_all(&outside).expect("outside");
+        symlink(&outside, root.join("assets")).expect("symlink");
+
+        let files = vec![DesktopPortableFileDigest {
+            path: "assets/redirected.json".into(),
+            sha256: "0".repeat(64),
+            size: 2,
+        }];
+        let error = preview_private_portable_files_at(&root, &files).expect_err("symlink parent must be rejected");
+        assert!(error.contains("符号链接") || error.contains("Reparse Point"));
+
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&outside);
+    }
+
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -2057,6 +2296,7 @@ pub fn run() {
             read_portable_pack_file,
             save_portable_pack_file,
             collect_private_portable_files,
+            preview_private_portable_files,
             import_private_portable_files,
             collect_shared_portable_files,
             install_shared_portable_files,

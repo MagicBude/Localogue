@@ -2,14 +2,14 @@
 
 ## 当前阶段
 
-**V1-24B：Person Portrait / Gallery Asset Governance。**
+**V1-24C：Portable Pack / Presentation / Asset Closeout。**
 
 V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Desktop 的资料源模型，使它从“很多散落路径设置”升级为用户可以理解和快速切换的资料库工作区：
 
 - 新增 **Library Profile**：示例库与用户自建资料库可分别保存 Private Library、Unified Roots、额外 Media / NFO 路径与 Shared Packs；
 - Profile 新建 / 切换 / 重命名 / 删除已改为立即持久化；active ID 失效时自动回退到现有 Profile，避免新增资料库后旧 Profile 消失或侧栏失去选择器；
 - “添加示例库”由 Desktop Native Runtime 自动从内置资源初始化到 App Local Data，不再依赖用户先运行 pnpm 开发命令；
-- 新增 Native `contractRevision=4` 防漂移检查：Webview 热更新而 Rust Binary / ACL 未重编译时，Profile 管理不会再显示假成功，而会要求重启或重编译；
+- 新增 Native `contractRevision=6` 防漂移检查：Webview 热更新而 Rust Binary / ACL 未重编译时，Profile 管理不会再显示假成功，而会要求重启或重编译；
 - Profile metadata mutation 与普通路径设置保存分离，重命名会核对 Native 返回值后再确认持久化结果；
 - 侧栏直接提供资料库下拉切换与管理入口，切换只替换当前路径配置，不复制或移动磁盘数据；
 - 旧单库 Settings 会平滑迁移为 Profile；Dev Fixture 固定命名为“示例库”，普通新建库使用“资料库 1 / 资料库 2 …”中性默认名；
@@ -26,6 +26,8 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ### 当前 V1-24B
 
+- 修复真实资料库图片兼容回归：旧 Desktop 通过 Unified Sync 导入的 fanart / screenshot 可能没有 width / height，Hero Gallery 现在先按 Asset 角色纳入候选，再用浏览器实际解码尺寸做横版二次校验；因此既恢复真实横图画廊，也继续阻止竖版 poster / 竖图进入顶部。
+- Work Presentation 的私人首图候选现在包含 poster / cover / gallery / fanart / screenshot，默认回退顺序仍保持 poster → cover → 其它作品图片；Web 与 Desktop 选择规则同步。
 - Work Detail 顶部 Hero Gallery 严格只展示横版 Gallery / Fanart / Screenshot / 横版 Cover；竖版 poster 仅用于海报墙和封面，不再作为顶部画廊回退。示例库 11 部作品全部有宽幅 Gallery。
 - 修复产品示例库运行副本刷新：`tauri dev` 不再优先使用旧 Resource 副本，Native Provision 会比较整棵 Fixture 的内容签名后原子刷新 App Local Data，避免模板已有横图但运行库仍只看到 Poster。
 - Person Detail 已加入 Portrait / Gallery 浏览、头像/Gallery 图片导入与 Private Asset 删除治理。
@@ -34,9 +36,15 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - Media 页新增 Private Asset Storage Health：可检查孤儿文件、Asset 引用缺失和非托管路径，并只安全清理当前 Private `asset-files/` 内真正无引用的普通文件。
 - V1-24B 功能闭环完成；下一阶段进入 V1-24C Portable Pack / Presentation / Asset 迁移与冲突报告收尾。
 
-### 后续 V1-24C
+### 当前 V1-24C
 
-Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移收尾继续后续实现。Library Profile 后续还可增加首次启动向导、Profile 导入导出与 Community Pack Registry。
+- 内置示例库现在同时 provision Private Fixture 与 Starter Shared Pack；旧版 `Private + 0 Shared` 示例 Profile 会自动补齐为 `Private + 1 Shared`，普通新建资料库不自动挂共享资料。
+- Personal Portable Pack 导入前生成结构化 Import Plan，按新增 / 完全相同 / 内容冲突与 Canonical / Asset / Presentation / Audit 分类展示；冲突默认跳过，不覆盖本地。
+- 导入前检查 Asset JSON、Private 二进制与 Presentation Preference 引用完整性；导入后重新检查 Asset Storage Health，并输出结构化导入报告。
+- Portable UI 明确绑定当前 Library Profile，避免多资料库环境误认为备份包含其它 Profile 或全局实例设置。
+- Personal Import Plan 现在还绑定生成预览时的 Private Library；若预览后切换 Profile，Webview 与 Native 双层拒绝继续导入，必须重新生成预览，避免跨库误写。
+- Native Personal Import 增加 symlink / Windows Reparse Point 路径树防护；Shared Portable Pack 保持临时目录校验与原子安装。
+- V1-24C 完成后，下一步优先转向 Community Pack Registry / 首次启动与资料库 onboarding。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -251,14 +259,14 @@ Portable Pack 冲突预览、导入结果报告与 Presentation / Asset 迁移�
 
 ## 下一阶段建议
 
-**V1-24C：Portable Pack / Presentation / Asset 收尾。**
+**下一阶段：Community Pack Registry / Onboarding 基础。**
 
-1. 为 Personal Portable Pack 增加导入前冲突预览，明确新增 / 已存在 / 跳过 / 冲突的文件与实体；
-2. 为导入执行结果增加结构化报告，覆盖 Canonical、Audit、Presentation Preference、Asset JSON 与 `asset-files/`；
-3. 验证 Portable Pack 导入/导出后的 Asset 引用与二进制完整性，并把缺失/冲突状态显式呈现；
-4. 收口 Presentation Preference / Asset 的迁移规则，保持 Shared Pack 只读与 Private 显示偏好边界；
-5. 评估 Profile 级 Portable Backup / Restore 入口，避免多资料库时代误把不同 Profile 的路径配置混合；
-6. 完成 V1-24C 验收后再进入后续 Community Pack Registry / onboarding 等产品化能力。
+1. 定义 Community Pack Registry 清单与可信来源模型，先支持官方/用户显式配置的 Registry；
+2. Desktop 提供 Shared Pack 浏览、安装、更新与卸载入口，不要求普通用户手工 `git clone`；
+3. 安装/更新完成后由用户选择挂载到哪个 Library Profile，普通资料库不自动加入任何内容型 Shared Pack；
+4. 首次启动向导只引导“创建资料库 / 选择内容根目录 / 可选安装社区资料”，高级兼容路径继续折叠；
+5. `localogue-community-data` 继续独立仓库发布 Shared Pack，主仓库只消费其版本化产物；
+6. Registry 与更新机制继续维持 Shared Pack Native 只读、manifest 校验与原子安装边界。
 
 ## 当前不做
 
@@ -286,3 +294,4 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 - Windows 扫描根不再依赖 `fs::canonicalize`，兼容可 `read_dir` 但 canonical final path 返回 OS 1005 的卷。
 - 迭代扫描、junction/reparse 目录防环和后台 worker 继续保留。
 
+- V1-24C Shared-only 可见性 Fixture 已补齐：示例 Shared Pack 中的“共享示例花”现在关联 `SHARED-DEMO-001` performer Work，不再因人物库的 performer 关系收口规则而被过滤。

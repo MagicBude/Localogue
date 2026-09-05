@@ -66,9 +66,43 @@ export interface DesktopPortableFile {
   bytes: number[] | Uint8Array;
 }
 
+export interface DesktopPortableFileDigest {
+  path: string;
+  sha256: string;
+  size: number;
+}
+
+export type DesktopPortableFileStatus = "new" | "identical" | "conflict";
+
+export interface DesktopPortableCategoryCount {
+  newFiles: number;
+  identicalFiles: number;
+  conflictFiles: number;
+}
+
+export interface DesktopPortablePlanEntry {
+  path: string;
+  category: string;
+  status: DesktopPortableFileStatus;
+  existingSize?: number;
+}
+
+export interface DesktopPortablePrivatePreview {
+  targetLibraryPath: string;
+  newFiles: number;
+  identicalFiles: number;
+  conflictFiles: number;
+  categories: Record<string, DesktopPortableCategoryCount>;
+  entries: DesktopPortablePlanEntry[];
+}
+
 export interface DesktopPortableImportResult {
   imported: number;
   skipped: number;
+  skippedIdentical?: number;
+  skippedConflicts?: number;
+  importedByCategory?: Record<string, number>;
+  skippedByCategory?: Record<string, number>;
 }
 export type DesktopWritableLibraryCollection =
   | "works"

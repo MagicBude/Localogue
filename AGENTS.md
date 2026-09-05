@@ -402,3 +402,14 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Dev Fixture 长期至少维持 10 个 Work、6 个 Person，并同时覆盖有图与无图、关系筛选、Presentation、Import/Review 场景；生成式图片继续作为可公开提交的视觉测试资产。
 - `localogue-community-data` 与主程序保持独立仓库：前者维护可共享事实数据，后者维护代码、Schema、词表与虚构 Fixture。Localogue 通过 Shared Pack / 未来 Registry 消费社区资料，不在主仓库复制第二份真实元数据。
 
+
+
+## V1-24C Portable Pack / Profile Backup 约束
+
+- Personal Portable Pack 永远绑定**当前 Library Profile 的 Private Library**；不得把其它 Profile、Library Profile 路径、ffprobe/Web URL 等实例设置或用户视频媒体混进备份。
+- Personal Import 导入前必须生成结构化 Plan；既有目标内容不同即视为 conflict，默认跳过而不是覆盖。完全相同文件也应跳过并单独统计。
+- Portable Pack 中 Asset JSON 引用 Private `asset-files/` 时必须验证二进制是否存在且摘要一致；Presentation Preference 引用 Pack 外 Asset 必须显式警告。
+- Native Personal Import 的路径安全不仅检查 `..` 与目录白名单，还必须拒绝 Private Library 根目录以下已有的 symlink / Windows Reparse Point，避免写入重定向越界。
+- “示例库”是唯一允许产品自动挂 Starter Shared Pack 的内置 Profile；普通“资料库 N”默认始终 `Private + 0 Shared`，不得推断用户内容类型或自动加入社区资料。
+- 示例库的 Private Fixture 与 Starter Shared Pack 都应 provision 到 App Local Data 的稳定运行副本，不让 Profile 长期依赖开发仓库或安装资源目录。
+- V1-24C 文档继续更新固定 `MANIFEST.md / PROJECT_STATUS.md / CHANGELOG.md`，不得新增版本 MANIFEST。

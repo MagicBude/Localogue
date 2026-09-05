@@ -1383,3 +1383,21 @@ select[multiple] { min-height: 105px; padding: 6px; }
   overflow-wrap: anywhere;
   color: var(--muted);
 }
+
+/* V1-24C Portable Pack structured preflight ---------------------------------- */
+.portable-profile-note { margin: 8px 0 0; color: var(--muted, #6c6a63); font-size: 11px; overflow-wrap: anywhere; }
+.portable-profile-note code { font-size: 10px; }
+.portable-plan-metrics { margin-top: 4px; }
+.portable-category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.portable-category-grid > div { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--line, #ddd8ce); border-radius: 10px; background: var(--panel, #fff); }
+.portable-category-grid strong { font-size: 11px; }
+.portable-category-grid small { color: var(--muted, #6c6a63); font-size: 9px; }
+.portable-detail-list { border: 1px solid var(--line, #ddd8ce); border-radius: 10px; padding: 9px 11px; }
+.portable-detail-list summary { cursor: pointer; font-weight: 800; }
+.portable-detail-list code { display: block; margin-top: 5px; overflow-wrap: anywhere; font-size: 9px; }
+.portable-import-result { border-color: rgba(68, 128, 76, .35); }
+
+.portable-import-target { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--line, #ddd8ce); border-radius: 10px; background: var(--panel, #fff); }
+.portable-import-target span { color: var(--muted, #6c6a63); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.portable-import-target strong { font-size: 12px; }
+.portable-import-target code { overflow-wrap: anywhere; font-size: 9px; }

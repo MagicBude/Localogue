@@ -437,8 +437,41 @@ async function validateCompanionExamples() {
     path.join(sharedLibraryRoot, "assets", "asset_shared_demo_hana_portrait.json"),
     "shared-packs/starter-community-pack/library/assets/asset_shared_demo_hana_portrait.json",
   );
+  const sharedOnlyWork = await readJson(
+    path.join(sharedLibraryRoot, "works", "work_shared_demo_hana_001.json"),
+    "shared-packs/starter-community-pack/library/works/work_shared_demo_hana_001.json",
+  );
+  const sharedOnlyWorkPoster = await readJson(
+    path.join(sharedLibraryRoot, "assets", "asset_shared_demo_hana_work_poster.json"),
+    "shared-packs/starter-community-pack/library/assets/asset_shared_demo_hana_work_poster.json",
+  );
   if (!sharedOnlyPerson || sharedOnlyPerson.portraitAssetId !== "asset_shared_demo_hana_portrait") {
     errors.push("starter-community-pack: Shared-only Person 必须引用 asset_shared_demo_hana_portrait，用于验收 Shared Asset 只读显示");
+  }
+  const sharedPerformerRelation = sharedOnlyWork?.personRelations?.find(
+    (relation) => relation.personId === "person_shared_demo_001" && relation.role === "performer",
+  );
+  if (!sharedOnlyWork || !sharedPerformerRelation) {
+    errors.push("starter-community-pack: Shared-only Person 必须至少关联一部 performer Work，否则 Desktop 人物库按作品关系收口时无法显示该人物");
+  }
+  if (!sharedOnlyWork?.assetIds?.includes("asset_shared_demo_hana_work_poster")) {
+    errors.push("starter-community-pack: Shared-only Work 必须引用 asset_shared_demo_hana_work_poster，用于验收 Shared Work Asset 只读显示");
+  }
+  if (!sharedOnlyWorkPoster || sharedOnlyWorkPoster.subjectId !== "work_shared_demo_hana_001" || sharedOnlyWorkPoster.type !== "poster") {
+    errors.push("starter-community-pack: Shared-only Work Poster Asset 元数据不完整");
+  } else {
+    const sharedPosterPath = path.join(sharedLibraryRoot, sharedOnlyWorkPoster.storagePath ?? "");
+    try {
+      const bytes = await readFile(sharedPosterPath);
+      if (bytes.length < 3 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) {
+        errors.push("starter-community-pack: Shared-only Work Poster 必须是真实 JPEG");
+      }
+      if (sharedOnlyWorkPoster.fileSize !== bytes.length) errors.push("starter-community-pack: Shared-only Work Poster fileSize 不匹配");
+      const digest = createHash("sha256").update(bytes).digest("hex");
+      if (sharedOnlyWorkPoster.sha256 !== digest) errors.push("starter-community-pack: Shared-only Work Poster SHA-256 不匹配");
+    } catch (error) {
+      errors.push(`starter-community-pack: Shared-only Work Poster 文件不可读 (${error.message})`);
+    }
   }
   if (!sharedOnlyAsset || sharedOnlyAsset.subjectId !== "person_shared_demo_001" || sharedOnlyAsset.type !== "portrait") {
     errors.push("starter-community-pack: Shared-only Portrait Asset 元数据不完整");

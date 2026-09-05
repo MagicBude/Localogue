@@ -12,6 +12,8 @@ import type {
   DesktopAssetStorageHealth,
   DesktopAssetStorageCleanupResult,
   DesktopPortableFile,
+  DesktopPortableFileDigest,
+  DesktopPortablePrivatePreview,
   DesktopPortableImportResult,
   DesktopFileStat,
   DesktopDeletableLibraryCollection,
@@ -37,7 +39,12 @@ export const desktopBridge = {
   savePortablePackFile: (suggestedName: string, bytes: Uint8Array) =>
     invoke<string | null>("save_portable_pack_file", { suggestedName, bytes: Array.from(bytes) }),
   collectPrivatePortableFiles: () => invoke<DesktopPortableFile[]>("collect_private_portable_files"),
-  importPrivatePortableFiles: (files: DesktopPortableFile[]) => invoke<DesktopPortableImportResult>("import_private_portable_files", { files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })) }),
+  previewPrivatePortableFiles: (files: DesktopPortableFileDigest[]) =>
+    invoke<DesktopPortablePrivatePreview>("preview_private_portable_files", { files }),
+  importPrivatePortableFiles: (files: DesktopPortableFile[], expectedLibraryPath: string) => invoke<DesktopPortableImportResult>("import_private_portable_files", {
+    files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })),
+    expectedLibraryPath,
+  }),
   collectSharedPortableFiles: (packPath: string) => invoke<DesktopPortableFile[]>("collect_shared_portable_files", { packPath }),
   installSharedPortableFiles: (sourceId: string, sourceVersion: string, files: DesktopPortableFile[]) => invoke<string>("install_shared_portable_files", { sourceId, sourceVersion, files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })) }),
   openPath: (path: string) => invoke<void>("open_path", { path }),

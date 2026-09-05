@@ -6,7 +6,12 @@ import type {
   PortablePackPreview,
 } from "@/domain/entities/portable-pack";
 
-import type { DesktopPortableFile } from "./contracts";
+import type {
+  DesktopAssetStorageHealth,
+  DesktopPortableFile,
+  DesktopPortableImportResult,
+  DesktopPortablePrivatePreview,
+} from "./contracts";
 import { desktopBridge } from "./tauri-bridge";
 
 const MAX_PACK_BYTES = 256 * 1024 * 1024;
@@ -16,9 +21,28 @@ const PERSONAL_ALLOWED = new Set([
   "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
 ]);
 
+export interface DesktopPortableAssetIntegrity {
+  assetRecords: number;
+  assetFiles: number;
+  presentationPreferences: number;
+  missingAssetFiles: string[];
+  assetDigestMismatches: string[];
+  externalPreferenceAssetIds: string[];
+}
+
 export interface DesktopPortablePreview extends PortablePackPreview {
   path: string;
   envelope: PortablePackEnvelope;
+  personalPlan?: DesktopPortablePrivatePreview;
+  assetIntegrity?: DesktopPortableAssetIntegrity;
+}
+
+export interface DesktopPortableImportReport extends PortablePackImportResult {
+  skippedIdentical?: number;
+  skippedConflicts?: number;
+  importedByCategory?: Record<string, number>;
+  skippedByCategory?: Record<string, number>;
+  assetStorageAfterImport?: DesktopAssetStorageHealth;
 }
 
 export async function exportDesktopPersonalPack(): Promise<string | null> {
@@ -64,7 +88,10 @@ export async function pickAndPreviewPortablePack(): Promise<DesktopPortablePrevi
   const envelope = await decodePortableEnvelope(raw);
   const errors: string[] = [];
   const warnings: string[] = [];
-  const conflicts: string[] = [];
+  let conflicts: string[] = [];
+  let personalPlan: DesktopPortablePrivatePreview | undefined;
+  let assetIntegrity: DesktopPortableAssetIntegrity | undefined;
+
   if (envelope.schemaVersion !== 1 || envelope.format !== "localogue-portable-pack") errors.push("不是受支持的 Localogue Portable Pack。 ");
   if (!envelope.manifest?.id || !envelope.manifest.name || !envelope.manifest.version) errors.push("Portable Pack manifest 缺少 id / name / version。 ");
   const seen = new Set<string>();
@@ -80,8 +107,31 @@ export async function pickAndPreviewPortablePack(): Promise<DesktopPortablePrevi
       if (envelope.manifest.kind === "shared-library" && normalized !== "localogue-pack.json" && !normalized.startsWith("library/") && !normalized.startsWith("sources/")) errors.push(`${normalized}: 不属于 Shared Pack 白名单。`);
     } catch (error) { errors.push(message(error)); }
   }
-  if (envelope.manifest.kind === "shared-library" && !envelope.files.some((file) => file.path === "localogue-pack.json")) errors.push("Shared Pack 缺少 localogue-pack.json。 ");
-  if (envelope.manifest.kind === "personal-backup") warnings.push("Personal Pack 导入默认不覆盖已经存在的 Private 文件。 ");
+
+  if (envelope.manifest.kind === "shared-library" && !seen.has("localogue-pack.json")) {
+    errors.push("Shared Pack 缺少 localogue-pack.json。 ");
+  }
+
+  if (envelope.manifest.kind === "personal-backup" && !errors.length) {
+    assetIntegrity = inspectPortableAssetIntegrity(envelope);
+    if (assetIntegrity.missingAssetFiles.length) warnings.push(`有 ${assetIntegrity.missingAssetFiles.length} 个 Asset 的二进制文件没有包含在备份中。`);
+    if (assetIntegrity.assetDigestMismatches.length) errors.push(`有 ${assetIntegrity.assetDigestMismatches.length} 个 Asset JSON 的 SHA-256 与 Pack 文件摘要不一致。`);
+    if (assetIntegrity.externalPreferenceAssetIds.length) warnings.push(`有 ${assetIntegrity.externalPreferenceAssetIds.length} 个展示偏好引用的 Asset 不在本 Pack 中；导入后会依赖目标资料库已有 Asset。`);
+
+    if (!errors.length) {
+      try {
+        personalPlan = await desktopBridge.previewPrivatePortableFiles(
+          envelope.files.map((file) => ({ path: normalizePackPath(file.path), sha256: file.sha256, size: file.size })),
+        );
+        conflicts = personalPlan.entries.filter((entry) => entry.status === "conflict").map((entry) => entry.path);
+        if (personalPlan.identicalFiles) warnings.push(`${personalPlan.identicalFiles} 个文件与当前资料库完全相同，导入时会跳过。`);
+        if (personalPlan.conflictFiles) warnings.push(`${personalPlan.conflictFiles} 个文件与当前资料库内容不同；V1-24C 不覆盖本地文件，导入时会安全跳过。`);
+      } catch (error) {
+        errors.push(`无法生成当前资料库的 Portable Import Plan：${message(error)}`);
+      }
+    }
+  }
+
   return {
     path,
     envelope,
@@ -92,15 +142,33 @@ export async function pickAndPreviewPortablePack(): Promise<DesktopPortablePrevi
     warnings,
     conflicts,
     importable: errors.length === 0,
+    personalPlan,
+    assetIntegrity,
   };
 }
 
-export async function importDesktopPortablePreview(preview: DesktopPortablePreview): Promise<PortablePackImportResult> {
+export async function importDesktopPortablePreview(preview: DesktopPortablePreview): Promise<DesktopPortableImportReport> {
   if (!preview.importable) throw new Error(preview.errors.join("；"));
   const files: DesktopPortableFile[] = preview.envelope.files.map((file) => ({ path: normalizePackPath(file.path), bytes: decodePortableFile(file) }));
   if (preview.manifest.kind === "personal-backup") {
-    const result = await desktopBridge.importPrivatePortableFiles(files);
-    return { kind: "personal-backup", imported: result.imported, skipped: result.skipped, warnings: result.skipped ? [`跳过 ${result.skipped} 个已存在文件。`] : [] };
+    const result: DesktopPortableImportResult = await desktopBridge.importPrivatePortableFiles(files, preview.personalPlan?.targetLibraryPath ?? "");
+    const assetStorageAfterImport = await desktopBridge.inspectPrivateAssetStorage().catch(() => undefined);
+    const warnings = [
+      ...(result.skippedIdentical ? [`跳过 ${result.skippedIdentical} 个与当前资料库完全相同的文件。`] : []),
+      ...(result.skippedConflicts ? [`跳过 ${result.skippedConflicts} 个与当前资料库内容不同的冲突文件；没有覆盖本地内容。`] : []),
+      ...(assetStorageAfterImport?.missingFiles.length ? [`导入后检测到 ${assetStorageAfterImport.missingFiles.length} 个 Asset 文件缺失。`] : []),
+    ];
+    return {
+      kind: "personal-backup",
+      imported: result.imported,
+      skipped: result.skipped,
+      skippedIdentical: result.skippedIdentical,
+      skippedConflicts: result.skippedConflicts,
+      importedByCategory: result.importedByCategory,
+      skippedByCategory: result.skippedByCategory,
+      assetStorageAfterImport,
+      warnings,
+    };
   }
   const installedPath = await desktopBridge.installSharedPortableFiles(
     preview.manifest.sourcePackId ?? preview.manifest.id,
@@ -108,6 +176,53 @@ export async function importDesktopPortablePreview(preview: DesktopPortablePrevi
     files,
   );
   return { kind: "shared-library", imported: files.length, skipped: 0, installedPath, sharedPackPath: installedPath, warnings: [] };
+}
+
+function inspectPortableAssetIntegrity(envelope: PortablePackEnvelope): DesktopPortableAssetIntegrity {
+  const files = new Map(envelope.files.map((file) => [normalizePackPath(file.path), file]));
+  const assetIds = new Set<string>();
+  const missingAssetFiles: string[] = [];
+  const assetDigestMismatches: string[] = [];
+  const preferenceAssetIds = new Set<string>();
+  let assetRecords = 0;
+  let presentationPreferences = 0;
+
+  for (const [path, file] of files) {
+    if (path.startsWith("assets/") && path.endsWith(".json") && file.encoding === "utf8") {
+      try {
+        const asset = JSON.parse(file.content) as { id?: string; storagePath?: string; sha256?: string };
+        if (!asset.id) continue;
+        assetRecords += 1;
+        assetIds.add(asset.id);
+        if (asset.storagePath?.startsWith("asset-files/")) {
+          const binary = files.get(normalizePackPath(asset.storagePath));
+          if (!binary) missingAssetFiles.push(`${asset.id}: ${asset.storagePath}`);
+          else if (asset.sha256 && asset.sha256 !== binary.sha256) assetDigestMismatches.push(`${asset.id}: ${asset.storagePath}`);
+        }
+      } catch {
+        // JSON 结构会由目标 Repository / Validator 继续检查；这里仅补资产引用完整性。
+      }
+    }
+    if (path.startsWith("presentation-preferences/") && path.endsWith(".json") && file.encoding === "utf8") {
+      try {
+        const preference = JSON.parse(file.content) as { preferredCoverAssetId?: string; preferredPortraitAssetId?: string };
+        presentationPreferences += 1;
+        if (preference.preferredCoverAssetId) preferenceAssetIds.add(preference.preferredCoverAssetId);
+        if (preference.preferredPortraitAssetId) preferenceAssetIds.add(preference.preferredPortraitAssetId);
+      } catch {
+        // 保留给现有 schema/Repository 校验。
+      }
+    }
+  }
+
+  return {
+    assetRecords,
+    assetFiles: [...files.keys()].filter((path) => path.startsWith("asset-files/")).length,
+    presentationPreferences,
+    missingAssetFiles,
+    assetDigestMismatches,
+    externalPreferenceAssetIds: [...preferenceAssetIds].filter((id) => !assetIds.has(id)).sort(),
+  };
 }
 
 async function toPortableFile(file: DesktopPortableFile): Promise<PortablePackFile> {

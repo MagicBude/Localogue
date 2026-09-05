@@ -11,11 +11,13 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前实现已推进到 **V1-24B：Person Portrait / Gallery Asset Governance**。在 V1-24A Presentation Preference Workbench 基础上，Desktop 新增 **Library Profile（资料库配置）**：示例库与用户自建资料库可以分别记住 Private Library、统一内容根目录、高级媒体/NFO目录与 Shared Pack，并从侧栏快速切换；旧单库设置会自动迁移，普通新建库使用“资料库 1 / 资料库 2 …”中性名称，不预设内容分类。Profile 新建、切换、重命名与删除会立即持久化，active ID 异常会自动回退到现有 Profile；切换只替换本机路径配置，不复制或移动 Canonical / Media 数据。
+当前实现已推进到 **V1-24C：Portable Pack / Presentation / Asset Closeout**。在 V1-24A Presentation Preference Workbench 基础上，Desktop 新增 **Library Profile（资料库配置）**：示例库与用户自建资料库可以分别记住 Private Library、统一内容根目录、高级媒体/NFO目录与 Shared Pack，并从侧栏快速切换；旧单库设置会自动迁移，普通新建库使用“资料库 1 / 资料库 2 …”中性名称，不预设内容分类。Profile 新建、切换、重命名与删除会立即持久化，active ID 异常会自动回退到现有 Profile；切换只替换本机路径配置，不复制或移动 Canonical / Media 数据。
 
 资料源设置同时收敛为四层语义：**私人资料库（可写）→ 内容根目录（推荐扫描入口）→ 只读共享资料（Shared Pack）→ 高级兼容目录**。Media 页面的一键同步继续固定按 **NFO → Asset → Media** 编排，并且现在会等待全部 Unified Root + 额外媒体目录扫描完成后才报告成功，扫描结果会明确列出本轮实际检查的全部目录。Desktop Vite 构建也使用 Rolldown vendor code splitting 解决单一主 bundle 持续膨胀的问题，而不是简单调高 warning 阈值。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。
 
 V1-24B 同时把作品详情视觉资源分成明确的两类：竖版 `poster/cover` 用于海报墙与首选封面，横版 `gallery/fanart/screenshot` 用于详情页 Hero Gallery。内置示例库当前提供 11 Works / 8 People / 43 Assets，并通过 Native 内容签名 provision 到 App Local Data；开发环境会优先读取仓库中的最新 Fixture，避免旧 Tauri Resource 缓存造成示例图片不同步。 V1-24B 收尾后，Desktop 图片读取也支持受控的 Shared Pack Asset：Native 按当前 Profile 的 `Private > Shared Pack` 优先级重新绑定 `Asset.id + storagePath`，并且每个来源只允许读取自己的 `asset-files/`，不会向 Webview 开放通用文件路径。Media 页同时提供“资源文件健康”，用于报告 Private Asset 孤儿二进制、缺失引用与可回收空间，并在 Native 重新确认最新引用后安全清理真正的孤儿文件。
+
+V1-24C 在多 Library Profile 基础上把 Portable Pack 收口为“**当前资料库的 Private 内容备份**”：导入前先按新增 / 完全相同 / 内容冲突生成结构化 Plan，并按 Canonical、Asset、Presentation、Audit 分类；内容冲突默认跳过，不静默覆盖本地文件。Asset JSON 与 `asset-files/` 的缺失/摘要不一致会在导入前显式检查，导入后再执行 Asset Storage Health。内置“示例库”同时 provision 可写 Private Fixture 与只读 Starter Shared Pack，因此标准状态为 `Private + 1 Shared`；普通用户新建资料库仍保持 `Private + 0 Shared`。详见 `docs/desktop/portable-pack-and-profile-backup.md`。
 
 当前 V1 已完成：
 
@@ -288,7 +290,7 @@ pnpm desktop:rust:check
 pnpm desktop:dev
 ```
 
-Desktop V1-24A 已增加 Presentation Preference Workbench；V1-24B 已完成 Work Hero Gallery、Person Portrait/Gallery、Private 图片导入、Shared Asset 受控只读解析与孤儿文件健康治理。下一阶段 V1-24C 继续收尾 Portable Pack 冲突预览、导入结果报告和 Presentation / Asset 迁移。
+Desktop V1-24A 已增加 Presentation Preference Workbench；V1-24B 已完成 Work Hero Gallery、Person Portrait/Gallery、Private 图片导入、Shared Asset 受控只读解析与孤儿文件健康治理；V1-24C 进一步完成 Portable Pack 冲突预览、结构化导入报告、Presentation / Asset 迁移完整性与示例库 Starter Shared Pack 自动挂载。
 
 第一次执行 `pnpm desktop:rust:check` 或 `pnpm desktop:dev` 后 Cargo 会生成 `apps/desktop/src-tauri/Cargo.lock`；应用项目应把这个锁文件一并提交，以固定 Rust 依赖解析。
 
@@ -602,6 +604,8 @@ V1-11 增加两个日常入口：
 
 Personal Pack 故意不包含 `media-files/` 和 `.localogue/settings.json`：磁盘路径与实例配置通常不能跨设备直接复用。
 
+Desktop 多资料库模式下，Personal Pack 的 Import Plan 会锁定生成预览时的 Private Library。若预览后切换 Library Profile，旧预览会失效，Native 也会拒绝向新的资料库写入，必须重新选择 Pack 生成预览。
+
 推荐学习：
 
 1. `docs/development/v1-11-packs-and-media-binding-walkthrough.md`
@@ -698,3 +702,11 @@ Localogue V1-13 的 Webview JavaScript 基线为：Windows `chrome105`，macOS/L
 V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.config.js` / `vite.config.d.ts`。由于本项目常通过 ZIP 覆盖仓库根目录升级，旧文件不会自动删除，Vite 自动配置发现可能因此拾取历史配置。当前正式配置已经迁移到 `vite.config.mts`，Desktop scripts 使用 `--config vite.config.mts` 显式加载；`pnpm check` 还会首先运行 `pnpm desktop:clean:legacy` 自动清理历史文件。无需用户手工删除旧配置。
 
 - Desktop Dev 的 Vite watcher 不监听 `src-tauri/**`；Rust 热更新由 Tauri/Cargo 自己负责，避免 Windows `.pdb` 文件锁冲突。
+
+
+> 示例库的 Starter Shared Pack 还包含 Shared-only 人物“共享示例花”和 `SHARED-DEMO-001`，用于验证 Shared-only Person / Work / Asset 的只读显示。
+
+
+### V1-24B Gallery / Presentation compatibility
+
+真实本地图片即使缺少历史 `width / height` 元数据，也会在运行时按实际图片尺寸恢复横版 Hero Gallery；Work 私人显示首图可从 poster / cover / gallery / fanart / screenshot 中选择，默认仍优先 poster / cover。

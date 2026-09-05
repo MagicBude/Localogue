@@ -27,7 +27,11 @@ export async function resolveWorkCoverAsset(
   }
 
   const assets = await Promise.all(work.assetIds.map((id) => repository.findAssetById(id)));
-  return assets.find((asset): asset is Asset => asset !== null && ["poster", "cover"].includes(asset.type)) ?? null;
+  const candidates = assets.filter((asset): asset is Asset => asset !== null);
+  return candidates.find((asset) => asset.type === "poster")
+    ?? candidates.find((asset) => asset.type === "cover")
+    ?? candidates.find((asset) => ["gallery", "fanart", "screenshot"].includes(asset.type))
+    ?? null;
 }
 
 export function assetDisplayUrl(asset: Asset): string {

@@ -17,7 +17,7 @@ export function workPresentationCandidates(work: Work, assets: readonly Asset[])
     .map((id) => byId.get(id))
     .filter((asset): asset is Asset => Boolean(asset));
   const owned = assets.filter((asset) => asset.subjectType === "work" && asset.subjectId === work.id);
-  return uniqueAssets([...referenced, ...owned]).filter((asset) => asset.type === "poster" || asset.type === "cover");
+  return uniqueAssets([...referenced, ...owned]).filter(isWorkPresentationVisualAsset);
 }
 
 export function personPresentationCandidates(person: Person, assets: readonly Asset[]): Asset[] {
@@ -38,7 +38,9 @@ export function resolveWorkPresentation(
   const candidates = workPresentationCandidates(work, assets);
   const preferredAssetId = preference?.preferredCoverAssetId;
   const preferred = preferredAssetId ? candidates.find((asset) => asset.id === preferredAssetId) : undefined;
-  const fallback = candidates.find((asset) => asset.type === "poster") ?? candidates.find((asset) => asset.type === "cover");
+  const fallback = candidates.find((asset) => asset.type === "poster")
+    ?? candidates.find((asset) => asset.type === "cover")
+    ?? candidates.find((asset) => ["gallery", "fanart", "screenshot"].includes(asset.type));
   return {
     candidates,
     preferred,
@@ -70,6 +72,11 @@ export function resolvePersonPresentation(
 
 export function makePresentationPreferenceId(entityType: "person" | "work", entityId: string): string {
   return `presentation_${entityType}_${entityId}`;
+}
+
+function isWorkPresentationVisualAsset(asset: Asset): boolean {
+  if (!["poster", "cover", "gallery", "fanart", "screenshot"].includes(asset.type)) return false;
+  return !asset.mimeType || asset.mimeType.startsWith("image/");
 }
 
 function uniqueAssets(assets: readonly Asset[]): Asset[] {

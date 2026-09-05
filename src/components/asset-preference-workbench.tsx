@@ -52,7 +52,7 @@ export function AssetPreferenceWorkbench(props: Props) {
       const response = await fetch("/api/assets/upload", { method: "POST", body: form });
       const body = await response.json() as { error?: string; asset?: { id: string; type: AssetType } };
       if (!response.ok || !body.asset) throw new Error(body.error ?? t.failed);
-      if ((props.entityType === "person" && body.asset.type === "portrait") || (props.entityType === "work" && ["poster", "cover"].includes(body.asset.type))) {
+      if ((props.entityType === "person" && body.asset.type === "portrait") || (props.entityType === "work" && ["poster", "cover", "fanart", "screenshot"].includes(body.asset.type))) {
         await setPreference(body.asset.id);
       }
       event.currentTarget.reset();
@@ -89,7 +89,7 @@ export function AssetPreferenceWorkbench(props: Props) {
 
     {props.candidates.length ? <div className="asset-choice-grid">
       {props.candidates.map((asset) => {
-        const selectable = props.entityType === "person" ? ["portrait", "gallery"].includes(asset.type) : ["poster", "cover"].includes(asset.type);
+        const selectable = props.entityType === "person" ? ["portrait", "gallery"].includes(asset.type) : ["poster", "cover", "gallery", "fanart", "screenshot"].includes(asset.type);
         const selected = props.activeAssetId === asset.id;
         return <article className={`asset-choice ${selected ? "asset-choice--selected" : ""}`} key={asset.id}>
           <div className="asset-choice__image"><Image alt="" fill unoptimized sizes="180px" src={asset.url} /></div>
