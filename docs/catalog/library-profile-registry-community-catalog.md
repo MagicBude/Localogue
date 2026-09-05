@@ -134,3 +134,10 @@ V1-27C 先让 Desktop Browse 能直接看 Community Catalog，不会偷偷修改
 - **全部**：当前 Library Profile 已有实体 + Community Catalog 已审核参考实体。
 
 Community Catalog 不会制造假的作品计数，因此新增目录项通常会显示 `0 部作品`。
+
+
+## V1-27D：多语言与 Browse 关系展示
+
+Community Catalog 的名称不再假设“三语都必须存在”。Maker / Label 等品牌实体优先保存来源原名和已审核品牌写法；描述性 Label / Series 才逐步加入社区翻译。`nameKinds` 用来标识原名、品牌写法、社区翻译或转写。
+
+Browse 仍然是目录视图：有作品 / 无作品 / 全部 + 搜索。Maker → Label → Series 的已确认 parent 会作为卡片辅助信息显示，但 Browse 不增加级联筛选；跨 Maker / Label / Series / Genre 等组合查找作品由 Works 多维筛选负责。

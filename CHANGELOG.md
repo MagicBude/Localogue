@@ -1,5 +1,16 @@
 # Changelog
 
+## V1-27D - Entity Localization & Browse Relationship Presentation
+
+- Community Catalog 增加 `nameKinds`，区分来源原名、审核品牌写法、社区翻译与社区转写，避免把社区显示名伪装成官方名称。
+- Maker / Label / Series 开始补充保守的多语言显示名；品牌无可靠中文名时继续回退原名，不为了三语齐全而硬翻。
+- 当前 Community Organization 35 项中：英文显示名 34 / 35，中文显示名 6 / 35；Series 9 项中：英文 8 / 9，中文 7 / 9。
+- Community Catalog JSON / CSV 同步增加 `name_kind_ja / name_kind_zh_cn / name_kind_en`，Validator 校验每个已存在名称必须拥有合法名称性质。
+- Desktop Browse 的 Label / Series 卡片会显示已确认父级 Maker / Label；没有可靠 parent 时不猜测。
+- Browse 明确保持“看完整目录”的定位，不增加 Maker → Label → Series 级联筛选；组合筛选留给 Works 多维筛选。
+- 卡片搜索同时包含已显示的父级关系文字，方便按已确认所属组织定位目录项。
+- 新增 `docs/catalog/entity-localization-and-browse.md` 固化多语言与 Browse/Works 职责边界。
+
 ## V1-27C - Community Catalog Projection
 
 - 新增 `resources/catalogs/`，把 Registry Evidence 与人工审核后的 Canonical Community Catalog 正式分层。

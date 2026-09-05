@@ -38,6 +38,7 @@ interface CatalogItem {
   sortKey: string;
   count: number;
   searchValues: string[];
+  subtitle?: string;
   genreFacets?: readonly ControlledGenreFacet[];
 }
 
@@ -64,6 +65,11 @@ export function DesktopCatalogBrowser({
       repository.listPeople({ page: 1, pageSize: 100000 }),
     ]);
     const peopleById = new Map(people.items.map((person) => [person.id, person]));
+    const organizationById = new Map<string, { id: string; kind: string; names: LocalizedText }>();
+    for (const item of COMMUNITY_ORGANIZATION_CATALOG) organizationById.set(item.id, item);
+    for (const item of organizations) organizationById.set(item.id, item);
+    const parentSubtitle = (parentOrganizationId?: string) =>
+      catalogParentSubtitle(parentOrganizationId, organizationById, metadataLanguage, uiLanguage);
 
     const controlledGenres = CONTROLLED_GENRE_DEFINITIONS.map((item) => ({
       id: item.id,
@@ -101,23 +107,23 @@ export function DesktopCatalogBrowser({
       makers: mergeCatalogItems(
         organizations
           .filter((item) => item.kind === "maker")
-          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id))),
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id), [], parentSubtitle(item.parentOrganizationId))),
         COMMUNITY_ORGANIZATION_CATALOG
           .filter((item) => item.kind === "maker")
-          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id), item.aliases)),
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id), item.aliases, parentSubtitle(item.parentOrganizationId))),
       ),
       labels: mergeCatalogItems(
         organizations
           .filter((item) => item.kind === "label")
-          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id))),
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id), [], parentSubtitle(item.parentOrganizationId))),
         COMMUNITY_ORGANIZATION_CATALOG
           .filter((item) => item.kind === "label")
-          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id), item.aliases)),
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id), item.aliases, parentSubtitle(item.parentOrganizationId))),
       ),
       series: mergeCatalogItems(
-        series.map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id))),
+        series.map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id), [], parentSubtitle(item.parentOrganizationId))),
         COMMUNITY_SERIES_CATALOG.map((item) =>
-          catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id), item.aliases),
+          catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id), item.aliases, parentSubtitle(item.parentOrganizationId)),
         ),
       ),
       genres: mergeCatalogItems(controlledGenres, libraryGenreItems),
@@ -133,7 +139,7 @@ export function DesktopCatalogBrowser({
       })).sort(catalogSort),
       workTypes: mergeCatalogItems(controlledWorkTypes, facetWorkTypes),
     };
-  }, [repository, metadataLanguage]);
+  }, [repository, metadataLanguage, uiLanguage]);
 
   if (data.loading) return <BrowserState>{t("正在生成分类索引…")}</BrowserState>;
   if (data.error || !data.value) return <BrowserState error>{data.error ?? t("无法读取分类索引。")}</BrowserState>;
@@ -343,18 +349,36 @@ function catalogEntityItem(
   metadataLanguage: SupportedLanguage,
   count: number,
   aliases: readonly string[] = [],
+  subtitle?: string,
 ): CatalogItem {
   return {
     id,
     label: localizeText(names, metadataLanguage, id),
     sortKey: stableLocalizedSortKey(names, id),
     count,
+    subtitle,
     searchValues: uniqueSearchValues([
       id,
       ...Object.values(names).filter((value): value is string => Boolean(value)),
       ...aliases,
+      ...(subtitle ? [subtitle] : []),
     ]),
   };
+}
+
+function catalogParentSubtitle(
+  parentOrganizationId: string | undefined,
+  organizationById: Map<string, { id: string; kind: string; names: LocalizedText }>,
+  metadataLanguage: SupportedLanguage,
+  uiLanguage: SupportedLanguage,
+): string | undefined {
+  if (!parentOrganizationId) return undefined;
+  const parent = organizationById.get(parentOrganizationId);
+  if (!parent || (parent.kind !== "maker" && parent.kind !== "label")) return undefined;
+  const kindLabel = parent.kind === "maker"
+    ? ({ "zh-CN": "厂商", ja: "メーカー", en: "Maker" } as const)[uiLanguage]
+    : ({ "zh-CN": "厂牌", ja: "レーベル", en: "Label" } as const)[uiLanguage];
+  return `${kindLabel} · ${localizeText(parent.names, metadataLanguage, parent.id)}`;
 }
 
 function mergeCatalogItems(primary: CatalogItem[], secondary: CatalogItem[]): CatalogItem[] {
@@ -369,6 +393,7 @@ function mergeCatalogItems(primary: CatalogItem[], secondary: CatalogItem[]): Ca
       ...existing,
       count: Math.max(existing.count, item.count),
       searchValues: uniqueSearchValues([...existing.searchValues, ...item.searchValues]),
+      subtitle: existing.subtitle ?? item.subtitle,
       genreFacets: existing.genreFacets ?? item.genreFacets,
     });
   }
@@ -389,6 +414,7 @@ function CatalogItemGrid({
       {items.map((item) => (
         <button key={item.id} onClick={() => onSelect(item.id)} type="button">
           <strong>{item.label}</strong>
+          {item.subtitle ? <small className="muted">{item.subtitle}</small> : null}
           <small>{workCountLabel(item.count)}</small>
         </button>
       ))}

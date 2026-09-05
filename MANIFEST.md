@@ -2,10 +2,20 @@
 
 ## 阶段名称
 
-**V1-25C：Provider ID Identity / Coverage Round 2**
+**V1-27D：Entity Localization & Browse Relationship Presentation**
 
-当前产品版本继续为 `0.1.25`。V1-25A/B 已建立 Canonical Vocabulary 与 Provider Coverage；V1-25C 暂不进入 Onboarding，先修复 Provider ID 身份归属，再继续扩充可复核分类。
+当前产品版本继续为 `0.1.25`。V1-27A/B/C 已建立 Organization / Series Registry Evidence 与 Community Catalog；V1-27D 完善多语言显示和父级关系展示，不把 Browse 扩展成级联作品筛选器。
 
+
+
+## V1-27D Entity Localization / Browse Boundary
+
+- Community Catalog：22 Maker / 13 Label / 9 Series，共 44 Canonical Entity；
+- `nameKinds` 区分 `source-name` / `reviewed-brand-form` / `community-translation` / `community-transliteration`；
+- Community Organization 多语言覆盖：zh-CN 6 / 35、en 34 / 35；Series：zh-CN 7 / 9、en 8 / 9；
+- Label / Series 卡片显示已确认父级 Maker / Label；无证据关系不猜；
+- Browse 保持“有作品 / 无作品 / 全部 + 搜索 + 完整目录”定位，不增加 Maker → Label → Series 级联筛选；
+- Maker / Label / Series / Genre / Person 等组合筛选后续统一在 Works 多维筛选实现。
 
 ## V1-25C Provider Identity / Coverage
 

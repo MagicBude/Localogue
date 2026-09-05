@@ -6,34 +6,55 @@
     {
       "id": "series_s1_414",
       "names": {
-        "ja": "新人NO.1STYLE"
+        "ja": "新人NO.1STYLE",
+        "zh-CN": "新人 NO.1 STYLE",
+        "en": "Newcomer NO.1 STYLE"
       },
       "aliases": [
         "新人NO.1 STYLE"
       ],
       "parentOrganizationId": "maker_s1",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_ideapocket_1011",
       "names": {
-        "ja": "うちの妻を犯して下さい"
+        "ja": "うちの妻を犯して下さい",
+        "zh-CN": "请侵犯我的妻子",
+        "en": "Please Violate My Wife"
       },
       "aliases": [],
       "parentOrganizationId": "maker_ideapocket",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_ideapocket_863",
       "names": {
-        "ja": "死ぬほど大嫌いな上司とまさかの相部屋に"
+        "ja": "死ぬほど大嫌いな上司とまさかの相部屋に",
+        "zh-CN": "竟然和讨厌到要死的上司同住一间房",
+        "en": "Unexpectedly Sharing a Room with the Boss I Hate to Death"
       },
       "aliases": [],
       "parentOrganizationId": "maker_ideapocket",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_ideapocket_939",
@@ -43,7 +64,10 @@
       "aliases": [],
       "parentOrganizationId": "maker_ideapocket",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name"
+      }
     },
     {
       "id": "series_moodyz_3519",
@@ -54,47 +78,79 @@
       "aliases": [],
       "parentOrganizationId": "maker_moodyz",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "series_moodyz_3562",
       "names": {
-        "ja": "聖水痴女ハーレム"
+        "ja": "聖水痴女ハーレム",
+        "zh-CN": "圣水痴女后宫",
+        "en": "Golden Shower Seductress Harem"
       },
       "aliases": [],
       "parentOrganizationId": "maker_moodyz",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_moodyz_3489",
       "names": {
-        "ja": "聖水くらぶ"
+        "ja": "聖水くらぶ",
+        "zh-CN": "圣水俱乐部",
+        "en": "Golden Shower Club"
       },
       "aliases": [],
       "parentOrganizationId": "maker_moodyz",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_madonna_1749",
       "names": {
-        "ja": "夫の上司に飾られた　人妻ボディアクセサリー"
+        "ja": "夫の上司に飾られた　人妻ボディアクセサリー",
+        "zh-CN": "被丈夫上司装饰的人妻身体饰品",
+        "en": "Married Woman Body Accessory Adorned by Her Husband's Boss"
       },
       "aliases": [],
       "parentOrganizationId": "maker_madonna",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "series_madonna_1891",
       "names": {
-        "ja": "廃業寸前"
+        "ja": "廃業寸前",
+        "zh-CN": "濒临停业",
+        "en": "On the Verge of Closing Down"
       },
       "aliases": [],
       "parentOrganizationId": "maker_madonna",
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     }
   ]
 }

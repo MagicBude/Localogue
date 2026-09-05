@@ -35,3 +35,18 @@ Registry Evidence 只有满足人工审核后才能进入 Community Catalog：
 ```bash
 pnpm validate:catalog
 ```
+
+## 多语言显示名
+
+V1-27D 开始为 Community Catalog 的名称增加 `nameKinds` 语义，避免把社区翻译冒充来源官方名称：
+
+- `source-name`：来源原名；
+- `reviewed-brand-form`：审核后的品牌/拉丁字母写法；
+- `community-translation`：社区审核翻译；
+- `community-transliteration`：社区审核转写。
+
+品牌没有可靠中文名时允许缺少 `zh-CN`，Desktop 会按既有本地化回退规则显示原名；不为了三语齐全而硬翻。描述性 Label / Series 可以逐步加入社区翻译。
+
+## Browse 边界
+
+Desktop Browse 继续负责“看完整目录”，不会增加 Maker → Label → Series 级联筛选。已确认 parent 只作为卡片上的归属提示展示；真正的 Maker / Label / Series / Genre 等组合条件应统一放在 Works 多维筛选中。

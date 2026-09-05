@@ -15,7 +15,11 @@
         "S1 NO.1 STYLE"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_moodyz",
@@ -28,7 +32,11 @@
         "MOODYZ"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_madonna",
@@ -41,7 +49,11 @@
         "Madonna"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_ideapocket",
@@ -55,7 +67,11 @@
         "IDEA POCKET"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_fitch",
@@ -66,7 +82,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_attackers",
@@ -79,7 +99,11 @@
         "ATTACKERS"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_ebody",
@@ -90,7 +114,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_premium",
@@ -103,27 +131,41 @@
         "PREMIUM"
       ],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_honnaka",
       "kind": "maker",
       "names": {
-        "ja": "本中"
+        "ja": "本中",
+        "en": "Honnaka"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_red",
       "kind": "maker",
       "names": {
-        "ja": "レッド"
+        "ja": "レッド",
+        "en": "RED"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_oppai",
@@ -134,7 +176,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_emukko_lab",
@@ -144,7 +190,10 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name"
+      }
     },
     {
       "id": "maker_kawaii",
@@ -155,7 +204,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_kirakira",
@@ -166,47 +219,71 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_das",
       "kind": "maker",
       "names": {
-        "ja": "ダスッ！"
+        "ja": "ダスッ！",
+        "en": "DAS!"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_tameike_goro",
       "kind": "maker",
       "names": {
-        "ja": "溜池ゴロー"
+        "ja": "溜池ゴロー",
+        "en": "Tameike Goro"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_chijo_heaven",
       "kind": "maker",
       "names": {
-        "ja": "痴女ヘブン"
+        "ja": "痴女ヘブン",
+        "en": "Chijo Heaven"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_hajime_kikaku",
       "kind": "maker",
       "names": {
-        "ja": "はじめ企画"
+        "ja": "はじめ企画",
+        "en": "Hajime Kikaku"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "maker_hunter",
@@ -217,7 +294,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_befree",
@@ -228,7 +309,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_hsoda",
@@ -239,7 +324,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "maker_rookie",
@@ -250,7 +339,11 @@
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "label_s1_no1_style",
@@ -264,127 +357,203 @@
       ],
       "status": "active",
       "parentOrganizationId": "maker_s1",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "reviewed-brand-form"
+      }
     },
     {
       "id": "label_shirouto_neoki_suppin_club",
       "kind": "label",
       "names": {
-        "ja": "素人寝起きすっぴん倶楽部"
+        "ja": "素人寝起きすっぴん倶楽部",
+        "zh-CN": "素人起床素颜俱乐部",
+        "en": "Amateur Wake-Up No-Makeup Club"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "label_shirouto_hoihoi_tower",
       "kind": "label",
       "names": {
-        "ja": "素人ホイホイtower"
+        "ja": "素人ホイホイtower",
+        "en": "Shirouto Hoihoi tower"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_shirouto_mukumuku",
       "kind": "label",
       "names": {
-        "ja": "素人ムクムク"
+        "ja": "素人ムクムク",
+        "en": "Shirouto Mukumuku"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_shirouto_mukumuku_x",
       "kind": "label",
       "names": {
-        "ja": "素人ムクムク-X-"
+        "ja": "素人ムクムク-X-",
+        "en": "Shirouto Mukumuku -X-"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_shirouto_mukumuku_kusuri",
       "kind": "label",
       "names": {
-        "ja": "素人ムクムク-クスリ-"
+        "ja": "素人ムクムク-クスリ-",
+        "en": "Shirouto Mukumuku -Kusuri-"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_shirouto_mukumuku_shio",
       "kind": "label",
       "names": {
-        "ja": "素人ムクムク-塩-"
+        "ja": "素人ムクムク-塩-",
+        "en": "Shirouto Mukumuku -Shio-"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_shirouto_mukumuku_shoku",
       "kind": "label",
       "names": {
-        "ja": "素人ムクムク-職-"
+        "ja": "素人ムクムク-職-",
+        "en": "Shirouto Mukumuku -Shoku-"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "en": "community-transliteration"
+      }
     },
     {
       "id": "label_tokyo_koibito",
       "kind": "label",
       "names": {
-        "ja": "東京恋人"
+        "ja": "東京恋人",
+        "zh-CN": "东京恋人",
+        "en": "Tokyo Lover"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "label_tokyo_koibito_suiken",
       "kind": "label",
       "names": {
-        "ja": "東京恋人酔拳"
+        "ja": "東京恋人酔拳",
+        "zh-CN": "东京恋人醉拳",
+        "en": "Tokyo Lover Drunken Fist"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "label_buzz_shirouto",
       "kind": "label",
       "names": {
-        "ja": "Buzzシロウト"
+        "ja": "Buzzシロウト",
+        "zh-CN": "Buzz素人",
+        "en": "Buzz Amateur"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "label_gachi_shirouto",
       "kind": "label",
       "names": {
-        "ja": "ガチ素人"
+        "ja": "ガチ素人",
+        "zh-CN": "真正素人",
+        "en": "Real Amateur"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     },
     {
       "id": "label_deaikei_shirouto",
       "kind": "label",
       "names": {
-        "ja": "出会い系素人"
+        "ja": "出会い系素人",
+        "zh-CN": "交友系素人",
+        "en": "Dating-Site Amateur"
       },
       "aliases": [],
       "status": "active",
-      "schemaVersion": 1
+      "schemaVersion": 1,
+      "nameKinds": {
+        "ja": "source-name",
+        "zh-CN": "community-translation",
+        "en": "community-translation"
+      }
     }
   ]
 }

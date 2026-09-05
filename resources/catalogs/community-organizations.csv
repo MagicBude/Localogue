@@ -1,36 +1,36 @@
-id,kind,name_ja,name_zh_cn,name_en,aliases,parentOrganizationId,status
-maker_s1,maker,エスワン ナンバーワンスタイル,,S1 NO.1 STYLE,S1 | S1 NO.1 STYLE,,active
-maker_moodyz,maker,ムーディーズ,,MOODYZ,MOODYZ,,active
-maker_madonna,maker,マドンナ,,Madonna,Madonna,,active
-maker_ideapocket,maker,アイデアポケット,,IDEAPOCKET,Idea Pocket | IDEA POCKET,,active
-maker_fitch,maker,Fitch,,Fitch,,,active
-maker_attackers,maker,アタッカーズ,,Attackers,ATTACKERS,,active
-maker_ebody,maker,E-BODY,,E-BODY,,,active
-maker_premium,maker,プレミアム,,Premium,PREMIUM,,active
-maker_honnaka,maker,本中,,,,,active
-maker_red,maker,レッド,,,,,active
-maker_oppai,maker,OPPAI,,OPPAI,,,active
-maker_emukko_lab,maker,えむっ娘ラボ,,,,,active
-maker_kawaii,maker,kawaii,,kawaii,,,active
-maker_kirakira,maker,kira☆kira,,kira☆kira,,,active
-maker_das,maker,ダスッ！,,,,,active
-maker_tameike_goro,maker,溜池ゴロー,,,,,active
-maker_chijo_heaven,maker,痴女ヘブン,,,,,active
-maker_hajime_kikaku,maker,はじめ企画,,,,,active
-maker_hunter,maker,Hunter,,Hunter,,,active
-maker_befree,maker,BeFree,,BeFree,,,active
-maker_hsoda,maker,Hsoda,,Hsoda,,,active
-maker_rookie,maker,ROOKIE,,ROOKIE,,,active
-label_s1_no1_style,label,S1 NO.1 STYLE,,S1 NO.1 STYLE,エスワン ナンバーワンスタイル,maker_s1,active
-label_shirouto_neoki_suppin_club,label,素人寝起きすっぴん倶楽部,,,,,active
-label_shirouto_hoihoi_tower,label,素人ホイホイtower,,,,,active
-label_shirouto_mukumuku,label,素人ムクムク,,,,,active
-label_shirouto_mukumuku_x,label,素人ムクムク-X-,,,,,active
-label_shirouto_mukumuku_kusuri,label,素人ムクムク-クスリ-,,,,,active
-label_shirouto_mukumuku_shio,label,素人ムクムク-塩-,,,,,active
-label_shirouto_mukumuku_shoku,label,素人ムクムク-職-,,,,,active
-label_tokyo_koibito,label,東京恋人,,,,,active
-label_tokyo_koibito_suiken,label,東京恋人酔拳,,,,,active
-label_buzz_shirouto,label,Buzzシロウト,,,,,active
-label_gachi_shirouto,label,ガチ素人,,,,,active
-label_deaikei_shirouto,label,出会い系素人,,,,,active
+﻿id,kind,name_ja,name_zh_cn,name_en,name_kind_ja,name_kind_zh_cn,name_kind_en,aliases,parentOrganizationId,status
+maker_s1,maker,エスワン ナンバーワンスタイル,,S1 NO.1 STYLE,source-name,,reviewed-brand-form,S1 | S1 NO.1 STYLE,,active
+maker_moodyz,maker,ムーディーズ,,MOODYZ,source-name,,reviewed-brand-form,MOODYZ,,active
+maker_madonna,maker,マドンナ,,Madonna,source-name,,reviewed-brand-form,Madonna,,active
+maker_ideapocket,maker,アイデアポケット,,IDEAPOCKET,source-name,,reviewed-brand-form,Idea Pocket | IDEA POCKET,,active
+maker_fitch,maker,Fitch,,Fitch,source-name,,reviewed-brand-form,,,active
+maker_attackers,maker,アタッカーズ,,Attackers,source-name,,reviewed-brand-form,ATTACKERS,,active
+maker_ebody,maker,E-BODY,,E-BODY,source-name,,reviewed-brand-form,,,active
+maker_premium,maker,プレミアム,,Premium,source-name,,reviewed-brand-form,PREMIUM,,active
+maker_honnaka,maker,本中,,Honnaka,source-name,,community-transliteration,,,active
+maker_red,maker,レッド,,RED,source-name,,community-transliteration,,,active
+maker_oppai,maker,OPPAI,,OPPAI,source-name,,reviewed-brand-form,,,active
+maker_emukko_lab,maker,えむっ娘ラボ,,,source-name,,,,,active
+maker_kawaii,maker,kawaii,,kawaii,source-name,,reviewed-brand-form,,,active
+maker_kirakira,maker,kira☆kira,,kira☆kira,source-name,,reviewed-brand-form,,,active
+maker_das,maker,ダスッ！,,DAS!,source-name,,community-transliteration,,,active
+maker_tameike_goro,maker,溜池ゴロー,,Tameike Goro,source-name,,community-transliteration,,,active
+maker_chijo_heaven,maker,痴女ヘブン,,Chijo Heaven,source-name,,community-transliteration,,,active
+maker_hajime_kikaku,maker,はじめ企画,,Hajime Kikaku,source-name,,community-transliteration,,,active
+maker_hunter,maker,Hunter,,Hunter,source-name,,reviewed-brand-form,,,active
+maker_befree,maker,BeFree,,BeFree,source-name,,reviewed-brand-form,,,active
+maker_hsoda,maker,Hsoda,,Hsoda,source-name,,reviewed-brand-form,,,active
+maker_rookie,maker,ROOKIE,,ROOKIE,source-name,,reviewed-brand-form,,,active
+label_s1_no1_style,label,S1 NO.1 STYLE,,S1 NO.1 STYLE,source-name,,reviewed-brand-form,エスワン ナンバーワンスタイル,maker_s1,active
+label_shirouto_neoki_suppin_club,label,素人寝起きすっぴん倶楽部,素人起床素颜俱乐部,Amateur Wake-Up No-Makeup Club,source-name,community-translation,community-translation,,,active
+label_shirouto_hoihoi_tower,label,素人ホイホイtower,,Shirouto Hoihoi tower,source-name,,community-transliteration,,,active
+label_shirouto_mukumuku,label,素人ムクムク,,Shirouto Mukumuku,source-name,,community-transliteration,,,active
+label_shirouto_mukumuku_x,label,素人ムクムク-X-,,Shirouto Mukumuku -X-,source-name,,community-transliteration,,,active
+label_shirouto_mukumuku_kusuri,label,素人ムクムク-クスリ-,,Shirouto Mukumuku -Kusuri-,source-name,,community-transliteration,,,active
+label_shirouto_mukumuku_shio,label,素人ムクムク-塩-,,Shirouto Mukumuku -Shio-,source-name,,community-transliteration,,,active
+label_shirouto_mukumuku_shoku,label,素人ムクムク-職-,,Shirouto Mukumuku -Shoku-,source-name,,community-transliteration,,,active
+label_tokyo_koibito,label,東京恋人,东京恋人,Tokyo Lover,source-name,community-translation,community-translation,,,active
+label_tokyo_koibito_suiken,label,東京恋人酔拳,东京恋人醉拳,Tokyo Lover Drunken Fist,source-name,community-translation,community-translation,,,active
+label_buzz_shirouto,label,Buzzシロウト,Buzz素人,Buzz Amateur,source-name,community-translation,community-translation,,,active
+label_gachi_shirouto,label,ガチ素人,真正素人,Real Amateur,source-name,community-translation,community-translation,,,active
+label_deaikei_shirouto,label,出会い系素人,交友系素人,Dating-Site Amateur,source-name,community-translation,community-translation,,,active

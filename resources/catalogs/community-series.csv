@@ -1,10 +1,10 @@
-id,name_ja,name_zh_cn,name_en,aliases,parentOrganizationId,status
-series_s1_414,新人NO.1STYLE,,,新人NO.1 STYLE,maker_s1,active
-series_ideapocket_1011,うちの妻を犯して下さい,,,,maker_ideapocket,active
-series_ideapocket_863,死ぬほど大嫌いな上司とまさかの相部屋に,,,,maker_ideapocket,active
-series_ideapocket_939,見つめる愛情イラマチオ,,,,maker_ideapocket,active
-series_moodyz_3519,W CAST,,W CAST,,maker_moodyz,active
-series_moodyz_3562,聖水痴女ハーレム,,,,maker_moodyz,active
-series_moodyz_3489,聖水くらぶ,,,,maker_moodyz,active
-series_madonna_1749,夫の上司に飾られた　人妻ボディアクセサリー,,,,maker_madonna,active
-series_madonna_1891,廃業寸前,,,,maker_madonna,active
+﻿id,name_ja,name_zh_cn,name_en,name_kind_ja,name_kind_zh_cn,name_kind_en,aliases,parentOrganizationId,status
+series_s1_414,新人NO.1STYLE,新人 NO.1 STYLE,Newcomer NO.1 STYLE,source-name,community-translation,community-translation,新人NO.1 STYLE,maker_s1,active
+series_ideapocket_1011,うちの妻を犯して下さい,请侵犯我的妻子,Please Violate My Wife,source-name,community-translation,community-translation,,maker_ideapocket,active
+series_ideapocket_863,死ぬほど大嫌いな上司とまさかの相部屋に,竟然和讨厌到要死的上司同住一间房,Unexpectedly Sharing a Room with the Boss I Hate to Death,source-name,community-translation,community-translation,,maker_ideapocket,active
+series_ideapocket_939,見つめる愛情イラマチオ,,,source-name,,,,maker_ideapocket,active
+series_moodyz_3519,W CAST,,W CAST,source-name,,reviewed-brand-form,,maker_moodyz,active
+series_moodyz_3562,聖水痴女ハーレム,圣水痴女后宫,Golden Shower Seductress Harem,source-name,community-translation,community-translation,,maker_moodyz,active
+series_moodyz_3489,聖水くらぶ,圣水俱乐部,Golden Shower Club,source-name,community-translation,community-translation,,maker_moodyz,active
+series_madonna_1749,夫の上司に飾られた　人妻ボディアクセサリー,被丈夫上司装饰的人妻身体饰品,Married Woman Body Accessory Adorned by Her Husband's Boss,source-name,community-translation,community-translation,,maker_madonna,active
+series_madonna_1891,廃業寸前,濒临停业,On the Verge of Closing Down,source-name,community-translation,community-translation,,maker_madonna,active

@@ -2,8 +2,17 @@
 
 ## 当前阶段
 
-**V1-27C：Community Catalog Projection。**
+**V1-27D：Entity Localization & Browse Relationship Presentation。**
 
+
+
+V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：
+
+- Community Catalog 名称增加 `nameKinds`，明确来源原名 / 审核品牌写法 / 社区翻译 / 社区转写；
+- Maker / Label / Series 逐步补多语言显示，缺少可靠中文品牌名时允许回退原名；
+- Label / Series 卡片展示已确认的父级 Maker / Label，关系无证据时不猜；
+- Browse 继续只负责“看全部目录”，Maker + Label + Series + Genre 等组合筛选统一留给 Works 多维筛选；
+- 当前 Community Organization 多语言覆盖：zh-CN 6 / 35、en 34 / 35；Series：zh-CN 7 / 9、en 8 / 9。
 
 V1-27B 已进入有限目录的真实 Provider 覆盖：
 
@@ -290,13 +299,13 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ## 下一阶段建议
 
-**下一阶段：V1-27D Community Catalog Coverage Round 2。**
+**下一阶段建议：Community Catalog Coverage Round 2 + Works 多维筛选规划。**
 
 1. 继续从公开页面、厂商官网、现成数据集和外部工具补充静态 Maker / Label / Series Evidence；
-2. 对已有 name-only Evidence 做人工身份核对，只有证据充分时才补 `canonicalId` 并晋升 Community Catalog；
-3. 优先补主流 Maker 的 Label 层级，以及 Series → 最具体 Label/Maker 的已确认 parent 关系；
-4. 同名、改名、历史名称先作为 Alias / Evidence 保留，不按字符串相似度自动合并；
-5. Community Catalog 成熟后，再评估是否发布为正式 Shared Pack，供不同 Library Profile 按需挂载并获得完整详情。
+2. 对已有 name-only Evidence 做人工身份核对，证据充分后再晋升 Community Catalog；
+3. 继续补可靠的多语言显示名与 Maker → Label → Series parent 关系，但 Browse 不增加级联筛选；
+4. Works 页面后续统一承接 Maker / Label / Series / Genre / Person 等多维组合筛选；
+5. 同名、改名、历史名称继续作为 Alias / Evidence 保留，不按字符串相似度自动合并。
 
 ## 当前不做
 

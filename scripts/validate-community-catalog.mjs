@@ -53,6 +53,20 @@ const organizationEvidence = readJson(registryRoot, "organization-source-evidenc
 const seriesEvidence = readJson(registryRoot, "series-source-evidence.json").items ?? [];
 const organizations = organizationsDocument.items ?? [];
 const series = seriesDocument.items ?? [];
+const allowedNameKinds = new Set(["source-name", "reviewed-brand-form", "community-translation", "community-transliteration"]);
+
+const validateNameKinds = (entityName, item) => {
+  const names = item.names ?? {};
+  const kinds = item.nameKinds ?? {};
+  for (const [language, value] of Object.entries(names)) {
+    if (!String(value ?? "").trim()) continue;
+    const kind = kinds[language];
+    if (!allowedNameKinds.has(kind)) errors.push(`${entityName} 名称缺少合法 nameKinds：${item.id}/${language}/${kind ?? "missing"}`);
+  }
+  for (const language of Object.keys(kinds)) {
+    if (!String(names[language] ?? "").trim()) errors.push(`${entityName} nameKinds 没有对应名称：${item.id}/${language}`);
+  }
+};
 
 const organizationById = new Map();
 for (const item of organizations) {
@@ -65,6 +79,7 @@ for (const item of organizations) {
   if (item.kind === "label" && !String(item.id).startsWith("label_")) errors.push(`Label ID 应使用 label_ 前缀：${item.id}`);
   if (!item.names || !Object.values(item.names).some((value) => String(value ?? "").trim())) errors.push(`Community Organization 缺少名称：${item.id}`);
   if (!Array.isArray(item.aliases)) errors.push(`Community Organization aliases 必须是数组：${item.id}`);
+  validateNameKinds("Community Organization", item);
   if (item.status !== "active") errors.push(`Community Organization status 非法：${item.id}/${item.status}`);
 }
 
@@ -87,6 +102,7 @@ for (const item of series) {
   if (!String(item.id).startsWith("series_")) errors.push(`Series ID 应使用 series_ 前缀：${item.id}`);
   if (!item.names || !Object.values(item.names).some((value) => String(value ?? "").trim())) errors.push(`Community Series 缺少名称：${item.id}`);
   if (!Array.isArray(item.aliases)) errors.push(`Community Series aliases 必须是数组：${item.id}`);
+  validateNameKinds("Community Series", item);
   if (item.status !== "active") errors.push(`Community Series status 非法：${item.id}/${item.status}`);
   if (!item.parentOrganizationId) {
     errors.push(`V1-27C Community Series 必须有已审核 parentOrganizationId：${item.id}`);
@@ -123,6 +139,9 @@ const expectedOrgRows = organizations.map((item) => ({
   name_ja: item.names?.ja ?? "",
   name_zh_cn: item.names?.["zh-CN"] ?? "",
   name_en: item.names?.en ?? "",
+  name_kind_ja: item.nameKinds?.ja ?? "",
+  name_kind_zh_cn: item.nameKinds?.["zh-CN"] ?? "",
+  name_kind_en: item.nameKinds?.en ?? "",
   aliases: (item.aliases ?? []).join(" | "),
   parentOrganizationId: item.parentOrganizationId ?? "",
   status: item.status ?? "",
@@ -132,6 +151,9 @@ const expectedSeriesRows = series.map((item) => ({
   name_ja: item.names?.ja ?? "",
   name_zh_cn: item.names?.["zh-CN"] ?? "",
   name_en: item.names?.en ?? "",
+  name_kind_ja: item.nameKinds?.ja ?? "",
+  name_kind_zh_cn: item.nameKinds?.["zh-CN"] ?? "",
+  name_kind_en: item.nameKinds?.en ?? "",
   aliases: (item.aliases ?? []).join(" | "),
   parentOrganizationId: item.parentOrganizationId ?? "",
   status: item.status ?? "",
@@ -164,4 +186,6 @@ console.log(`  Makers: ${organizations.filter((item) => item.kind === "maker").l
 console.log(`  Labels: ${organizations.filter((item) => item.kind === "label").length}`);
 console.log(`  Series: ${series.length}`);
 console.log(`  Canonical entities: ${catalogKindById.size}`);
+console.log(`  Organization localized: zh-CN ${organizations.filter((item) => item.names?.["zh-CN"]).length}/${organizations.length}, en ${organizations.filter((item) => item.names?.en).length}/${organizations.length}`);
+console.log(`  Series localized: zh-CN ${series.filter((item) => item.names?.["zh-CN"]).length}/${series.length}, en ${series.filter((item) => item.names?.en).length}/${series.length}`);
 console.log(`  Mapped Registry Evidence: ${[...organizationEvidence, ...seriesEvidence].filter((item) => item.canonicalId).length}`);

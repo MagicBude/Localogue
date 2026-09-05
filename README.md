@@ -11,7 +11,10 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
-当前进入 **V1-25C：Provider ID Identity / Coverage Round 2**。V1-25A/B 已建立 Vocabulary 与 Provider Coverage 骨架；本轮先修正 Provider ID 身份边界，再继续扩充真实分类，不回 Onboarding。产品版本继续保持 `0.1.25`。
+当前进入 **V1-27D：Entity Localization & Browse Relationship Presentation**。V1-27A/B/C 已建立 Maker / Label / Series Registry Evidence 与 Canonical Community Catalog；本轮继续完善多语言显示与已确认归属关系的可见性，同时保持 Browse 只负责完整目录浏览，组合筛选留给 Works。产品版本继续保持 `0.1.25`。
+
+
+V1-27D 为 Community Catalog 名称增加 `nameKinds`：来源原名、审核品牌写法、社区翻译和社区转写被明确区分。品牌没有可靠中文名时不强行翻译，描述性 Label / Series 才逐步加入社区审核翻译。Desktop Browse 的 Label / Series 卡片会显示已确认父级 Maker / Label，但不会增加 Maker → Label → Series 级联筛选；真正的 Maker / Label / Series / Genre 等多维组合条件统一留给 Works。
 
 分类运行时现在由数据驱动：359 个 Canonical Genre、43 个 Work Type、51 个 Source-only Classification、1166 个精确 Classification Alias（1131 approved / 35 review-required），以及 `localogue-community-data` 323 / 323 Classification Crosswalk。V1-25C 为 Approved Genre Source Alias 增加 `idSource` Provider 身份边界：名称 Evidence 可以跨来源复用，`sourceId` 不再跟随 `sources` 跨站复制。当前收集的 FANZA 260、JAVLibrary 286、JAVBus 9、JAVDB 32 个来源词均为 100% 已识别；JAVBus 数量下降来自剔除错误归属 ID，而不是删掉 Canonical 数据。
 
