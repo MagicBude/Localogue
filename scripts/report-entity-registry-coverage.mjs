@@ -13,17 +13,19 @@ const providers = [...new Set(evidence.map((item) => item.provider))].sort();
 const kinds = ["maker", "label", "series"];
 
 console.log("# Entity Registry Coverage\n");
-console.log("| Provider | Maker | Label | Series | Verified | Name-only |");
-console.log("| --- | ---: | ---: | ---: | ---: | ---: |");
+console.log("| Provider | Maker | Label | Series | Verified | Name-only | Canonical mapped |");
+console.log("| --- | ---: | ---: | ---: | ---: | ---: | ---: |");
 
 for (const provider of providers) {
   const items = evidence.filter((item) => item.provider === provider);
   const counts = Object.fromEntries(kinds.map((kind) => [kind, items.filter((item) => item.entityKind === kind).length]));
   const verified = items.filter((item) => item.idStatus === "verified").length;
   const nameOnly = items.filter((item) => item.idStatus === "name-only").length;
-  console.log(`| ${provider} | ${counts.maker} | ${counts.label} | ${counts.series} | ${verified} | ${nameOnly} |`);
+  const mapped = items.filter((item) => Boolean(item.canonicalId)).length;
+  console.log(`| ${provider} | ${counts.maker} | ${counts.label} | ${counts.series} | ${verified} | ${nameOnly} | ${mapped} |`);
 }
 
 const verified = evidence.filter((item) => item.idStatus === "verified").length;
 const nameOnly = evidence.filter((item) => item.idStatus === "name-only").length;
-console.log(`\nTotal evidence: ${evidence.length} · verified Provider IDs: ${verified} · name-only: ${nameOnly}`);
+const mapped = evidence.filter((item) => Boolean(item.canonicalId)).length;
+console.log(`\nTotal evidence: ${evidence.length} · verified Provider IDs: ${verified} · name-only: ${nameOnly} · canonical mapped: ${mapped}`);

@@ -130,7 +130,7 @@ Desktop 设置页将资料源解释为四层：
 
 ### 下一阶段
 
-继续 Provider Coverage，而不是立刻回 Onboarding：优先取得 JAVDB `/api/v2/tags?type=0..4`、JAVBus 完整 Genre ID、FANZA `GenreSearch` 的可复核 ID 级导出，再比较 JAVLibrary 2024/2025 快照。Provider Coverage 稳定后再回 Community Pack Registry / Onboarding。
+继续有限实体目录建设：优先补 Community Catalog 中 Maker → Label → Series 的静态证据、Alias 与 parent 关系；证据不足的 Registry Evidence 不自动晋升。Catalog 稳定后再评估发布为正式 Shared Pack，仍不在 Localogue 内加入在线 Provider 抓取/API 客户端。
 
 ## 版本
 
@@ -158,3 +158,15 @@ Desktop 设置页将资料源解释为四层：
 - `scripts/report-entity-registry-coverage.mjs`：Registry Provider 覆盖报告。
 - `scripts/validate-entity-registry.mjs`：Series Evidence、动态 Provider 注册与跨文件 ID 约束。
 - `docs/catalog/organization-series-registry.md` / `resources/registries/README.md`：V1-27B 静态 Registry 维护边界与人工审核流程。
+
+### V1-27C Community Catalog Projection
+
+- `resources/catalogs/community-organizations.{json,csv}`：22 Maker / 13 Label 的首批 Canonical Community Catalog。
+- `resources/catalogs/community-series.{json,csv}`：9 个已确认 parent 的 Canonical Series。
+- `resources/catalogs/README.md`：Registry Evidence → Community Catalog 晋升规则和运行时边界。
+- `src/application/catalog/community-entity-catalog.ts`：只读 Community Catalog 运行时参考索引。
+- `scripts/validate-community-catalog.mjs`：Catalog JSON/CSV、verified Evidence、kind / parent / canonicalId 校验。
+- `apps/desktop/src/desktop-catalog-browser.tsx`：“无作品 / 全部”补充 Community Catalog；“有作品”继续严格按当前 Library Profile Work 关联计数。
+- `docs/catalog/library-profile-registry-community-catalog.md`：Library Profile / Registry Evidence / Community Catalog / Shared Pack 概念说明。
+- Registry Evidence 当前 54 / 67 条已映射 Canonical；Community Catalog 共 44 个实体。
+- 删除误入 V1-27B 的 `scripts/snapshot-fanza-entity-registry.mjs`，保持静态资料库定位。

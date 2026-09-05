@@ -23,6 +23,21 @@
 - 不把“当前切片 100% 已审核”描述成“Provider 全量覆盖”。
 - Series 归属没有证据时保持空值。
 
+## 与 Community Catalog 的关系
+
+Registry 保存“来源说了什么”；`resources/catalogs/` 保存“Localogue 人工审核后最终认为什么”。
+
+同一个现实 Maker / Label / Series 可以在 Registry 里拥有多条 Provider Evidence，但 Community Catalog 只保留一个 Canonical ID。审核确认后，Evidence 使用 `canonicalId` 指向 Catalog；证据不足的记录继续留在 Registry，不会为了提高覆盖率而强行合并。
+
+当前映射情况可通过：
+
+```bash
+pnpm registry:coverage
+pnpm validate:catalog
+```
+
+查看。
+
 ## 本地维护检查
 
 ```bash

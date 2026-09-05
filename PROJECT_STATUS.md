@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-**V1-27B：Provider Registry Coverage Round 1。**
+**V1-27C：Community Catalog Projection。**
 
 
 V1-27B 已进入有限目录的真实 Provider 覆盖：
@@ -12,6 +12,16 @@ V1-27B 已进入有限目录的真实 Provider 覆盖：
 - FANZA 当前静态切片包含 22 Maker ID、12 Label ID，并保留 2 条 Label name-only 真实作品样本；本仓库不负责在线采集。
 - Maker 官方站当前收录 9 个可公开复核的 Series ID；这些 ID 不与 FANZA/JAVBus/JAVDB 混用；
 - 新增 `registry:coverage`；
+
+V1-27C 开始把“来源证据”晋升为真正可浏览的 Canonical Community Catalog：
+
+- 新增 `resources/catalogs/community-organizations.{json,csv}` 与 `community-series.{json,csv}`；
+- 首批 Community Catalog：22 Maker / 13 Label / 9 Series，共 44 个 Canonical Entity；
+- 54 / 67 条 Registry Evidence 已通过 `canonicalId` 映射到 Community Catalog；未充分确认的 name-only Evidence 继续留在 Registry，不强行合并；
+- 新增 `validate:catalog`，要求 Catalog 实体至少拥有一条 verified Evidence，并校验 JSON/CSV、kind、parent 与 canonicalId 反向映射；
+- Desktop Browse 的“有作品”继续只看当前 Library Profile 的真实 Work 关系；“无作品 / 全部”额外显示 Community Catalog 中尚未被当前资料库使用的 Maker / Label / Series；
+- Genre 分面按钮与下方题材卡片增加垂直间距，改善层级拥挤；
+- Community Catalog 是全局只读参考索引，不修改 Library Profile，也不会自动挂载/复制成 Shared Pack。
 
 V1-25A 已建立分类治理骨架；当前继续优先构建 Provider Coverage，而不是先做 Onboarding：
 
@@ -280,14 +290,13 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ## 下一阶段建议
 
-**下一阶段：V1-27C Canonical Organization / Series Mapping Round 1。**
+**下一阶段：V1-27D Community Catalog Coverage Round 2。**
 
-2. 用 `registry:coverage -- --snapshot ...` 对比仓库静态 Evidence，确认完整分页与静态 ID 切片的一致性；
-3. 为高频 Maker 建立第一批 Canonical Organization Alias + FANZA/JAVBus/官方站 Provider ID Mapping；
-4. Series 优先从官方 Maker 站和公开数据库双向交叉验证，再绑定最具体的 Label/Maker；
-5. JAVDB typed maker/series search 与 JAVBus detail ID 继续作为交叉验证，不把 Web 搜索结果误称为全量目录；
-6. Label 继续单独治理，不因 Maker/Label 名称相近自动合并；
-7. Registry 稳定后再扩大桌面 Browse 的来源/别名详情展示。
+1. 继续从公开页面、厂商官网、现成数据集和外部工具补充静态 Maker / Label / Series Evidence；
+2. 对已有 name-only Evidence 做人工身份核对，只有证据充分时才补 `canonicalId` 并晋升 Community Catalog；
+3. 优先补主流 Maker 的 Label 层级，以及 Series → 最具体 Label/Maker 的已确认 parent 关系；
+4. 同名、改名、历史名称先作为 Alias / Evidence 保留，不按字符串相似度自动合并；
+5. Community Catalog 成熟后，再评估是否发布为正式 Shared Pack，供不同 Library Profile 按需挂载并获得完整详情。
 
 ## 当前不做
 
@@ -317,8 +326,8 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 
 - V1-24C Shared-only 可见性 Fixture 已补齐：示例 Shared Pack 中的“共享示例花”现在关联 `SHARED-DEMO-001` performer Work，不再因人物库的 performer 关系收口规则而被过滤。
 
-## V1-27B 当前状态
+## V1-27C 当前状态
 
-Maker / Label / Series Registry Foundation 已通过 V1-27A 验证；V1-27B 已开始真实 Provider 覆盖。当前 Demo 基线仍为 2 Maker、2 Label、3 Series，3 个 Series 的历史未归属只 warning。
+Maker / Label / Series Registry Foundation 已通过 V1-27A/V1-27B 验证；V1-27C 首次建立 Registry Evidence → Community Catalog 的 Canonical 晋升链路。当前 Community Catalog 为 22 Maker / 13 Label / 9 Series；当前 Demo / Private Library 自身仍可保留独立自定义实体，Browse 会在“无作品 / 全部”中与只读 Community Catalog 合并显示。
 
 

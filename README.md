@@ -715,13 +715,17 @@ V1-13 早期测试版本曾让 TypeScript 在 `apps/desktop` 目录生成 `vite.
 
 真实本地图片即使缺少历史 `width / height` 元数据，也会在运行时按实际图片尺寸恢复横版 Hero Gallery；Work 私人显示首图可从 poster / cover / gallery / fanart / screenshot 中选择，默认仍优先 poster / cover。
 
-### Organization / Series Registry
+### Organization / Series Registry 与 Community Catalog
 
-V1-27A/V1-27B 开始把 Maker、Label、Series 作为有限目录治理：Provider ID 与名称证据进入 `resources/registries/`，Maker → Label 使用 Organization 父子关系，Series 可选关联最具体的已确认 Organization。Registry 由公开页面、厂商官网、现成数据集或外部工具取得资料后人工审核维护，Localogue 本身不承担 Provider 抓取。
+V1-27A/V1-27B 开始把 Maker、Label、Series 作为有限目录治理：Provider ID 与名称证据进入 `resources/registries/`，这里保存“来源具体说了什么”，允许同一个现实实体在不同 Provider 中出现多条 Evidence。Registry 由公开页面、厂商官网、现成数据集或外部工具取得资料后人工审核维护，Localogue 本身不承担 Provider 抓取。
 
+V1-27C 新增 `resources/catalogs/`：只有经过人工审核、去重且至少拥有一条 verified Evidence 的实体，才会晋升为 Community Catalog Canonical Entity。Desktop Browse 的“有作品”仍只反映当前 Library Profile 的真实 Work 关联；“无作品 / 全部”会补充只读 Community Catalog，因此已经审核但当前没有作品的 Maker / Label / Series 也能直接浏览。
+
+这几层的关系与 Library Profile / Shared Pack 的区别见 `docs/catalog/library-profile-registry-community-catalog.md`。
 
 ```bash
 pnpm validate:registry
+pnpm validate:catalog
 pnpm registry:audit
 pnpm registry:coverage
 ```

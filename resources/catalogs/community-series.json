@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-27C",
+  "catalogStatus": "reviewed-community-canonical-slice",
+  "items": [
+    {
+      "id": "series_s1_414",
+      "names": {
+        "ja": "新人NO.1STYLE"
+      },
+      "aliases": [
+        "新人NO.1 STYLE"
+      ],
+      "parentOrganizationId": "maker_s1",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_ideapocket_1011",
+      "names": {
+        "ja": "うちの妻を犯して下さい"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_ideapocket",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_ideapocket_863",
+      "names": {
+        "ja": "死ぬほど大嫌いな上司とまさかの相部屋に"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_ideapocket",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_ideapocket_939",
+      "names": {
+        "ja": "見つめる愛情イラマチオ"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_ideapocket",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_moodyz_3519",
+      "names": {
+        "ja": "W CAST",
+        "en": "W CAST"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_moodyz",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_moodyz_3562",
+      "names": {
+        "ja": "聖水痴女ハーレム"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_moodyz",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_moodyz_3489",
+      "names": {
+        "ja": "聖水くらぶ"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_moodyz",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_madonna_1749",
+      "names": {
+        "ja": "夫の上司に飾られた　人妻ボディアクセサリー"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_madonna",
+      "status": "active",
+      "schemaVersion": 1
+    },
+    {
+      "id": "series_madonna_1891",
+      "names": {
+        "ja": "廃業寸前"
+      },
+      "aliases": [],
+      "parentOrganizationId": "maker_madonna",
+      "status": "active",
+      "schemaVersion": 1
+    }
+  ]
+}

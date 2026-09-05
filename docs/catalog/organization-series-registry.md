@@ -69,3 +69,30 @@ pnpm registry:audit
 5. 有充分证据后再建立 Canonical parent 关系。
 
 整个过程遵循“先有限集合，再逐步扩无限作品”的资料库建设原则。
+
+## V1-27C：从 Evidence 晋升 Community Catalog
+
+V1-27C 增加 `resources/catalogs/`，把“来源证据”与“Canonical 参考实体”正式拆开：
+
+```text
+Registry Evidence
+   │ 人工审核、去重、确认身份
+   ▼
+Community Catalog
+   │
+   └─ Desktop Browse 只读参考
+```
+
+晋升要求：
+
+1. Community Catalog Entity 至少有一条 `verified` Registry Evidence；
+2. 多个 Provider 的 Evidence 可以共同指向同一个 `canonicalId`；
+3. `canonicalId` 的 kind 必须与 Evidence 的 `entityKind` 一致；
+4. Label parent 必须是已确认 Maker；
+5. 本轮晋升的 Series 必须拥有已确认 parentOrganizationId；
+6. name-only / 身份不确定的 Evidence 不自动晋升。
+
+Community Catalog 不属于任何 Library Profile，也不会改变 Private Library 或自动挂载 Shared Pack。Desktop 的“有作品”仍严格以当前 Profile 的 Work 关系计算；“无作品 / 全部”才补充 Catalog 参考实体。
+
+完整概念说明见 `docs/catalog/library-profile-registry-community-catalog.md`。
+

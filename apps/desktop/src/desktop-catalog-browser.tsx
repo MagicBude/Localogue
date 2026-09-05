@@ -6,6 +6,10 @@ import {
 } from "@/application/services/localization-service";
 import { localizeGenre } from "@/application/services/genre-localization-service";
 import {
+  COMMUNITY_ORGANIZATION_CATALOG,
+  COMMUNITY_SERIES_CATALOG,
+} from "@/application/catalog/community-entity-catalog";
+import {
   CONTROLLED_GENRE_DEFINITIONS,
   WORK_TYPE_DEFINITIONS,
   type ControlledGenreFacet,
@@ -31,6 +35,7 @@ interface CatalogSelection {
 interface CatalogItem {
   id: string;
   label: string;
+  sortKey: string;
   count: number;
   searchValues: string[];
   genreFacets?: readonly ControlledGenreFacet[];
@@ -63,6 +68,7 @@ export function DesktopCatalogBrowser({
     const controlledGenres = CONTROLLED_GENRE_DEFINITIONS.map((item) => ({
       id: item.id,
       label: localizeText(item.names, metadataLanguage, item.id),
+      sortKey: stableLocalizedSortKey(item.names, item.id),
       count: facetCount(result, "genres", item.id),
       searchValues: uniqueSearchValues([item.id, ...Object.values(item.names), ...item.aliases].filter((value): value is string => Boolean(value))),
       genreFacets: item.facets,
@@ -70,6 +76,7 @@ export function DesktopCatalogBrowser({
     const libraryGenreItems = libraryGenres.map((item) => ({
       id: item.id,
       label: localizeGenre(item, metadataLanguage, item.id),
+      sortKey: stableLocalizedSortKey(item.names, item.id),
       count: facetCount(result, "genres", item.id),
       searchValues: uniqueSearchValues(
         [item.id, ...Object.values(item.names)].filter((value): value is string => Boolean(value)),
@@ -78,28 +85,41 @@ export function DesktopCatalogBrowser({
     const controlledWorkTypes = WORK_TYPE_DEFINITIONS.map((item) => ({
       id: item.id,
       label: localizeText(item.names, metadataLanguage, item.id),
+      sortKey: stableLocalizedSortKey(item.names, item.id),
       count: facetCount(result, "workTypes", item.id),
       searchValues: uniqueSearchValues([item.id, ...Object.values(item.names), ...item.aliases].filter((value): value is string => Boolean(value))),
     }));
     const facetWorkTypes = result.facets.workTypes.map((facet) => ({
       id: facet.id,
       label: facet.id,
+      sortKey: facet.id,
       count: facet.count,
       searchValues: [facet.id],
     }));
 
     return {
-      makers: organizations
-        .filter((item) => item.kind === "maker")
-        .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id)))
-        .sort(catalogSort),
-      labels: organizations
-        .filter((item) => item.kind === "label")
-        .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id)))
-        .sort(catalogSort),
-      series: series
-        .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id)))
-        .sort(catalogSort),
+      makers: mergeCatalogItems(
+        organizations
+          .filter((item) => item.kind === "maker")
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id))),
+        COMMUNITY_ORGANIZATION_CATALOG
+          .filter((item) => item.kind === "maker")
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "makers", item.id), item.aliases)),
+      ),
+      labels: mergeCatalogItems(
+        organizations
+          .filter((item) => item.kind === "label")
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id))),
+        COMMUNITY_ORGANIZATION_CATALOG
+          .filter((item) => item.kind === "label")
+          .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "labels", item.id), item.aliases)),
+      ),
+      series: mergeCatalogItems(
+        series.map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id))),
+        COMMUNITY_SERIES_CATALOG.map((item) =>
+          catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "series", item.id), item.aliases),
+        ),
+      ),
       genres: mergeCatalogItems(controlledGenres, libraryGenreItems),
       tags: tags
         .map((item) => catalogEntityItem(item.id, item.names, metadataLanguage, facetCount(result, "tags", item.id)))
@@ -107,6 +127,7 @@ export function DesktopCatalogBrowser({
       directors: result.facets.directors.map((facet) => ({
         id: facet.id,
         label: peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, metadataLanguage) : facet.id,
+        sortKey: facet.id,
         count: facet.count,
         searchValues: [facet.id, peopleById.has(facet.id) ? getPreferredPersonName(peopleById.get(facet.id)!, metadataLanguage) : facet.id],
       })).sort(catalogSort),
@@ -153,7 +174,7 @@ export function DesktopCatalogBrowser({
       <section className="page-title">
         <span className="eyebrow">EXPLORE · CATALOG INDEX</span>
         <h1>{t("分类浏览")}</h1>
-        <p>{t("对齐 Web 的厂商、厂牌、系列、Genre、导演、作品类型和 Tag 索引；点击任意分类后继续使用完整作品多维筛选。")}</p>
+        <p>{catalogCommunityDescription(uiLanguage)}</p>
       </section>
 
       <section className="settings-card form-card">
@@ -210,7 +231,21 @@ export function DesktopCatalogBrowser({
                     {t("{count} 项", { count: facetVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
                   </small>
                 </div>
-                <div className="button-row" aria-label={genreFacetAriaLabel(uiLanguage)}>
+                <div
+                  className="button-row"
+                  style={{
+                    position: "sticky",
+                    top: 80,
+                    zIndex: 8,
+                    marginTop: 12,
+                    marginBottom: 18,
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    background: "var(--panel)",
+                    boxShadow: "0 10px 18px rgba(0, 0, 0, 0.035)",
+                  }}
+                  aria-label={genreFacetAriaLabel(uiLanguage)}
+                >
                   {(["all", ...GENRE_FACET_ORDER, ...(hasOtherGenres ? ["other" as const] : [])] as GenreFacetFilter[]).map((facet) => (
                     <button
                       className={genreFacet === facet ? "primary-button" : "ghost-button"}
@@ -307,12 +342,18 @@ function catalogEntityItem(
   names: LocalizedText,
   metadataLanguage: SupportedLanguage,
   count: number,
+  aliases: readonly string[] = [],
 ): CatalogItem {
   return {
     id,
     label: localizeText(names, metadataLanguage, id),
+    sortKey: stableLocalizedSortKey(names, id),
     count,
-    searchValues: [id, ...Object.values(names).filter((value): value is string => Boolean(value))],
+    searchValues: uniqueSearchValues([
+      id,
+      ...Object.values(names).filter((value): value is string => Boolean(value)),
+      ...aliases,
+    ]),
   };
 }
 
@@ -388,6 +429,12 @@ function genreFacetLabel(facet: GenreFacetFilter, language: SupportedLanguage): 
   return labels[facet][language];
 }
 
+function catalogCommunityDescription(language: SupportedLanguage): string {
+  if (language === "ja") return "作品ありは現在の Library Profile に実際に関連する項目だけを表示します。作品なし / すべてでは、レビュー済みでまだ作品に登場していない Maker・Label・Series を読み取り専用 Community Catalog から補います。";
+  if (language === "en") return "With works reflects only actual links in the current Library Profile. Without works / All also adds reviewed Maker, Label, and Series entries from the read-only Community Catalog even when no current work uses them yet.";
+  return "有作品只反映当前 Library Profile 的实际关联；无作品 / 全部还会补充只读 Community Catalog，让已经审核但尚未出现在作品中的 Maker、Label、Series 也可见。";
+}
+
 function genreFacetDescription(language: SupportedLanguage): string {
   if (language === "ja") return "すべて表示では主分類ごとに一度だけ配置し、個別分類では兼属する Genre も含めます。作品タイプや媒体属性は別ディメンションです。";
   if (language === "en") return "All groups place each Genre once by its primary facet; a specific facet also includes Genres that belong to multiple facets. Work types and media attributes remain separate.";
@@ -426,8 +473,14 @@ function facetCount(
   return result.facets[key].find((facet) => facet.id === id)?.count ?? 0;
 }
 
+function stableLocalizedSortKey(names: LocalizedText, id: string): string {
+  return names.ja ?? names["zh-CN"] ?? names.en ?? id;
+}
+
 function catalogSort(a: CatalogItem, b: CatalogItem): number {
-  return b.count - a.count || a.label.localeCompare(b.label, "ja");
+  return b.count - a.count
+    || a.sortKey.localeCompare(b.sortKey, "ja")
+    || a.id.localeCompare(b.id, "en");
 }
 
 function BrowserState({ children, error = false }: { children: ReactNode; error?: boolean }) {

@@ -1,5 +1,18 @@
 # Changelog
 
+## V1-27C - Community Catalog Projection
+
+- 新增 `resources/catalogs/`，把 Registry Evidence 与人工审核后的 Canonical Community Catalog 正式分层。
+- 首批 Community Catalog 收录 22 Maker / 13 Label / 9 Series，共 44 个 Canonical Entity。
+- Registry Evidence 新增 `canonicalId` 映射；当前 54 / 67 条 Evidence 已归并到 Community Catalog，证据不足的 name-only 记录继续留在 Registry。
+- 新增 `pnpm validate:catalog`，校验 Catalog JSON/CSV 一致性、Canonical ID/kind、Label/Series parent，以及每个 Catalog Entity 至少拥有一条 verified Registry Evidence。
+- `pnpm check` 接入 Community Catalog Validator。
+- Desktop Browse 将当前 Library Profile 实体与只读 Community Catalog 合并：“有作品”仍只看真实 Work 关联，“无作品 / 全部”可浏览尚无作品的社区 Maker / Label / Series。
+- 搜索会同时匹配 Community Catalog 的 Canonical 名称和已审核 Alias；当前资料库同 ID 实体优先保留本地显示名。
+- Genre 分面按钮区增加上下间距，修复小分类按钮与题材卡片过于贴近的问题。
+- 新增 `docs/catalog/library-profile-registry-community-catalog.md`，明确 Library Profile、Registry Evidence、Community Catalog 与 Shared Pack 的职责边界。
+- 清理误入上一阶段的 FANZA 在线快照脚本；Localogue Community Data 继续只维护静态审核资料，不集成在线采集/API 客户端。
+
 ## V1-27B - Provider Registry Coverage Round 1
 
 - Organization / Series Registry 从 Foundation 进入第一轮真实 Provider 覆盖。
@@ -9,7 +22,6 @@
 - Registry 累计 45 个 verified Provider ID + 22 条 name-only Evidence。
 - Validator 不再硬编码 Provider 列表，而是以 `provider-entity-sources.*` 为来源注册表；新增 Series Evidence、name-only 重复和跨文件 Provider/entityKind/sourceId 唯一性检查。
 - 新增 `pnpm registry:coverage`，按 Provider / Maker / Label / Series 汇总仓库内静态 Evidence 的 verified 与 name-only 覆盖；命令不访问网络。
-- Snapshot 工具支持 `--input` 离线归一化，用于测试或处理手工保存的官方 API JSON。
 - 本轮仍不根据名称相似度自动合并 Maker / Label / Series，也不把 Maker 官方站 Series ID 当作 FANZA/JAVBus/JAVDB ID。
 
 

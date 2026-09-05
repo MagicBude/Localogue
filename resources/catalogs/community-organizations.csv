@@ -1,0 +1,36 @@
+id,kind,name_ja,name_zh_cn,name_en,aliases,parentOrganizationId,status
+maker_s1,maker,エスワン ナンバーワンスタイル,,S1 NO.1 STYLE,S1 | S1 NO.1 STYLE,,active
+maker_moodyz,maker,ムーディーズ,,MOODYZ,MOODYZ,,active
+maker_madonna,maker,マドンナ,,Madonna,Madonna,,active
+maker_ideapocket,maker,アイデアポケット,,IDEAPOCKET,Idea Pocket | IDEA POCKET,,active
+maker_fitch,maker,Fitch,,Fitch,,,active
+maker_attackers,maker,アタッカーズ,,Attackers,ATTACKERS,,active
+maker_ebody,maker,E-BODY,,E-BODY,,,active
+maker_premium,maker,プレミアム,,Premium,PREMIUM,,active
+maker_honnaka,maker,本中,,,,,active
+maker_red,maker,レッド,,,,,active
+maker_oppai,maker,OPPAI,,OPPAI,,,active
+maker_emukko_lab,maker,えむっ娘ラボ,,,,,active
+maker_kawaii,maker,kawaii,,kawaii,,,active
+maker_kirakira,maker,kira☆kira,,kira☆kira,,,active
+maker_das,maker,ダスッ！,,,,,active
+maker_tameike_goro,maker,溜池ゴロー,,,,,active
+maker_chijo_heaven,maker,痴女ヘブン,,,,,active
+maker_hajime_kikaku,maker,はじめ企画,,,,,active
+maker_hunter,maker,Hunter,,Hunter,,,active
+maker_befree,maker,BeFree,,BeFree,,,active
+maker_hsoda,maker,Hsoda,,Hsoda,,,active
+maker_rookie,maker,ROOKIE,,ROOKIE,,,active
+label_s1_no1_style,label,S1 NO.1 STYLE,,S1 NO.1 STYLE,エスワン ナンバーワンスタイル,maker_s1,active
+label_shirouto_neoki_suppin_club,label,素人寝起きすっぴん倶楽部,,,,,active
+label_shirouto_hoihoi_tower,label,素人ホイホイtower,,,,,active
+label_shirouto_mukumuku,label,素人ムクムク,,,,,active
+label_shirouto_mukumuku_x,label,素人ムクムク-X-,,,,,active
+label_shirouto_mukumuku_kusuri,label,素人ムクムク-クスリ-,,,,,active
+label_shirouto_mukumuku_shio,label,素人ムクムク-塩-,,,,,active
+label_shirouto_mukumuku_shoku,label,素人ムクムク-職-,,,,,active
+label_tokyo_koibito,label,東京恋人,,,,,active
+label_tokyo_koibito_suiken,label,東京恋人酔拳,,,,,active
+label_buzz_shirouto,label,Buzzシロウト,,,,,active
+label_gachi_shirouto,label,ガチ素人,,,,,active
+label_deaikei_shirouto,label,出会い系素人,,,,,active
