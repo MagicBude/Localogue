@@ -639,6 +639,16 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
 }
 .desktop-catalog-sections { display: grid; gap: 16px; }
+/* Genre 维度较多，滚动目录时保留工具栏；布局样式集中在 CSS，组件只描述语义和状态。 */
+.catalog-genre-facet-toolbar {
+  position: sticky;
+  top: 80px;
+  z-index: 8;
+  margin-block: 12px 18px;
+  padding-block: 10px;
+  background: var(--panel);
+  box-shadow: 0 10px 18px rgb(0 0 0 / 3.5%);
+}
 .desktop-catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

@@ -237,21 +237,7 @@ export function DesktopCatalogBrowser({
                     {t("{count} 项", { count: facetVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
                   </small>
                 </div>
-                <div
-                  className="button-row"
-                  style={{
-                    position: "sticky",
-                    top: 80,
-                    zIndex: 8,
-                    marginTop: 12,
-                    marginBottom: 18,
-                    paddingTop: 10,
-                    paddingBottom: 10,
-                    background: "var(--panel)",
-                    boxShadow: "0 10px 18px rgba(0, 0, 0, 0.035)",
-                  }}
-                  aria-label={genreFacetAriaLabel(uiLanguage)}
-                >
+                <div className="button-row catalog-genre-facet-toolbar" aria-label={genreFacetAriaLabel(uiLanguage)}>
                   {(["all", ...GENRE_FACET_ORDER, ...(hasOtherGenres ? ["other" as const] : [])] as GenreFacetFilter[]).map((facet) => (
                     <button
                       className={genreFacet === facet ? "primary-button" : "ghost-button"}
