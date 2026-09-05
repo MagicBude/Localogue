@@ -1,4 +1,6 @@
 import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -13,16 +15,8 @@ import type {
 } from "./contracts";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
-import { DesktopCatalogBrowser } from "./desktop-catalog-browser";
-import { DesktopGovernance } from "./desktop-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopSidebar, DesktopTopbar, type DesktopPage } from "./desktop-app-shell";
-import { DesktopWorkDetailPage, DesktopWorksPage } from "./desktop-work-pages";
-import { DesktopPeoplePage, DesktopPersonDetailPage } from "./desktop-person-pages";
-import { DesktopHomePage } from "./desktop-home-page";
-import { DesktopMediaPage } from "./desktop-media-page";
-import { DesktopPacksPage } from "./desktop-packs-page";
-import { DesktopSettingsPage } from "./desktop-settings-page";
 import {
   activeLibraryProfile,
   applyLibraryProfile,
@@ -34,6 +28,21 @@ import {
 
 // Native Profile 命令的最小契约版本；低版本 Runtime 只能读取旧设置，不能安全保存多资料库配置。
 const PROFILE_NATIVE_CONTRACT_REVISION = 2;
+
+/**
+ * 页面模块按需下载。React.lazy 接受默认导出，因此这里把各文件的命名导出映射成 default。
+ * 这不会改变页面职责，只让用户首次打开某个页面时才加载它的代码。
+ */
+const DesktopHomePage = lazy(() => import("./desktop-home-page").then((module) => ({ default: module.DesktopHomePage })));
+const DesktopWorksPage = lazy(() => import("./desktop-work-pages").then((module) => ({ default: module.DesktopWorksPage })));
+const DesktopWorkDetailPage = lazy(() => import("./desktop-work-pages").then((module) => ({ default: module.DesktopWorkDetailPage })));
+const DesktopPeoplePage = lazy(() => import("./desktop-person-pages").then((module) => ({ default: module.DesktopPeoplePage })));
+const DesktopPersonDetailPage = lazy(() => import("./desktop-person-pages").then((module) => ({ default: module.DesktopPersonDetailPage })));
+const DesktopCatalogBrowser = lazy(() => import("./desktop-catalog-browser").then((module) => ({ default: module.DesktopCatalogBrowser })));
+const DesktopGovernance = lazy(() => import("./desktop-governance").then((module) => ({ default: module.DesktopGovernance })));
+const DesktopMediaPage = lazy(() => import("./desktop-media-page").then((module) => ({ default: module.DesktopMediaPage })));
+const DesktopPacksPage = lazy(() => import("./desktop-packs-page").then((module) => ({ default: module.DesktopPacksPage })));
+const DesktopSettingsPage = lazy(() => import("./desktop-settings-page").then((module) => ({ default: module.DesktopSettingsPage })));
 
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   schemaVersion: 1,
@@ -278,6 +287,7 @@ export default function App() {
 
         <div className="status-line">{message}</div>
 
+        <Suspense fallback={<PageLoadingState />}>
         {!hasLibrarySource && page !== "settings" ? (
           <EmptyLibrary onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
@@ -353,6 +363,7 @@ export default function App() {
             setMessage={setMessage}
           />
         )}
+        </Suspense>
       </main>
     </div>
   );
@@ -368,6 +379,12 @@ function EmptyLibrary({ onConfigure }: { onConfigure: () => void }) {
       <button className="primary-button" onClick={onConfigure}>{t("打开设置")}</button>
     </section>
   );
+}
+
+/** 页面代码正在按需加载时保持稳定高度，避免 WebView 因内容骤缩跳回顶部。 */
+function PageLoadingState() {
+  const { t } = useDesktopI18n();
+  return <section className="empty-state"><div className="loading-dot" /><strong>{t("正在读取资料库…")}</strong></section>;
 }
 
 function invalidPackInfo(path: string, error: unknown): DesktopSharedPackInfo {

@@ -35,3 +35,5 @@ Desktop 早期为了快速建立完整产品壳，把首页、作品、人物、
 Media 内部继续把扫描状态、NFO / 图片预览、词表审计、单文件诊断和媒体列表提取到 `desktop-media-sections.tsx`。这些 Section 只接收数据与回调，不创建 Coordinator、不写 Repository；页面控制器继续统一持有任务状态和执行顺序。
 
 Desktop 外壳使用相同原则：`desktop-app-shell.tsx` 只渲染侧栏和顶栏，并通过回调上报导航、刷新、折叠和 Profile 切换意图；`App.tsx` 继续负责持久化与 Native Bridge。这样展示组件不会因为复用而获得不必要的平台权限。
+
+页面文件拆开后，`App.tsx` 使用 `React.lazy` 按导航目标加载页面模块。源代码模块化和运行时分包是两件事：前者改善维护，后者才会缩小首次加载的入口包。`Suspense` fallback 保持内容区稳定，避免加载页面代码时 WebView 高度突然收缩。

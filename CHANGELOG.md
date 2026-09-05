@@ -12,6 +12,7 @@
 - Media 扫描状态与媒体结果列表进一步提取为纯展示 Section，避免任务执行逻辑与表格 JSX 混杂。
 - NFO / 图片预览、词表审计与单文件诊断继续提取为纯展示 Section，并消除页面渲染中的重复路径去重。
 - Desktop 侧栏与顶栏提取为独立 Presentation Shell，导航展示和 Profile 快速切换 UI 不再挤占 App 启动控制器。
+- Desktop 页面改为 `React.lazy` 按需加载，使文件级模块化同时形成 Vite 页面分包，并用稳定 Loading fallback 避免切页抖动。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency
