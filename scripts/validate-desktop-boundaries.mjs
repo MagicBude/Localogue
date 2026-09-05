@@ -141,6 +141,7 @@ if (!errors.length) {
   const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
   const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;
   const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
+  const desktopSettingsPage = readFileSync(path.join(root, "apps/desktop/src/desktop-settings-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopApp.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
@@ -547,10 +548,10 @@ if (!errors.length) {
   if (!desktopApp.includes("switchLibraryProfile") || !desktopApp.includes("source-profile-select") || !desktopApp.includes("source-profile-manage")) {
     errors.push("V1-24 Desktop 必须在侧栏提供资料库快速切换与管理入口。");
   }
-  if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopApp.includes('t("+ 新建资料库")')) {
+  if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建资料库")')) {
     errors.push("V1-24 新建资料库必须使用“资料库 N”中性默认命名，并提供明确的新建入口。");
   }
-  if (!libraryProfiles.includes('"示例库"') || !desktopApp.includes('t("+ 添加示例库")')) {
+  if (!libraryProfiles.includes('"示例库"') || !desktopSettingsPage.includes('t("+ 添加示例库")')) {
     errors.push("V1-24 开发 Fixture 必须以短名称“示例库”接入 Library Profile。");
   }
   if (!desktopApp.includes("provisionExampleLibrary") || !rust.includes("provision_example_library") || !permission.includes('"provision_example_library"')) {

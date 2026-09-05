@@ -28,4 +28,6 @@ Desktop 早期为了快速建立完整产品壳，把首页、作品、人物、
 
 ## 后续拆分顺序
 
-下一批优先拆分 Media 页面，再拆 Packs 与 Settings。Media 同时包含扫描 Job、NFO Preview、Asset Import、Vocabulary Repair 和人工绑定，拆分时应继续按 Application 能力划分子组件，不能把扫描规则复制进 React。
+第二批已经拆出 Packs 与 Settings：前者只组合 Shared Pack 配置和 Portable Pack 工作台，后者集中管理 Library Profile、资料源路径与 Runtime 信息。
+
+下一批单独拆分 Media 页面。Media 同时包含扫描 Job、NFO Preview、Asset Import、Vocabulary Repair 和人工绑定，拆分时应继续按 Application 能力划分子组件，不能把扫描规则复制进 React。

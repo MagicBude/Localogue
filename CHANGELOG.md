@@ -7,6 +7,7 @@
 - 首页最近作品从固定 6 条扩展为最多 12 条，并增加“查看全部作品”入口，进入现有 Works Explorer。
 - 首页合并重复 Works 查询：同一次结果同时计算总数、最近作品、相关人物和人物作品数，减少 JSON Repository 全量扫描。
 - Desktop Boundary Validator 跟随模块边界读取对应页面文件，继续守住详情页、Gallery、Presentation 与查询语义。
+- 第二批将资料包与设置页迁入独立模块，`App.tsx` 只负责全局状态、持久化和页面组合。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency
