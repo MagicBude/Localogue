@@ -346,6 +346,18 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - V1-23 再继续 Evidence / Review / Commit Plan / Curation / History / Restore / Portable Pack 等完整治理链。
 
 
+## V1-25A Vocabulary Coverage / Source Mapping 约束
+
+- `resources/vocabularies/*.json` 是分类识别 Runtime 事实源；禁止在 Importer / UI 中再维护第二套 Genre、Work Type、Source-only 字符串表。
+- Stable Canonical ID 一经进入已发布词表不得因翻译或命名偏好随意改名；旧 33 Genre / 8 Work Type ID 必须保持兼容。
+- `genre-source-aliases.*` 只保存 Provider 稳定分类 ID 映射；普通同义词、旧称和拼写变体进入 `classification-term-aliases.*`。
+- Third-party substitution 的右侧翻译只是参考证据，不能未经语义复核直接覆盖 Canonical `ja / zh-CN / en`。
+- 已知但不属于 Genre / Work Type 的生命周期、媒体、分级、技术/营销分类进入 `source-only-classifications.*`，必须可识别但不得污染 Canonical Genre。
+- 复合词 / 多义词若无法从原始字符串唯一确定 Canonical，必须登记 `review-required` 或保持 unmapped；禁止 last-write-wins、fuzzy match 或 AI 猜测自动落库。
+- Community Classification 通过 `community-classification-crosswalk.*` 显式路由，不复制整个 Community Pack 成主仓库第二份真实元数据。
+- Genre Presentation 命中 Canonical ID 后优先使用 `genres.*` 三语名称；未命中时保留来源原文/LocalizedText。
+- 新增或调整 Vocabulary 必须同步 JSON / CSV / 文档并通过 `pnpm validate:vocabulary`；新增 Provider 覆盖应使用 `pnpm vocabulary:coverage -- <taxonomy>` 输出未识别项。
+
 ## V1-23 Desktop Governance 约束
 
 - Desktop Review 必须复用共享 Evidence / Entity Resolution / Review Decision / Commit Plan Application Service，不得在 React 组件里重写第二套治理算法。

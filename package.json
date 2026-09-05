@@ -1,6 +1,6 @@
 {
   "name": "localogue",
-  "version": "0.1.24",
+  "version": "0.1.25",
   "private": true,
   "packageManager": "pnpm@11.24.0",
   "engines": {
@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:fixture && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
+    "check": "pnpm desktop:clean:legacy && pnpm validate:data && pnpm validate:audit && pnpm validate:fixture && pnpm validate:vocabulary && pnpm validate:provider-coverage && pnpm validate:platform && pnpm validate:desktop && pnpm lint && pnpm typecheck && pnpm desktop:check && pnpm build",
     "validate:data": "node scripts/validate-library.mjs",
     "library:init": "node scripts/init-private-library.mjs",
     "validate:audit": "node scripts/validate-audit.mjs",
@@ -33,7 +33,11 @@
     "desktop:demo:reset": "node scripts/manage-dev-fixture.mjs reset",
     "desktop:demo:clean": "node scripts/manage-dev-fixture.mjs clean",
     "desktop:demo:orphan": "node scripts/manage-dev-fixture.mjs orphan",
-    "desktop:rust:test": "pnpm --filter @localogue/desktop rust:test"
+    "desktop:rust:test": "pnpm --filter @localogue/desktop rust:test",
+    "validate:vocabulary": "node scripts/validate-vocabulary.mjs",
+    "vocabulary:coverage": "node scripts/report-vocabulary-coverage.mjs",
+    "validate:provider-coverage": "node scripts/report-provider-coverage.mjs --check",
+    "vocabulary:provider-coverage": "node scripts/report-provider-coverage.mjs"
   },
   "dependencies": {
     "next": "16.3.3",

@@ -11,6 +11,10 @@ Localogue 的目标不是成为另一个“刮削器”，也不是优先成为�
 
 ## 当前阶段
 
+当前进入 **V1-25C：Provider ID Identity / Coverage Round 2**。V1-25A/B 已建立 Vocabulary 与 Provider Coverage 骨架；本轮先修正 Provider ID 身份边界，再继续扩充真实分类，不回 Onboarding。产品版本继续保持 `0.1.25`。
+
+分类运行时现在由数据驱动：359 个 Canonical Genre、43 个 Work Type、51 个 Source-only Classification、1166 个精确 Classification Alias（1131 approved / 35 review-required），以及 `localogue-community-data` 323 / 323 Classification Crosswalk。V1-25C 为 Approved Genre Source Alias 增加 `idSource` Provider 身份边界：名称 Evidence 可以跨来源复用，`sourceId` 不再跟随 `sources` 跨站复制。当前收集的 FANZA 260、JAVLibrary 286、JAVBus 9、JAVDB 32 个来源词均为 100% 已识别；JAVBus 数量下降来自剔除错误归属 ID，而不是删掉 Canonical 数据。
+
 当前实现已推进到 **V1-24C：Portable Pack / Presentation / Asset Closeout**。在 V1-24A Presentation Preference Workbench 基础上，Desktop 新增 **Library Profile（资料库配置）**：示例库与用户自建资料库可以分别记住 Private Library、统一内容根目录、高级媒体/NFO目录与 Shared Pack，并从侧栏快速切换；旧单库设置会自动迁移，普通新建库使用“资料库 1 / 资料库 2 …”中性名称，不预设内容分类。Profile 新建、切换、重命名与删除会立即持久化，active ID 异常会自动回退到现有 Profile；切换只替换本机路径配置，不复制或移动 Canonical / Media 数据。
 
 资料源设置同时收敛为四层语义：**私人资料库（可写）→ 内容根目录（推荐扫描入口）→ 只读共享资料（Shared Pack）→ 高级兼容目录**。Media 页面的一键同步继续固定按 **NFO → Asset → Media** 编排，并且现在会等待全部 Unified Root + 额外媒体目录扫描完成后才报告成功，扫描结果会明确列出本轮实际检查的全部目录。Desktop Vite 构建也使用 Rolldown vendor code splitting 解决单一主 bundle 持续膨胀的问题，而不是简单调高 warning 阈值。Web 与 Desktop 继续共用 Application Query Core；Shared Pack 保持 Native 强制只读，Rust 不开放通用文件读取、写入或 Shell 能力。

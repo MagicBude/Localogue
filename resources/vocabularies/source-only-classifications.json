@@ -1,0 +1,544 @@
+{
+  "vocabularyVersion": 1,
+  "kind": "recognized-source-only-classifications",
+  "description": "Recognized source classification terms that must not be promoted to Canonical Genre/Work Type.",
+  "items": [
+    {
+      "id": "lifecycle_first_shoot",
+      "category": "lifecycle",
+      "ja": "初撮り",
+      "zh-CN": "首次拍摄",
+      "en": "First Shoot",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000005"
+      ]
+    },
+    {
+      "id": "lifecycle_debut",
+      "category": "lifecycle",
+      "ja": "デビュー作",
+      "zh-CN": "出道作",
+      "en": "Debut Work",
+      "aliases": [
+        "Debut",
+        "Debut Work",
+        "デビュー作品",
+        "出道作"
+      ],
+      "communityGenreIds": [
+        "genre_000006"
+      ]
+    },
+    {
+      "id": "lifecycle_retirement",
+      "category": "lifecycle",
+      "ja": "引退作",
+      "zh-CN": "引退作",
+      "en": "Retirement Work",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000007"
+      ]
+    },
+    {
+      "id": "lifecycle_comeback",
+      "category": "lifecycle",
+      "ja": "復帰作",
+      "zh-CN": "复出作",
+      "en": "Comeback Work",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000008"
+      ]
+    },
+    {
+      "id": "lifecycle_anniversary",
+      "category": "lifecycle",
+      "ja": "記念作",
+      "zh-CN": "纪念作品",
+      "en": "Anniversary Work",
+      "aliases": [
+        "Anniversary",
+        "周年",
+        "周年企划"
+      ],
+      "communityGenreIds": [
+        "genre_000009"
+      ]
+    },
+    {
+      "id": "media_dvd",
+      "category": "media-format",
+      "ja": "DVD",
+      "zh-CN": "DVD",
+      "en": "DVD",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000308"
+      ]
+    },
+    {
+      "id": "media_blu_ray",
+      "category": "media-format",
+      "ja": "Blu-ray",
+      "zh-CN": "蓝光",
+      "en": "Blu-ray",
+      "aliases": [
+        "Blu Ray",
+        "Blu-ray（ブルーレイ）",
+        "ブルーレイ"
+      ],
+      "communityGenreIds": [
+        "genre_000309"
+      ]
+    },
+    {
+      "id": "media_hd_dvd",
+      "category": "media-format",
+      "ja": "HD DVD",
+      "zh-CN": "HD DVD",
+      "en": "HD DVD",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000310"
+      ]
+    },
+    {
+      "id": "media_vhs",
+      "category": "media-format",
+      "ja": "VHS",
+      "zh-CN": "VHS录像带",
+      "en": "VHS",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000311"
+      ]
+    },
+    {
+      "id": "media_umd_video",
+      "category": "media-format",
+      "ja": "UMD Video",
+      "zh-CN": "UMD视频",
+      "en": "UMD Video",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000312"
+      ]
+    },
+    {
+      "id": "media_microsd",
+      "category": "media-format",
+      "ja": "MicroSD",
+      "zh-CN": "MicroSD卡",
+      "en": "MicroSD",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000313"
+      ]
+    },
+    {
+      "id": "media_digital_distribution",
+      "category": "media-format",
+      "ja": "配信",
+      "zh-CN": "数字发行",
+      "en": "Digital Distribution",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000314"
+      ]
+    },
+    {
+      "id": "media_streaming",
+      "category": "media-format",
+      "ja": "ストリーミング",
+      "zh-CN": "流媒体",
+      "en": "Streaming",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000315"
+      ]
+    },
+    {
+      "id": "media_download",
+      "category": "media-format",
+      "ja": "ダウンロード",
+      "zh-CN": "数字下载",
+      "en": "Download",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000316"
+      ]
+    },
+    {
+      "id": "media_4k_uhd",
+      "category": "media-format",
+      "ja": "4K UHD",
+      "zh-CN": "4K超高清",
+      "en": "4K UHD",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000317"
+      ]
+    },
+    {
+      "id": "media_full_hd",
+      "category": "media-format",
+      "ja": "フルHD",
+      "zh-CN": "全高清",
+      "en": "Full HD",
+      "aliases": [
+        "Full HD (FHD)",
+        "フルハイビジョン(FHD)"
+      ],
+      "communityGenreIds": [
+        "genre_000318"
+      ]
+    },
+    {
+      "id": "media_hd",
+      "category": "media-format",
+      "ja": "HD",
+      "zh-CN": "高清",
+      "en": "HD",
+      "aliases": [
+        "Hi-Def",
+        "High Definition",
+        "ハイビジョン",
+        "高清"
+      ],
+      "communityGenreIds": [
+        "genre_000319"
+      ]
+    },
+    {
+      "id": "media_sd",
+      "category": "media-format",
+      "ja": "SD",
+      "zh-CN": "标清",
+      "en": "Standard Definition",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000320"
+      ]
+    },
+    {
+      "id": "rating_r18",
+      "category": "content-rating",
+      "ja": "R-18",
+      "zh-CN": "R-18",
+      "en": "R-18",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000321"
+      ]
+    },
+    {
+      "id": "rating_r15",
+      "category": "content-rating",
+      "ja": "R-15",
+      "zh-CN": "R-15",
+      "en": "R-15",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000322"
+      ]
+    },
+    {
+      "id": "rating_adults_only",
+      "category": "content-rating",
+      "ja": "成人指定",
+      "zh-CN": "成人限定",
+      "en": "Adults Only",
+      "aliases": [],
+      "communityGenreIds": [
+        "genre_000323"
+      ]
+    },
+    {
+      "id": "region_asia",
+      "category": "region",
+      "ja": "アジア",
+      "zh-CN": "亚洲",
+      "en": "Asia",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "region_france",
+      "category": "region",
+      "ja": "フランス",
+      "zh-CN": "法国",
+      "en": "France",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "region_korea",
+      "category": "region",
+      "ja": "韓国",
+      "zh-CN": "韩国",
+      "en": "Korea",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "generic_normal",
+      "category": "generic-source-bucket",
+      "ja": "ノーマル",
+      "zh-CN": "普通",
+      "en": "Normal",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "generic_sexy",
+      "category": "generic-source-bucket",
+      "ja": "セクシー",
+      "zh-CN": "性感",
+      "en": "Sexy",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "marketing_topic_work",
+      "category": "marketing",
+      "ja": "話題作",
+      "zh-CN": "话题作品",
+      "en": "Featured Work",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "age_coded_shotacon",
+      "category": "age-coded-source-term",
+      "ja": "ショタ",
+      "zh-CN": "正太系",
+      "en": "Shotacon",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "age_coded_loli_style",
+      "category": "age-coded-source-term",
+      "ja": "ロリ系",
+      "zh-CN": "幼态系",
+      "en": "Loli-style",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "generic_professions",
+      "category": "generic-source-bucket",
+      "ja": "職業色々",
+      "zh-CN": "多种职业",
+      "en": "Various Professions",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "generic_adult",
+      "category": "generic-source-bucket",
+      "ja": "アダルト",
+      "zh-CN": "成人",
+      "en": "Adult",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "technical_chroma_key",
+      "category": "production-technique",
+      "ja": "クロマキー",
+      "zh-CN": "色键",
+      "en": "Chroma Key",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "technical_close_up",
+      "category": "production-technique",
+      "ja": "局部アップ",
+      "zh-CN": "局部特写",
+      "en": "Close-up",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "generic_culture",
+      "category": "generic-source-bucket",
+      "ja": "カルチャー",
+      "zh-CN": "文化",
+      "en": "Culture",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "technical_touch_typing",
+      "category": "source-specific",
+      "ja": "タッチタイピング",
+      "zh-CN": "触摸打字",
+      "en": "Touch Typing",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "provider_mgs_bonus",
+      "category": "provider-specific",
+      "ja": "MGSだけのおまけ映像付き",
+      "zh-CN": "含 MGS 独家附赠影像",
+      "en": "MGS Exclusive Bonus Video",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "provider_sample_video",
+      "category": "provider-specific",
+      "ja": "サンプル動画",
+      "zh-CN": "样片",
+      "en": "Sample Video",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "content_drug",
+      "category": "content-warning",
+      "ja": "ドラッグ",
+      "zh-CN": "药物题材",
+      "en": "Drug-related",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_theme",
+      "category": "taxonomy-heading",
+      "ja": "主題",
+      "zh-CN": "主题",
+      "en": "Theme",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_role",
+      "category": "taxonomy-heading",
+      "ja": "キャラクター",
+      "zh-CN": "角色分类",
+      "en": "Character Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_wardrobe",
+      "category": "taxonomy-heading",
+      "ja": "コスチューム",
+      "zh-CN": "服装分类",
+      "en": "Costume Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_body",
+      "category": "taxonomy-heading",
+      "ja": "ボディタイプ",
+      "zh-CN": "体型分类",
+      "en": "Body Type Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_act",
+      "category": "taxonomy-heading",
+      "ja": "セックス行為",
+      "zh-CN": "行为分类",
+      "en": "Sex Acts Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_practice",
+      "category": "taxonomy-heading",
+      "ja": "セックスプレイ",
+      "zh-CN": "玩法分类",
+      "en": "Sex Play Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_genre",
+      "category": "taxonomy-heading",
+      "ja": "ジャンル",
+      "zh-CN": "作品类别",
+      "en": "Genre Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "taxonomy_section_media",
+      "category": "taxonomy-heading",
+      "ja": "メディア",
+      "zh-CN": "媒体分类",
+      "en": "Media Section",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "region_taiwan",
+      "category": "region",
+      "ja": "台湾",
+      "zh-CN": "台湾",
+      "en": "Taiwan",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "technical_vertical_video",
+      "category": "technical-format",
+      "ja": "縦動画",
+      "zh-CN": "竖屏视频",
+      "en": "Vertical Video",
+      "aliases": [
+        "スマホ推奨縦動画"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "product_bundle",
+      "category": "product-format",
+      "ja": "セット商品",
+      "zh-CN": "套装商品",
+      "en": "Bundle Product",
+      "aliases": [],
+      "communityGenreIds": []
+    },
+    {
+      "id": "distribution_exclusive",
+      "category": "distribution",
+      "ja": "独占配信",
+      "zh-CN": "独家发行",
+      "en": "Exclusive Distribution",
+      "aliases": [
+        "FANZA配信限定"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "provider_marketing_campaign",
+      "category": "provider-marketing",
+      "ja": "セール・キャンペーン",
+      "zh-CN": "促销活动",
+      "en": "Sale / Campaign",
+      "aliases": [
+        "すべてのセール",
+        "日替わりセール",
+        "みんなのお気に入り30％OFF第1弾",
+        "FANZA7周年50％OFF第9弾",
+        "SODグループ30％OFF第2弾",
+        "セレブの友他30％OFF",
+        "ルナティックス30％OFF",
+        "ブランドストア30％OFF！",
+        "ポイント還元",
+        "期間限定セール"
+      ],
+      "communityGenreIds": []
+    }
+  ]
+}

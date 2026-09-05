@@ -1,0 +1,112 @@
+{
+  "vocabularyVersion": 1,
+  "kind": "provider-genre-catalog",
+  "provider": "javbus",
+  "snapshot": "2026-09-05",
+  "catalogStatus": "verified-id-slice",
+  "source": "public JAVBus page/API evidence",
+  "enumeration": {
+    "kind": "site-filter",
+    "note": "JAVBus movie details expose genre links as /genre/{id}; this catalog includes only independently verified ID/name pairs. Legacy cross-site IDs without provider ownership were removed."
+  },
+  "items": [
+    {
+      "sourceId": "e",
+      "ja": "巨乳",
+      "zh-CN": "巨乳",
+      "en": "Big Tits",
+      "sourceGroup": "censored",
+      "canonicalId": "big_bust",
+      "idStatus": "verified-public-api"
+    },
+    {
+      "sourceId": "3f",
+      "ja": "深喉",
+      "zh-CN": "深喉",
+      "en": "Deep Throat",
+      "sourceGroup": "censored",
+      "canonicalId": "deep_throat",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "7i",
+      "ja": "孕ませ",
+      "zh-CN": "受孕题材",
+      "en": "Impregnation",
+      "sourceGroup": "censored",
+      "canonicalId": "impregnation",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "4",
+      "ja": "中出",
+      "zh-CN": "内射",
+      "en": "Creampie",
+      "sourceGroup": "censored",
+      "canonicalId": "creampie",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "2t",
+      "ja": "花癡",
+      "zh-CN": "花痴",
+      "en": "",
+      "sourceGroup": "censored",
+      "canonicalId": "",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "1y",
+      "ja": "其他戀物癖",
+      "zh-CN": "其他恋物癖",
+      "en": "Other Fetish",
+      "sourceGroup": "censored",
+      "canonicalId": "fetish",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "4o",
+      "ja": "高畫質",
+      "zh-CN": "高清",
+      "en": "High Definition",
+      "sourceGroup": "censored",
+      "canonicalId": "",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "f",
+      "ja": "單體作品",
+      "zh-CN": "单体作品",
+      "en": "Solo",
+      "sourceGroup": "censored",
+      "canonicalId": "",
+      "idStatus": "verified-public-page"
+    },
+    {
+      "sourceId": "6j",
+      "ja": "温泉",
+      "zh-CN": "温泉",
+      "en": "Hot Spring",
+      "sourceGroup": "censored",
+      "canonicalId": "hot_spring",
+      "idStatus": "verified-public-doc"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "saved-page",
+      "url": "https://gist.github.com/doudot/0c7f8739a40d3743f0b2ba50b0e8cf41",
+      "note": "Saved JAVBus YST-303 page exposes genre/{id} links for 3f, 7i, 4, 2t, 1y, 4o and f."
+    },
+    {
+      "kind": "public-api-doc",
+      "url": "https://github.com/fireinrain/javbus-api",
+      "note": "Movie detail example returns genres[{id:\"e\", name:\"巨乳\"}] and genre filters accept filterValue IDs."
+    },
+    {
+      "kind": "public-tool-doc",
+      "url": "https://github.com/ddd354/JAVOneStop/blob/master/JAV_HELP.md",
+      "note": "Documents JAVBus 温泉 => 6j."
+    }
+  ]
+}

@@ -1,34 +1,360 @@
-﻿id,ja,zh-CN,en
-uniform,制服,制服,Uniform
-office_lady,OL,OL / 职场女性,Office Lady
-married_woman,人妻,人妻,Married Woman
-mature,熟女,熟女,Mature
-amateur,素人,素人,Amateur
-big_bust,巨乳,巨乳,Big Bust
-small_bust,貧乳,贫乳,Small Bust
-slender,スレンダー,苗条,Slender
-cosplay,コスプレ,角色扮演,Cosplay
-drama,ドラマ,剧情,Drama
-documentary,ドキュメンタリー,纪录片,Documentary
-lesbian,レズ,女同性题材,Lesbian
-beautiful_girl,美少女,美少女,Beautiful Girl
-pov,主観,主观视角,POV
-squirting,潮吹き,潮吹,Squirting
-blowjob,フェラ,口交,Blowjob
-masturbation,オナニー,自慰,Masturbation
-orgasm,アクメ・オーガズム,绝顶高潮,Orgasm
-creampie,中出し,内射,Creampie
-maid,メイド,女仆,Maid
-nurse,看護婦・ナース,护士,Nurse
-female_teacher,女教師,女教师,Female Teacher
-abuse,凌辱,凌辱,Abuse
-kissing,キス・接吻,接吻,Kissing
-titjob,パイズリ,乳交,Titjob
-cowgirl,騎乗位,骑乘位,Cowgirl
-handjob,手コキ,手交,Handjob
-facial,顔射,颜射,Facial
-cum_swallowing,ごっくん,吞精,Cum Swallowing
-anal,アナル,肛交,Anal
-bondage,拘束,捆绑,Bondage
-sm,SM,SM,S&M
-voyeurism,盗撮・のぞき,偷窥,Voyeurism
+id,ja,zh-CN,en,facets,communityGenreIds
+beautiful_girl,美少女,美少女,Beautiful Girl,theme,genre_000001
+married_woman,人妻,人妻,Married Woman,role|theme,genre_000002|genre_000117
+mature,熟女,熟女,Mature,role|theme,genre_000003|genre_000116
+amateur,素人,素人,Amateur,role|theme,genre_000004|genre_000118
+fan_appreciation,ファン感謝,粉丝感谢,Fan Appreciation,theme,genre_000010
+drama,ドラマ,剧情,Drama,theme,genre_000014
+documentary,ドキュメンタリー,纪录片,Documentary,theme,genre_000015
+romance,恋愛,恋爱,Romance,theme,genre_000016
+romantic_comedy,ラブコメ,爱情喜剧,Romantic Comedy,theme,genre_000017
+comedy,コメディ,喜剧,Comedy,theme,genre_000018
+suspense,サスペンス,悬疑,Suspense,theme,genre_000019
+horror,ホラー,恐怖,Horror,theme,genre_000020
+science_fiction,SF,科幻,Science Fiction,theme,genre_000021
+fantasy,ファンタジー,奇幻,Fantasy,theme,genre_000022
+parody,パロディ,戏仿,Parody,theme,genre_000023
+period_drama,時代劇,历史剧,Period Drama,theme,genre_000024
+travel,旅行,旅行,Travel,theme,genre_000025
+hot_spring,温泉,温泉,Hot Spring,theme,genre_000026
+school_setting,学校,学校题材,School Setting,theme,genre_000027
+workplace_setting,職場,职场题材,Workplace Setting,theme,genre_000028
+beauty_salon,美容院,美容院,Beauty Salon,theme,genre_000029
+beauty_treatment,エステ,美容护理,Beauty Treatment,theme,genre_000030
+hospital_setting,病院,医院,Hospital Setting,theme,genre_000031
+sports,スポーツ,运动,Sports,theme,genre_000032
+dance,ダンス,舞蹈,Dance,theme,genre_000033
+time_stop,時間停止,时间停止,Time Stop,theme,genre_000034
+invisible_person,透明人間,隐形人,Invisible Person,theme,genre_000035
+body_swap,入れ替わり,身份互换,Body Swap,theme,genre_000036
+hypnosis,催眠,催眠,Hypnosis,theme,genre_000037
+mind_control,洗脳,洗脑,Mind Control,theme,genre_000038
+transformation,変身,变身,Transformation,theme,genre_000039
+feminization,女体化,女性化,Feminization,theme,genre_000040
+couple,恋人,情侣,Couple,theme,genre_000041
+friends,友達,朋友,Friends,theme,genre_000042
+childhood_friend,幼なじみ,青梅竹马,Childhood Friends,role|theme,genre_000043|genre_000112
+family,家族,家庭,Family,theme,genre_000044
+incest_theme,近親設定,近亲设定,Incest Theme,theme,genre_000045
+infidelity,不倫,婚外情,Infidelity,theme,genre_000046
+netorare,寝取られ,被夺爱,Netorare,theme,genre_000047
+netori,寝取り,夺爱,Netori,theme,genre_000048
+cheating,浮気,出轨,Cheating,theme,genre_000049
+seduction,誘惑,诱惑,Seduction,theme,genre_000050
+reverse_pickup,逆ナン,女性搭讪,Reverse Pickup,theme,genre_000051
+pickup,ナンパ,搭讪,Pickup,theme,genre_000052
+groping_theme,痴漢,痴汉题材,Groping Theme,theme,genre_000053
+hidden_camera,盗撮,偷拍题材,Hidden Camera Theme,theme,genre_000054
+voyeurism,盗撮・のぞき,偷窥,Voyeurism,theme,genre_000055
+public_exposure,露出,公开暴露,Public Exposure,theme,genre_000056
+humiliation,羞恥,羞耻,Humiliation,theme,genre_000057
+prank,いたずら,恶作剧,Prank,theme,genre_000058
+fetish,フェチ,恋物,Fetish,theme,genre_000059
+leg_fetish,脚フェチ,腿控,Leg Fetish,theme,genre_000060
+foot_fetish,足フェチ,足控,Foot Fetish,theme,genre_000061
+breast_fetish,乳フェチ,乳房偏好,Breast Fetish,theme,genre_000062
+butt_fetish,尻フェチ,臀部偏好,Butt Fetish,theme,genre_000063
+scent_fetish,匂いフェチ,气味偏好,Scent Fetish,theme,genre_000064
+sweat,汗,汗水,Sweat,theme,genre_000065
+tanned,日焼け,晒黑,Tanned,body|theme,genre_000066|genre_000195
+full_nudity,全裸,全裸,Full Nudity,theme,genre_000067
+dating_reality,恋愛リアリティ,恋爱真人秀,Dating Reality,theme,genre_000068
+pov,主観,主观视角,POV,theme,genre_000069
+pov_recording,ハメ撮り,第一人称拍摄,POV Recording,practice|theme,genre_000070|genre_000265
+idol,アイドル,偶像,Idol,role,genre_000071
+celebrity,芸能人,艺人,Celebrity,role,genre_000072
+female_announcer,女子アナ,女主播,Female Announcer,role,genre_000073
+actress,女優,女演员,Actress,role,genre_000074
+model,モデル,模特,Model,role,genre_000075
+gravure_idol,グラビアアイドル,写真偶像,Gravure Idol,role,genre_000076
+student,学生,学生,Student,role,genre_000077
+female_college_student,女子大生,女大学生,Female College Student,role,genre_000078
+female_high_school_student,女子校生,女高中生,Female High School Student,role,genre_000079
+teacher,先生,教师,Teacher,role,genre_000080
+female_teacher,女教師,女教师,Female Teacher,role,genre_000081
+private_tutor,家庭教師,家庭教师,Private Tutor,role,genre_000082
+instructor,講師,讲师,Instructor,role,genre_000083
+office_lady,OL,OL / 职场女性,Office Lady,role,genre_000084
+secretary,秘書,秘书,Secretary,role,genre_000085
+receptionist,受付嬢,前台接待,Receptionist,role,genre_000086
+shop_clerk,店員,店员,Shop Clerk,role,genre_000087
+waitress,ウェイトレス,服务员,Waitress,role,genre_000088
+nurse,看護婦・ナース,护士,Nurse,role,genre_000089
+female_doctor,女医,女医生,Female Doctor,role,genre_000090
+female_prosecutor,女検事,女检察官,Female Prosecutor,role,genre_000091
+police_officer,警察官,警察,Police Officer,role,genre_000092
+flight_attendant,客室乗務員,空乘,Flight Attendant,role,genre_000093
+train_conductor,車掌,列车乘务员,Train Conductor,role,genre_000094
+hairdresser,美容師,美发师,Hairdresser,role,genre_000095
+esthetician,エステティシャン,美容师,Esthetician,role,genre_000096
+inn_proprietress,女将,女掌柜,Inn Proprietress,role,genre_000097
+hostess,女主人,女主人,Hostess,role,genre_000098
+maid,メイド,女仆,Maid,role,genre_000099
+shrine_maiden,巫女,巫女,Shrine Maiden,role,genre_000100
+nun,シスター,修女,Nun,role,genre_000101
+bride,花嫁,新娘,Bride,role,genre_000102
+young_wife,若妻,年轻妻子,Young Wife,role,genre_000103
+widow,未亡人,寡妇,Widow,role,genre_000104
+mother,母,母亲,Mother,role,genre_000105
+stepmother,義母,继母,Stepmother,role,genre_000106
+older_sister,姉,姐姐,Older Sister,role,genre_000107
+younger_sister,妹,妹妹,Younger Sister,role,genre_000108
+daughter,娘,女儿,Daughter,role,genre_000109
+young_lady,お嬢様,大小姐,Young Lady,role,genre_000110
+heiress,令嬢,千金小姐,Heiress,role,genre_000111
+gyaru,ギャル,辣妹,Gyaru,role,genre_000113
+innocent_type,清楚系,清纯系,Innocent Type,role,genre_000114
+baby_faced,童顔,童颜,Baby-faced,body|role,genre_000115|genre_000201
+female_warrior,女戦士,女战士,Female Warrior,role,genre_000119
+kunoichi,くノ一,女忍者,Kunoichi,role,genre_000120
+martial_artist,格闘家,格斗家,Martial Artist,role,genre_000121
+princess,お姫様,公主,Princess,role,genre_000122
+dominatrix,女王様,女王,Dominatrix,practice|role,genre_000123|genre_000248
+slave,奴隷,奴隶,Slave Role,practice|role,genre_000124|genre_000247
+feminine_boy,男の娘,伪娘,Feminine Boy,role,genre_000125
+transgender_woman,トランスジェンダー女性,跨性别女性,Transgender Woman,role,genre_000126
+male_performer,男性出演者,男演员,Male Performer,role,genre_000127
+older_man,高齢男性,高龄男性,Older Man,role,genre_000128
+foreign_performer,外国人出演者,外国演员,Foreign Performer,role,genre_000129
+asian_performer,アジア系出演者,亚洲演员,Asian Performer,role,genre_000130
+black_performer,黒人出演者,黑人演员,Black Performer,role,genre_000131
+white_performer,白人出演者,白人演员,White Performer,role,genre_000132
+uniform,制服,制服,Uniform,wardrobe,genre_000133
+sailor_uniform,セーラー服,水手服,Sailor Uniform,wardrobe,genre_000134
+school_uniform,学校制服,校服,School Uniform,wardrobe,genre_000135
+gym_clothes,体操着,运动服,Gym Clothes,wardrobe,genre_000136
+bloomers,ブルマー,运动短裤,Bloomers,wardrobe,genre_000137
+school_swimsuit,スクール水着,学校泳装,School Swimsuit,wardrobe,genre_000138
+swimsuit,水着,泳装,Swimsuit,wardrobe,genre_000139
+bikini,ビキニ,比基尼,Bikini,wardrobe,genre_000140
+competition_swimsuit,競泳水着,竞泳泳装,Competition Swimsuit,wardrobe,genre_000141
+lingerie,下着,内衣,Lingerie,wardrobe,genre_000142
+bra,ブラジャー,胸罩,Bra,wardrobe,genre_000143
+panties,パンティ,内裤,Panties,wardrobe,genre_000144
+babydoll,ベビードール,娃娃装,Babydoll,wardrobe,genre_000145
+negligee,ネグリジェ,睡裙,Negligee,wardrobe,genre_000146
+nude_apron,裸エプロン,裸体围裙,Nude Apron,wardrobe,genre_000147
+apron,エプロン,围裙,Apron,wardrobe,genre_000148
+maid_outfit,メイド服,女仆装,Maid Outfit,wardrobe,genre_000149
+nurse_outfit,ナース服,护士服,Nurse Outfit,wardrobe,genre_000150
+office_wear,OL服,OL装,Office Wear,wardrobe,genre_000151
+suit,スーツ,西装,Suit,wardrobe,genre_000152
+kimono,和服,和服,Kimono,wardrobe,genre_000153
+yukata,浴衣,浴衣,Yukata,wardrobe,genre_000154
+mourning_dress,喪服,丧服,Mourning Dress,wardrobe,genre_000155
+cheongsam,チャイナドレス,旗袍,Cheongsam,wardrobe,genre_000156
+wedding_dress,ウェディングドレス,婚纱,Wedding Dress,wardrobe,genre_000157
+cosplay,コスプレ,角色扮演,Cosplay,wardrobe,genre_000158
+anime_cosplay,アニメコスプレ,动漫角色扮演,Anime Cosplay,wardrobe,genre_000159
+bunny_girl,バニーガール,兔女郎,Bunny Girl,wardrobe,genre_000160
+cat_ears,猫耳,猫耳,Cat Ears,wardrobe,genre_000161
+gothic_lolita,ゴスロリ,哥特萝莉,Gothic Lolita,wardrobe,genre_000162
+miniskirt,ミニスカート,迷你裙,Miniskirt,wardrobe,genre_000163
+micro_miniskirt,超ミニスカート,超短裙,Micro Miniskirt,wardrobe,genre_000164
+pencil_skirt,タイトスカート,紧身裙,Pencil Skirt,wardrobe,genre_000165
+stockings,ストッキング,丝袜,Stockings,wardrobe,genre_000166
+pantyhose,パンスト,连裤袜,Pantyhose,wardrobe,genre_000167
+thigh_high_socks,ニーハイ,过膝袜,Thigh-high Socks,wardrobe,genre_000168
+loose_socks,ルーズソックス,泡泡袜,Loose Socks,wardrobe,genre_000169
+boots,ブーツ,长靴,Boots,wardrobe,genre_000170
+high_heels,ハイヒール,高跟鞋,High Heels,wardrobe,genre_000171
+glasses,眼鏡,眼镜,Glasses,wardrobe,genre_000172
+hat,帽子,帽子,Hat,wardrobe,genre_000173
+mask,マスク,口罩,Mask,wardrobe,genre_000174
+bodysuit,全身タイツ,全身紧身衣,Bodysuit,wardrobe,genre_000175
+leotard,レオタード,紧身衣,Leotard,wardrobe,genre_000176
+bondage_wear,ボンデージ,束缚装,Bondage Wear,wardrobe,genre_000177
+cross_dressing,女装,女装,Cross-dressing,wardrobe,genre_000178
+clothed,着衣,着衣,Clothed,wardrobe,genre_000179
+partially_nude,半裸,半裸,Partially Nude,wardrobe,genre_000180
+big_bust,巨乳,巨乳,Big Bust,body,genre_000181
+very_large_bust,爆乳,爆乳,Very Large Bust,body,genre_000182
+extremely_large_bust,超乳,超大胸部,Extremely Large Bust,body,genre_000183
+small_bust,貧乳,贫乳,Small Bust,body,genre_000184
+petite_bust,微乳,微乳,Petite Bust,body,genre_000185
+beautiful_breasts,美乳,美胸,Beautiful Breasts,body,genre_000186
+big_butt,巨尻,巨臀,Big Butt,body,genre_000187
+beautiful_butt,美尻,美臀,Beautiful Butt,body,genre_000188
+slender,スレンダー,苗条,Slender,body,genre_000189
+chubby,ぽっちゃり,丰满,Chubby,body,genre_000190
+plus_size,肥満,肥胖,Plus-size,body,genre_000191
+tall,長身,高挑,Tall,body,genre_000192
+petite,小柄,娇小,Petite,body,genre_000193
+muscular,筋肉質,肌肉型,Muscular,body,genre_000194
+fair_skinned,色白,白皙,Fair-skinned,body,genre_000196
+beautiful_legs,美脚,美腿,Beautiful Legs,body,genre_000197
+pregnant,妊婦,孕妇,Pregnant,body,genre_000198
+hairless,パイパン,无阴毛,Hairless,body,genre_000199
+hairy,剛毛,体毛浓密,Hairy,body,genre_000200
+mature_figure,成熟体型,成熟体型,Mature Figure,body,genre_000202
+kissing,キス・接吻,接吻,Kissing,act,genre_000203
+deep_kissing,ディープキス,深吻,Deep Kissing,act,genre_000204
+blowjob,フェラ,口交,Blowjob,act,genre_000205
+deep_throat,イラマチオ,深喉,Deep Throat,act,genre_000206
+cunnilingus,クンニ,舔阴,Cunnilingus,act,genre_000207
+handjob,手コキ,手交,Handjob,act,genre_000208
+footjob,足コキ,足交,Footjob,act,genre_000209
+titjob,パイズリ,乳交,Titjob,act,genre_000210
+intercrural_sex,素股,股间摩擦,Intercrural Sex,act,genre_000211
+cowgirl,騎乗位,骑乘位,Cowgirl,act,genre_000212
+missionary,正常位,传教士体位,Missionary,act,genre_000213
+rear_entry,後背位,后入式,Rear-entry,act,genre_000214
+standing_rear_entry,立ちバック,站立后入,Standing Rear-entry,act,genre_000215
+sixty_nine,69,69式,Sixty-nine,act,genre_000216
+anal,アナル,肛交,Anal,act,genre_000217
+creampie,中出し,内射,Creampie,act,genre_000218
+facial,顔射,颜射,Facial,act,genre_000219
+oral_ejaculation,口内発射,口内射精,Oral Ejaculation,act,genre_000220
+semen_swallowing,飲精,吞精,Semen Swallowing,act,genre_000221
+bukkake,ぶっかけ,多人射精,Bukkake,act,genre_000222
+cum_swallowing,ごっくん,吞精,Cum Swallowing,act,genre_000223
+urination,放尿,排尿,Urination,act,genre_000224
+squirting,潮吹き,潮吹,Squirting,act,genre_000225
+heavy_squirting,大量潮吹き,大量潮吹,Heavy Squirting,act,genre_000226
+fingering,指入れ,指交,Fingering,act,genre_000227
+fisting,フィスト,拳交,Fisting,act,genre_000228
+group_sex,複数プレイ,多人性行为,Group Sex,act,genre_000229
+threesome,3P,三人性行为,Threesome,act,genre_000230
+orgy,乱交,群交,Orgy,act,genre_000231
+masturbation,オナニー,自慰,Masturbation,act,genre_000232
+mutual_masturbation,相互自慰,相互自慰,Mutual Masturbation,act,genre_000233
+lotion_play,ローション,润滑液玩法,Lotion Play,act,genre_000234
+massage,マッサージ,按摩,Massage,act,genre_000235
+oil_play,オイル,精油按摩,Oil Play,act,genre_000236
+nipple_stimulation,乳首責め,乳头刺激,Nipple Stimulation,act,genre_000237
+breast_fondling,乳揉み,揉胸,Breast Fondling,act,genre_000238
+spanking,尻叩き,打屁股,Spanking,act,genre_000239
+dirty_talk,言葉責め,言语调教,Dirty Talk,act,genre_000240
+seductress,痴女,主动女性,Seductress,act,genre_000241
+male_squirting,男潮吹き,男性潮吹,Male Squirting,act,genre_000242
+sm,SM,SM,S&M,practice,genre_000243
+kinbaku,緊縛,绳缚,Kinbaku,practice,genre_000244
+bondage,拘束,捆绑,Bondage,practice,genre_000245
+training,調教,调教,Training,practice,genre_000246
+humiliation_play,羞恥プレイ,羞耻玩法,Humiliation Play,practice,genre_000249
+exhibitionism,露出プレイ,露出玩法,Exhibitionism,practice,genre_000250
+outdoor,野外,户外,Outdoor,practice,genre_000251
+car_sex,カーセックス,车内性行为,Car Sex,practice,genre_000252
+bath,風呂,浴室,Bath,practice,genre_000253
+bubble_bath,泡風呂,泡泡浴,Bubble Bath,practice,genre_000254
+hot_spring_play,温泉プレイ,温泉玩法,Hot Spring Play,practice,genre_000255
+sex_toys,玩具,成人玩具,Sex Toys,practice,genre_000256
+vibrator,バイブ,振动棒,Vibrator,practice,genre_000257
+dildo,ディルド,仿真阳具,Dildo,practice,genre_000258
+bullet_vibrator,ローター,跳蛋,Bullet Vibrator,practice,genre_000259
+object_insertion,異物挿入,异物插入,Object Insertion,practice,genre_000260
+aphrodisiac_theme,媚薬,催情药设定,Aphrodisiac Theme,practice,genre_000261
+tentacles,触手,触手,Tentacles,practice,genre_000262
+hypnosis_play,催眠プレイ,催眠玩法,Hypnosis Play,practice,genre_000263
+hidden_camera_style,盗撮風,偷拍风格,Hidden-camera Style,practice,genre_000264
+pickup_production,ナンパもの,搭讪企划,Pickup Production,practice,genre_000266
+groping_production,痴漢もの,痴汉企划,Groping Production,practice,genre_000267
+lesbian,レズ,女同性题材,Lesbian,practice,genre_000268
+gay,ゲイ,男同性题材,Gay,practice,genre_000269
+bisexual,バイセクシュアル,双性恋题材,Bisexual,practice,genre_000270
+mixed_gender,男女混合,男女混合,Mixed-gender,practice,genre_000271
+femdom,フェムドム,女性主导,Femdom,practice,genre_000272
+orgasm,アクメ・オーガズム,绝顶高潮,Orgasm,act,
+abuse,凌辱,凌辱,Abuse,practice,
+bizarre,猟奇,猎奇,Bizarre,theme,
+impregnation,孕ませ,受孕题材,Impregnation,theme,
+graphic_violence,残虐表現,残酷表现,Graphic Violence,theme,
+dark_theme,ダーク系,暗黑系,Dark Theme,theme,
+intoxication,泥酔,醉酒题材,Intoxication,theme,
+delusion,妄想,妄想,Delusion,theme,
+eroticism,エロス,情色,Eroticism,theme,
+sadistic_theme,鬼畜系,施虐题材,Sadistic Theme,theme,
+futanari,ふたなり,扶她,Futanari,theme,
+image_club,イメクラ,印象俱乐部,Image Club,theme,
+verbal_abuse,罵倒,辱骂,Verbal Abuse,theme,
+lesbian_kiss,レズキス,女同接吻,Lesbian Kiss,act,
+rape_theme,レイプ,强奸题材,Rape Theme,theme,
+soapland,ヘルス・ソープ,风俗浴场,Soapland,theme,
+submissive_man,M男,受虐男性,Submissive Man,role,
+tsundere,ツンデレ,傲娇,Tsundere,role,
+virgin,処女,处女,Virgin,theme,
+male_virgin,童貞,处男,Male Virgin,theme,
+youth_theme,青春,青春题材,Youth Theme,theme,
+promotional_model,キャンギャル,宣传模特,Promotional Model,role,
+bus_guide,バスガイド,巴士导游,Bus Guide,role,
+event_companion,コンパニオン,活动陪同,Event Companion,role,
+cosplayer,コスプレイヤー,Cosplayer,Cosplayer,role,
+freeter,フリーター,自由职业打工族,Freeter,role,
+cabaret_hostess,キャバ嬢,陪酒女郎,Cabaret Club Hostess,role,
+look_alike,そっくりさん,相似艺人,Look-alike,role,
+sex_worker,風俗嬢,风俗从业者,Sex Worker,role,
+race_queen,レースクィーン,赛车女郎,Race Queen,role,
+female_investigator,女捜査官,女调查员,Female Investigator,role,
+kogal,コギャル,Kogal,Kogal,role,
+anime_character,アニメキャラクター,动漫角色,Anime Character,wardrobe,
+blazer,ブレザー,制服西装外套,Blazer,wardrobe,
+bodycon,ボディコン,紧身裙装,Bodycon,wardrobe,
+doll,ドール,人偶,Doll,wardrobe,
+clothed_erotic,着エロ,着衣情色,Clothed Erotic,wardrobe,
+police_costume,ミニスカポリス,迷你裙警察装,Police Costume,wardrobe,
+panty_shot,パンチラ,走光,Panty Shot,theme,
+large_penis,デカチン・巨根,巨根,Large Penis,body,
+breast_milk,母乳,母乳,Breast Milk,act,
+coprophagia,食糞,食粪,Coprophagia,act,
+defecation,脱糞,排便,Defecation,act,
+facesitting,顔面騎乗,颜面骑乘,Facesitting,act,
+urine_drinking,飲尿,饮尿,Urine Drinking,act,
+shower,シャワー,淋浴,Shower,practice,
+wax_play,蝋燭,蜡烛玩法,Wax Play,practice,
+cervix_stimulation,ポルチオ,宫颈刺激,Cervix Stimulation,practice,
+confinement,監禁,监禁,Confinement,practice,
+electric_massager,電マ,电动按摩器,Electric Massager,practice,
+enema,浣腸,灌肠,Enema,practice,
+gangbang,輪姦,轮奸,Gangbang,act,
+immediate_sex,即ハメ,即刻性交,Immediate Sex,practice,
+scatology,スカトロ,排泄玩法,Scatology,practice,
+speculum,クスコ,窥器,Speculum,practice,
+tickling,くすぐり,挠痒,Tickling,practice,
+torture,拷問,拷问,Torture,practice,
+undressing,脱衣,脱衣,Undressing,practice,
+urethral_catheter,尿道カテーテル,尿道导管,Urethral Catheter,practice,
+action,アクション,动作,Action,theme,
+adventure,アドベンチャー,冒险,Adventure,theme,
+fighting_action,アクション格闘,格斗动作,Fighting Action,theme,
+psychological,サイコ,心理惊悚,Psychological,theme,
+thriller,スリラー,惊悚,Thriller,theme,
+tokusatsu,特撮,特摄,Tokusatsu,theme,
+athlete,アスリート,运动员,Athlete,role,
+otaku,オタク,御宅族,Otaku,role|theme,
+masturbation_support,オナサポ,自慰辅助,Masturbation Support,practice,
+grandmother,お婆ちゃん,祖母,Grandmother,role,
+aunt,叔母さん,姨母・姑妈,Aunt,role,
+yakuza,極道,黑道,Yakuza,role|theme,
+fainting,失神,失神,Fainting,practice,
+partner_swapping,スワッピング,交换伴侣,Partner Swapping,practice,
+cheerleader,チアガール,啦啦队员,Cheerleader,role,
+dating,デート,约会,Dating,theme,
+no_panties,ノーパン,无内裤,No Panties,wardrobe,
+braless,ノーブラ,无胸罩,Braless,wardrobe,
+drinking_party,飲み会・合コン,酒会・联谊,Drinking Party / Mixer,theme,
+harem,ハーレム,后宫,Harem,theme,
+promiscuous_woman,ビッチ,放荡女性,Promiscuous Woman,role,
+transforming_heroine,変身ヒロイン,变身女英雄,Transforming Heroine,role|theme,
+hotel_setting,ホテル,酒店,Hotel Setting,theme,
+mom_friend,ママ友,妈妈朋友,Mom Friend,role,
+cleavage_peek,胸チラ,露胸,Cleavage Peek,wardrobe,
+interview_scenario,面接,面试,Interview Scenario,theme,
+yoga,ヨガ,瑜伽,Yoga,theme,
+premature_ejaculation,早漏,早泄,Premature Ejaculation,act,
+flexible_body,軟体,柔软身体,Flexible Body,body,
+animal_style,獣系,兽系,Animal Style,theme,
+collaboration,コラボ作品,合作作品,Collaboration Work,theme,
+experience_confession,体験告白,体验告白,Experience Confession,theme,
+v_cinema,Vシネマ,V影院,V-Cinema,theme,
+boys_love,BL,男孩之爱,Boys Love,theme,
+wetting,お漏らし,漏尿,Wetting,act,
+vomit,ゲロ,呕吐,Vomit,practice,
+nose_hook,鼻フック,鼻钩,Nose Hook,practice,
+game_live_action,ゲーム実写版,游戏真人版,Game Live-action Adaptation,theme,
+club_activity,部活,社团活动,Club Activity,theme,
+manager_role,マネージャー,经理・管理者,Manager,role,
+subordinate,部下,部下,Subordinate,role,
+colleague,同僚,同事,Colleague,role,
+reflexology,リフレ,反射疗法,Reflexology,act,
+adopted_daughter,養女,养女,Adopted Daughter,role,
+tights,タイツ,紧身裤袜,Tights,wardrobe,

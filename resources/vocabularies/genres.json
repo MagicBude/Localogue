@@ -1,203 +1,4128 @@
 {
-  "vocabularyVersion": 2,
+  "vocabularyVersion": 3,
+  "kind": "canonical-genres",
+  "description": "Localogue Canonical Genre. Stable IDs are preserved; facets/communityGenreIds are governance metadata and do not change Work.genreIds semantics.",
   "items": [
     {
-      "id": "uniform",
-      "ja": "制服",
-      "zh-CN": "制服",
-      "en": "Uniform"
-    },
-    {
-      "id": "office_lady",
-      "ja": "OL",
-      "zh-CN": "OL / 职场女性",
-      "en": "Office Lady"
+      "id": "beautiful_girl",
+      "ja": "美少女",
+      "zh-CN": "美少女",
+      "en": "Beautiful Girl",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000001"
+      ]
     },
     {
       "id": "married_woman",
       "ja": "人妻",
       "zh-CN": "人妻",
-      "en": "Married Woman"
+      "en": "Married Woman",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000002",
+        "genre_000117"
+      ]
     },
     {
       "id": "mature",
       "ja": "熟女",
       "zh-CN": "熟女",
-      "en": "Mature"
+      "en": "Mature",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000003",
+        "genre_000116"
+      ]
     },
     {
       "id": "amateur",
       "ja": "素人",
       "zh-CN": "素人",
-      "en": "Amateur"
+      "en": "Amateur",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000004",
+        "genre_000118"
+      ]
     },
     {
-      "id": "big_bust",
-      "ja": "巨乳",
-      "zh-CN": "巨乳",
-      "en": "Big Bust"
-    },
-    {
-      "id": "small_bust",
-      "ja": "貧乳",
-      "zh-CN": "贫乳",
-      "en": "Small Bust"
-    },
-    {
-      "id": "slender",
-      "ja": "スレンダー",
-      "zh-CN": "苗条",
-      "en": "Slender"
-    },
-    {
-      "id": "cosplay",
-      "ja": "コスプレ",
-      "zh-CN": "角色扮演",
-      "en": "Cosplay"
+      "id": "fan_appreciation",
+      "ja": "ファン感謝",
+      "zh-CN": "粉丝感谢",
+      "en": "Fan Appreciation",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000010"
+      ]
     },
     {
       "id": "drama",
       "ja": "ドラマ",
       "zh-CN": "剧情",
-      "en": "Drama"
+      "en": "Drama",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000014"
+      ]
     },
     {
       "id": "documentary",
       "ja": "ドキュメンタリー",
       "zh-CN": "纪录片",
-      "en": "Documentary"
+      "en": "Documentary",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000015"
+      ]
     },
     {
-      "id": "lesbian",
-      "ja": "レズ",
-      "zh-CN": "女同性题材",
-      "en": "Lesbian"
+      "id": "romance",
+      "ja": "恋愛",
+      "zh-CN": "恋爱",
+      "en": "Romance",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000016"
+      ]
     },
     {
-      "id": "beautiful_girl",
-      "ja": "美少女",
-      "zh-CN": "美少女",
-      "en": "Beautiful Girl"
+      "id": "romantic_comedy",
+      "ja": "ラブコメ",
+      "zh-CN": "爱情喜剧",
+      "en": "Romantic Comedy",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000017"
+      ]
     },
     {
-      "id": "pov",
-      "ja": "主観",
-      "zh-CN": "主观视角",
-      "en": "POV"
+      "id": "comedy",
+      "ja": "コメディ",
+      "zh-CN": "喜剧",
+      "en": "Comedy",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000018"
+      ]
     },
     {
-      "id": "squirting",
-      "ja": "潮吹き",
-      "zh-CN": "潮吹",
-      "en": "Squirting"
+      "id": "suspense",
+      "ja": "サスペンス",
+      "zh-CN": "悬疑",
+      "en": "Suspense",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000019"
+      ]
     },
     {
-      "id": "blowjob",
-      "ja": "フェラ",
-      "zh-CN": "口交",
-      "en": "Blowjob"
+      "id": "horror",
+      "ja": "ホラー",
+      "zh-CN": "恐怖",
+      "en": "Horror",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000020"
+      ]
     },
     {
-      "id": "masturbation",
-      "ja": "オナニー",
-      "zh-CN": "自慰",
-      "en": "Masturbation"
+      "id": "science_fiction",
+      "ja": "SF",
+      "zh-CN": "科幻",
+      "en": "Science Fiction",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000021"
+      ]
     },
     {
-      "id": "orgasm",
-      "ja": "アクメ・オーガズム",
-      "zh-CN": "绝顶高潮",
-      "en": "Orgasm"
+      "id": "fantasy",
+      "ja": "ファンタジー",
+      "zh-CN": "奇幻",
+      "en": "Fantasy",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000022"
+      ]
     },
     {
-      "id": "creampie",
-      "ja": "中出し",
-      "zh-CN": "内射",
-      "en": "Creampie"
+      "id": "parody",
+      "ja": "パロディ",
+      "zh-CN": "戏仿",
+      "en": "Parody",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000023"
+      ]
     },
     {
-      "id": "maid",
-      "ja": "メイド",
-      "zh-CN": "女仆",
-      "en": "Maid"
+      "id": "period_drama",
+      "ja": "時代劇",
+      "zh-CN": "历史剧",
+      "en": "Period Drama",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000024"
+      ]
     },
     {
-      "id": "nurse",
-      "ja": "看護婦・ナース",
-      "zh-CN": "护士",
-      "en": "Nurse"
+      "id": "travel",
+      "ja": "旅行",
+      "zh-CN": "旅行",
+      "en": "Travel",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000025"
+      ]
     },
     {
-      "id": "female_teacher",
-      "ja": "女教師",
-      "zh-CN": "女教师",
-      "en": "Female Teacher"
+      "id": "hot_spring",
+      "ja": "温泉",
+      "zh-CN": "温泉",
+      "en": "Hot Spring",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000026"
+      ]
     },
     {
-      "id": "abuse",
-      "ja": "凌辱",
-      "zh-CN": "凌辱",
-      "en": "Abuse"
+      "id": "school_setting",
+      "ja": "学校",
+      "zh-CN": "学校题材",
+      "en": "School Setting",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000027"
+      ]
     },
     {
-      "id": "kissing",
-      "ja": "キス・接吻",
-      "zh-CN": "接吻",
-      "en": "Kissing"
+      "id": "workplace_setting",
+      "ja": "職場",
+      "zh-CN": "职场题材",
+      "en": "Workplace Setting",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000028"
+      ]
     },
     {
-      "id": "titjob",
-      "ja": "パイズリ",
-      "zh-CN": "乳交",
-      "en": "Titjob"
+      "id": "beauty_salon",
+      "ja": "美容院",
+      "zh-CN": "美容院",
+      "en": "Beauty Salon",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000029"
+      ]
     },
     {
-      "id": "cowgirl",
-      "ja": "騎乗位",
-      "zh-CN": "骑乘位",
-      "en": "Cowgirl"
+      "id": "beauty_treatment",
+      "ja": "エステ",
+      "zh-CN": "美容护理",
+      "en": "Beauty Treatment",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000030"
+      ]
     },
     {
-      "id": "handjob",
-      "ja": "手コキ",
-      "zh-CN": "手交",
-      "en": "Handjob"
+      "id": "hospital_setting",
+      "ja": "病院",
+      "zh-CN": "医院",
+      "en": "Hospital Setting",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000031"
+      ]
     },
     {
-      "id": "facial",
-      "ja": "顔射",
-      "zh-CN": "颜射",
-      "en": "Facial"
+      "id": "sports",
+      "ja": "スポーツ",
+      "zh-CN": "运动",
+      "en": "Sports",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000032"
+      ]
     },
     {
-      "id": "cum_swallowing",
-      "ja": "ごっくん",
-      "zh-CN": "吞精",
-      "en": "Cum Swallowing"
+      "id": "dance",
+      "ja": "ダンス",
+      "zh-CN": "舞蹈",
+      "en": "Dance",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000033"
+      ]
     },
     {
-      "id": "anal",
-      "ja": "アナル",
-      "zh-CN": "肛交",
-      "en": "Anal"
+      "id": "time_stop",
+      "ja": "時間停止",
+      "zh-CN": "时间停止",
+      "en": "Time Stop",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000034"
+      ]
     },
     {
-      "id": "bondage",
-      "ja": "拘束",
-      "zh-CN": "捆绑",
-      "en": "Bondage"
+      "id": "invisible_person",
+      "ja": "透明人間",
+      "zh-CN": "隐形人",
+      "en": "Invisible Person",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000035"
+      ]
     },
     {
-      "id": "sm",
-      "ja": "SM",
-      "zh-CN": "SM",
-      "en": "S&M"
+      "id": "body_swap",
+      "ja": "入れ替わり",
+      "zh-CN": "身份互换",
+      "en": "Body Swap",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000036"
+      ]
+    },
+    {
+      "id": "hypnosis",
+      "ja": "催眠",
+      "zh-CN": "催眠",
+      "en": "Hypnosis",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000037"
+      ]
+    },
+    {
+      "id": "mind_control",
+      "ja": "洗脳",
+      "zh-CN": "洗脑",
+      "en": "Mind Control",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000038"
+      ]
+    },
+    {
+      "id": "transformation",
+      "ja": "変身",
+      "zh-CN": "变身",
+      "en": "Transformation",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000039"
+      ]
+    },
+    {
+      "id": "feminization",
+      "ja": "女体化",
+      "zh-CN": "女性化",
+      "en": "Feminization",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000040"
+      ]
+    },
+    {
+      "id": "couple",
+      "ja": "恋人",
+      "zh-CN": "情侣",
+      "en": "Couple",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000041"
+      ]
+    },
+    {
+      "id": "friends",
+      "ja": "友達",
+      "zh-CN": "朋友",
+      "en": "Friends",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000042"
+      ]
+    },
+    {
+      "id": "childhood_friend",
+      "ja": "幼なじみ",
+      "zh-CN": "青梅竹马",
+      "en": "Childhood Friends",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000043",
+        "genre_000112"
+      ]
+    },
+    {
+      "id": "family",
+      "ja": "家族",
+      "zh-CN": "家庭",
+      "en": "Family",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000044"
+      ]
+    },
+    {
+      "id": "incest_theme",
+      "ja": "近親設定",
+      "zh-CN": "近亲设定",
+      "en": "Incest Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000045"
+      ]
+    },
+    {
+      "id": "infidelity",
+      "ja": "不倫",
+      "zh-CN": "婚外情",
+      "en": "Infidelity",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000046"
+      ]
+    },
+    {
+      "id": "netorare",
+      "ja": "寝取られ",
+      "zh-CN": "被夺爱",
+      "en": "Netorare",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000047"
+      ]
+    },
+    {
+      "id": "netori",
+      "ja": "寝取り",
+      "zh-CN": "夺爱",
+      "en": "Netori",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000048"
+      ]
+    },
+    {
+      "id": "cheating",
+      "ja": "浮気",
+      "zh-CN": "出轨",
+      "en": "Cheating",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000049"
+      ]
+    },
+    {
+      "id": "seduction",
+      "ja": "誘惑",
+      "zh-CN": "诱惑",
+      "en": "Seduction",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000050"
+      ]
+    },
+    {
+      "id": "reverse_pickup",
+      "ja": "逆ナン",
+      "zh-CN": "女性搭讪",
+      "en": "Reverse Pickup",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000051"
+      ]
+    },
+    {
+      "id": "pickup",
+      "ja": "ナンパ",
+      "zh-CN": "搭讪",
+      "en": "Pickup",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000052"
+      ]
+    },
+    {
+      "id": "groping_theme",
+      "ja": "痴漢",
+      "zh-CN": "痴汉题材",
+      "en": "Groping Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000053"
+      ]
+    },
+    {
+      "id": "hidden_camera",
+      "ja": "盗撮",
+      "zh-CN": "偷拍题材",
+      "en": "Hidden Camera Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000054"
+      ]
     },
     {
       "id": "voyeurism",
       "ja": "盗撮・のぞき",
       "zh-CN": "偷窥",
-      "en": "Voyeurism"
+      "en": "Voyeurism",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000055"
+      ]
+    },
+    {
+      "id": "public_exposure",
+      "ja": "露出",
+      "zh-CN": "公开暴露",
+      "en": "Public Exposure",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000056"
+      ]
+    },
+    {
+      "id": "humiliation",
+      "ja": "羞恥",
+      "zh-CN": "羞耻",
+      "en": "Humiliation",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000057"
+      ]
+    },
+    {
+      "id": "prank",
+      "ja": "いたずら",
+      "zh-CN": "恶作剧",
+      "en": "Prank",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000058"
+      ]
+    },
+    {
+      "id": "fetish",
+      "ja": "フェチ",
+      "zh-CN": "恋物",
+      "en": "Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000059"
+      ]
+    },
+    {
+      "id": "leg_fetish",
+      "ja": "脚フェチ",
+      "zh-CN": "腿控",
+      "en": "Leg Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000060"
+      ]
+    },
+    {
+      "id": "foot_fetish",
+      "ja": "足フェチ",
+      "zh-CN": "足控",
+      "en": "Foot Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000061"
+      ]
+    },
+    {
+      "id": "breast_fetish",
+      "ja": "乳フェチ",
+      "zh-CN": "乳房偏好",
+      "en": "Breast Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000062"
+      ]
+    },
+    {
+      "id": "butt_fetish",
+      "ja": "尻フェチ",
+      "zh-CN": "臀部偏好",
+      "en": "Butt Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000063"
+      ]
+    },
+    {
+      "id": "scent_fetish",
+      "ja": "匂いフェチ",
+      "zh-CN": "气味偏好",
+      "en": "Scent Fetish",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000064"
+      ]
+    },
+    {
+      "id": "sweat",
+      "ja": "汗",
+      "zh-CN": "汗水",
+      "en": "Sweat",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000065"
+      ]
+    },
+    {
+      "id": "tanned",
+      "ja": "日焼け",
+      "zh-CN": "晒黑",
+      "en": "Tanned",
+      "facets": [
+        "body",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000066",
+        "genre_000195"
+      ]
+    },
+    {
+      "id": "full_nudity",
+      "ja": "全裸",
+      "zh-CN": "全裸",
+      "en": "Full Nudity",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000067"
+      ]
+    },
+    {
+      "id": "dating_reality",
+      "ja": "恋愛リアリティ",
+      "zh-CN": "恋爱真人秀",
+      "en": "Dating Reality",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000068"
+      ]
+    },
+    {
+      "id": "pov",
+      "ja": "主観",
+      "zh-CN": "主观视角",
+      "en": "POV",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000069"
+      ]
+    },
+    {
+      "id": "pov_recording",
+      "ja": "ハメ撮り",
+      "zh-CN": "第一人称拍摄",
+      "en": "POV Recording",
+      "facets": [
+        "practice",
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000070",
+        "genre_000265"
+      ]
+    },
+    {
+      "id": "idol",
+      "ja": "アイドル",
+      "zh-CN": "偶像",
+      "en": "Idol",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000071"
+      ]
+    },
+    {
+      "id": "celebrity",
+      "ja": "芸能人",
+      "zh-CN": "艺人",
+      "en": "Celebrity",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000072"
+      ]
+    },
+    {
+      "id": "female_announcer",
+      "ja": "女子アナ",
+      "zh-CN": "女主播",
+      "en": "Female Announcer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000073"
+      ]
+    },
+    {
+      "id": "actress",
+      "ja": "女優",
+      "zh-CN": "女演员",
+      "en": "Actress",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000074"
+      ]
+    },
+    {
+      "id": "model",
+      "ja": "モデル",
+      "zh-CN": "模特",
+      "en": "Model",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000075"
+      ]
+    },
+    {
+      "id": "gravure_idol",
+      "ja": "グラビアアイドル",
+      "zh-CN": "写真偶像",
+      "en": "Gravure Idol",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000076"
+      ]
+    },
+    {
+      "id": "student",
+      "ja": "学生",
+      "zh-CN": "学生",
+      "en": "Student",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000077"
+      ]
+    },
+    {
+      "id": "female_college_student",
+      "ja": "女子大生",
+      "zh-CN": "女大学生",
+      "en": "Female College Student",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000078"
+      ]
+    },
+    {
+      "id": "female_high_school_student",
+      "ja": "女子校生",
+      "zh-CN": "女高中生",
+      "en": "Female High School Student",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000079"
+      ]
+    },
+    {
+      "id": "teacher",
+      "ja": "先生",
+      "zh-CN": "教师",
+      "en": "Teacher",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000080"
+      ]
+    },
+    {
+      "id": "female_teacher",
+      "ja": "女教師",
+      "zh-CN": "女教师",
+      "en": "Female Teacher",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000081"
+      ]
+    },
+    {
+      "id": "private_tutor",
+      "ja": "家庭教師",
+      "zh-CN": "家庭教师",
+      "en": "Private Tutor",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000082"
+      ]
+    },
+    {
+      "id": "instructor",
+      "ja": "講師",
+      "zh-CN": "讲师",
+      "en": "Instructor",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000083"
+      ]
+    },
+    {
+      "id": "office_lady",
+      "ja": "OL",
+      "zh-CN": "OL / 职场女性",
+      "en": "Office Lady",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000084"
+      ]
+    },
+    {
+      "id": "secretary",
+      "ja": "秘書",
+      "zh-CN": "秘书",
+      "en": "Secretary",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000085"
+      ]
+    },
+    {
+      "id": "receptionist",
+      "ja": "受付嬢",
+      "zh-CN": "前台接待",
+      "en": "Receptionist",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000086"
+      ]
+    },
+    {
+      "id": "shop_clerk",
+      "ja": "店員",
+      "zh-CN": "店员",
+      "en": "Shop Clerk",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000087"
+      ]
+    },
+    {
+      "id": "waitress",
+      "ja": "ウェイトレス",
+      "zh-CN": "服务员",
+      "en": "Waitress",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000088"
+      ]
+    },
+    {
+      "id": "nurse",
+      "ja": "看護婦・ナース",
+      "zh-CN": "护士",
+      "en": "Nurse",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000089"
+      ]
+    },
+    {
+      "id": "female_doctor",
+      "ja": "女医",
+      "zh-CN": "女医生",
+      "en": "Female Doctor",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000090"
+      ]
+    },
+    {
+      "id": "female_prosecutor",
+      "ja": "女検事",
+      "zh-CN": "女检察官",
+      "en": "Female Prosecutor",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000091"
+      ]
+    },
+    {
+      "id": "police_officer",
+      "ja": "警察官",
+      "zh-CN": "警察",
+      "en": "Police Officer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000092"
+      ]
+    },
+    {
+      "id": "flight_attendant",
+      "ja": "客室乗務員",
+      "zh-CN": "空乘",
+      "en": "Flight Attendant",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000093"
+      ]
+    },
+    {
+      "id": "train_conductor",
+      "ja": "車掌",
+      "zh-CN": "列车乘务员",
+      "en": "Train Conductor",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000094"
+      ]
+    },
+    {
+      "id": "hairdresser",
+      "ja": "美容師",
+      "zh-CN": "美发师",
+      "en": "Hairdresser",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000095"
+      ]
+    },
+    {
+      "id": "esthetician",
+      "ja": "エステティシャン",
+      "zh-CN": "美容师",
+      "en": "Esthetician",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000096"
+      ]
+    },
+    {
+      "id": "inn_proprietress",
+      "ja": "女将",
+      "zh-CN": "女掌柜",
+      "en": "Inn Proprietress",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000097"
+      ]
+    },
+    {
+      "id": "hostess",
+      "ja": "女主人",
+      "zh-CN": "女主人",
+      "en": "Hostess",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000098"
+      ]
+    },
+    {
+      "id": "maid",
+      "ja": "メイド",
+      "zh-CN": "女仆",
+      "en": "Maid",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000099"
+      ]
+    },
+    {
+      "id": "shrine_maiden",
+      "ja": "巫女",
+      "zh-CN": "巫女",
+      "en": "Shrine Maiden",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000100"
+      ]
+    },
+    {
+      "id": "nun",
+      "ja": "シスター",
+      "zh-CN": "修女",
+      "en": "Nun",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000101"
+      ]
+    },
+    {
+      "id": "bride",
+      "ja": "花嫁",
+      "zh-CN": "新娘",
+      "en": "Bride",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000102"
+      ]
+    },
+    {
+      "id": "young_wife",
+      "ja": "若妻",
+      "zh-CN": "年轻妻子",
+      "en": "Young Wife",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000103"
+      ]
+    },
+    {
+      "id": "widow",
+      "ja": "未亡人",
+      "zh-CN": "寡妇",
+      "en": "Widow",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000104"
+      ]
+    },
+    {
+      "id": "mother",
+      "ja": "母",
+      "zh-CN": "母亲",
+      "en": "Mother",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000105"
+      ]
+    },
+    {
+      "id": "stepmother",
+      "ja": "義母",
+      "zh-CN": "继母",
+      "en": "Stepmother",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000106"
+      ]
+    },
+    {
+      "id": "older_sister",
+      "ja": "姉",
+      "zh-CN": "姐姐",
+      "en": "Older Sister",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000107"
+      ]
+    },
+    {
+      "id": "younger_sister",
+      "ja": "妹",
+      "zh-CN": "妹妹",
+      "en": "Younger Sister",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000108"
+      ]
+    },
+    {
+      "id": "daughter",
+      "ja": "娘",
+      "zh-CN": "女儿",
+      "en": "Daughter",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000109"
+      ]
+    },
+    {
+      "id": "young_lady",
+      "ja": "お嬢様",
+      "zh-CN": "大小姐",
+      "en": "Young Lady",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000110"
+      ]
+    },
+    {
+      "id": "heiress",
+      "ja": "令嬢",
+      "zh-CN": "千金小姐",
+      "en": "Heiress",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000111"
+      ]
+    },
+    {
+      "id": "gyaru",
+      "ja": "ギャル",
+      "zh-CN": "辣妹",
+      "en": "Gyaru",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000113"
+      ]
+    },
+    {
+      "id": "innocent_type",
+      "ja": "清楚系",
+      "zh-CN": "清纯系",
+      "en": "Innocent Type",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000114"
+      ]
+    },
+    {
+      "id": "baby_faced",
+      "ja": "童顔",
+      "zh-CN": "童颜",
+      "en": "Baby-faced",
+      "facets": [
+        "body",
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000115",
+        "genre_000201"
+      ]
+    },
+    {
+      "id": "female_warrior",
+      "ja": "女戦士",
+      "zh-CN": "女战士",
+      "en": "Female Warrior",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000119"
+      ]
+    },
+    {
+      "id": "kunoichi",
+      "ja": "くノ一",
+      "zh-CN": "女忍者",
+      "en": "Kunoichi",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000120"
+      ]
+    },
+    {
+      "id": "martial_artist",
+      "ja": "格闘家",
+      "zh-CN": "格斗家",
+      "en": "Martial Artist",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000121"
+      ]
+    },
+    {
+      "id": "princess",
+      "ja": "お姫様",
+      "zh-CN": "公主",
+      "en": "Princess",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000122"
+      ]
+    },
+    {
+      "id": "dominatrix",
+      "ja": "女王様",
+      "zh-CN": "女王",
+      "en": "Dominatrix",
+      "facets": [
+        "practice",
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000123",
+        "genre_000248"
+      ]
+    },
+    {
+      "id": "slave",
+      "ja": "奴隷",
+      "zh-CN": "奴隶",
+      "en": "Slave Role",
+      "facets": [
+        "practice",
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000124",
+        "genre_000247"
+      ]
+    },
+    {
+      "id": "feminine_boy",
+      "ja": "男の娘",
+      "zh-CN": "伪娘",
+      "en": "Feminine Boy",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000125"
+      ]
+    },
+    {
+      "id": "transgender_woman",
+      "ja": "トランスジェンダー女性",
+      "zh-CN": "跨性别女性",
+      "en": "Transgender Woman",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000126"
+      ]
+    },
+    {
+      "id": "male_performer",
+      "ja": "男性出演者",
+      "zh-CN": "男演员",
+      "en": "Male Performer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000127"
+      ]
+    },
+    {
+      "id": "older_man",
+      "ja": "高齢男性",
+      "zh-CN": "高龄男性",
+      "en": "Older Man",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000128"
+      ]
+    },
+    {
+      "id": "foreign_performer",
+      "ja": "外国人出演者",
+      "zh-CN": "外国演员",
+      "en": "Foreign Performer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000129"
+      ]
+    },
+    {
+      "id": "asian_performer",
+      "ja": "アジア系出演者",
+      "zh-CN": "亚洲演员",
+      "en": "Asian Performer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000130"
+      ]
+    },
+    {
+      "id": "black_performer",
+      "ja": "黒人出演者",
+      "zh-CN": "黑人演员",
+      "en": "Black Performer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000131"
+      ]
+    },
+    {
+      "id": "white_performer",
+      "ja": "白人出演者",
+      "zh-CN": "白人演员",
+      "en": "White Performer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": [
+        "genre_000132"
+      ]
+    },
+    {
+      "id": "uniform",
+      "ja": "制服",
+      "zh-CN": "制服",
+      "en": "Uniform",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000133"
+      ]
+    },
+    {
+      "id": "sailor_uniform",
+      "ja": "セーラー服",
+      "zh-CN": "水手服",
+      "en": "Sailor Uniform",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000134"
+      ]
+    },
+    {
+      "id": "school_uniform",
+      "ja": "学校制服",
+      "zh-CN": "校服",
+      "en": "School Uniform",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000135"
+      ]
+    },
+    {
+      "id": "gym_clothes",
+      "ja": "体操着",
+      "zh-CN": "运动服",
+      "en": "Gym Clothes",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000136"
+      ]
+    },
+    {
+      "id": "bloomers",
+      "ja": "ブルマー",
+      "zh-CN": "运动短裤",
+      "en": "Bloomers",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000137"
+      ]
+    },
+    {
+      "id": "school_swimsuit",
+      "ja": "スクール水着",
+      "zh-CN": "学校泳装",
+      "en": "School Swimsuit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000138"
+      ]
+    },
+    {
+      "id": "swimsuit",
+      "ja": "水着",
+      "zh-CN": "泳装",
+      "en": "Swimsuit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000139"
+      ]
+    },
+    {
+      "id": "bikini",
+      "ja": "ビキニ",
+      "zh-CN": "比基尼",
+      "en": "Bikini",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000140"
+      ]
+    },
+    {
+      "id": "competition_swimsuit",
+      "ja": "競泳水着",
+      "zh-CN": "竞泳泳装",
+      "en": "Competition Swimsuit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000141"
+      ]
+    },
+    {
+      "id": "lingerie",
+      "ja": "下着",
+      "zh-CN": "内衣",
+      "en": "Lingerie",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000142"
+      ]
+    },
+    {
+      "id": "bra",
+      "ja": "ブラジャー",
+      "zh-CN": "胸罩",
+      "en": "Bra",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000143"
+      ]
+    },
+    {
+      "id": "panties",
+      "ja": "パンティ",
+      "zh-CN": "内裤",
+      "en": "Panties",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000144"
+      ]
+    },
+    {
+      "id": "babydoll",
+      "ja": "ベビードール",
+      "zh-CN": "娃娃装",
+      "en": "Babydoll",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000145"
+      ]
+    },
+    {
+      "id": "negligee",
+      "ja": "ネグリジェ",
+      "zh-CN": "睡裙",
+      "en": "Negligee",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000146"
+      ]
+    },
+    {
+      "id": "nude_apron",
+      "ja": "裸エプロン",
+      "zh-CN": "裸体围裙",
+      "en": "Nude Apron",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000147"
+      ]
+    },
+    {
+      "id": "apron",
+      "ja": "エプロン",
+      "zh-CN": "围裙",
+      "en": "Apron",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000148"
+      ]
+    },
+    {
+      "id": "maid_outfit",
+      "ja": "メイド服",
+      "zh-CN": "女仆装",
+      "en": "Maid Outfit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000149"
+      ]
+    },
+    {
+      "id": "nurse_outfit",
+      "ja": "ナース服",
+      "zh-CN": "护士服",
+      "en": "Nurse Outfit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000150"
+      ]
+    },
+    {
+      "id": "office_wear",
+      "ja": "OL服",
+      "zh-CN": "OL装",
+      "en": "Office Wear",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000151"
+      ]
+    },
+    {
+      "id": "suit",
+      "ja": "スーツ",
+      "zh-CN": "西装",
+      "en": "Suit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000152"
+      ]
+    },
+    {
+      "id": "kimono",
+      "ja": "和服",
+      "zh-CN": "和服",
+      "en": "Kimono",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000153"
+      ]
+    },
+    {
+      "id": "yukata",
+      "ja": "浴衣",
+      "zh-CN": "浴衣",
+      "en": "Yukata",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000154"
+      ]
+    },
+    {
+      "id": "mourning_dress",
+      "ja": "喪服",
+      "zh-CN": "丧服",
+      "en": "Mourning Dress",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000155"
+      ]
+    },
+    {
+      "id": "cheongsam",
+      "ja": "チャイナドレス",
+      "zh-CN": "旗袍",
+      "en": "Cheongsam",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000156"
+      ]
+    },
+    {
+      "id": "wedding_dress",
+      "ja": "ウェディングドレス",
+      "zh-CN": "婚纱",
+      "en": "Wedding Dress",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000157"
+      ]
+    },
+    {
+      "id": "cosplay",
+      "ja": "コスプレ",
+      "zh-CN": "角色扮演",
+      "en": "Cosplay",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000158"
+      ]
+    },
+    {
+      "id": "anime_cosplay",
+      "ja": "アニメコスプレ",
+      "zh-CN": "动漫角色扮演",
+      "en": "Anime Cosplay",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000159"
+      ]
+    },
+    {
+      "id": "bunny_girl",
+      "ja": "バニーガール",
+      "zh-CN": "兔女郎",
+      "en": "Bunny Girl",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000160"
+      ]
+    },
+    {
+      "id": "cat_ears",
+      "ja": "猫耳",
+      "zh-CN": "猫耳",
+      "en": "Cat Ears",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000161"
+      ]
+    },
+    {
+      "id": "gothic_lolita",
+      "ja": "ゴスロリ",
+      "zh-CN": "哥特萝莉",
+      "en": "Gothic Lolita",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000162"
+      ]
+    },
+    {
+      "id": "miniskirt",
+      "ja": "ミニスカート",
+      "zh-CN": "迷你裙",
+      "en": "Miniskirt",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000163"
+      ]
+    },
+    {
+      "id": "micro_miniskirt",
+      "ja": "超ミニスカート",
+      "zh-CN": "超短裙",
+      "en": "Micro Miniskirt",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000164"
+      ]
+    },
+    {
+      "id": "pencil_skirt",
+      "ja": "タイトスカート",
+      "zh-CN": "紧身裙",
+      "en": "Pencil Skirt",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000165"
+      ]
+    },
+    {
+      "id": "stockings",
+      "ja": "ストッキング",
+      "zh-CN": "丝袜",
+      "en": "Stockings",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000166"
+      ]
+    },
+    {
+      "id": "pantyhose",
+      "ja": "パンスト",
+      "zh-CN": "连裤袜",
+      "en": "Pantyhose",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000167"
+      ]
+    },
+    {
+      "id": "thigh_high_socks",
+      "ja": "ニーハイ",
+      "zh-CN": "过膝袜",
+      "en": "Thigh-high Socks",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000168"
+      ]
+    },
+    {
+      "id": "loose_socks",
+      "ja": "ルーズソックス",
+      "zh-CN": "泡泡袜",
+      "en": "Loose Socks",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000169"
+      ]
+    },
+    {
+      "id": "boots",
+      "ja": "ブーツ",
+      "zh-CN": "长靴",
+      "en": "Boots",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000170"
+      ]
+    },
+    {
+      "id": "high_heels",
+      "ja": "ハイヒール",
+      "zh-CN": "高跟鞋",
+      "en": "High Heels",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000171"
+      ]
+    },
+    {
+      "id": "glasses",
+      "ja": "眼鏡",
+      "zh-CN": "眼镜",
+      "en": "Glasses",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000172"
+      ]
+    },
+    {
+      "id": "hat",
+      "ja": "帽子",
+      "zh-CN": "帽子",
+      "en": "Hat",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000173"
+      ]
+    },
+    {
+      "id": "mask",
+      "ja": "マスク",
+      "zh-CN": "口罩",
+      "en": "Mask",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000174"
+      ]
+    },
+    {
+      "id": "bodysuit",
+      "ja": "全身タイツ",
+      "zh-CN": "全身紧身衣",
+      "en": "Bodysuit",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000175"
+      ]
+    },
+    {
+      "id": "leotard",
+      "ja": "レオタード",
+      "zh-CN": "紧身衣",
+      "en": "Leotard",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000176"
+      ]
+    },
+    {
+      "id": "bondage_wear",
+      "ja": "ボンデージ",
+      "zh-CN": "束缚装",
+      "en": "Bondage Wear",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000177"
+      ]
+    },
+    {
+      "id": "cross_dressing",
+      "ja": "女装",
+      "zh-CN": "女装",
+      "en": "Cross-dressing",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000178"
+      ]
+    },
+    {
+      "id": "clothed",
+      "ja": "着衣",
+      "zh-CN": "着衣",
+      "en": "Clothed",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000179"
+      ]
+    },
+    {
+      "id": "partially_nude",
+      "ja": "半裸",
+      "zh-CN": "半裸",
+      "en": "Partially Nude",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": [
+        "genre_000180"
+      ]
+    },
+    {
+      "id": "big_bust",
+      "ja": "巨乳",
+      "zh-CN": "巨乳",
+      "en": "Big Bust",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000181"
+      ]
+    },
+    {
+      "id": "very_large_bust",
+      "ja": "爆乳",
+      "zh-CN": "爆乳",
+      "en": "Very Large Bust",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000182"
+      ]
+    },
+    {
+      "id": "extremely_large_bust",
+      "ja": "超乳",
+      "zh-CN": "超大胸部",
+      "en": "Extremely Large Bust",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000183"
+      ]
+    },
+    {
+      "id": "small_bust",
+      "ja": "貧乳",
+      "zh-CN": "贫乳",
+      "en": "Small Bust",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000184"
+      ]
+    },
+    {
+      "id": "petite_bust",
+      "ja": "微乳",
+      "zh-CN": "微乳",
+      "en": "Petite Bust",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000185"
+      ]
+    },
+    {
+      "id": "beautiful_breasts",
+      "ja": "美乳",
+      "zh-CN": "美胸",
+      "en": "Beautiful Breasts",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000186"
+      ]
+    },
+    {
+      "id": "big_butt",
+      "ja": "巨尻",
+      "zh-CN": "巨臀",
+      "en": "Big Butt",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000187"
+      ]
+    },
+    {
+      "id": "beautiful_butt",
+      "ja": "美尻",
+      "zh-CN": "美臀",
+      "en": "Beautiful Butt",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000188"
+      ]
+    },
+    {
+      "id": "slender",
+      "ja": "スレンダー",
+      "zh-CN": "苗条",
+      "en": "Slender",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000189"
+      ]
+    },
+    {
+      "id": "chubby",
+      "ja": "ぽっちゃり",
+      "zh-CN": "丰满",
+      "en": "Chubby",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000190"
+      ]
+    },
+    {
+      "id": "plus_size",
+      "ja": "肥満",
+      "zh-CN": "肥胖",
+      "en": "Plus-size",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000191"
+      ]
+    },
+    {
+      "id": "tall",
+      "ja": "長身",
+      "zh-CN": "高挑",
+      "en": "Tall",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000192"
+      ]
+    },
+    {
+      "id": "petite",
+      "ja": "小柄",
+      "zh-CN": "娇小",
+      "en": "Petite",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000193"
+      ]
+    },
+    {
+      "id": "muscular",
+      "ja": "筋肉質",
+      "zh-CN": "肌肉型",
+      "en": "Muscular",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000194"
+      ]
+    },
+    {
+      "id": "fair_skinned",
+      "ja": "色白",
+      "zh-CN": "白皙",
+      "en": "Fair-skinned",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000196"
+      ]
+    },
+    {
+      "id": "beautiful_legs",
+      "ja": "美脚",
+      "zh-CN": "美腿",
+      "en": "Beautiful Legs",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000197"
+      ]
+    },
+    {
+      "id": "pregnant",
+      "ja": "妊婦",
+      "zh-CN": "孕妇",
+      "en": "Pregnant",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000198"
+      ]
+    },
+    {
+      "id": "hairless",
+      "ja": "パイパン",
+      "zh-CN": "无阴毛",
+      "en": "Hairless",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000199"
+      ]
+    },
+    {
+      "id": "hairy",
+      "ja": "剛毛",
+      "zh-CN": "体毛浓密",
+      "en": "Hairy",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000200"
+      ]
+    },
+    {
+      "id": "mature_figure",
+      "ja": "成熟体型",
+      "zh-CN": "成熟体型",
+      "en": "Mature Figure",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": [
+        "genre_000202"
+      ]
+    },
+    {
+      "id": "kissing",
+      "ja": "キス・接吻",
+      "zh-CN": "接吻",
+      "en": "Kissing",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000203"
+      ]
+    },
+    {
+      "id": "deep_kissing",
+      "ja": "ディープキス",
+      "zh-CN": "深吻",
+      "en": "Deep Kissing",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000204"
+      ]
+    },
+    {
+      "id": "blowjob",
+      "ja": "フェラ",
+      "zh-CN": "口交",
+      "en": "Blowjob",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000205"
+      ]
+    },
+    {
+      "id": "deep_throat",
+      "ja": "イラマチオ",
+      "zh-CN": "深喉",
+      "en": "Deep Throat",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000206"
+      ]
+    },
+    {
+      "id": "cunnilingus",
+      "ja": "クンニ",
+      "zh-CN": "舔阴",
+      "en": "Cunnilingus",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000207"
+      ]
+    },
+    {
+      "id": "handjob",
+      "ja": "手コキ",
+      "zh-CN": "手交",
+      "en": "Handjob",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000208"
+      ]
+    },
+    {
+      "id": "footjob",
+      "ja": "足コキ",
+      "zh-CN": "足交",
+      "en": "Footjob",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000209"
+      ]
+    },
+    {
+      "id": "titjob",
+      "ja": "パイズリ",
+      "zh-CN": "乳交",
+      "en": "Titjob",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000210"
+      ]
+    },
+    {
+      "id": "intercrural_sex",
+      "ja": "素股",
+      "zh-CN": "股间摩擦",
+      "en": "Intercrural Sex",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000211"
+      ]
+    },
+    {
+      "id": "cowgirl",
+      "ja": "騎乗位",
+      "zh-CN": "骑乘位",
+      "en": "Cowgirl",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000212"
+      ]
+    },
+    {
+      "id": "missionary",
+      "ja": "正常位",
+      "zh-CN": "传教士体位",
+      "en": "Missionary",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000213"
+      ]
+    },
+    {
+      "id": "rear_entry",
+      "ja": "後背位",
+      "zh-CN": "后入式",
+      "en": "Rear-entry",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000214"
+      ]
+    },
+    {
+      "id": "standing_rear_entry",
+      "ja": "立ちバック",
+      "zh-CN": "站立后入",
+      "en": "Standing Rear-entry",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000215"
+      ]
+    },
+    {
+      "id": "sixty_nine",
+      "ja": "69",
+      "zh-CN": "69式",
+      "en": "Sixty-nine",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000216"
+      ]
+    },
+    {
+      "id": "anal",
+      "ja": "アナル",
+      "zh-CN": "肛交",
+      "en": "Anal",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000217"
+      ]
+    },
+    {
+      "id": "creampie",
+      "ja": "中出し",
+      "zh-CN": "内射",
+      "en": "Creampie",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000218"
+      ]
+    },
+    {
+      "id": "facial",
+      "ja": "顔射",
+      "zh-CN": "颜射",
+      "en": "Facial",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000219"
+      ]
+    },
+    {
+      "id": "oral_ejaculation",
+      "ja": "口内発射",
+      "zh-CN": "口内射精",
+      "en": "Oral Ejaculation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000220"
+      ]
+    },
+    {
+      "id": "semen_swallowing",
+      "ja": "飲精",
+      "zh-CN": "吞精",
+      "en": "Semen Swallowing",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000221"
+      ]
+    },
+    {
+      "id": "bukkake",
+      "ja": "ぶっかけ",
+      "zh-CN": "多人射精",
+      "en": "Bukkake",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000222"
+      ]
+    },
+    {
+      "id": "cum_swallowing",
+      "ja": "ごっくん",
+      "zh-CN": "吞精",
+      "en": "Cum Swallowing",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000223"
+      ]
+    },
+    {
+      "id": "urination",
+      "ja": "放尿",
+      "zh-CN": "排尿",
+      "en": "Urination",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000224"
+      ]
+    },
+    {
+      "id": "squirting",
+      "ja": "潮吹き",
+      "zh-CN": "潮吹",
+      "en": "Squirting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000225"
+      ]
+    },
+    {
+      "id": "heavy_squirting",
+      "ja": "大量潮吹き",
+      "zh-CN": "大量潮吹",
+      "en": "Heavy Squirting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000226"
+      ]
+    },
+    {
+      "id": "fingering",
+      "ja": "指入れ",
+      "zh-CN": "指交",
+      "en": "Fingering",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000227"
+      ]
+    },
+    {
+      "id": "fisting",
+      "ja": "フィスト",
+      "zh-CN": "拳交",
+      "en": "Fisting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000228"
+      ]
+    },
+    {
+      "id": "group_sex",
+      "ja": "複数プレイ",
+      "zh-CN": "多人性行为",
+      "en": "Group Sex",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000229"
+      ]
+    },
+    {
+      "id": "threesome",
+      "ja": "3P",
+      "zh-CN": "三人性行为",
+      "en": "Threesome",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000230"
+      ]
+    },
+    {
+      "id": "orgy",
+      "ja": "乱交",
+      "zh-CN": "群交",
+      "en": "Orgy",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000231"
+      ]
+    },
+    {
+      "id": "masturbation",
+      "ja": "オナニー",
+      "zh-CN": "自慰",
+      "en": "Masturbation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000232"
+      ]
+    },
+    {
+      "id": "mutual_masturbation",
+      "ja": "相互自慰",
+      "zh-CN": "相互自慰",
+      "en": "Mutual Masturbation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000233"
+      ]
+    },
+    {
+      "id": "lotion_play",
+      "ja": "ローション",
+      "zh-CN": "润滑液玩法",
+      "en": "Lotion Play",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000234"
+      ]
+    },
+    {
+      "id": "massage",
+      "ja": "マッサージ",
+      "zh-CN": "按摩",
+      "en": "Massage",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000235"
+      ]
+    },
+    {
+      "id": "oil_play",
+      "ja": "オイル",
+      "zh-CN": "精油按摩",
+      "en": "Oil Play",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000236"
+      ]
+    },
+    {
+      "id": "nipple_stimulation",
+      "ja": "乳首責め",
+      "zh-CN": "乳头刺激",
+      "en": "Nipple Stimulation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000237"
+      ]
+    },
+    {
+      "id": "breast_fondling",
+      "ja": "乳揉み",
+      "zh-CN": "揉胸",
+      "en": "Breast Fondling",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000238"
+      ]
+    },
+    {
+      "id": "spanking",
+      "ja": "尻叩き",
+      "zh-CN": "打屁股",
+      "en": "Spanking",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000239"
+      ]
+    },
+    {
+      "id": "dirty_talk",
+      "ja": "言葉責め",
+      "zh-CN": "言语调教",
+      "en": "Dirty Talk",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000240"
+      ]
+    },
+    {
+      "id": "seductress",
+      "ja": "痴女",
+      "zh-CN": "主动女性",
+      "en": "Seductress",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000241"
+      ]
+    },
+    {
+      "id": "male_squirting",
+      "ja": "男潮吹き",
+      "zh-CN": "男性潮吹",
+      "en": "Male Squirting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": [
+        "genre_000242"
+      ]
+    },
+    {
+      "id": "sm",
+      "ja": "SM",
+      "zh-CN": "SM",
+      "en": "S&M",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000243"
+      ]
+    },
+    {
+      "id": "kinbaku",
+      "ja": "緊縛",
+      "zh-CN": "绳缚",
+      "en": "Kinbaku",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000244"
+      ]
+    },
+    {
+      "id": "bondage",
+      "ja": "拘束",
+      "zh-CN": "捆绑",
+      "en": "Bondage",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000245"
+      ]
+    },
+    {
+      "id": "training",
+      "ja": "調教",
+      "zh-CN": "调教",
+      "en": "Training",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000246"
+      ]
+    },
+    {
+      "id": "humiliation_play",
+      "ja": "羞恥プレイ",
+      "zh-CN": "羞耻玩法",
+      "en": "Humiliation Play",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000249"
+      ]
+    },
+    {
+      "id": "exhibitionism",
+      "ja": "露出プレイ",
+      "zh-CN": "露出玩法",
+      "en": "Exhibitionism",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000250"
+      ]
+    },
+    {
+      "id": "outdoor",
+      "ja": "野外",
+      "zh-CN": "户外",
+      "en": "Outdoor",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000251"
+      ]
+    },
+    {
+      "id": "car_sex",
+      "ja": "カーセックス",
+      "zh-CN": "车内性行为",
+      "en": "Car Sex",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000252"
+      ]
+    },
+    {
+      "id": "bath",
+      "ja": "風呂",
+      "zh-CN": "浴室",
+      "en": "Bath",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000253"
+      ]
+    },
+    {
+      "id": "bubble_bath",
+      "ja": "泡風呂",
+      "zh-CN": "泡泡浴",
+      "en": "Bubble Bath",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000254"
+      ]
+    },
+    {
+      "id": "hot_spring_play",
+      "ja": "温泉プレイ",
+      "zh-CN": "温泉玩法",
+      "en": "Hot Spring Play",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000255"
+      ]
+    },
+    {
+      "id": "sex_toys",
+      "ja": "玩具",
+      "zh-CN": "成人玩具",
+      "en": "Sex Toys",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000256"
+      ]
+    },
+    {
+      "id": "vibrator",
+      "ja": "バイブ",
+      "zh-CN": "振动棒",
+      "en": "Vibrator",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000257"
+      ]
+    },
+    {
+      "id": "dildo",
+      "ja": "ディルド",
+      "zh-CN": "仿真阳具",
+      "en": "Dildo",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000258"
+      ]
+    },
+    {
+      "id": "bullet_vibrator",
+      "ja": "ローター",
+      "zh-CN": "跳蛋",
+      "en": "Bullet Vibrator",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000259"
+      ]
+    },
+    {
+      "id": "object_insertion",
+      "ja": "異物挿入",
+      "zh-CN": "异物插入",
+      "en": "Object Insertion",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000260"
+      ]
+    },
+    {
+      "id": "aphrodisiac_theme",
+      "ja": "媚薬",
+      "zh-CN": "催情药设定",
+      "en": "Aphrodisiac Theme",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000261"
+      ]
+    },
+    {
+      "id": "tentacles",
+      "ja": "触手",
+      "zh-CN": "触手",
+      "en": "Tentacles",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000262"
+      ]
+    },
+    {
+      "id": "hypnosis_play",
+      "ja": "催眠プレイ",
+      "zh-CN": "催眠玩法",
+      "en": "Hypnosis Play",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000263"
+      ]
+    },
+    {
+      "id": "hidden_camera_style",
+      "ja": "盗撮風",
+      "zh-CN": "偷拍风格",
+      "en": "Hidden-camera Style",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000264"
+      ]
+    },
+    {
+      "id": "pickup_production",
+      "ja": "ナンパもの",
+      "zh-CN": "搭讪企划",
+      "en": "Pickup Production",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000266"
+      ]
+    },
+    {
+      "id": "groping_production",
+      "ja": "痴漢もの",
+      "zh-CN": "痴汉企划",
+      "en": "Groping Production",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000267"
+      ]
+    },
+    {
+      "id": "lesbian",
+      "ja": "レズ",
+      "zh-CN": "女同性题材",
+      "en": "Lesbian",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000268"
+      ]
+    },
+    {
+      "id": "gay",
+      "ja": "ゲイ",
+      "zh-CN": "男同性题材",
+      "en": "Gay",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000269"
+      ]
+    },
+    {
+      "id": "bisexual",
+      "ja": "バイセクシュアル",
+      "zh-CN": "双性恋题材",
+      "en": "Bisexual",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000270"
+      ]
+    },
+    {
+      "id": "mixed_gender",
+      "ja": "男女混合",
+      "zh-CN": "男女混合",
+      "en": "Mixed-gender",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000271"
+      ]
+    },
+    {
+      "id": "femdom",
+      "ja": "フェムドム",
+      "zh-CN": "女性主导",
+      "en": "Femdom",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000272"
+      ]
+    },
+    {
+      "id": "orgasm",
+      "ja": "アクメ・オーガズム",
+      "zh-CN": "绝顶高潮",
+      "en": "Orgasm",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "abuse",
+      "ja": "凌辱",
+      "zh-CN": "凌辱",
+      "en": "Abuse",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "bizarre",
+      "ja": "猟奇",
+      "zh-CN": "猎奇",
+      "en": "Bizarre",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "impregnation",
+      "ja": "孕ませ",
+      "zh-CN": "受孕题材",
+      "en": "Impregnation",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "graphic_violence",
+      "ja": "残虐表現",
+      "zh-CN": "残酷表现",
+      "en": "Graphic Violence",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "dark_theme",
+      "ja": "ダーク系",
+      "zh-CN": "暗黑系",
+      "en": "Dark Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "intoxication",
+      "ja": "泥酔",
+      "zh-CN": "醉酒题材",
+      "en": "Intoxication",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "delusion",
+      "ja": "妄想",
+      "zh-CN": "妄想",
+      "en": "Delusion",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "eroticism",
+      "ja": "エロス",
+      "zh-CN": "情色",
+      "en": "Eroticism",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "sadistic_theme",
+      "ja": "鬼畜系",
+      "zh-CN": "施虐题材",
+      "en": "Sadistic Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "futanari",
+      "ja": "ふたなり",
+      "zh-CN": "扶她",
+      "en": "Futanari",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "image_club",
+      "ja": "イメクラ",
+      "zh-CN": "印象俱乐部",
+      "en": "Image Club",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "verbal_abuse",
+      "ja": "罵倒",
+      "zh-CN": "辱骂",
+      "en": "Verbal Abuse",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "lesbian_kiss",
+      "ja": "レズキス",
+      "zh-CN": "女同接吻",
+      "en": "Lesbian Kiss",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "rape_theme",
+      "ja": "レイプ",
+      "zh-CN": "强奸题材",
+      "en": "Rape Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "soapland",
+      "ja": "ヘルス・ソープ",
+      "zh-CN": "风俗浴场",
+      "en": "Soapland",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "submissive_man",
+      "ja": "M男",
+      "zh-CN": "受虐男性",
+      "en": "Submissive Man",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "tsundere",
+      "ja": "ツンデレ",
+      "zh-CN": "傲娇",
+      "en": "Tsundere",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "virgin",
+      "ja": "処女",
+      "zh-CN": "处女",
+      "en": "Virgin",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "male_virgin",
+      "ja": "童貞",
+      "zh-CN": "处男",
+      "en": "Male Virgin",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "youth_theme",
+      "ja": "青春",
+      "zh-CN": "青春题材",
+      "en": "Youth Theme",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "promotional_model",
+      "ja": "キャンギャル",
+      "zh-CN": "宣传模特",
+      "en": "Promotional Model",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "bus_guide",
+      "ja": "バスガイド",
+      "zh-CN": "巴士导游",
+      "en": "Bus Guide",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "event_companion",
+      "ja": "コンパニオン",
+      "zh-CN": "活动陪同",
+      "en": "Event Companion",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "cosplayer",
+      "ja": "コスプレイヤー",
+      "zh-CN": "Cosplayer",
+      "en": "Cosplayer",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "freeter",
+      "ja": "フリーター",
+      "zh-CN": "自由职业打工族",
+      "en": "Freeter",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "cabaret_hostess",
+      "ja": "キャバ嬢",
+      "zh-CN": "陪酒女郎",
+      "en": "Cabaret Club Hostess",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "look_alike",
+      "ja": "そっくりさん",
+      "zh-CN": "相似艺人",
+      "en": "Look-alike",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "sex_worker",
+      "ja": "風俗嬢",
+      "zh-CN": "风俗从业者",
+      "en": "Sex Worker",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "race_queen",
+      "ja": "レースクィーン",
+      "zh-CN": "赛车女郎",
+      "en": "Race Queen",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "female_investigator",
+      "ja": "女捜査官",
+      "zh-CN": "女调查员",
+      "en": "Female Investigator",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "kogal",
+      "ja": "コギャル",
+      "zh-CN": "Kogal",
+      "en": "Kogal",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "anime_character",
+      "ja": "アニメキャラクター",
+      "zh-CN": "动漫角色",
+      "en": "Anime Character",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "blazer",
+      "ja": "ブレザー",
+      "zh-CN": "制服西装外套",
+      "en": "Blazer",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "bodycon",
+      "ja": "ボディコン",
+      "zh-CN": "紧身裙装",
+      "en": "Bodycon",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "doll",
+      "ja": "ドール",
+      "zh-CN": "人偶",
+      "en": "Doll",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "clothed_erotic",
+      "ja": "着エロ",
+      "zh-CN": "着衣情色",
+      "en": "Clothed Erotic",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "police_costume",
+      "ja": "ミニスカポリス",
+      "zh-CN": "迷你裙警察装",
+      "en": "Police Costume",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "panty_shot",
+      "ja": "パンチラ",
+      "zh-CN": "走光",
+      "en": "Panty Shot",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "large_penis",
+      "ja": "デカチン・巨根",
+      "zh-CN": "巨根",
+      "en": "Large Penis",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "breast_milk",
+      "ja": "母乳",
+      "zh-CN": "母乳",
+      "en": "Breast Milk",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "coprophagia",
+      "ja": "食糞",
+      "zh-CN": "食粪",
+      "en": "Coprophagia",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "defecation",
+      "ja": "脱糞",
+      "zh-CN": "排便",
+      "en": "Defecation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "facesitting",
+      "ja": "顔面騎乗",
+      "zh-CN": "颜面骑乘",
+      "en": "Facesitting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "urine_drinking",
+      "ja": "飲尿",
+      "zh-CN": "饮尿",
+      "en": "Urine Drinking",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "shower",
+      "ja": "シャワー",
+      "zh-CN": "淋浴",
+      "en": "Shower",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "wax_play",
+      "ja": "蝋燭",
+      "zh-CN": "蜡烛玩法",
+      "en": "Wax Play",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "cervix_stimulation",
+      "ja": "ポルチオ",
+      "zh-CN": "宫颈刺激",
+      "en": "Cervix Stimulation",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "confinement",
+      "ja": "監禁",
+      "zh-CN": "监禁",
+      "en": "Confinement",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "electric_massager",
+      "ja": "電マ",
+      "zh-CN": "电动按摩器",
+      "en": "Electric Massager",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "enema",
+      "ja": "浣腸",
+      "zh-CN": "灌肠",
+      "en": "Enema",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "gangbang",
+      "ja": "輪姦",
+      "zh-CN": "轮奸",
+      "en": "Gangbang",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "immediate_sex",
+      "ja": "即ハメ",
+      "zh-CN": "即刻性交",
+      "en": "Immediate Sex",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "scatology",
+      "ja": "スカトロ",
+      "zh-CN": "排泄玩法",
+      "en": "Scatology",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "speculum",
+      "ja": "クスコ",
+      "zh-CN": "窥器",
+      "en": "Speculum",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "tickling",
+      "ja": "くすぐり",
+      "zh-CN": "挠痒",
+      "en": "Tickling",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "torture",
+      "ja": "拷問",
+      "zh-CN": "拷问",
+      "en": "Torture",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "undressing",
+      "ja": "脱衣",
+      "zh-CN": "脱衣",
+      "en": "Undressing",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "urethral_catheter",
+      "ja": "尿道カテーテル",
+      "zh-CN": "尿道导管",
+      "en": "Urethral Catheter",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "action",
+      "ja": "アクション",
+      "zh-CN": "动作",
+      "en": "Action",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "adventure",
+      "ja": "アドベンチャー",
+      "zh-CN": "冒险",
+      "en": "Adventure",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "fighting_action",
+      "ja": "アクション格闘",
+      "zh-CN": "格斗动作",
+      "en": "Fighting Action",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "psychological",
+      "ja": "サイコ",
+      "zh-CN": "心理惊悚",
+      "en": "Psychological",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "thriller",
+      "ja": "スリラー",
+      "zh-CN": "惊悚",
+      "en": "Thriller",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "tokusatsu",
+      "ja": "特撮",
+      "zh-CN": "特摄",
+      "en": "Tokusatsu",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "athlete",
+      "ja": "アスリート",
+      "zh-CN": "运动员",
+      "en": "Athlete",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "otaku",
+      "ja": "オタク",
+      "zh-CN": "御宅族",
+      "en": "Otaku",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "masturbation_support",
+      "ja": "オナサポ",
+      "zh-CN": "自慰辅助",
+      "en": "Masturbation Support",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "grandmother",
+      "ja": "お婆ちゃん",
+      "zh-CN": "祖母",
+      "en": "Grandmother",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "aunt",
+      "ja": "叔母さん",
+      "zh-CN": "姨母・姑妈",
+      "en": "Aunt",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "yakuza",
+      "ja": "極道",
+      "zh-CN": "黑道",
+      "en": "Yakuza",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "fainting",
+      "ja": "失神",
+      "zh-CN": "失神",
+      "en": "Fainting",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "partner_swapping",
+      "ja": "スワッピング",
+      "zh-CN": "交换伴侣",
+      "en": "Partner Swapping",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "cheerleader",
+      "ja": "チアガール",
+      "zh-CN": "啦啦队员",
+      "en": "Cheerleader",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "dating",
+      "ja": "デート",
+      "zh-CN": "约会",
+      "en": "Dating",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "no_panties",
+      "ja": "ノーパン",
+      "zh-CN": "无内裤",
+      "en": "No Panties",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "braless",
+      "ja": "ノーブラ",
+      "zh-CN": "无胸罩",
+      "en": "Braless",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "drinking_party",
+      "ja": "飲み会・合コン",
+      "zh-CN": "酒会・联谊",
+      "en": "Drinking Party / Mixer",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "harem",
+      "ja": "ハーレム",
+      "zh-CN": "后宫",
+      "en": "Harem",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "promiscuous_woman",
+      "ja": "ビッチ",
+      "zh-CN": "放荡女性",
+      "en": "Promiscuous Woman",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "transforming_heroine",
+      "ja": "変身ヒロイン",
+      "zh-CN": "变身女英雄",
+      "en": "Transforming Heroine",
+      "facets": [
+        "role",
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "hotel_setting",
+      "ja": "ホテル",
+      "zh-CN": "酒店",
+      "en": "Hotel Setting",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "mom_friend",
+      "ja": "ママ友",
+      "zh-CN": "妈妈朋友",
+      "en": "Mom Friend",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "cleavage_peek",
+      "ja": "胸チラ",
+      "zh-CN": "露胸",
+      "en": "Cleavage Peek",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "interview_scenario",
+      "ja": "面接",
+      "zh-CN": "面试",
+      "en": "Interview Scenario",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "yoga",
+      "ja": "ヨガ",
+      "zh-CN": "瑜伽",
+      "en": "Yoga",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "premature_ejaculation",
+      "ja": "早漏",
+      "zh-CN": "早泄",
+      "en": "Premature Ejaculation",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "flexible_body",
+      "ja": "軟体",
+      "zh-CN": "柔软身体",
+      "en": "Flexible Body",
+      "facets": [
+        "body"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "animal_style",
+      "ja": "獣系",
+      "zh-CN": "兽系",
+      "en": "Animal Style",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "collaboration",
+      "ja": "コラボ作品",
+      "zh-CN": "合作作品",
+      "en": "Collaboration Work",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "experience_confession",
+      "ja": "体験告白",
+      "zh-CN": "体验告白",
+      "en": "Experience Confession",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "v_cinema",
+      "ja": "Vシネマ",
+      "zh-CN": "V影院",
+      "en": "V-Cinema",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "boys_love",
+      "ja": "BL",
+      "zh-CN": "男孩之爱",
+      "en": "Boys Love",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "wetting",
+      "ja": "お漏らし",
+      "zh-CN": "漏尿",
+      "en": "Wetting",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "vomit",
+      "ja": "ゲロ",
+      "zh-CN": "呕吐",
+      "en": "Vomit",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "nose_hook",
+      "ja": "鼻フック",
+      "zh-CN": "鼻钩",
+      "en": "Nose Hook",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "game_live_action",
+      "ja": "ゲーム実写版",
+      "zh-CN": "游戏真人版",
+      "en": "Game Live-action Adaptation",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "club_activity",
+      "ja": "部活",
+      "zh-CN": "社团活动",
+      "en": "Club Activity",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "manager_role",
+      "ja": "マネージャー",
+      "zh-CN": "经理・管理者",
+      "en": "Manager",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "subordinate",
+      "ja": "部下",
+      "zh-CN": "部下",
+      "en": "Subordinate",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "colleague",
+      "ja": "同僚",
+      "zh-CN": "同事",
+      "en": "Colleague",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "reflexology",
+      "ja": "リフレ",
+      "zh-CN": "反射疗法",
+      "en": "Reflexology",
+      "facets": [
+        "act"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "adopted_daughter",
+      "ja": "養女",
+      "zh-CN": "养女",
+      "en": "Adopted Daughter",
+      "facets": [
+        "role"
+      ],
+      "communityGenreIds": []
+    },
+    {
+      "id": "tights",
+      "ja": "タイツ",
+      "zh-CN": "紧身裤袜",
+      "en": "Tights",
+      "facets": [
+        "wardrobe"
+      ],
+      "communityGenreIds": []
     }
   ]
 }

@@ -1,5 +1,8 @@
+import classificationTermAliases from "../../../resources/vocabularies/classification-term-aliases.json";
 import genreVocabulary from "../../../resources/vocabularies/genres.json";
 import genreSourceAliases from "../../../resources/vocabularies/genre-source-aliases.json";
+import sourceOnlyVocabulary from "../../../resources/vocabularies/source-only-classifications.json";
+import workTypeVocabulary from "../../../resources/vocabularies/work-types.json";
 
 import type { NormalizedImportCandidate } from "@/domain/entities/evidence";
 import type { LocalizedText } from "@/domain/value-objects/localized-text";
@@ -10,7 +13,8 @@ import type { LocalizedText } from "@/domain/value-objects/localized-text";
  *
  * Localogue must not copy that mixed bag into Canonical Genre + Tag. This
  * module is the single semantic routing boundary for imported classification
- * terms. Keep it in sync with resources/vocabularies/import-term-mappings.*
+ * terms. Runtime decisions are data-driven by resources/vocabularies/* rather
+ * than by an ever-growing hard-coded switch table.
  */
 
 export interface ControlledGenreDefinition {
@@ -31,44 +35,107 @@ export interface ImportClassificationNormalization {
   structuralTerms: string[];
 }
 
-export const WORK_TYPE_DEFINITIONS: readonly WorkTypeDefinition[] = [
-  { id: "solo", names: { ja: "単体作品", "zh-CN": "单体作品", en: "Solo" }, aliases: ["単体", "単体作品", "单体", "单体作品", "solo"] },
-  { id: "co_starring", names: { ja: "共演作品", "zh-CN": "共演作品", en: "Co-starring" }, aliases: ["共演", "共演作品", "co-starring", "costarring"] },
-  { id: "vr", names: { ja: "VR作品", "zh-CN": "VR作品", en: "VR" }, aliases: ["vr", "vr作品", "vr動画", "vr video"] },
-  { id: "image_video", names: { ja: "イメージビデオ", "zh-CN": "写真影像", en: "Image Video" }, aliases: ["イメージビデオ", "イメージdvd", "写真影像", "image video", "image_video"] },
-  { id: "compilation", names: { ja: "総集編", "zh-CN": "合辑", en: "Compilation" }, aliases: ["総集編", "总集篇", "合辑", "compilation"] },
-  { id: "omnibus", names: { ja: "オムニバス", "zh-CN": "单元合集", en: "Omnibus" }, aliases: ["オムニバス", "单元合集", "omnibus"] },
-  { id: "best_of", names: { ja: "ベスト", "zh-CN": "精选集", en: "Best Of" }, aliases: ["ベスト", "best", "best of", "精选集"] },
-  { id: "other", names: { ja: "その他", "zh-CN": "其他", en: "Other" }, aliases: ["その他", "其他", "other"] },
-] as const;
-
-interface GenreVocabularyRow { id: string; ja: string; "zh-CN": string; en: string; }
-interface GenreSourceAliasRow { canonicalId: string; sourceId: string; ja: string; "zh-CN": string; en: string; sources: string[]; note?: string; }
-
-const GENRE_SOURCE_ALIASES = genreSourceAliases.items as GenreSourceAliasRow[];
-const SOURCE_ALIASES_BY_GENRE = new Map<string, string[]>();
-for (const item of GENRE_SOURCE_ALIASES) {
-  const values = SOURCE_ALIASES_BY_GENRE.get(item.canonicalId) ?? [];
-  values.push(item.ja, item["zh-CN"], item.en);
-  SOURCE_ALIASES_BY_GENRE.set(item.canonicalId, values);
+interface VocabularyRow {
+  id: string;
+  ja: string;
+  "zh-CN": string;
+  en: string;
 }
 
-/**
- * Canonical Genre is defined by resources/vocabularies/genres.*.
- * Only the curated genre-source-aliases subset may extend importer matching.
- * The original 1,271-row user reference is intentionally not shipped or used
- * as a Canonical allowlist because it mixes themes, technical flags, campaigns
- * and other source-specific dimensions.
- */
+interface GenreSourceAliasRow {
+  canonicalId: string;
+  sourceId: string;
+  idSource: "fanza" | "javbus" | "javdb" | "javlibrary" | null;
+  idStatus: string;
+  ja: string;
+  "zh-CN": string;
+  en: string;
+  sources: string[];
+  note?: string;
+}
+
+interface ClassificationTermAliasRow {
+  term: string;
+  status: "approved" | "review-required";
+  targets: string[];
+  candidateTargets: string[];
+  sources: string[];
+  note?: string;
+}
+
+interface SourceOnlyRow extends VocabularyRow {
+  aliases?: string[];
+}
+
+const TERM_ALIASES = classificationTermAliases.items as ClassificationTermAliasRow[];
+const REVIEW_TERM_KEYS = new Set(TERM_ALIASES.filter((item) => item.status === "review-required").map((item) => termKey(item.term)));
+const APPROVED_SINGLE_TARGET_ALIASES = TERM_ALIASES.filter(
+  (item) => item.status === "approved" && item.targets.length === 1,
+);
+
+const GENRE_SOURCE_ALIASES = genreSourceAliases.items as GenreSourceAliasRow[];
+const EXTRA_ALIASES_BY_TARGET = new Map<string, string[]>();
+
+function registerTargetAlias(target: string, value: string): void {
+  const cleaned = value?.trim();
+  if (!cleaned || REVIEW_TERM_KEYS.has(termKey(cleaned))) return;
+  const values = EXTRA_ALIASES_BY_TARGET.get(target) ?? [];
+  values.push(cleaned);
+  EXTRA_ALIASES_BY_TARGET.set(target, values);
+}
+
+for (const item of APPROVED_SINGLE_TARGET_ALIASES) {
+  registerTargetAlias(item.targets[0], item.term);
+}
+for (const item of GENRE_SOURCE_ALIASES) {
+  const target = `genre:${item.canonicalId}`;
+  registerTargetAlias(target, item.ja);
+  registerTargetAlias(target, item["zh-CN"]);
+  registerTargetAlias(target, item.en);
+}
+
+/** Canonical Genre is defined by resources/vocabularies/genres.*. */
 export const CONTROLLED_GENRE_DEFINITIONS: readonly ControlledGenreDefinition[] =
-  (genreVocabulary.items as GenreVocabularyRow[]).map((item) => ({
+  (genreVocabulary.items as VocabularyRow[]).map((item) => ({
     id: item.id,
     names: { ja: item.ja, "zh-CN": item["zh-CN"], en: item.en },
-    aliases: uniqueClean([item.ja, item["zh-CN"], item.en, ...(SOURCE_ALIASES_BY_GENRE.get(item.id) ?? [])]),
+    aliases: uniqueClean([
+      item.ja,
+      item["zh-CN"],
+      item.en,
+      ...(EXTRA_ALIASES_BY_TARGET.get(`genre:${item.id}`) ?? []),
+    ]),
   }));
 
-const WORK_TYPE_BY_ALIAS = aliasIndex(WORK_TYPE_DEFINITIONS);
-const GENRE_BY_ALIAS = aliasIndex(CONTROLLED_GENRE_DEFINITIONS);
+/** Work Type is also a governed vocabulary, not an importer-local enum. */
+export const WORK_TYPE_DEFINITIONS: readonly WorkTypeDefinition[] =
+  (workTypeVocabulary.items as VocabularyRow[]).map((item) => ({
+    id: item.id,
+    names: { ja: item.ja, "zh-CN": item["zh-CN"], en: item.en },
+    aliases: uniqueClean([
+      item.ja,
+      item["zh-CN"],
+      item.en,
+      ...(EXTRA_ALIASES_BY_TARGET.get(`workType:${item.id}`) ?? []),
+    ]),
+  }));
+
+const SOURCE_ONLY_DEFINITIONS = (sourceOnlyVocabulary.items as SourceOnlyRow[]).map((item) => ({
+  id: item.id,
+  aliases: uniqueClean([
+    item.ja,
+    item["zh-CN"],
+    item.en,
+    ...(item.aliases ?? []),
+    ...(EXTRA_ALIASES_BY_TARGET.get(`sourceOnly:${item.id}`) ?? []),
+  ]),
+}));
+
+// Conflicting exact aliases fail closed: they are absent from the automatic
+// index and therefore surface as unmapped/review material instead of guessing.
+const WORK_TYPE_BY_ALIAS = uniqueAliasIndex(WORK_TYPE_DEFINITIONS);
+const GENRE_BY_ALIAS = uniqueAliasIndex(CONTROLLED_GENRE_DEFINITIONS);
+const SOURCE_ONLY_KEYS = uniqueAliasKeySet(SOURCE_ONLY_DEFINITIONS);
 
 /** Route mixed source classification terms into Localogue's canonical dimensions. */
 export function normalizeImportedClassifications(input: NormalizedImportCandidate): ImportClassificationNormalization {
@@ -112,7 +179,6 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
       } else if (prefixed.kind === "tag" && prefixed.value) {
         tags.add(prefixed.value);
       }
-      // publisher / code-family and other structural terms are evidence, not Canonical Genre/Tag.
       continue;
     }
 
@@ -138,6 +204,8 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
       continue;
     }
 
+    // review-required compound/ambiguous aliases intentionally arrive here.
+    // They remain visible to the existing unmapped-classification review flow.
     unmappedTerms.push(term);
   }
 
@@ -158,8 +226,7 @@ export function workTypeFor(value: string): WorkTypeDefinition | undefined {
 }
 
 export function genreFor(value: string): ControlledGenreDefinition | undefined {
-  const key = termKey(value);
-  return CONTROLLED_GENRE_DEFINITIONS.find((item) => item.id === value) ?? GENRE_BY_ALIAS.get(key);
+  return CONTROLLED_GENRE_DEFINITIONS.find((item) => item.id === value) ?? GENRE_BY_ALIAS.get(termKey(value));
 }
 
 export function workTypeDefinition(id: string): WorkTypeDefinition | undefined {
@@ -170,16 +237,8 @@ export function controlledGenreDefinition(idOrAlias: string): ControlledGenreDef
   return CONTROLLED_GENRE_DEFINITIONS.find((item) => item.id === idOrAlias) ?? GENRE_BY_ALIAS.get(termKey(idOrAlias));
 }
 
-const SOURCE_ONLY_CLASSIFICATION_KEYS = new Set([
-  "デビュー作", "デビュー作品", "出道作", "debut work", "debut",
-  "周年", "周年企划", "anniversary",
-  "ハイビジョン", "高清", "high definition", "hi def",
-  "有码", "censored",
-  "blu ray", "ブルーレイ",
-].map(termKey));
-
 function isSourceOnlyClassification(value: string): boolean {
-  return SOURCE_ONLY_CLASSIFICATION_KEYS.has(termKey(value));
+  return SOURCE_ONLY_KEYS.has(termKey(value));
 }
 
 function parseStructuralPrefix(value: string): { kind: "series" | "maker" | "label" | "publisher" | "tag"; value: string } | undefined {
@@ -206,8 +265,6 @@ function matchesStructuralContext(value: string, candidate: NormalizedImportCand
   if (candidate.label && termKey(candidate.label) === key) return true;
   if (candidate.series.some((item) => termKey(item) === key)) return true;
 
-  // Scrapers often repeat the alphabetic catalog prefix (OAE, MIDV, ...)
-  // as a genre/tag. It is part of the work code family, not a Genre.
   const codePrefix = candidate.code?.match(/^([A-Z]+)(?=[-_ ]?\d)/iu)?.[1];
   if (codePrefix && termKey(codePrefix) === key) return true;
   return false;
@@ -218,14 +275,42 @@ function matchesKnownPerson(value: string, candidate: NormalizedImportCandidate)
   return [...candidate.performers, ...candidate.directors].some((item) => termKey(item) === key);
 }
 
-function aliasIndex<T extends { aliases: readonly string[]; names: LocalizedText }>(items: readonly T[]): Map<string, T> {
-  const result = new Map<string, T>();
+function uniqueAliasIndex<T extends { id: string; aliases: readonly string[]; names: LocalizedText }>(items: readonly T[]): Map<string, T> {
+  const candidates = new Map<string, T>();
+  const conflicts = new Set<string>();
   for (const item of items) {
     for (const value of [...item.aliases, ...Object.values(item.names).filter((entry): entry is string => Boolean(entry))]) {
-      result.set(termKey(value), item);
+      const key = termKey(value);
+      if (!key || conflicts.has(key)) continue;
+      const existing = candidates.get(key);
+      if (existing && existing.id !== item.id) {
+        candidates.delete(key);
+        conflicts.add(key);
+      } else {
+        candidates.set(key, item);
+      }
     }
   }
-  return result;
+  return candidates;
+}
+
+function uniqueAliasKeySet(items: readonly { id: string; aliases: readonly string[] }[]): Set<string> {
+  const ownerByKey = new Map<string, string>();
+  const conflicts = new Set<string>();
+  for (const item of items) {
+    for (const value of item.aliases) {
+      const key = termKey(value);
+      if (!key || conflicts.has(key)) continue;
+      const owner = ownerByKey.get(key);
+      if (owner && owner !== item.id) {
+        ownerByKey.delete(key);
+        conflicts.add(key);
+      } else {
+        ownerByKey.set(key, item.id);
+      }
+    }
+  }
+  return new Set(ownerByKey.keys());
 }
 
 function termKey(value: string): string {

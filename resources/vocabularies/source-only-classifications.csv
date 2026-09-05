@@ -1,0 +1,52 @@
+id,category,ja,zh-CN,en,aliases,communityGenreIds
+lifecycle_first_shoot,lifecycle,初撮り,首次拍摄,First Shoot,,genre_000005
+lifecycle_debut,lifecycle,デビュー作,出道作,Debut Work,Debut|Debut Work|デビュー作品|出道作,genre_000006
+lifecycle_retirement,lifecycle,引退作,引退作,Retirement Work,,genre_000007
+lifecycle_comeback,lifecycle,復帰作,复出作,Comeback Work,,genre_000008
+lifecycle_anniversary,lifecycle,記念作,纪念作品,Anniversary Work,Anniversary|周年|周年企划,genre_000009
+media_dvd,media-format,DVD,DVD,DVD,,genre_000308
+media_blu_ray,media-format,Blu-ray,蓝光,Blu-ray,Blu Ray|Blu-ray（ブルーレイ）|ブルーレイ,genre_000309
+media_hd_dvd,media-format,HD DVD,HD DVD,HD DVD,,genre_000310
+media_vhs,media-format,VHS,VHS录像带,VHS,,genre_000311
+media_umd_video,media-format,UMD Video,UMD视频,UMD Video,,genre_000312
+media_microsd,media-format,MicroSD,MicroSD卡,MicroSD,,genre_000313
+media_digital_distribution,media-format,配信,数字发行,Digital Distribution,,genre_000314
+media_streaming,media-format,ストリーミング,流媒体,Streaming,,genre_000315
+media_download,media-format,ダウンロード,数字下载,Download,,genre_000316
+media_4k_uhd,media-format,4K UHD,4K超高清,4K UHD,,genre_000317
+media_full_hd,media-format,フルHD,全高清,Full HD,Full HD (FHD)|フルハイビジョン(FHD),genre_000318
+media_hd,media-format,HD,高清,HD,Hi-Def|High Definition|ハイビジョン|高清,genre_000319
+media_sd,media-format,SD,标清,Standard Definition,,genre_000320
+rating_r18,content-rating,R-18,R-18,R-18,,genre_000321
+rating_r15,content-rating,R-15,R-15,R-15,,genre_000322
+rating_adults_only,content-rating,成人指定,成人限定,Adults Only,,genre_000323
+region_asia,region,アジア,亚洲,Asia,,
+region_france,region,フランス,法国,France,,
+region_korea,region,韓国,韩国,Korea,,
+generic_normal,generic-source-bucket,ノーマル,普通,Normal,,
+generic_sexy,generic-source-bucket,セクシー,性感,Sexy,,
+marketing_topic_work,marketing,話題作,话题作品,Featured Work,,
+age_coded_shotacon,age-coded-source-term,ショタ,正太系,Shotacon,,
+age_coded_loli_style,age-coded-source-term,ロリ系,幼态系,Loli-style,,
+generic_professions,generic-source-bucket,職業色々,多种职业,Various Professions,,
+generic_adult,generic-source-bucket,アダルト,成人,Adult,,
+technical_chroma_key,production-technique,クロマキー,色键,Chroma Key,,
+technical_close_up,production-technique,局部アップ,局部特写,Close-up,,
+generic_culture,generic-source-bucket,カルチャー,文化,Culture,,
+technical_touch_typing,source-specific,タッチタイピング,触摸打字,Touch Typing,,
+provider_mgs_bonus,provider-specific,MGSだけのおまけ映像付き,含 MGS 独家附赠影像,MGS Exclusive Bonus Video,,
+provider_sample_video,provider-specific,サンプル動画,样片,Sample Video,,
+content_drug,content-warning,ドラッグ,药物题材,Drug-related,,
+taxonomy_section_theme,taxonomy-heading,主題,主题,Theme,,
+taxonomy_section_role,taxonomy-heading,キャラクター,角色分类,Character Section,,
+taxonomy_section_wardrobe,taxonomy-heading,コスチューム,服装分类,Costume Section,,
+taxonomy_section_body,taxonomy-heading,ボディタイプ,体型分类,Body Type Section,,
+taxonomy_section_act,taxonomy-heading,セックス行為,行为分类,Sex Acts Section,,
+taxonomy_section_practice,taxonomy-heading,セックスプレイ,玩法分类,Sex Play Section,,
+taxonomy_section_genre,taxonomy-heading,ジャンル,作品类别,Genre Section,,
+taxonomy_section_media,taxonomy-heading,メディア,媒体分类,Media Section,,
+region_taiwan,region,台湾,台湾,Taiwan,,
+technical_vertical_video,technical-format,縦動画,竖屏视频,Vertical Video,スマホ推奨縦動画,
+product_bundle,product-format,セット商品,套装商品,Bundle Product,,
+distribution_exclusive,distribution,独占配信,独家发行,Exclusive Distribution,FANZA配信限定,
+provider_marketing_campaign,provider-marketing,セール・キャンペーン,促销活动,Sale / Campaign,すべてのセール|日替わりセール|みんなのお気に入り30％OFF第1弾|FANZA7周年50％OFF第9弾|SODグループ30％OFF第2弾|セレブの友他30％OFF|ルナティックス30％OFF|ブランドストア30％OFF！|ポイント還元|期間限定セール,

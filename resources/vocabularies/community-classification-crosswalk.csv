@@ -1,0 +1,324 @@
+﻿communityId,facet,assignmentTarget,ja,zh-CN,en,targetKind,targetId,decision
+genre_000001,theme,genreIds,美少女,美少女,Beautiful Girl,genre,beautiful_girl,community-canonical-genre
+genre_000002,theme,genreIds,人妻,已婚女性,Married Woman,genre,married_woman,community-canonical-genre
+genre_000003,theme,genreIds,熟女,熟女,Mature Woman,genre,mature,community-canonical-genre
+genre_000004,theme,genreIds,素人,素人,Amateur,genre,amateur,community-canonical-genre
+genre_000005,theme,genreIds,初撮り,首次拍摄,First Shoot,sourceOnly,lifecycle_first_shoot,recognized-source-only
+genre_000006,theme,genreIds,デビュー作,出道作,Debut Work,sourceOnly,lifecycle_debut,recognized-source-only
+genre_000007,theme,genreIds,引退作,引退作,Retirement Work,sourceOnly,lifecycle_retirement,recognized-source-only
+genre_000008,theme,genreIds,復帰作,复出作,Comeback Work,sourceOnly,lifecycle_comeback,recognized-source-only
+genre_000009,theme,genreIds,記念作,纪念作品,Anniversary Work,sourceOnly,lifecycle_anniversary,recognized-source-only
+genre_000010,theme,genreIds,ファン感謝,粉丝感谢,Fan Appreciation,genre,fan_appreciation,community-canonical-genre
+genre_000011,theme,genreIds,単体作品,单体作品,Solo Performer Work,workType,solo,rerouted-from-community-genre
+genre_000012,theme,genreIds,企画作品,企划作品,Concept Work,workType,concept_work,rerouted-from-community-genre
+genre_000013,theme,genreIds,共演,共演,Co-starring,workType,co_starring,rerouted-from-community-genre
+genre_000014,theme,genreIds,ドラマ,剧情,Drama,genre,drama,community-canonical-genre
+genre_000015,theme,genreIds,ドキュメンタリー,纪录片,Documentary,genre,documentary,community-canonical-genre
+genre_000016,theme,genreIds,恋愛,恋爱,Romance,genre,romance,community-canonical-genre
+genre_000017,theme,genreIds,ラブコメ,爱情喜剧,Romantic Comedy,genre,romantic_comedy,community-canonical-genre
+genre_000018,theme,genreIds,コメディ,喜剧,Comedy,genre,comedy,community-canonical-genre
+genre_000019,theme,genreIds,サスペンス,悬疑,Suspense,genre,suspense,community-canonical-genre
+genre_000020,theme,genreIds,ホラー,恐怖,Horror,genre,horror,community-canonical-genre
+genre_000021,theme,genreIds,SF,科幻,Science Fiction,genre,science_fiction,community-canonical-genre
+genre_000022,theme,genreIds,ファンタジー,奇幻,Fantasy,genre,fantasy,community-canonical-genre
+genre_000023,theme,genreIds,パロディ,戏仿,Parody,genre,parody,community-canonical-genre
+genre_000024,theme,genreIds,時代劇,历史剧,Period Drama,genre,period_drama,community-canonical-genre
+genre_000025,theme,genreIds,旅行,旅行,Travel,genre,travel,community-canonical-genre
+genre_000026,theme,genreIds,温泉,温泉,Hot Spring,genre,hot_spring,community-canonical-genre
+genre_000027,theme,genreIds,学校,学校题材,School Setting,genre,school_setting,community-canonical-genre
+genre_000028,theme,genreIds,職場,职场题材,Workplace Setting,genre,workplace_setting,community-canonical-genre
+genre_000029,theme,genreIds,美容院,美容院,Beauty Salon,genre,beauty_salon,community-canonical-genre
+genre_000030,theme,genreIds,エステ,美容护理,Beauty Treatment,genre,beauty_treatment,community-canonical-genre
+genre_000031,theme,genreIds,病院,医院,Hospital Setting,genre,hospital_setting,community-canonical-genre
+genre_000032,theme,genreIds,スポーツ,运动,Sports,genre,sports,community-canonical-genre
+genre_000033,theme,genreIds,ダンス,舞蹈,Dance,genre,dance,community-canonical-genre
+genre_000034,theme,genreIds,時間停止,时间停止,Time Stop,genre,time_stop,community-canonical-genre
+genre_000035,theme,genreIds,透明人間,隐形人,Invisible Person,genre,invisible_person,community-canonical-genre
+genre_000036,theme,genreIds,入れ替わり,身份互换,Body Swap,genre,body_swap,community-canonical-genre
+genre_000037,theme,genreIds,催眠,催眠,Hypnosis,genre,hypnosis,community-canonical-genre
+genre_000038,theme,genreIds,洗脳,洗脑,Mind Control,genre,mind_control,community-canonical-genre
+genre_000039,theme,genreIds,変身,变身,Transformation,genre,transformation,community-canonical-genre
+genre_000040,theme,genreIds,女体化,女性化,Feminization,genre,feminization,community-canonical-genre
+genre_000041,theme,genreIds,恋人,情侣,Couple,genre,couple,community-canonical-genre
+genre_000042,theme,genreIds,友達,朋友,Friends,genre,friends,community-canonical-genre
+genre_000043,theme,genreIds,幼なじみ,青梅竹马,Childhood Friends,genre,childhood_friend,community-canonical-genre
+genre_000044,theme,genreIds,家族,家庭,Family,genre,family,community-canonical-genre
+genre_000045,theme,genreIds,近親設定,近亲设定,Incest Theme,genre,incest_theme,community-canonical-genre
+genre_000046,theme,genreIds,不倫,婚外情,Infidelity,genre,infidelity,community-canonical-genre
+genre_000047,theme,genreIds,寝取られ,被夺爱,Netorare,genre,netorare,community-canonical-genre
+genre_000048,theme,genreIds,寝取り,夺爱,Netori,genre,netori,community-canonical-genre
+genre_000049,theme,genreIds,浮気,出轨,Cheating,genre,cheating,community-canonical-genre
+genre_000050,theme,genreIds,誘惑,诱惑,Seduction,genre,seduction,community-canonical-genre
+genre_000051,theme,genreIds,逆ナン,女性搭讪,Reverse Pickup,genre,reverse_pickup,community-canonical-genre
+genre_000052,theme,genreIds,ナンパ,搭讪,Pickup,genre,pickup,community-canonical-genre
+genre_000053,theme,genreIds,痴漢,痴汉题材,Groping Theme,genre,groping_theme,community-canonical-genre
+genre_000054,theme,genreIds,盗撮,偷拍题材,Hidden Camera Theme,genre,hidden_camera,community-canonical-genre
+genre_000055,theme,genreIds,覗き,偷窥题材,Voyeurism,genre,voyeurism,community-canonical-genre
+genre_000056,theme,genreIds,露出,公开暴露,Public Exposure,genre,public_exposure,community-canonical-genre
+genre_000057,theme,genreIds,羞恥,羞耻,Humiliation,genre,humiliation,community-canonical-genre
+genre_000058,theme,genreIds,いたずら,恶作剧,Prank,genre,prank,community-canonical-genre
+genre_000059,theme,genreIds,フェチ,恋物,Fetish,genre,fetish,community-canonical-genre
+genre_000060,theme,genreIds,脚フェチ,腿控,Leg Fetish,genre,leg_fetish,community-canonical-genre
+genre_000061,theme,genreIds,足フェチ,足控,Foot Fetish,genre,foot_fetish,community-canonical-genre
+genre_000062,theme,genreIds,乳フェチ,乳房偏好,Breast Fetish,genre,breast_fetish,community-canonical-genre
+genre_000063,theme,genreIds,尻フェチ,臀部偏好,Butt Fetish,genre,butt_fetish,community-canonical-genre
+genre_000064,theme,genreIds,匂いフェチ,气味偏好,Scent Fetish,genre,scent_fetish,community-canonical-genre
+genre_000065,theme,genreIds,汗,汗水,Sweat,genre,sweat,community-canonical-genre
+genre_000066,theme,genreIds,日焼け,晒黑,Tanned,genre,tanned,community-canonical-genre
+genre_000067,theme,genreIds,全裸,全裸,Full Nudity,genre,full_nudity,community-canonical-genre
+genre_000068,theme,genreIds,恋愛リアリティ,恋爱真人秀,Dating Reality,genre,dating_reality,community-canonical-genre
+genre_000069,theme,genreIds,主観,主观视角,Point of View,genre,pov,community-canonical-genre
+genre_000070,theme,genreIds,ハメ撮り,第一人称拍摄,POV Recording,genre,pov_recording,community-canonical-genre
+genre_000071,role,genreIds,アイドル,偶像,Idol,genre,idol,community-canonical-genre
+genre_000072,role,genreIds,芸能人,艺人,Celebrity,genre,celebrity,community-canonical-genre
+genre_000073,role,genreIds,女子アナ,女主播,Female Announcer,genre,female_announcer,community-canonical-genre
+genre_000074,role,genreIds,女優,女演员,Actress,genre,actress,community-canonical-genre
+genre_000075,role,genreIds,モデル,模特,Model,genre,model,community-canonical-genre
+genre_000076,role,genreIds,グラビアアイドル,写真偶像,Gravure Idol,genre,gravure_idol,community-canonical-genre
+genre_000077,role,genreIds,学生,学生,Student,genre,student,community-canonical-genre
+genre_000078,role,genreIds,女子大生,女大学生,Female College Student,genre,female_college_student,community-canonical-genre
+genre_000079,role,genreIds,女子校生,女高中生,Female High School Student,genre,female_high_school_student,community-canonical-genre
+genre_000080,role,genreIds,先生,教师,Teacher,genre,teacher,community-canonical-genre
+genre_000081,role,genreIds,女教師,女教师,Female Teacher,genre,female_teacher,community-canonical-genre
+genre_000082,role,genreIds,家庭教師,家庭教师,Private Tutor,genre,private_tutor,community-canonical-genre
+genre_000083,role,genreIds,講師,讲师,Instructor,genre,instructor,community-canonical-genre
+genre_000084,role,genreIds,OL,职场女性,Office Lady,genre,office_lady,community-canonical-genre
+genre_000085,role,genreIds,秘書,秘书,Secretary,genre,secretary,community-canonical-genre
+genre_000086,role,genreIds,受付嬢,前台接待,Receptionist,genre,receptionist,community-canonical-genre
+genre_000087,role,genreIds,店員,店员,Shop Clerk,genre,shop_clerk,community-canonical-genre
+genre_000088,role,genreIds,ウェイトレス,服务员,Waitress,genre,waitress,community-canonical-genre
+genre_000089,role,genreIds,看護師,护士,Nurse,genre,nurse,community-canonical-genre
+genre_000090,role,genreIds,女医,女医生,Female Doctor,genre,female_doctor,community-canonical-genre
+genre_000091,role,genreIds,女検事,女检察官,Female Prosecutor,genre,female_prosecutor,community-canonical-genre
+genre_000092,role,genreIds,警察官,警察,Police Officer,genre,police_officer,community-canonical-genre
+genre_000093,role,genreIds,客室乗務員,空乘,Flight Attendant,genre,flight_attendant,community-canonical-genre
+genre_000094,role,genreIds,車掌,列车乘务员,Train Conductor,genre,train_conductor,community-canonical-genre
+genre_000095,role,genreIds,美容師,美发师,Hairdresser,genre,hairdresser,community-canonical-genre
+genre_000096,role,genreIds,エステティシャン,美容师,Esthetician,genre,esthetician,community-canonical-genre
+genre_000097,role,genreIds,女将,女掌柜,Inn Proprietress,genre,inn_proprietress,community-canonical-genre
+genre_000098,role,genreIds,女主人,女主人,Hostess,genre,hostess,community-canonical-genre
+genre_000099,role,genreIds,メイド,女仆,Maid,genre,maid,community-canonical-genre
+genre_000100,role,genreIds,巫女,巫女,Shrine Maiden,genre,shrine_maiden,community-canonical-genre
+genre_000101,role,genreIds,シスター,修女,Nun,genre,nun,community-canonical-genre
+genre_000102,role,genreIds,花嫁,新娘,Bride,genre,bride,community-canonical-genre
+genre_000103,role,genreIds,若妻,年轻妻子,Young Wife,genre,young_wife,community-canonical-genre
+genre_000104,role,genreIds,未亡人,寡妇,Widow,genre,widow,community-canonical-genre
+genre_000105,role,genreIds,母,母亲,Mother,genre,mother,community-canonical-genre
+genre_000106,role,genreIds,義母,继母,Stepmother,genre,stepmother,community-canonical-genre
+genre_000107,role,genreIds,姉,姐姐,Older Sister,genre,older_sister,community-canonical-genre
+genre_000108,role,genreIds,妹,妹妹,Younger Sister,genre,younger_sister,community-canonical-genre
+genre_000109,role,genreIds,娘,女儿,Daughter,genre,daughter,community-canonical-genre
+genre_000110,role,genreIds,お嬢様,大小姐,Young Lady,genre,young_lady,community-canonical-genre
+genre_000111,role,genreIds,令嬢,千金小姐,Heiress,genre,heiress,community-canonical-genre
+genre_000112,role,genreIds,幼なじみ,青梅竹马,Childhood Friend,genre,childhood_friend,community-canonical-genre
+genre_000113,role,genreIds,ギャル,辣妹,Gyaru,genre,gyaru,community-canonical-genre
+genre_000114,role,genreIds,清楚系,清纯系,Innocent Type,genre,innocent_type,community-canonical-genre
+genre_000115,role,genreIds,童顔,童颜,Baby-faced,genre,baby_faced,community-canonical-genre
+genre_000116,role,genreIds,熟女,熟女角色,Mature Woman Role,genre,mature,community-canonical-genre
+genre_000117,role,genreIds,人妻,人妻角色,Married Woman Role,genre,married_woman,community-canonical-genre
+genre_000118,role,genreIds,素人,素人角色,Amateur Role,genre,amateur,community-canonical-genre
+genre_000119,role,genreIds,女戦士,女战士,Female Warrior,genre,female_warrior,community-canonical-genre
+genre_000120,role,genreIds,くノ一,女忍者,Kunoichi,genre,kunoichi,community-canonical-genre
+genre_000121,role,genreIds,格闘家,格斗家,Martial Artist,genre,martial_artist,community-canonical-genre
+genre_000122,role,genreIds,お姫様,公主,Princess,genre,princess,community-canonical-genre
+genre_000123,role,genreIds,女王様,女王,Dominatrix,genre,dominatrix,community-canonical-genre
+genre_000124,role,genreIds,奴隷,奴隶,Slave Role,genre,slave,community-canonical-genre
+genre_000125,role,genreIds,男の娘,伪娘,Feminine Boy,genre,feminine_boy,community-canonical-genre
+genre_000126,role,genreIds,トランスジェンダー女性,跨性别女性,Transgender Woman,genre,transgender_woman,community-canonical-genre
+genre_000127,role,genreIds,男性出演者,男演员,Male Performer,genre,male_performer,community-canonical-genre
+genre_000128,role,genreIds,高齢男性,高龄男性,Older Man,genre,older_man,community-canonical-genre
+genre_000129,role,genreIds,外国人出演者,外国演员,Foreign Performer,genre,foreign_performer,community-canonical-genre
+genre_000130,role,genreIds,アジア系出演者,亚洲演员,Asian Performer,genre,asian_performer,community-canonical-genre
+genre_000131,role,genreIds,黒人出演者,黑人演员,Black Performer,genre,black_performer,community-canonical-genre
+genre_000132,role,genreIds,白人出演者,白人演员,White Performer,genre,white_performer,community-canonical-genre
+genre_000133,wardrobe,genreIds,制服,制服,Uniform,genre,uniform,community-canonical-genre
+genre_000134,wardrobe,genreIds,セーラー服,水手服,Sailor Uniform,genre,sailor_uniform,community-canonical-genre
+genre_000135,wardrobe,genreIds,学校制服,校服,School Uniform,genre,school_uniform,community-canonical-genre
+genre_000136,wardrobe,genreIds,体操着,运动服,Gym Clothes,genre,gym_clothes,community-canonical-genre
+genre_000137,wardrobe,genreIds,ブルマー,运动短裤,Bloomers,genre,bloomers,community-canonical-genre
+genre_000138,wardrobe,genreIds,スクール水着,学校泳装,School Swimsuit,genre,school_swimsuit,community-canonical-genre
+genre_000139,wardrobe,genreIds,水着,泳装,Swimsuit,genre,swimsuit,community-canonical-genre
+genre_000140,wardrobe,genreIds,ビキニ,比基尼,Bikini,genre,bikini,community-canonical-genre
+genre_000141,wardrobe,genreIds,競泳水着,竞泳泳装,Competition Swimsuit,genre,competition_swimsuit,community-canonical-genre
+genre_000142,wardrobe,genreIds,下着,内衣,Lingerie,genre,lingerie,community-canonical-genre
+genre_000143,wardrobe,genreIds,ブラジャー,胸罩,Bra,genre,bra,community-canonical-genre
+genre_000144,wardrobe,genreIds,パンティ,内裤,Panties,genre,panties,community-canonical-genre
+genre_000145,wardrobe,genreIds,ベビードール,娃娃装,Babydoll,genre,babydoll,community-canonical-genre
+genre_000146,wardrobe,genreIds,ネグリジェ,睡裙,Negligee,genre,negligee,community-canonical-genre
+genre_000147,wardrobe,genreIds,裸エプロン,裸体围裙,Nude Apron,genre,nude_apron,community-canonical-genre
+genre_000148,wardrobe,genreIds,エプロン,围裙,Apron,genre,apron,community-canonical-genre
+genre_000149,wardrobe,genreIds,メイド服,女仆装,Maid Outfit,genre,maid_outfit,community-canonical-genre
+genre_000150,wardrobe,genreIds,ナース服,护士服,Nurse Outfit,genre,nurse_outfit,community-canonical-genre
+genre_000151,wardrobe,genreIds,OL服,OL装,Office Wear,genre,office_wear,community-canonical-genre
+genre_000152,wardrobe,genreIds,スーツ,西装,Suit,genre,suit,community-canonical-genre
+genre_000153,wardrobe,genreIds,和服,和服,Kimono,genre,kimono,community-canonical-genre
+genre_000154,wardrobe,genreIds,浴衣,浴衣,Yukata,genre,yukata,community-canonical-genre
+genre_000155,wardrobe,genreIds,喪服,丧服,Mourning Dress,genre,mourning_dress,community-canonical-genre
+genre_000156,wardrobe,genreIds,チャイナドレス,旗袍,Cheongsam,genre,cheongsam,community-canonical-genre
+genre_000157,wardrobe,genreIds,ウェディングドレス,婚纱,Wedding Dress,genre,wedding_dress,community-canonical-genre
+genre_000158,wardrobe,genreIds,コスプレ,角色扮演,Cosplay,genre,cosplay,community-canonical-genre
+genre_000159,wardrobe,genreIds,アニメコスプレ,动漫角色扮演,Anime Cosplay,genre,anime_cosplay,community-canonical-genre
+genre_000160,wardrobe,genreIds,バニーガール,兔女郎,Bunny Girl,genre,bunny_girl,community-canonical-genre
+genre_000161,wardrobe,genreIds,猫耳,猫耳,Cat Ears,genre,cat_ears,community-canonical-genre
+genre_000162,wardrobe,genreIds,ゴスロリ,哥特萝莉,Gothic Lolita,genre,gothic_lolita,community-canonical-genre
+genre_000163,wardrobe,genreIds,ミニスカート,迷你裙,Miniskirt,genre,miniskirt,community-canonical-genre
+genre_000164,wardrobe,genreIds,超ミニスカート,超短裙,Micro Miniskirt,genre,micro_miniskirt,community-canonical-genre
+genre_000165,wardrobe,genreIds,タイトスカート,紧身裙,Pencil Skirt,genre,pencil_skirt,community-canonical-genre
+genre_000166,wardrobe,genreIds,ストッキング,丝袜,Stockings,genre,stockings,community-canonical-genre
+genre_000167,wardrobe,genreIds,パンスト,连裤袜,Pantyhose,genre,pantyhose,community-canonical-genre
+genre_000168,wardrobe,genreIds,ニーハイ,过膝袜,Thigh-high Socks,genre,thigh_high_socks,community-canonical-genre
+genre_000169,wardrobe,genreIds,ルーズソックス,泡泡袜,Loose Socks,genre,loose_socks,community-canonical-genre
+genre_000170,wardrobe,genreIds,ブーツ,长靴,Boots,genre,boots,community-canonical-genre
+genre_000171,wardrobe,genreIds,ハイヒール,高跟鞋,High Heels,genre,high_heels,community-canonical-genre
+genre_000172,wardrobe,genreIds,眼鏡,眼镜,Glasses,genre,glasses,community-canonical-genre
+genre_000173,wardrobe,genreIds,帽子,帽子,Hat,genre,hat,community-canonical-genre
+genre_000174,wardrobe,genreIds,マスク,口罩,Mask,genre,mask,community-canonical-genre
+genre_000175,wardrobe,genreIds,全身タイツ,全身紧身衣,Bodysuit,genre,bodysuit,community-canonical-genre
+genre_000176,wardrobe,genreIds,レオタード,紧身衣,Leotard,genre,leotard,community-canonical-genre
+genre_000177,wardrobe,genreIds,ボンデージ,束缚装,Bondage Wear,genre,bondage_wear,community-canonical-genre
+genre_000178,wardrobe,genreIds,女装,女装,Cross-dressing,genre,cross_dressing,community-canonical-genre
+genre_000179,wardrobe,genreIds,着衣,着衣,Clothed,genre,clothed,community-canonical-genre
+genre_000180,wardrobe,genreIds,半裸,半裸,Partially Nude,genre,partially_nude,community-canonical-genre
+genre_000181,body,genreIds,巨乳,巨乳,Big Bust,genre,big_bust,community-canonical-genre
+genre_000182,body,genreIds,爆乳,爆乳,Very Large Bust,genre,very_large_bust,community-canonical-genre
+genre_000183,body,genreIds,超乳,超大胸部,Extremely Large Bust,genre,extremely_large_bust,community-canonical-genre
+genre_000184,body,genreIds,貧乳,贫乳,Small Bust,genre,small_bust,community-canonical-genre
+genre_000185,body,genreIds,微乳,微乳,Petite Bust,genre,petite_bust,community-canonical-genre
+genre_000186,body,genreIds,美乳,美胸,Beautiful Breasts,genre,beautiful_breasts,community-canonical-genre
+genre_000187,body,genreIds,巨尻,巨臀,Big Butt,genre,big_butt,community-canonical-genre
+genre_000188,body,genreIds,美尻,美臀,Beautiful Butt,genre,beautiful_butt,community-canonical-genre
+genre_000189,body,genreIds,スレンダー,苗条,Slender,genre,slender,community-canonical-genre
+genre_000190,body,genreIds,ぽっちゃり,丰满,Chubby,genre,chubby,community-canonical-genre
+genre_000191,body,genreIds,肥満,肥胖,Plus-size,genre,plus_size,community-canonical-genre
+genre_000192,body,genreIds,長身,高挑,Tall,genre,tall,community-canonical-genre
+genre_000193,body,genreIds,小柄,娇小,Petite,genre,petite,community-canonical-genre
+genre_000194,body,genreIds,筋肉質,肌肉型,Muscular,genre,muscular,community-canonical-genre
+genre_000195,body,genreIds,日焼け,晒黑肤色,Tanned,genre,tanned,community-canonical-genre
+genre_000196,body,genreIds,色白,白皙,Fair-skinned,genre,fair_skinned,community-canonical-genre
+genre_000197,body,genreIds,美脚,美腿,Beautiful Legs,genre,beautiful_legs,community-canonical-genre
+genre_000198,body,genreIds,妊婦,孕妇,Pregnant,genre,pregnant,community-canonical-genre
+genre_000199,body,genreIds,パイパン,无阴毛,Hairless,genre,hairless,community-canonical-genre
+genre_000200,body,genreIds,剛毛,体毛浓密,Hairy,genre,hairy,community-canonical-genre
+genre_000201,body,genreIds,童顔,童颜,Baby-faced,genre,baby_faced,community-canonical-genre
+genre_000202,body,genreIds,成熟体型,成熟体型,Mature Figure,genre,mature_figure,community-canonical-genre
+genre_000203,act,genreIds,キス,接吻,Kissing,genre,kissing,community-canonical-genre
+genre_000204,act,genreIds,ディープキス,深吻,Deep Kissing,genre,deep_kissing,community-canonical-genre
+genre_000205,act,genreIds,フェラ,口交,Fellatio,genre,blowjob,community-canonical-genre
+genre_000206,act,genreIds,イラマチオ,深喉,Deep Throat,genre,deep_throat,community-canonical-genre
+genre_000207,act,genreIds,クンニ,舔阴,Cunnilingus,genre,cunnilingus,community-canonical-genre
+genre_000208,act,genreIds,手コキ,手交,Handjob,genre,handjob,community-canonical-genre
+genre_000209,act,genreIds,足コキ,足交,Footjob,genre,footjob,community-canonical-genre
+genre_000210,act,genreIds,パイズリ,乳交,Paizuri,genre,titjob,community-canonical-genre
+genre_000211,act,genreIds,素股,股间摩擦,Intercrural Sex,genre,intercrural_sex,community-canonical-genre
+genre_000212,act,genreIds,騎乗位,女上位,Cowgirl,genre,cowgirl,community-canonical-genre
+genre_000213,act,genreIds,正常位,传教士体位,Missionary,genre,missionary,community-canonical-genre
+genre_000214,act,genreIds,後背位,后入式,Rear-entry,genre,rear_entry,community-canonical-genre
+genre_000215,act,genreIds,立ちバック,站立后入,Standing Rear-entry,genre,standing_rear_entry,community-canonical-genre
+genre_000216,act,genreIds,69,69式,Sixty-nine,genre,sixty_nine,community-canonical-genre
+genre_000217,act,genreIds,アナル,肛交,Anal Sex,genre,anal,community-canonical-genre
+genre_000218,act,genreIds,中出し,体内射精,Creampie,genre,creampie,community-canonical-genre
+genre_000219,act,genreIds,顔射,颜射,Facial,genre,facial,community-canonical-genre
+genre_000220,act,genreIds,口内発射,口内射精,Oral Ejaculation,genre,oral_ejaculation,community-canonical-genre
+genre_000221,act,genreIds,飲精,吞精,Semen Swallowing,genre,semen_swallowing,community-canonical-genre
+genre_000222,act,genreIds,ぶっかけ,多人射精,Bukkake,genre,bukkake,community-canonical-genre
+genre_000223,act,genreIds,ごっくん,吞饮精液,Gokkun,genre,cum_swallowing,community-canonical-genre
+genre_000224,act,genreIds,放尿,排尿,Urination,genre,urination,community-canonical-genre
+genre_000225,act,genreIds,潮吹き,潮吹,Squirting,genre,squirting,community-canonical-genre
+genre_000226,act,genreIds,大量潮吹き,大量潮吹,Heavy Squirting,genre,heavy_squirting,community-canonical-genre
+genre_000227,act,genreIds,指入れ,指交,Fingering,genre,fingering,community-canonical-genre
+genre_000228,act,genreIds,フィスト,拳交,Fisting,genre,fisting,community-canonical-genre
+genre_000229,act,genreIds,複数プレイ,多人性行为,Group Sex,genre,group_sex,community-canonical-genre
+genre_000230,act,genreIds,3P,三人性行为,Threesome,genre,threesome,community-canonical-genre
+genre_000231,act,genreIds,乱交,群交,Orgy,genre,orgy,community-canonical-genre
+genre_000232,act,genreIds,自慰,自慰,Masturbation,genre,masturbation,community-canonical-genre
+genre_000233,act,genreIds,相互自慰,相互自慰,Mutual Masturbation,genre,mutual_masturbation,community-canonical-genre
+genre_000234,act,genreIds,ローション,润滑液玩法,Lotion Play,genre,lotion_play,community-canonical-genre
+genre_000235,act,genreIds,マッサージ,按摩,Massage,genre,massage,community-canonical-genre
+genre_000236,act,genreIds,オイル,精油按摩,Oil Play,genre,oil_play,community-canonical-genre
+genre_000237,act,genreIds,乳首責め,乳头刺激,Nipple Stimulation,genre,nipple_stimulation,community-canonical-genre
+genre_000238,act,genreIds,乳揉み,揉胸,Breast Fondling,genre,breast_fondling,community-canonical-genre
+genre_000239,act,genreIds,尻叩き,打屁股,Spanking,genre,spanking,community-canonical-genre
+genre_000240,act,genreIds,言葉責め,言语调教,Dirty Talk,genre,dirty_talk,community-canonical-genre
+genre_000241,act,genreIds,痴女,主动女性,Seductress,genre,seductress,community-canonical-genre
+genre_000242,act,genreIds,男潮吹き,男性潮吹,Male Squirting,genre,male_squirting,community-canonical-genre
+genre_000243,practice,genreIds,SM,SM,BDSM,genre,sm,community-canonical-genre
+genre_000244,practice,genreIds,緊縛,绳缚,Kinbaku,genre,kinbaku,community-canonical-genre
+genre_000245,practice,genreIds,拘束,拘束,Restraint,genre,bondage,community-canonical-genre
+genre_000246,practice,genreIds,調教,调教,Training,genre,training,community-canonical-genre
+genre_000247,practice,genreIds,奴隷,奴隶玩法,Slave Play,genre,slave,community-canonical-genre
+genre_000248,practice,genreIds,女王様,女王玩法,Dominatrix Play,genre,dominatrix,community-canonical-genre
+genre_000249,practice,genreIds,羞恥プレイ,羞耻玩法,Humiliation Play,genre,humiliation_play,community-canonical-genre
+genre_000250,practice,genreIds,露出プレイ,露出玩法,Exhibitionism,genre,exhibitionism,community-canonical-genre
+genre_000251,practice,genreIds,野外,户外,Outdoor,genre,outdoor,community-canonical-genre
+genre_000252,practice,genreIds,カーセックス,车内性行为,Car Sex,genre,car_sex,community-canonical-genre
+genre_000253,practice,genreIds,風呂,浴室,Bath,genre,bath,community-canonical-genre
+genre_000254,practice,genreIds,泡風呂,泡泡浴,Bubble Bath,genre,bubble_bath,community-canonical-genre
+genre_000255,practice,genreIds,温泉プレイ,温泉玩法,Hot Spring Play,genre,hot_spring_play,community-canonical-genre
+genre_000256,practice,genreIds,玩具,成人玩具,Sex Toys,genre,sex_toys,community-canonical-genre
+genre_000257,practice,genreIds,バイブ,振动棒,Vibrator,genre,vibrator,community-canonical-genre
+genre_000258,practice,genreIds,ディルド,仿真阳具,Dildo,genre,dildo,community-canonical-genre
+genre_000259,practice,genreIds,ローター,跳蛋,Bullet Vibrator,genre,bullet_vibrator,community-canonical-genre
+genre_000260,practice,genreIds,異物挿入,异物插入,Object Insertion,genre,object_insertion,community-canonical-genre
+genre_000261,practice,genreIds,媚薬,催情药设定,Aphrodisiac Theme,genre,aphrodisiac_theme,community-canonical-genre
+genre_000262,practice,genreIds,触手,触手,Tentacles,genre,tentacles,community-canonical-genre
+genre_000263,practice,genreIds,催眠プレイ,催眠玩法,Hypnosis Play,genre,hypnosis_play,community-canonical-genre
+genre_000264,practice,genreIds,盗撮風,偷拍风格,Hidden-camera Style,genre,hidden_camera_style,community-canonical-genre
+genre_000265,practice,genreIds,ハメ撮り,第一人称实录,POV Sex,genre,pov_recording,community-canonical-genre
+genre_000266,practice,genreIds,ナンパもの,搭讪企划,Pickup Production,genre,pickup_production,community-canonical-genre
+genre_000267,practice,genreIds,痴漢もの,痴汉企划,Groping Production,genre,groping_production,community-canonical-genre
+genre_000268,practice,genreIds,レズビアン,女同性题材,Lesbian,genre,lesbian,community-canonical-genre
+genre_000269,practice,genreIds,ゲイ,男同性题材,Gay,genre,gay,community-canonical-genre
+genre_000270,practice,genreIds,バイセクシュアル,双性恋题材,Bisexual,genre,bisexual,community-canonical-genre
+genre_000271,practice,genreIds,男女混合,男女混合,Mixed-gender,genre,mixed_gender,community-canonical-genre
+genre_000272,practice,genreIds,フェムドム,女性主导,Femdom,genre,femdom,community-canonical-genre
+genre_000273,production,workType,成人向け実写,成人实拍,Adult Live Action,workType,adult_live_action,community-work-type
+genre_000274,production,workType,成人向けアニメ,成人动画,Adult Animation,workType,adult_animation,community-work-type
+genre_000275,production,workType,イメージビデオ,写真影像,Image Video,workType,image_video,community-work-type
+genre_000276,production,workType,ピンク映画,粉红电影,Pink Film,workType,pink_film,community-work-type
+genre_000277,production,workType,オリジナル作品,原创作品,Original Work,workType,original_work,community-work-type
+genre_000278,production,workType,原作もの,改编作品,Adaptation,workType,adaptation,community-work-type
+genre_000279,production,workType,総集編,合集,Compilation,workType,compilation,community-work-type
+genre_000280,production,workType,ベスト盤,精选集,Best-of Compilation,workType,best_of,community-work-type
+genre_000281,production,workType,オムニバス,短篇合集,Omnibus,workType,omnibus,community-work-type
+genre_000282,production,workType,単体作品,单体作品,Single-performer Work,workType,solo,community-work-type
+genre_000283,production,workType,共演作品,共演作品,Co-starring Work,workType,co_starring,community-work-type
+genre_000284,production,workType,VR専用,VR专用,VR-only,workType,vr,community-work-type
+genre_000285,production,workType,3D,3D,3D,workType,three_d,community-work-type
+genre_000286,production,workType,主観映像,主观视角影像,POV Video,workType,pov_video,community-work-type
+genre_000287,production,workType,ドラマ作品,剧情作品,Drama Production,workType,drama_production,community-work-type
+genre_000288,production,workType,ドキュメンタリー作品,纪录片作品,Documentary Production,workType,documentary_production,community-work-type
+genre_000289,production,workType,インタビュー,访谈,Interview,workType,interview,community-work-type
+genre_000290,production,workType,How-to,教学,Instructional,workType,instructional,community-work-type
+genre_000291,production,workType,投稿作品,投稿作品,Submitted Work,workType,submitted_work,community-work-type
+genre_000292,production,workType,自主制作,独立制作,Independent Production,workType,independent_production,community-work-type
+genre_000293,production,workType,海外作品,海外作品,Overseas Production,workType,overseas_production,community-work-type
+genre_000294,production,workType,輸入作品,进口作品,Imported Work,workType,imported_work,community-work-type
+genre_000295,production,workType,女性向け,女性向,For Women,workType,for_women,community-work-type
+genre_000296,production,workType,男性向け,男性向,For Men,workType,for_men,community-work-type
+genre_000297,production,workType,同人作品,同人作品,Doujin Work,workType,doujin_work,community-work-type
+genre_000298,production,workType,無修正,无码,Uncensored,workType,uncensored,community-work-type
+genre_000299,production,workType,モザイク,有码,Censored,workType,censored,community-work-type
+genre_000300,production,workType,薄消し,薄码,Light Mosaic,workType,light_mosaic,community-work-type
+genre_000301,production,workType,字幕付き,带字幕,Subtitled,workType,subtitled,community-work-type
+genre_000302,production,workType,多言語字幕,多语言字幕,Multilingual Subtitles,workType,multilingual_subtitles,community-work-type
+genre_000303,production,workType,リマスター,重制,Remastered,workType,remastered,community-work-type
+genre_000304,production,workType,4時間以上,4小时以上,Over Four Hours,workType,over_four_hours,community-work-type
+genre_000305,production,workType,短編,短片,Short Form,workType,short_form,community-work-type
+genre_000306,production,workType,長編,长片,Feature-length,workType,feature_length,community-work-type
+genre_000307,production,workType,シリーズ作品,系列作品,Series Entry,workType,series_entry,community-work-type
+genre_000308,media,mediaFormat,DVD,DVD,DVD,sourceOnly,media_dvd,recognized-source-only
+genre_000309,media,mediaFormat,Blu-ray,蓝光,Blu-ray,sourceOnly,media_blu_ray,recognized-source-only
+genre_000310,media,mediaFormat,HD DVD,HD DVD,HD DVD,sourceOnly,media_hd_dvd,recognized-source-only
+genre_000311,media,mediaFormat,VHS,VHS录像带,VHS,sourceOnly,media_vhs,recognized-source-only
+genre_000312,media,mediaFormat,UMD Video,UMD视频,UMD Video,sourceOnly,media_umd_video,recognized-source-only
+genre_000313,media,mediaFormat,MicroSD,MicroSD卡,MicroSD,sourceOnly,media_microsd,recognized-source-only
+genre_000314,media,mediaFormat,配信,数字发行,Digital Distribution,sourceOnly,media_digital_distribution,recognized-source-only
+genre_000315,media,mediaFormat,ストリーミング,流媒体,Streaming,sourceOnly,media_streaming,recognized-source-only
+genre_000316,media,mediaFormat,ダウンロード,数字下载,Download,sourceOnly,media_download,recognized-source-only
+genre_000317,media,mediaFormat,4K UHD,4K超高清,4K UHD,sourceOnly,media_4k_uhd,recognized-source-only
+genre_000318,media,mediaFormat,フルHD,全高清,Full HD,sourceOnly,media_full_hd,recognized-source-only
+genre_000319,media,mediaFormat,HD,高清,HD,sourceOnly,media_hd,recognized-source-only
+genre_000320,media,mediaFormat,SD,标清,Standard Definition,sourceOnly,media_sd,recognized-source-only
+genre_000321,rating,contentRating,R-18,R-18,R-18,sourceOnly,rating_r18,recognized-source-only
+genre_000322,rating,contentRating,R-15,R-15,R-15,sourceOnly,rating_r15,recognized-source-only
+genre_000323,rating,contentRating,成人指定,成人限定,Adults Only,sourceOnly,rating_adults_only,recognized-source-only

@@ -1,4 +1,46 @@
 # Changelog
+
+## V1-25C - Provider ID Identity / Coverage Round 2
+
+- 产品版本继续保持 `0.1.25`；继续建立在尚未提交的 V1-25A/B Provider Coverage 工作上。
+- 修复 `report-provider-coverage.mjs` 的 ESLint unused `error` warning。
+- `genre-source-aliases.*` 新增 `idSource` / `idStatus`：`sourceId` 的 Provider 身份与跨站 label Evidence (`sources`) 正式分离。
+- 旧 67 条 Alias 中，32 条 JAVDB legacy web-filter ID 与 1 条已公开 API 核实的 JAVBus `e=巨乳` 获得明确 Provider 归属；其余旧 ID 暂标 `legacy-unscoped`，不再凭 `sources` 猜 Provider。
+- 加入 5 条经 JAVBus 页面/公开文档直接核实且可安全映射到 Canonical Genre 的 ID Alias：`3f=深喉`、`7i=孕ませ`、`4=中出`、`1y=其他戀物癖`、`6j=温泉`，Approved Genre Source Alias 增至 72。
+- JAVBus Provider Catalog 从 Round 1 的 35 条收紧为 9 条真正有 Provider 级证据的 ID/name；另含 `2t=花癡`（Review）、`4o=高畫質`（Source-only）、`f=單體作品`（Work Type）。
+- JAVLibrary 286 label 快照保持完整，但撤销从跨站 Alias 继承的未验证 ID；当前只保留独立公开文档核实的 `a4hq=韓国`。
+- JAVDB 32 条现有 ID 明确标记为 `legacy-web-filter` namespace；现代 `/api/v2/tags?type=0..4` numeric tag dictionary 待可复核实时导出后以独立 namespace 接入。
+- Classification Alias 增至 1166（1131 approved / 35 review-required），补充 JAVBus 繁中真实 label 的精确路由。
+- Vocabulary Validator 新增 Provider/sourceId 唯一归属、Provider Catalog 归属冲突与 `genre-source-aliases.csv/json` 同步检查。
+
+## V1-25B - Provider Coverage Round 1
+
+- 产品版本继续保持 `0.1.25`；本轮建立在未提交的 V1-25A Vocabulary Coverage 基础上。
+- 新增 `provider-genre-catalogs/`，把 Provider 原始分类与 Localogue Canonical Vocabulary 分离保存。
+- 收集 FANZA 2026-03-20 标签快照 260 条；新增稳定 Canonical Genre 后，覆盖结果为 194 Genre / 19 Work Type / 21 Source-only / 26 Review / 0 Unmapped。
+- 收集 JAVLibrary 2025-03-29 标签快照 286 条；覆盖结果为 227 Genre / 27 Work Type / 23 Source-only / 9 Review / 0 Unmapped。
+- 将现有 Approved Provider ID Alias 拆出 JAVBus 35 条与 JAVDB 32 条 verified ID slice；明确它们不是全站分类总数。
+- Canonical Genre 从 320 扩展到 359，补充 Athlete、Otaku、Grandmother、Aunt、Yakuza、Partner Swapping、Cheerleader、Harem、Boys Love、V-Cinema、Wetting、Vomit、Nose Hook 等真实来源概念。
+- Source-only 从 46 扩展到 51，新增 Taiwan Region、Vertical Video、Bundle Product、Exclusive Distribution 与 Provider Marketing Campaign，避免 FANZA 平台/促销词污染 Genre。
+- Classification Alias 从 1101 扩展到 1161（1127 approved / 34 review-required）；复合词继续显式 Review，不强制单目标。
+- 新增 `pnpm vocabulary:provider-coverage` 汇总四个 Provider 覆盖率；新增 `pnpm validate:provider-coverage`，要求已收集快照没有 Unmapped / Runtime Ambiguous。
+- `pnpm check` 接入 Provider Coverage 回归检查。
+
+## V1-25A - Vocabulary Coverage & Source Mapping
+
+- 产品版本升级为 `0.1.25`。
+- 将 `localogue-community-data` 323 条 Classification 全量建立 Crosswalk：根据语义进入 Canonical Genre、Work Type 或 Source-only，不再把 Community 分类机械等同于 `Work.genreIds`。
+- Canonical Genre 从 33 扩展到 320，Work Type 从 8 扩展到 43；旧稳定 ID 和原有显示名称保持兼容。
+- 新增 46 个 Source-only Classification，覆盖生命周期、媒体格式、内容评级和分类表分段标题。
+- 新增 1101 个 Classification Term Alias：1089 个单目标 approved 可精确自动路由，12 个复合/多义词保留 `review-required`，禁止自动同时写入多个 Canonical。
+- 系统吸收两份 MetaTube 日文分类参考表中可稳定复用的词条；参考表翻译只作为 Evidence，不直接覆盖 Canonical Display Name。
+- 修正 `ハメ撮り` 与 `主観` 语义混并：`主観 -> pov`，`ハメ撮り -> pov_recording`；Provider sourceId `1g` 同步修正。
+- Import Classification Normalizer 改为读取受控词表和 Approved Alias，移除仅 8 个 Work Type / 少量 Source-only 的硬编码扩展瓶颈；Alias 冲突一律 fail closed。
+- Genre Localization 同步支持 Approved Classification Alias，并对多目标/冲突词拒绝猜测。
+- 新增 `pnpm validate:vocabulary`，校验稳定 ID、三语名称、Crosswalk target、Alias 单目标约束、Provider Alias、JSON/CSV 同步和关键映射回归。
+- 新增 `pnpm vocabulary:coverage -- <file>`，可对 TXT / CSV / JSON 分类词表生成 Genre / Work Type / Source-only / Review / Unmapped 覆盖率报告。
+- `pnpm check` 现在包含 Vocabulary Validator。
+
 - 修复 V1-24B 之后真实本地 Work 图片回归：早期 Desktop 导入的 fanart / screenshot 没有 width / height 时不再被 Hero Gallery 静默过滤；未知尺寸候选会在实际图片加载后用 naturalWidth / naturalHeight 二次校验，竖图仍不会进入顶部横版画廊。
 - Work Presentation 候选从仅 poster / cover 扩展为 poster / cover / gallery / fanart / screenshot；默认仍优先 poster → cover，只有用户显式选择时才会用其它作品图片作为私人显示首图，Web / Desktop 语义同步。
 - 修正 Starter Shared Pack 的 Shared-only 人物演示：新增 `SHARED-DEMO-001` performer Work 与只读 Poster，使“共享示例花”符合 Desktop 人物库按 performer 作品关系收口的规则，并可直接验证 Shared-only Person / Work / Asset。

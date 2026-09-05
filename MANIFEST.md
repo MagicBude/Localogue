@@ -2,9 +2,26 @@
 
 ## 阶段名称
 
-**V1-24C：Portable Pack / Presentation / Asset Closeout**
+**V1-25C：Provider ID Identity / Coverage Round 2**
 
-当前版本继续保持 `0.1.24`。V1-24C 在 Library Profile、Presentation Preference 与 V1-24B Asset Governance 基础上，收口当前资料库的 Portable Backup / Import Plan、Presentation / Asset 迁移完整性，并补齐示例库 Starter Shared Pack 的稳定 provision。
+当前产品版本继续为 `0.1.25`。V1-25A/B 已建立 Canonical Vocabulary 与 Provider Coverage；V1-25C 暂不进入 Onboarding，先修复 Provider ID 身份归属，再继续扩充可复核分类。
+
+
+## V1-25C Provider Identity / Coverage
+
+- Canonical Genre：359；
+- Canonical Work Type：43；
+- Source-only Classification：51；
+- Classification Term Alias：1166（1131 approved / 35 review-required）；
+- Community Classification Crosswalk：323 / 323；
+- `主観 -> pov`、`ハメ撮り -> pov_recording` 分离；
+- Runtime Classification Normalizer / Genre Localization 改为数据驱动；
+- 新增 `validate:vocabulary` 与 `vocabulary:coverage`；
+- 新增 `provider-genre-catalogs/`、`vocabulary:provider-coverage` 与 `validate:provider-coverage`；
+- FANZA 260 / JAVLibrary 286 / JAVBus 9 / JAVDB 32 个当前可信来源词均为 100% 已识别（Review 可存在，Unmapped / Runtime Ambiguous 为 0）；
+- Approved Genre Source Alias：72 条；`idSource` 与 `sources` 分离，旧未归属 ID 标记 `legacy-unscoped`；
+- JAVBus 只保留 9 条公开页面/API/文档可复核 ID；JAVLibrary 保留 286 label 且只保留独立核实 ID；JAVDB 32 条明确属于 legacy Web Filter namespace；
+- 未识别或多义词不猜测，不自动创建 Canonical。
 
 ## 本阶段完成
 
@@ -113,11 +130,11 @@ Desktop 设置页将资料源解释为四层：
 
 ### 下一阶段
 
-优先进入 Community Pack Registry / 首次启动与资料库 Onboarding：让用户不依赖 Git clone 或手工路径即可安装、更新并为当前 Library Profile 挂载社区 Shared Pack。
+继续 Provider Coverage，而不是立刻回 Onboarding：优先取得 JAVDB `/api/v2/tags?type=0..4`、JAVBus 完整 Genre ID、FANZA `GenreSearch` 的可复核 ID 级导出，再比较 JAVLibrary 2024/2025 快照。Provider Coverage 稳定后再回 Community Pack Registry / Onboarding。
 
 ## 版本
 
-`0.1.24`
+`0.1.25`
 
 - Starter Shared Pack 现在包含 Shared-only Person `person_shared_demo_001`、Shared-only Work `work_shared_demo_hana_001` 与对应只读 Poster；人物库可直接显示“共享示例花”。
 

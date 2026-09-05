@@ -1,61 +1,470 @@
 {
-  "vocabularyVersion": 1,
+  "vocabularyVersion": 2,
+  "kind": "canonical-work-types",
   "items": [
     {
-      "id": "solo",
-      "ja": "単体作品",
-      "zh-CN": "单体作品",
-      "en": "Solo",
-      "descriptionZh": "主要围绕单一主演人物的作品"
+      "id": "adult_live_action",
+      "ja": "成人向け実写",
+      "zh-CN": "成人实拍",
+      "en": "Adult Live Action",
+      "communityGenreIds": [
+        "genre_000273"
+      ],
+      "aliases": []
     },
     {
-      "id": "co_starring",
-      "ja": "共演作品",
-      "zh-CN": "共演作品",
-      "en": "Co-starring",
-      "descriptionZh": "多位主要人物共同出演"
-    },
-    {
-      "id": "vr",
-      "ja": "VR作品",
-      "zh-CN": "VR作品",
-      "en": "VR",
-      "descriptionZh": "VR 形式作品"
+      "id": "adult_animation",
+      "ja": "成人向けアニメ",
+      "zh-CN": "成人动画",
+      "en": "Adult Animation",
+      "communityGenreIds": [
+        "genre_000274"
+      ],
+      "aliases": []
     },
     {
       "id": "image_video",
       "ja": "イメージビデオ",
       "zh-CN": "写真影像",
       "en": "Image Video",
-      "descriptionZh": "以形象、写真影像为主要定位"
+      "descriptionZh": "以形象、写真影像为主要定位",
+      "communityGenreIds": [
+        "genre_000275"
+      ],
+      "aliases": [
+        "Image Video",
+        "イメージDVD"
+      ]
+    },
+    {
+      "id": "pink_film",
+      "ja": "ピンク映画",
+      "zh-CN": "粉红电影",
+      "en": "Pink Film",
+      "communityGenreIds": [
+        "genre_000276"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "original_work",
+      "ja": "オリジナル作品",
+      "zh-CN": "原创作品",
+      "en": "Original Work",
+      "communityGenreIds": [
+        "genre_000277"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "adaptation",
+      "ja": "原作もの",
+      "zh-CN": "改编作品",
+      "en": "Adaptation",
+      "communityGenreIds": [
+        "genre_000278"
+      ],
+      "aliases": []
     },
     {
       "id": "compilation",
       "ja": "総集編",
-      "zh-CN": "合辑",
+      "zh-CN": "合集",
       "en": "Compilation",
-      "descriptionZh": "已有内容整理形成的合集"
+      "descriptionZh": "已有内容整理形成的合集",
+      "communityGenreIds": [
+        "genre_000279"
+      ],
+      "aliases": [
+        "Compilation",
+        "合辑",
+        "总集篇"
+      ]
+    },
+    {
+      "id": "best_of",
+      "ja": "ベスト盤",
+      "zh-CN": "精选集",
+      "en": "Best-of Compilation",
+      "descriptionZh": "精选性质的汇编作品",
+      "communityGenreIds": [
+        "genre_000280"
+      ],
+      "aliases": [
+        "Best",
+        "Best Of",
+        "ベスト",
+        "精选集"
+      ]
     },
     {
       "id": "omnibus",
       "ja": "オムニバス",
-      "zh-CN": "单元合集",
+      "zh-CN": "短篇合集",
       "en": "Omnibus",
-      "descriptionZh": "多个相对独立单元组合"
+      "descriptionZh": "多个相对独立单元组合",
+      "communityGenreIds": [
+        "genre_000281"
+      ],
+      "aliases": [
+        "Omnibus",
+        "单元合集"
+      ]
     },
     {
-      "id": "best_of",
-      "ja": "ベスト",
-      "zh-CN": "精选集",
-      "en": "Best Of",
-      "descriptionZh": "精选性质的汇编作品"
+      "id": "solo",
+      "ja": "単体作品",
+      "zh-CN": "单体作品",
+      "en": "Single-performer Work",
+      "descriptionZh": "主要围绕单一主演人物的作品",
+      "communityGenreIds": [
+        "genre_000282"
+      ],
+      "aliases": [
+        "Solo",
+        "单体",
+        "単体"
+      ]
+    },
+    {
+      "id": "co_starring",
+      "ja": "共演作品",
+      "zh-CN": "共演作品",
+      "en": "Co-starring Work",
+      "descriptionZh": "多位主要人物共同出演",
+      "communityGenreIds": [
+        "genre_000283"
+      ],
+      "aliases": [
+        "Co-starring",
+        "costarring",
+        "共演"
+      ]
+    },
+    {
+      "id": "vr",
+      "ja": "VR専用",
+      "zh-CN": "VR专用",
+      "en": "VR-only",
+      "descriptionZh": "VR 形式作品",
+      "communityGenreIds": [
+        "genre_000284"
+      ],
+      "aliases": [
+        "VR",
+        "VR Video",
+        "VR作品",
+        "VR動画"
+      ]
+    },
+    {
+      "id": "three_d",
+      "ja": "3D",
+      "zh-CN": "3D",
+      "en": "3D",
+      "communityGenreIds": [
+        "genre_000285"
+      ],
+      "aliases": [
+        "3D"
+      ]
+    },
+    {
+      "id": "pov_video",
+      "ja": "主観映像",
+      "zh-CN": "主观视角影像",
+      "en": "POV Video",
+      "communityGenreIds": [
+        "genre_000286"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "drama_production",
+      "ja": "ドラマ作品",
+      "zh-CN": "剧情作品",
+      "en": "Drama Production",
+      "communityGenreIds": [
+        "genre_000287"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "documentary_production",
+      "ja": "ドキュメンタリー作品",
+      "zh-CN": "纪录片作品",
+      "en": "Documentary Production",
+      "communityGenreIds": [
+        "genre_000288"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "interview",
+      "ja": "インタビュー",
+      "zh-CN": "访谈",
+      "en": "Interview",
+      "communityGenreIds": [
+        "genre_000289"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "instructional",
+      "ja": "How-to",
+      "zh-CN": "教学",
+      "en": "Instructional",
+      "communityGenreIds": [
+        "genre_000290"
+      ],
+      "aliases": [
+        "How To",
+        "How-to"
+      ]
+    },
+    {
+      "id": "submitted_work",
+      "ja": "投稿作品",
+      "zh-CN": "投稿作品",
+      "en": "Submitted Work",
+      "communityGenreIds": [
+        "genre_000291"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "independent_production",
+      "ja": "自主制作",
+      "zh-CN": "独立制作",
+      "en": "Independent Production",
+      "communityGenreIds": [
+        "genre_000292"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "overseas_production",
+      "ja": "海外作品",
+      "zh-CN": "海外作品",
+      "en": "Overseas Production",
+      "communityGenreIds": [
+        "genre_000293"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "imported_work",
+      "ja": "輸入作品",
+      "zh-CN": "进口作品",
+      "en": "Imported Work",
+      "communityGenreIds": [
+        "genre_000294"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "for_women",
+      "ja": "女性向け",
+      "zh-CN": "女性向",
+      "en": "For Women",
+      "communityGenreIds": [
+        "genre_000295"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "for_men",
+      "ja": "男性向け",
+      "zh-CN": "男性向",
+      "en": "For Men",
+      "communityGenreIds": [
+        "genre_000296"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "doujin_work",
+      "ja": "同人作品",
+      "zh-CN": "同人作品",
+      "en": "Doujin Work",
+      "communityGenreIds": [
+        "genre_000297"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "uncensored",
+      "ja": "無修正",
+      "zh-CN": "无码",
+      "en": "Uncensored",
+      "communityGenreIds": [
+        "genre_000298"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "censored",
+      "ja": "モザイク",
+      "zh-CN": "有码",
+      "en": "Censored",
+      "communityGenreIds": [
+        "genre_000299"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "light_mosaic",
+      "ja": "薄消し",
+      "zh-CN": "薄码",
+      "en": "Light Mosaic",
+      "communityGenreIds": [
+        "genre_000300"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "subtitled",
+      "ja": "字幕付き",
+      "zh-CN": "带字幕",
+      "en": "Subtitled",
+      "communityGenreIds": [
+        "genre_000301"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "multilingual_subtitles",
+      "ja": "多言語字幕",
+      "zh-CN": "多语言字幕",
+      "en": "Multilingual Subtitles",
+      "communityGenreIds": [
+        "genre_000302"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "remastered",
+      "ja": "リマスター",
+      "zh-CN": "重制",
+      "en": "Remastered",
+      "communityGenreIds": [
+        "genre_000303"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "over_four_hours",
+      "ja": "4時間以上",
+      "zh-CN": "4小时以上",
+      "en": "Over Four Hours",
+      "communityGenreIds": [
+        "genre_000304"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "short_form",
+      "ja": "短編",
+      "zh-CN": "短片",
+      "en": "Short Form",
+      "communityGenreIds": [
+        "genre_000305"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "feature_length",
+      "ja": "長編",
+      "zh-CN": "长片",
+      "en": "Feature-length",
+      "communityGenreIds": [
+        "genre_000306"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "series_entry",
+      "ja": "シリーズ作品",
+      "zh-CN": "系列作品",
+      "en": "Series Entry",
+      "communityGenreIds": [
+        "genre_000307"
+      ],
+      "aliases": []
+    },
+    {
+      "id": "concept_work",
+      "ja": "企画作品",
+      "zh-CN": "企划作品",
+      "en": "Concept Work",
+      "descriptionZh": "以明确企划或设定为核心的作品",
+      "communityGenreIds": [
+        "genre_000012"
+      ],
+      "aliases": []
     },
     {
       "id": "other",
       "ja": "その他",
       "zh-CN": "其他",
       "en": "Other",
-      "descriptionZh": "无法归入已知类型"
+      "descriptionZh": "无法归入已知类型",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "gravure",
+      "ja": "グラビア",
+      "zh-CN": "写真",
+      "en": "Gravure",
+      "descriptionZh": "写真、形象展示类内容",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "multi_episode",
+      "ja": "複数話",
+      "zh-CN": "多章节",
+      "en": "Multi-episode",
+      "descriptionZh": "由多个章节或故事段组成",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "reissue",
+      "ja": "復刻版",
+      "zh-CN": "复刻版",
+      "en": "Reissue",
+      "descriptionZh": "旧作重新发行或复刻",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "simulation",
+      "ja": "シミュレーション",
+      "zh-CN": "模拟",
+      "en": "Simulation",
+      "descriptionZh": "模拟或交互式表现形式",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "classic",
+      "ja": "クラシック",
+      "zh-CN": "经典作品",
+      "en": "Classic",
+      "descriptionZh": "来源明确标记为经典/旧作类别",
+      "communityGenreIds": [],
+      "aliases": []
+    },
+    {
+      "id": "digital_mosaic",
+      "ja": "デジモ",
+      "zh-CN": "数码马赛克",
+      "en": "Digital Mosaic",
+      "descriptionZh": "数字马赛克处理的发行/制作类型",
+      "communityGenreIds": [],
+      "aliases": []
     }
   ]
 }

@@ -2,7 +2,19 @@
 
 ## 当前阶段
 
-**V1-24C：Portable Pack / Presentation / Asset Closeout。**
+**V1-25C：Provider ID Identity / Coverage Round 2。**
+
+V1-25A 已建立分类治理骨架；当前继续优先构建 Provider Coverage，而不是先做 Onboarding：
+
+- 359 Canonical Genre / 43 Work Type / 51 Source-only；
+- 1166 个精确 Classification Alias，其中 35 个复合/多义来源桶强制 Review；
+- `localogue-community-data` 323 / 323 Classification Crosswalk；
+- FANZA 260 / JAVLibrary 286 / JAVBus 9 / JAVDB 32 个当前可信 Provider Snapshot 全部达到 100%“已识别覆盖”（自动映射或明确 Review），0 Unmapped / 0 Runtime Ambiguous；
+- Provider Catalog 进一步区分 Label Evidence 与 Provider ID 身份：`idSource` 才能声明 `sourceId` 归属；旧跨站 ID 无独立证据时降级为 `legacy-unscoped`；JAVDB legacy Web Filter 与现代 `/api/v2/tags` numeric ID namespace 明确分离；
+- Importer 与 Genre Localization 继续数据驱动，并对 Alias 冲突 fail closed；
+- `validate:vocabulary`、`vocabulary:coverage`、`vocabulary:provider-coverage` 与 `validate:provider-coverage` 成为后续 Provider 扩展的固定工具。
+- Round 2 已核实 JAVBus `e/3f/7i/4/2t/1y/4o/f/6j` 9 个 ID/name 对；其中画质、作品形态和多义词继续进入 Source-only / Work Type / Review，而不是污染 Canonical Genre。
+
 
 V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Desktop 的资料源模型，使它从“很多散落路径设置”升级为用户可以理解和快速切换的资料库工作区：
 
@@ -44,7 +56,7 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - Portable UI 明确绑定当前 Library Profile，避免多资料库环境误认为备份包含其它 Profile 或全局实例设置。
 - Personal Import Plan 现在还绑定生成预览时的 Private Library；若预览后切换 Profile，Webview 与 Native 双层拒绝继续导入，必须重新生成预览，避免跨库误写。
 - Native Personal Import 增加 symlink / Windows Reparse Point 路径树防护；Shared Portable Pack 保持临时目录校验与原子安装。
-- V1-24C 完成后，下一步优先转向 Community Pack Registry / 首次启动与资料库 onboarding。
+- V1-24C 原计划随后进入 Community Pack Registry / Onboarding；V1-25B 当前先插入 Provider Coverage 收口，完成分类基础后再恢复该路线。
 
 ## V1-17 Unified Source / Desktop Interaction Parity
 
@@ -259,14 +271,14 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ## 下一阶段建议
 
-**下一阶段：Community Pack Registry / Onboarding 基础。**
+**下一阶段：继续 Provider Coverage，暂缓 Onboarding。**
 
-1. 定义 Community Pack Registry 清单与可信来源模型，先支持官方/用户显式配置的 Registry；
-2. Desktop 提供 Shared Pack 浏览、安装、更新与卸载入口，不要求普通用户手工 `git clone`；
-3. 安装/更新完成后由用户选择挂载到哪个 Library Profile，普通资料库不自动加入任何内容型 Shared Pack；
-4. 首次启动向导只引导“创建资料库 / 选择内容根目录 / 可选安装社区资料”，高级兼容路径继续折叠；
-5. `localogue-community-data` 继续独立仓库发布 Shared Pack，主仓库只消费其版本化产物；
-6. Registry 与更新机制继续维持 Shared Pack Native 只读、manifest 校验与原子安装边界。
+1. 获取 JAVDB `/api/v2/tags?type=0..4` 的实时完整 `category_id + id + name` 导出；
+2. 找到/生成可复核的 JAVBus 完整 Genre ID 表，不把当前 35 条 verified slice 误称为全量；
+3. 使用 FANZA `GenreSearch` 对目标 Adult floor 生成 ID 级快照；
+4. 比较 JAVLibrary 2024 / 2025 Snapshot，标记新增、移除和改名；
+5. 新来源词继续按 Genre / Work Type / Source-only / Review 分流，禁止为了覆盖率把促销、画质和平台属性升级为 Genre；
+6. Provider Coverage 稳定后，再恢复 Community Pack Registry / Onboarding。
 
 ## 当前不做
 

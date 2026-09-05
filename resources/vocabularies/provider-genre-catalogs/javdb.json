@@ -1,0 +1,279 @@
+{
+  "vocabularyVersion": 1,
+  "kind": "provider-genre-catalog",
+  "provider": "javdb",
+  "snapshot": "2026-09-05",
+  "catalogStatus": "verified-legacy-web-id-slice",
+  "source": "genre-source-aliases.json",
+  "enumeration": {
+    "kind": "public-signed-api",
+    "endpoint": "/api/v2/tags?type={0..4}",
+    "note": "Current 32 IDs are provider-scoped legacy web-filter identifiers preserved as evidence. The modern signed /api/v2/tags?type=0..4 endpoint returns grouped numeric tag IDs and must be captured as a separate live-export namespace rather than conflated with these strings."
+  },
+  "items": [
+    {
+      "sourceId": "tags?c3=58",
+      "ja": "Uniform",
+      "zh-CN": "制服",
+      "en": "Uniform",
+      "canonicalId": "uniform",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c3=114",
+      "ja": "OL",
+      "zh-CN": "白领",
+      "en": "OL",
+      "canonicalId": "office_lady",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "uncensored?c3=87",
+      "ja": "Married woman",
+      "zh-CN": "人妻",
+      "en": "Married woman",
+      "canonicalId": "married_woman",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c4=15",
+      "ja": "Mature Woman",
+      "zh-CN": "熟女",
+      "en": "Mature Woman",
+      "canonicalId": "mature",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c7=88",
+      "ja": "Amateur",
+      "zh-CN": "业余",
+      "en": "Amateur",
+      "canonicalId": "amateur",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c4=17",
+      "ja": "Big Tits",
+      "zh-CN": "巨乳",
+      "en": "Big Tits",
+      "canonicalId": "big_bust",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "western?c1=2",
+      "ja": "Small Tits",
+      "zh-CN": "贫乳",
+      "en": "Small Tits",
+      "canonicalId": "small_bust",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c4=65",
+      "ja": "Slender",
+      "zh-CN": "苗条",
+      "en": "Slender",
+      "canonicalId": "slender",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c3=43",
+      "ja": "Cosplay",
+      "zh-CN": "角色扮演",
+      "en": "Cosplay",
+      "canonicalId": "cosplay",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c7=11",
+      "ja": "Drama",
+      "zh-CN": "戏剧",
+      "en": "Drama",
+      "canonicalId": "drama",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c7=97",
+      "ja": "Documentary",
+      "zh-CN": "纪录片",
+      "en": "Documentary",
+      "canonicalId": "documentary",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c1=64",
+      "ja": "Lesbian",
+      "zh-CN": "女同性恋",
+      "en": "Lesbian",
+      "canonicalId": "lesbian",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c2=5",
+      "ja": "Beautiful Girl",
+      "zh-CN": "美少女",
+      "en": "Beautiful Girl",
+      "canonicalId": "beautiful_girl",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c7=45",
+      "ja": "POV",
+      "zh-CN": "第一人称摄影",
+      "en": "POV",
+      "canonicalId": "pov",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=68",
+      "ja": "Squirting",
+      "zh-CN": "潮吹",
+      "en": "Squirting",
+      "canonicalId": "squirting",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "uncensored?c2=66",
+      "ja": "Blowjob",
+      "zh-CN": "口交",
+      "en": "Blowjob",
+      "canonicalId": "blowjob",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "western?c2=28",
+      "ja": "Masturbation",
+      "zh-CN": "手淫",
+      "en": "Masturbation",
+      "canonicalId": "masturbation",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c1=360",
+      "ja": "Climax",
+      "zh-CN": "绝顶高潮",
+      "en": "Climax",
+      "canonicalId": "orgasm",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=18",
+      "ja": "Creampie",
+      "zh-CN": "中出",
+      "en": "Creampie",
+      "canonicalId": "creampie",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c3=113",
+      "ja": "Maid",
+      "zh-CN": "女佣",
+      "en": "Maid",
+      "canonicalId": "maid",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c2=115",
+      "ja": "Nurse",
+      "zh-CN": "护士",
+      "en": "Nurse",
+      "canonicalId": "nurse",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c2=158",
+      "ja": "Female Teacher",
+      "zh-CN": "女教师",
+      "en": "Female Teacher",
+      "canonicalId": "female_teacher",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c6=21",
+      "ja": "Abuse",
+      "zh-CN": "凌辱",
+      "en": "Abuse",
+      "canonicalId": "abuse",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=124",
+      "ja": "Kiss",
+      "zh-CN": "接吻",
+      "en": "Kiss",
+      "canonicalId": "kissing",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=14",
+      "ja": "Titty Fuck",
+      "zh-CN": "乳交",
+      "en": "Titty Fuck",
+      "canonicalId": "titjob",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=37",
+      "ja": "Cowgirl",
+      "zh-CN": "骑乘位",
+      "en": "Cowgirl",
+      "canonicalId": "cowgirl",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c5=102",
+      "ja": "Handjob",
+      "zh-CN": "手淫",
+      "en": "Handjob",
+      "canonicalId": "handjob",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "uncensored?c2=8",
+      "ja": "Facial",
+      "zh-CN": "颜射",
+      "en": "Facial",
+      "canonicalId": "facial",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "western?c2=23",
+      "ja": "Anal",
+      "zh-CN": "肛交",
+      "en": "Anal",
+      "canonicalId": "anal",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "uncensored?c2=14",
+      "ja": "Tied up",
+      "zh-CN": "捆绑",
+      "en": "Tied up",
+      "canonicalId": "bondage",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c6=60",
+      "ja": "SM",
+      "zh-CN": "SM",
+      "en": "SM",
+      "canonicalId": "sm",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "sourceId": "tags?c1=145",
+      "ja": "Voyeur",
+      "zh-CN": "偷窥",
+      "en": "Voyeur",
+      "canonicalId": "voyeurism",
+      "idStatus": "provider-scoped-legacy-filter"
+    }
+  ],
+  "idNamespace": "legacy-web-filter",
+  "evidence": [
+    {
+      "kind": "public-api-notes",
+      "url": "https://github.com/ANDonekey/javapi/blob/master/JavDB%20API/public/search-and-filters.md",
+      "note": "Documents /api/v2/tags?type=0..4 response groups and nested id/name fields; modern live export is kept distinct from legacy web-filter IDs."
+    }
+  ]
+}

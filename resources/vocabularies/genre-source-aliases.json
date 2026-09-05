@@ -1,7 +1,7 @@
 {
   "vocabularyVersion": 1,
   "kind": "approved-source-genre-aliases",
-  "description": "Curated subset extracted from the user-provided genre reference. Only aliases explicitly approved for Localogue Canonical Genre are retained.",
+  "description": "Approved Canonical Genre aliases with legacy source IDs. idSource is the provider ownership boundary for sourceId; sources is label/evidence provenance only. Rows with idSource=null preserve legacy evidence without claiming provider ownership.",
   "items": [
     {
       "canonicalId": "uniform",
@@ -14,7 +14,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "uniform",
@@ -24,7 +26,9 @@
       "en": "Uniform",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "office_lady",
@@ -38,7 +42,9 @@
         "javbus",
         "javdb",
         "javlib"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "married_woman",
@@ -51,7 +57,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "married_woman",
@@ -61,7 +69,9 @@
       "en": "Married woman",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "mature",
@@ -73,7 +83,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "mature",
@@ -83,7 +95,9 @@
       "en": "Mature Woman",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "amateur",
@@ -96,7 +110,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "amateur",
@@ -106,7 +122,9 @@
       "en": "Amateur",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "big_bust",
@@ -119,7 +137,10 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": "javbus",
+      "idStatus": "verified-public-api",
+      "note": "JAVBus API public example returns genres[{id:\"e\", name:\"巨乳\"}]."
     },
     {
       "canonicalId": "big_bust",
@@ -129,7 +150,9 @@
       "en": "Big Tits",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "small_bust",
@@ -140,7 +163,9 @@
       "sources": [
         "jav321",
         "javbus"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "small_bust",
@@ -150,7 +175,9 @@
       "en": "Small Tits",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "slender",
@@ -163,7 +190,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "slender",
@@ -173,7 +202,9 @@
       "en": "Slender",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "cosplay",
@@ -186,7 +217,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "cosplay",
@@ -196,7 +229,9 @@
       "en": "Cosplay",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "drama",
@@ -208,7 +243,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "drama",
@@ -219,7 +256,9 @@
       "sources": [
         "avsox",
         "javbus"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "drama",
@@ -229,7 +268,9 @@
       "en": "Drama",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "documentary",
@@ -240,7 +281,9 @@
       "sources": [
         "jav321",
         "javbus"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "documentary",
@@ -250,7 +293,9 @@
       "en": "Documentary",
       "sources": [
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "documentary",
@@ -260,7 +305,9 @@
       "en": "Documentary",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "lesbian",
@@ -273,7 +320,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "lesbian",
@@ -283,7 +332,9 @@
       "en": "Lesbian",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "beautiful_girl",
@@ -296,7 +347,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "beautiful_girl",
@@ -306,7 +359,9 @@
       "en": "Beautiful Girl",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "pov",
@@ -318,20 +373,25 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
-      "canonicalId": "pov",
+      "canonicalId": "pov_recording",
       "sourceId": "1g",
       "ja": "ハメ撮り",
-      "zh-CN": "第一人称摄影",
-      "en": "POV",
+      "zh-CN": "第一人称拍摄",
+      "en": "POV Recording",
       "sources": [
         "avsox",
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "note": "V1-25A：ハメ撮り与主観分离；来源 ID 1g 映射到 pov_recording。",
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "pov",
@@ -341,7 +401,9 @@
       "en": "POV",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "squirting",
@@ -354,7 +416,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "squirting",
@@ -364,7 +428,9 @@
       "en": "Squirting",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "blowjob",
@@ -377,7 +443,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "blowjob",
@@ -387,7 +455,9 @@
       "en": "Blowjob",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "masturbation",
@@ -400,7 +470,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "masturbation",
@@ -410,7 +482,9 @@
       "en": "Masturbation",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "orgasm",
@@ -421,7 +495,9 @@
       "sources": [
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "orgasm",
@@ -431,7 +507,9 @@
       "en": "Climax",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "creampie",
@@ -444,7 +522,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "creampie",
@@ -454,7 +534,9 @@
       "en": "Creampie",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "maid",
@@ -467,7 +549,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "maid",
@@ -477,7 +561,9 @@
       "en": "Maid",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "nurse",
@@ -488,7 +574,9 @@
       "sources": [
         "jav321",
         "javbus"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "nurse",
@@ -500,7 +588,9 @@
         "avsox",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "nurse",
@@ -510,7 +600,9 @@
       "en": "Nurse",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "female_teacher",
@@ -523,7 +615,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "female_teacher",
@@ -533,7 +627,9 @@
       "en": "Female Teacher",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "abuse",
@@ -543,7 +639,9 @@
       "en": "Abuse",
       "sources": [
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "abuse",
@@ -553,7 +651,9 @@
       "en": "Abuse",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "kissing",
@@ -565,7 +665,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "kissing",
@@ -575,7 +677,9 @@
       "en": "Kiss",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "titjob",
@@ -588,7 +692,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "titjob",
@@ -598,7 +704,9 @@
       "en": "Titty Fuck",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "cowgirl",
@@ -611,7 +719,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "cowgirl",
@@ -621,7 +731,9 @@
       "en": "Cowgirl",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "handjob",
@@ -634,7 +746,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "handjob",
@@ -644,7 +758,9 @@
       "en": "Handjob",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "facial",
@@ -657,7 +773,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "facial",
@@ -667,7 +785,9 @@
       "en": "Facial",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "cum_swallowing",
@@ -680,7 +800,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "anal",
@@ -693,7 +815,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "anal",
@@ -703,7 +827,9 @@
       "en": "Anal",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "bondage",
@@ -716,7 +842,9 @@
         "jav321",
         "javbus",
         "javlib"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "bondage",
@@ -726,7 +854,9 @@
       "en": "Tied up",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "sm",
@@ -740,7 +870,9 @@
         "javbus",
         "javdb",
         "javlib"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
     },
     {
       "canonicalId": "voyeurism",
@@ -751,7 +883,9 @@
       "sources": [
         "jav321",
         "javbus"
-      ]
+      ],
+      "idSource": null,
+      "idStatus": "legacy-unscoped"
     },
     {
       "canonicalId": "voyeurism",
@@ -761,7 +895,74 @@
       "en": "Voyeur",
       "sources": [
         "javdb"
-      ]
+      ],
+      "idSource": "javdb",
+      "idStatus": "provider-scoped-legacy-filter"
+    },
+    {
+      "canonicalId": "deep_throat",
+      "sourceId": "3f",
+      "idSource": "javbus",
+      "idStatus": "verified-public-page",
+      "ja": "深喉",
+      "zh-CN": "深喉",
+      "en": "Deep Throat",
+      "sources": [
+        "javbus"
+      ],
+      "note": "Saved JAVBus YST-303 page exposes /genre/3f = 深喉."
+    },
+    {
+      "canonicalId": "impregnation",
+      "sourceId": "7i",
+      "idSource": "javbus",
+      "idStatus": "verified-public-page",
+      "ja": "孕ませ",
+      "zh-CN": "受孕题材",
+      "en": "Impregnation",
+      "sources": [
+        "javbus"
+      ],
+      "note": "Saved JAVBus YST-303 page exposes /genre/7i = 孕ませ."
+    },
+    {
+      "canonicalId": "creampie",
+      "sourceId": "4",
+      "idSource": "javbus",
+      "idStatus": "verified-public-page",
+      "ja": "中出",
+      "zh-CN": "内射",
+      "en": "Creampie",
+      "sources": [
+        "javbus"
+      ],
+      "note": "Saved JAVBus YST-303 page exposes /genre/4 = 中出."
+    },
+    {
+      "canonicalId": "fetish",
+      "sourceId": "1y",
+      "idSource": "javbus",
+      "idStatus": "verified-public-page",
+      "ja": "其他戀物癖",
+      "zh-CN": "其他恋物癖",
+      "en": "Other Fetish",
+      "sources": [
+        "javbus"
+      ],
+      "note": "Saved JAVBus YST-303 page exposes /genre/1y = 其他戀物癖."
+    },
+    {
+      "canonicalId": "hot_spring",
+      "sourceId": "6j",
+      "idSource": "javbus",
+      "idStatus": "verified-public-doc",
+      "ja": "温泉",
+      "zh-CN": "温泉",
+      "en": "Hot Spring",
+      "sources": [
+        "javbus"
+      ],
+      "note": "JAVOneStop public documentation records JAVBus 温泉 = genre/6j."
     }
   ]
 }

@@ -46,6 +46,17 @@ const required = [
   "docs/vocabulary/import-term-mappings.md",
   "resources/vocabularies/genre-source-aliases.json",
   "resources/vocabularies/genre-source-aliases.csv",
+  "resources/vocabularies/classification-term-aliases.json",
+  "resources/vocabularies/classification-term-aliases.csv",
+  "resources/vocabularies/source-only-classifications.json",
+  "resources/vocabularies/source-only-classifications.csv",
+  "resources/vocabularies/community-classification-crosswalk.json",
+  "resources/vocabularies/community-classification-crosswalk.csv",
+  "docs/vocabulary/classification-term-aliases.md",
+  "docs/vocabulary/source-only-classifications.md",
+  "docs/vocabulary/community-classification-crosswalk.md",
+  "scripts/validate-vocabulary.mjs",
+  "scripts/report-vocabulary-coverage.mjs",
   "docs/vocabulary/genre-source-aliases.md",
   "src/application/services/genre-localization-service.ts",
   "apps/desktop/src/use-stable-async-data.ts",
@@ -355,7 +366,7 @@ if (!errors.length) {
   const mappingDocs = readFileSync(path.join(root, "docs/vocabulary/import-term-mappings.md"), "utf8");
   const controlledGenres = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/genres.json"), "utf8"));
   const controlledWorkTypes = JSON.parse(readFileSync(path.join(root, "resources/vocabularies/work-types.json"), "utf8"));
-  for (const token of ["normalizeImportedClassifications", "系列", "片商", "发行", "单体作品", "イメージビデオ", "unmappedTerms"]) {
+  for (const token of ["normalizeImportedClassifications", "系列", "片商", "发行", "classification-term-aliases", "source-only-classifications", "work-types.json", "REVIEW_TERM_KEYS", "unmappedTerms"]) {
     if (!classificationNormalizer.includes(token)) errors.push(`V1-21 导入分类规范器缺少规则：${token}`);
   }
   if (!Array.isArray(mappingDocument.rules) || mappingDocument.rules.length < 10 || !mappingDocument.unmappedPolicy) {
@@ -399,8 +410,8 @@ if (!errors.length) {
   const genreLocalization = readFileSync(path.join(root, "src/application/services/genre-localization-service.ts"), "utf8");
   const stableAsync = readFileSync(path.join(root, "apps/desktop/src/use-stable-async-data.ts"), "utf8");
   const genreAliasDocs = readFileSync(path.join(root, "docs/vocabulary/genre-source-aliases.md"), "utf8");
-  if (!Array.isArray(genreVocabulary.items) || genreVocabulary.items.length !== 33) {
-    errors.push(`V1-22 Hotfix 3 Canonical Genre Vocabulary 应为 33 条受控分类，当前 ${genreVocabulary.items?.length ?? 0} 条。`);
+  if (!Array.isArray(genreVocabulary.items) || genreVocabulary.items.length < 320) {
+    errors.push(`V1-25A Canonical Genre Vocabulary 覆盖不得低于 320 条，当前 ${genreVocabulary.items?.length ?? 0} 条。`);
   } else {
     const ids = new Set();
     for (const item of genreVocabulary.items) {
@@ -412,11 +423,11 @@ if (!errors.length) {
       if (ids.has(deprecated)) errors.push(`V1-22 Hotfix 3 不允许将 ${deprecated} 继续作为 Canonical Genre。`);
     }
   }
-  if (genreVocabularyCsv.split("\n").filter(Boolean).length !== 34) {
-    errors.push("Canonical Genre CSV 必须包含表头 + 33 条受控数据。");
+  if (genreVocabularyCsv.split("\n").filter(Boolean).length !== (genreVocabulary.items?.length ?? 0) + 1) {
+    errors.push("Canonical Genre CSV 必须与 JSON 条目数一致。");
   }
-  if (!Array.isArray(genreSourceAliases.items) || genreSourceAliases.items.length !== 67) {
-    errors.push(`V1-22 Hotfix 3 Approved Genre Source Aliases 应为 67 条精选来源别名，当前 ${genreSourceAliases.items?.length ?? 0} 条。`);
+  if (!Array.isArray(genreSourceAliases.items) || genreSourceAliases.items.length < 72) {
+    errors.push(`V1-25C Approved Genre Source Aliases 覆盖不得低于 72 条，当前 ${genreSourceAliases.items?.length ?? 0} 条。`);
   } else {
     const genreIds = new Set(genreVocabulary.items.map((item) => item.id));
     const keys = new Set();
@@ -428,13 +439,13 @@ if (!errors.length) {
       for (const field of ["ja", "zh-CN", "en"]) if (!String(item[field] ?? "").trim()) errors.push(`Genre Source Alias ${key} 缺少 ${field}`);
     }
   }
-  if (genreSourceAliasCsv.split("\n").filter(Boolean).length !== 68) {
-    errors.push("Approved Genre Source Alias CSV 必须包含表头 + 67 条精选映射。 ");
+  if (genreSourceAliasCsv.split("\n").filter(Boolean).length !== (genreSourceAliases.items?.length ?? 0) + 1) {
+    errors.push("Approved Genre Source Alias CSV 必须与 JSON 条目数一致。 ");
   }
-  for (const token of ["localizeGenre", "genre-source-aliases", "Canonical vocabulary", "getLanguageFallback"]) {
+  for (const token of ["localizeGenre", "genre-source-aliases", "classification-term-aliases", "getLanguageFallback"]) {
     if (!genreLocalization.includes(token)) errors.push(`V1-22 Hotfix 3 Genre 本地化服务缺少精选词表语义：${token}`);
   }
-  for (const token of ["67", "不是完整来源分类表", "Canonical Genre", "genre.csv"]) {
+  for (const token of ["idSource", "不是完整来源分类表", "Canonical Genre", "genre.csv"]) {
     if (!genreAliasDocs.includes(token)) errors.push(`V1-22 Hotfix 3 Genre Source Alias 文档缺少边界说明：${token}`);
   }
   for (const obsolete of ["resources/vocabularies/source-genre-catalog.json", "resources/vocabularies/source-genre-catalog.csv", "docs/vocabulary/source-genre-catalog.md"]) {

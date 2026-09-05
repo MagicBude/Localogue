@@ -1,0 +1,1835 @@
+{
+  "vocabularyVersion": 1,
+  "kind": "provider-genre-catalog",
+  "provider": "fanza",
+  "snapshot": "2026-03-20",
+  "catalogStatus": "label-snapshot",
+  "source": "https://github.com/metatube-community/jellyfin-plugin-metatube/discussions/621",
+  "enumeration": {
+    "kind": "official-api",
+    "endpoint": "DMM/FANZA Affiliate API v3 GenreSearch",
+    "note": "Official GenreSearch supports floor_id; this snapshot intentionally does not fabricate floor-specific IDs."
+  },
+  "items": [
+    {
+      "ja": "アイドル・芸能人",
+      "zh-CN": "偶像・艺人",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アクメ・オーガズム",
+      "zh-CN": "高潮・顶点",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アスリート",
+      "zh-CN": "运动员",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "姉・妹",
+      "zh-CN": "姐姐・妹妹",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "イタズラ",
+      "zh-CN": "恶作剧",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "インストラクター",
+      "zh-CN": "指导员",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ウェイトレス",
+      "zh-CN": "女服务员",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "受付嬢",
+      "zh-CN": "前台接待员",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "エステ",
+      "zh-CN": "美容沙龙",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "OL",
+      "zh-CN": "女白领",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お母さん",
+      "zh-CN": "母亲",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女将・女主人",
+      "zh-CN": "老板娘・女主人",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "幼なじみ",
+      "zh-CN": "青梅竹马",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お爺ちゃん",
+      "zh-CN": "爷爷",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お嬢様・令嬢",
+      "zh-CN": "大小姐・名门千金",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "オタク",
+      "zh-CN": "御宅族",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "オナサポ",
+      "zh-CN": "自慰辅助",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お姉さん",
+      "zh-CN": "姐姐",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お婆ちゃん",
+      "zh-CN": "奶奶",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "叔母さん",
+      "zh-CN": "伯母/舅妈",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お姫様",
+      "zh-CN": "公主",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "お風呂",
+      "zh-CN": "浴室",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女教師",
+      "zh-CN": "女教师",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女戦士",
+      "zh-CN": "女战士",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女捜査官",
+      "zh-CN": "女搜查官",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "カーセックス",
+      "zh-CN": "车震",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "格闘家",
+      "zh-CN": "格斗家",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "カップル",
+      "zh-CN": "情侣",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "家庭教師",
+      "zh-CN": "家教",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "看護婦・ナース",
+      "zh-CN": "护士",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "義母",
+      "zh-CN": "继母",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "逆ナン",
+      "zh-CN": "逆搭讪",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "キャバ嬢・風俗嬢",
+      "zh-CN": "陪酒女郎・风俗女郎",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ギャル",
+      "zh-CN": "辣妹",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "キャンギャル",
+      "zh-CN": "车模女郎",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "近親相姦",
+      "zh-CN": "近亲相奸",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "くノ一",
+      "zh-CN": "女忍者",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "極道・任侠",
+      "zh-CN": "黑道・侠义",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "コンパニオン",
+      "zh-CN": "陪同人员",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "時間停止",
+      "zh-CN": "时间停止",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "主観",
+      "zh-CN": "主观视角",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女医",
+      "zh-CN": "女医生",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女王様",
+      "zh-CN": "女王大人",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "職業色々",
+      "zh-CN": "各种职业",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女子アナ",
+      "zh-CN": "女主播",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女子校生",
+      "zh-CN": "女高中生",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女子大生",
+      "zh-CN": "女大学生",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ショタ",
+      "zh-CN": "正太",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "白目・失神",
+      "zh-CN": "翻白眼・失神",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スチュワーデス",
+      "zh-CN": "空姐",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スワッピング・夫婦交換",
+      "zh-CN": "交换伴侣・夫妇交换",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "性転換・女体化",
+      "zh-CN": "性转换・女体化",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "セレブ",
+      "zh-CN": "名流",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "チアガール",
+      "zh-CN": "啦啦队女孩",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ツンデレ",
+      "zh-CN": "傲娇",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "デート",
+      "zh-CN": "约会",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "盗撮・のぞき",
+      "zh-CN": "偷拍・偷窥",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ドール",
+      "zh-CN": "人偶",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "寝取り・寝取られ・NTR",
+      "zh-CN": "睡走・被睡・NTR",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ノーパン",
+      "zh-CN": "不穿内裤",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ノーブラ",
+      "zh-CN": "不穿胸罩",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "飲み会・合コン",
+      "zh-CN": "酒会・联谊",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ハーレム",
+      "zh-CN": "后宫",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "バスガイド",
+      "zh-CN": "巴士导游",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "花嫁",
+      "zh-CN": "新娘",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "秘書",
+      "zh-CN": "秘书",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ビッチ",
+      "zh-CN": "婊子",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "人妻・主婦",
+      "zh-CN": "人妻・主妇",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "病院・クリニック",
+      "zh-CN": "医院・诊所",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ファン感謝・訪問",
+      "zh-CN": "粉丝感谢・访问",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "部活・マネージャー",
+      "zh-CN": "社团活动・经理",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "部下・同僚",
+      "zh-CN": "部下・同事",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "不倫",
+      "zh-CN": "婚外情",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ヘルス・ソープ",
+      "zh-CN": "保健・泡泡浴",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "変身ヒロイン",
+      "zh-CN": "变身女英雄",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ホテル",
+      "zh-CN": "酒店",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "マッサージ・リフレ",
+      "zh-CN": "按摩・反射疗法",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ママ友",
+      "zh-CN": "妈妈朋友",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "娘・養女",
+      "zh-CN": "女儿・养女",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "胸チラ",
+      "zh-CN": "露胸",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "メイド",
+      "zh-CN": "女仆",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "面接",
+      "zh-CN": "面试",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "モデル",
+      "zh-CN": "模特",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ヨガ",
+      "zh-CN": "瑜伽",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "レースクィーン",
+      "zh-CN": "赛车皇后",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "若妻・幼妻",
+      "zh-CN": "年轻妻子・幼妻",
+      "sourceId": null,
+      "sourceGroup": "role-context",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アジア女優",
+      "zh-CN": "亚洲女演员",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "巨尻",
+      "zh-CN": "巨臀",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "筋肉",
+      "zh-CN": "肌肉",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "小柄",
+      "zh-CN": "娇小",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "黒人男優",
+      "zh-CN": "黑人男演员",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "処女",
+      "zh-CN": "处女",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女装・男の娘",
+      "zh-CN": "女装・伪娘",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スレンダー",
+      "zh-CN": "苗条",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "早漏",
+      "zh-CN": "早泄",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "そっくりさん",
+      "zh-CN": "相似的人",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "台湾モデル",
+      "zh-CN": "台湾模特",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "長身",
+      "zh-CN": "高个子",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "デカチン・巨根",
+      "zh-CN": "大屌・巨根",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "童貞",
+      "zh-CN": "处男",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "軟体",
+      "zh-CN": "柔软身体",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ニューハーフ",
+      "zh-CN": "人妖",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "妊婦",
+      "zh-CN": "孕妇",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "パイパン",
+      "zh-CN": "无毛",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "白人女優",
+      "zh-CN": "白人女演员",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "日焼け",
+      "zh-CN": "晒痕",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "貧乳・微乳",
+      "zh-CN": "贫乳・微乳",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ふたなり",
+      "zh-CN": "双性人",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ぽっちゃり",
+      "zh-CN": "丰满",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ミニ系",
+      "zh-CN": "迷你系",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "学生服",
+      "zh-CN": "校服",
+      "sourceId": null,
+      "sourceGroup": "body-person",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "競泳・スクール水着",
+      "zh-CN": "竞泳・学校泳衣",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "コスプレ",
+      "zh-CN": "角色扮演",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "セーラー服",
+      "zh-CN": "水手服",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "体操着・ブルマ",
+      "zh-CN": "体操服・布鲁玛",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "チャイナドレス",
+      "zh-CN": "旗袍",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ニーソックス",
+      "zh-CN": "过膝袜",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ネコミミ・獣系",
+      "zh-CN": "猫耳・兽系",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "裸エプロン",
+      "zh-CN": "裸体围裙",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "バニーガール",
+      "zh-CN": "兔女郎",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "パンスト・タイツ",
+      "zh-CN": "连裤袜・紧身衣",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ビジネススーツ",
+      "zh-CN": "商务套装",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "覆面・マスク",
+      "zh-CN": "蒙面・口罩",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ボディコン",
+      "zh-CN": "紧身连衣裙",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ボンテージ",
+      "zh-CN": "皮革束缚装",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "水着",
+      "zh-CN": "泳装",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ミニスカ",
+      "zh-CN": "迷你裙",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ミニスカポリス",
+      "zh-CN": "迷你裙女警",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "めがね",
+      "zh-CN": "眼镜",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ランジェリー",
+      "zh-CN": "内衣",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ルーズソックス",
+      "zh-CN": "泡泡袜",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "レオタード",
+      "zh-CN": "紧身衣",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "和服・浴衣",
+      "zh-CN": "和服・浴衣",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アクション・格闘",
+      "zh-CN": "动作・格斗",
+      "sourceId": null,
+      "sourceGroup": "wardrobe",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "脚フェチ",
+      "zh-CN": "恋脚癖",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アニメ",
+      "zh-CN": "动漫",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "イメージビデオ",
+      "zh-CN": "写真视频",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "イメージビデオ（男性）",
+      "zh-CN": "写真视频（男性）",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "淫乱・ハード系",
+      "zh-CN": "淫乱・硬核系",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "SF",
+      "zh-CN": "科幻",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "学園もの",
+      "zh-CN": "学园题材",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "企画",
+      "zh-CN": "企划",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ギャグ・コメディ",
+      "zh-CN": "搞笑・喜剧",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "局部アップ",
+      "zh-CN": "局部特写",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "巨乳フェチ",
+      "zh-CN": "恋巨乳癖",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "クラシック",
+      "zh-CN": "经典",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ゲイ",
+      "zh-CN": "男同性恋",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "原作コラボ",
+      "zh-CN": "原作合作",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "コラボ作品",
+      "zh-CN": "合作作品",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "サイコ・スリラー",
+      "zh-CN": "心理惊悚",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "残虐表現",
+      "zh-CN": "残虐表现",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女性向け",
+      "zh-CN": "女性向",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "女優ベスト・総集編",
+      "zh-CN": "女演员精选・总集篇",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "尻フェチ",
+      "zh-CN": "恋臀癖",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スポーツ",
+      "zh-CN": "运动",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "セクシー",
+      "zh-CN": "性感",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "その他フェチ",
+      "zh-CN": "其他癖好",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ダーク系",
+      "zh-CN": "黑暗系",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "体験告白",
+      "zh-CN": "体验告白",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ダンス",
+      "zh-CN": "舞蹈",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "単体作品",
+      "zh-CN": "单体作品",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "着エロ",
+      "zh-CN": "穿着色情",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "デビュー作品",
+      "zh-CN": "出道作品",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ドキュメンタリー",
+      "zh-CN": "纪录片",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "特撮",
+      "zh-CN": "特摄",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ドラマ",
+      "zh-CN": "电视剧",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ナンパ",
+      "zh-CN": "搭讪",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "How To",
+      "zh-CN": "教学",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "パンチラ",
+      "zh-CN": "走光",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ファンタジー",
+      "zh-CN": "幻想",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "Vシネマ",
+      "zh-CN": "V影院",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "復刻",
+      "zh-CN": "复刻",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ベスト・総集編",
+      "zh-CN": "最佳・总集篇",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "BL（ボーイズラブ）",
+      "zh-CN": "BL（男孩之爱）",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ホラー",
+      "zh-CN": "恐怖",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "妄想",
+      "zh-CN": "妄想",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "洋ピン・海外輸入",
+      "zh-CN": "洋片・海外引进",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "レズビアン",
+      "zh-CN": "女同性恋",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "恋愛",
+      "zh-CN": "恋爱",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "足コキ",
+      "zh-CN": "足交",
+      "sourceId": null,
+      "sourceGroup": "theme",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "汗だく",
+      "zh-CN": "大汗淋漓",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アナル",
+      "zh-CN": "肛门",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "アナルセックス",
+      "zh-CN": "肛交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "異物挿入",
+      "zh-CN": "异物插入",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "イラマチオ",
+      "zh-CN": "深喉",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "淫語",
+      "zh-CN": "淫语",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "飲尿",
+      "zh-CN": "饮尿",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "男の潮吹き",
+      "zh-CN": "男性潮吹",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "オナニー",
+      "zh-CN": "自慰",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "おもちゃ",
+      "zh-CN": "玩具",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "監禁",
+      "zh-CN": "监禁",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "顔射",
+      "zh-CN": "颜射",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "浣腸",
+      "zh-CN": "灌肠",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "顔面騎乗",
+      "zh-CN": "颜面骑乘",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "騎乗位",
+      "zh-CN": "骑乘位",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "キス・接吻",
+      "zh-CN": "亲吻",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "くすぐり",
+      "zh-CN": "挠痒",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "クスコ",
+      "zh-CN": "窥器",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "クンニ",
+      "zh-CN": "舔阴",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ゲロ",
+      "zh-CN": "呕吐物",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "拷問",
+      "zh-CN": "拷问",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ごっくん",
+      "zh-CN": "吞精",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "潮吹き",
+      "zh-CN": "潮吹",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "シックスナイン",
+      "zh-CN": "69式",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "縛り・緊縛",
+      "zh-CN": "捆绑・紧缚",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "羞恥",
+      "zh-CN": "羞耻",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "食糞",
+      "zh-CN": "食粪",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スカトロ",
+      "zh-CN": "粪尿癖",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スパンキング",
+      "zh-CN": "打屁股",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "即ハメ",
+      "zh-CN": "即插",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "脱糞",
+      "zh-CN": "排便",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ディルド",
+      "zh-CN": "假阴茎",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "手コキ",
+      "zh-CN": "手交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "電マ",
+      "zh-CN": "电动按摩棒",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ドラッグ",
+      "zh-CN": "药物",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "中出し",
+      "zh-CN": "内射",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "パイズリ",
+      "zh-CN": "乳交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "バイブ",
+      "zh-CN": "振动棒",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "辱め",
+      "zh-CN": "侮辱",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "バック",
+      "zh-CN": "后入式",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "罵倒",
+      "zh-CN": "辱骂",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "鼻フック",
+      "zh-CN": "鼻钩",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ハメ撮り",
+      "zh-CN": "性爱自拍",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "孕ませ",
+      "zh-CN": "使其怀孕",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "フィスト",
+      "zh-CN": "拳交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "フェラ",
+      "zh-CN": "口交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ぶっかけ",
+      "zh-CN": "颜射淋浴",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "放尿・お漏らし",
+      "zh-CN": "放尿・漏尿",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ポルチオ",
+      "zh-CN": "子宫颈",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "指マン",
+      "zh-CN": "指交",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ラブコメ",
+      "zh-CN": "爱情喜剧",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "レズキス",
+      "zh-CN": "女同接吻",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "蝋燭",
+      "zh-CN": "蜡烛",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ローション・オイル",
+      "zh-CN": "润滑液・精油",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ローター",
+      "zh-CN": "振动球",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "インディーズ",
+      "zh-CN": "独立制作",
+      "sourceId": null,
+      "sourceGroup": "act-practice",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ギリモザ",
+      "zh-CN": "极限马赛克",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ゲーム実写版",
+      "zh-CN": "游戏真人版",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "16時間以上作品",
+      "zh-CN": "16小时以上作品",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "スマホ推奨縦動画",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "セット商品",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "その他",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "デジモ",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "独占配信",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ハイクオリティVR",
+      "zh-CN": "高品质VR",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ハイビジョン",
+      "zh-CN": "高清",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "FANZA配信限定",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "VR専用",
+      "zh-CN": "VR专用",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "複数話",
+      "zh-CN": "多集",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "4時間以上作品",
+      "zh-CN": "4小时以上作品",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "すべてのセール",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "日替わりセール",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "みんなのお気に入り30％OFF第1弾",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "FANZA7周年50％OFF第9弾",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "SODグループ30％OFF第2弾",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "セレブの友他30％OFF",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ルナティックス30％OFF",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ブランドストア30％OFF！",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "ポイント還元",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    },
+    {
+      "ja": "期間限定セール",
+      "zh-CN": "",
+      "sourceId": null,
+      "sourceGroup": "platform-filter",
+      "idStatus": "unresolved"
+    }
+  ]
+}

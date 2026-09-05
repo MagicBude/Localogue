@@ -1,3 +1,4 @@
+import classificationTermAliases from "../../../resources/vocabularies/classification-term-aliases.json";
 import genreVocabulary from "../../../resources/vocabularies/genres.json";
 import genreSourceAliases from "../../../resources/vocabularies/genre-source-aliases.json";
 
@@ -15,6 +16,8 @@ interface GenreVocabularyRow {
 interface GenreSourceAliasRow {
   canonicalId: string;
   sourceId: string;
+  idSource: "fanza" | "javbus" | "javdb" | "javlibrary" | null;
+  idStatus: string;
   ja: string;
   "zh-CN": string;
   en: string;
@@ -22,25 +25,46 @@ interface GenreSourceAliasRow {
   note?: string;
 }
 
+interface ClassificationTermAliasRow {
+  term: string;
+  status: "approved" | "review-required";
+  targets: string[];
+}
+
 const canonicalGenres = genreVocabulary.items as GenreVocabularyRow[];
-const approvedAliases = genreSourceAliases.items as GenreSourceAliasRow[];
+const approvedProviderAliases = genreSourceAliases.items as GenreSourceAliasRow[];
+const classificationAliases = classificationTermAliases.items as ClassificationTermAliasRow[];
+const reviewTermKeys = new Set(classificationAliases.filter((item) => item.status === "review-required").map((item) => termKey(item.term)));
 const byId = new Map(canonicalGenres.map((item) => [item.id, item]));
-const canonicalIdByAlias = new Map<string, string>();
+const aliasOwners = new Map<string, string>();
+const ambiguousAliases = new Set<string>();
+
+function registerAlias(value: string, canonicalId: string): void {
+  const key = termKey(value);
+  if (!key || reviewTermKeys.has(key) || ambiguousAliases.has(key)) return;
+  const existing = aliasOwners.get(key);
+  if (existing && existing !== canonicalId) {
+    aliasOwners.delete(key);
+    ambiguousAliases.add(key);
+    return;
+  }
+  aliasOwners.set(key, canonicalId);
+}
 
 for (const item of canonicalGenres) {
-  for (const value of [item.ja, item["zh-CN"], item.en]) canonicalIdByAlias.set(termKey(value), item.id);
+  for (const value of [item.ja, item["zh-CN"], item.en]) registerAlias(value, item.id);
 }
-for (const item of approvedAliases) {
-  for (const value of [item.ja, item["zh-CN"], item.en]) {
-    const key = termKey(value);
-    if (key && !canonicalIdByAlias.has(key)) canonicalIdByAlias.set(key, item.canonicalId);
-  }
+for (const item of approvedProviderAliases) {
+  for (const value of [item.ja, item["zh-CN"], item.en]) registerAlias(value, item.canonicalId);
+}
+for (const item of classificationAliases) {
+  if (item.status !== "approved" || item.targets.length !== 1 || !item.targets[0].startsWith("genre:")) continue;
+  registerAlias(item.term, item.targets[0].slice("genre:".length));
 }
 
 /**
- * Resolve a Canonical Genre label without depending on the original user
- * reference CSV. Only approved Canonical vocabulary and curated source aliases
- * participate in runtime localization.
+ * Resolve a Canonical Genre label from stable ID first, then from reviewed
+ * exact aliases. Unreviewed/ambiguous terms never participate in localization.
  */
 export function localizeGenre(genre: Genre | undefined, preferred: SupportedLanguage, fallback = "—"): string {
   if (!genre) return fallback;
@@ -65,15 +89,18 @@ export function localizeGenre(genre: Genre | undefined, preferred: SupportedLang
 }
 
 export function findApprovedGenreAlias(value: string): GenreSourceAliasRow | undefined {
-  const canonicalId = canonicalIdByAlias.get(termKey(value));
+  const canonicalId = aliasOwners.get(termKey(value));
   if (!canonicalId) return undefined;
-  return approvedAliases.find((item) => item.canonicalId === canonicalId && [item.ja, item["zh-CN"], item.en].some((alias) => termKey(alias) === termKey(value)));
+  return approvedProviderAliases.find(
+    (item) => item.canonicalId === canonicalId
+      && [item.ja, item["zh-CN"], item.en].some((alias) => termKey(alias) === termKey(value)),
+  );
 }
 
 function findCanonicalGenreByKnownName(genre: Genre): GenreVocabularyRow | undefined {
   for (const value of Object.values(genre.names)) {
     if (!value?.trim()) continue;
-    const canonicalId = canonicalIdByAlias.get(termKey(value));
+    const canonicalId = aliasOwners.get(termKey(value));
     if (canonicalId) return byId.get(canonicalId);
   }
   return undefined;

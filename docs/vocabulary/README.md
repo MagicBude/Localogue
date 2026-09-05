@@ -26,7 +26,7 @@ solo
 - ID 使用稳定英文标识，不随翻译变化；
 - 日 / 中 / 英三语展示文本可以调整；
 - Raw Term 不能因为未识别而丢弃；
-- 词表可逐步扩展，不追求 V0 一次穷举所有行业术语；
+- 词表按 Provider / 参考数据覆盖持续扩展，不以“全世界永久完整”为目标；
 - 文档表格用于人阅读；
 - [导入词条映射表](import-term-mappings.md) 规定 NFO / 外部来源混合分类如何进入 Series / Work Type / Genre / Tag；
 - `resources/vocabularies/` 中的 JSON 用于未来程序读取。
@@ -43,3 +43,26 @@ solo
 两者都只表达治理信号，不表达“资料正确”或“已经确认重复”。
 
 - [Approved Genre Source Aliases](./genre-source-aliases.md)：从外部参考表中人工筛选的来源别名；只允许指向现有 Canonical Genre。
+
+## V1-25A / V1-25B Vocabulary Coverage
+
+当前分类治理拆成五层：
+
+- `genres.*`：359 个 Canonical Genre；
+- `work-types.*`：43 个 Canonical Work Type；
+- `source-only-classifications.*`：51 个可识别但不提升为 Canonical 的来源属性；
+- `classification-term-aliases.*`：1161 个精确来源词，其中 1127 个可自动路由、34 个必须审核；
+- `community-classification-crosswalk.*`：`localogue-community-data` 323 / 323 Classification 到 Localogue Runtime 维度的交叉映射。
+
+辅助命令：
+
+```bash
+pnpm validate:vocabulary
+pnpm vocabulary:coverage -- path/to/source-terms.txt
+pnpm vocabulary:provider-coverage
+pnpm validate:provider-coverage
+```
+
+Provider 快照与覆盖率规则见 [Provider Genre Coverage](./provider-coverage.md)。覆盖率报告用于发现未识别词，不会自动把未识别词创建成 Genre。
+
+V1-25C 起，Provider ID 与名称 Evidence 分离：`genre-source-aliases.*` 的 `idSource` 才表示 `sourceId` 属于哪个 Provider；`sources` 只表示名称曾在哪些来源出现，不能据此复制 ID。
