@@ -17,10 +17,13 @@ import type { LocalizedText } from "@/domain/value-objects/localized-text";
  * than by an ever-growing hard-coded switch table.
  */
 
+export type ControlledGenreFacet = "theme" | "role" | "wardrobe" | "body" | "act" | "practice";
+
 export interface ControlledGenreDefinition {
   id: string;
   names: LocalizedText;
   aliases: readonly string[];
+  facets: readonly ControlledGenreFacet[];
 }
 
 export interface WorkTypeDefinition {
@@ -40,6 +43,10 @@ interface VocabularyRow {
   ja: string;
   "zh-CN": string;
   en: string;
+}
+
+interface GenreVocabularyRow extends VocabularyRow {
+  facets?: ControlledGenreFacet[];
 }
 
 interface GenreSourceAliasRow {
@@ -96,9 +103,10 @@ for (const item of GENRE_SOURCE_ALIASES) {
 
 /** Canonical Genre is defined by resources/vocabularies/genres.*. */
 export const CONTROLLED_GENRE_DEFINITIONS: readonly ControlledGenreDefinition[] =
-  (genreVocabulary.items as VocabularyRow[]).map((item) => ({
+  (genreVocabulary.items as GenreVocabularyRow[]).map((item) => ({
     id: item.id,
     names: { ja: item.ja, "zh-CN": item["zh-CN"], en: item.en },
+    facets: item.facets ?? [],
     aliases: uniqueClean([
       item.ja,
       item["zh-CN"],
