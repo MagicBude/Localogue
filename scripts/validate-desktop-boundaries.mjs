@@ -137,6 +137,7 @@ if (!errors.length) {
   const desktopBridge = readFileSync(path.join(root, "apps/desktop/src/tauri-bridge.ts"), "utf8");
   const desktopApp = readFileSync(path.join(root, "apps/desktop/src/App.tsx"), "utf8");
   const desktopCuration = readFileSync(path.join(root, "apps/desktop/src/desktop-curation-page.tsx"), "utf8");
+  const desktopHistory = readFileSync(path.join(root, "apps/desktop/src/desktop-history-page.tsx"), "utf8");
   const desktopAppShell = readFileSync(path.join(root, "apps/desktop/src/desktop-app-shell.tsx"), "utf8");
   const desktopWorkPages = readFileSync(path.join(root, "apps/desktop/src/desktop-work-pages.tsx"), "utf8");
   const desktopWorkSurface = desktopApp + desktopWorkPages;
@@ -488,7 +489,7 @@ if (!errors.length) {
     if (!desktopApp.includes(page)) errors.push(`V1-23 Desktop 主导航缺少治理页面：${page}`);
   }
   for (const token of ["analyzeSingleEvidenceRecord", "buildCanonicalCommitPlan", "buildCurationOverview", "createGovernanceSnapshot", "restoreGovernanceSnapshot", "buildAdoptedProvenanceEvents", "buildRestoredProvenanceEvents"]) {
-    if (!(desktopGovernance + desktopCuration).includes(token)) errors.push(`V1-23 Desktop Governance 缺少共享治理服务或安全边界：${token}`);
+    if (!(desktopGovernance + desktopCuration + desktopHistory).includes(token)) errors.push(`V1-23 Desktop Governance 缺少共享治理服务或安全边界：${token}`);
   }
   for (const collection of ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts"]) {
     if (!desktopContracts.includes(`"${collection}"`) || !rust.includes(`"${collection}"`)) errors.push(`V1-23 Private Audit Collection 未跨 Rust / TypeScript 同步：${collection}`);
