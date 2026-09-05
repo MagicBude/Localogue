@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
 import { findApprovedGenreAlias } from "@/application/services/genre-localization-service";
-import { localizeText } from "@/application/services/localization-service";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
-import type { MediaFile } from "@/domain/entities/media-file";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { MediaBindingPanel } from "./desktop-management";
+import { MediaLibrarySection, MediaScanSection } from "./desktop-media-sections";
 import {
   importLocalAssetPreview,
   previewLocalAssetImport,
@@ -363,36 +362,12 @@ export function DesktopMediaPage({
         </div>
         <code className="path-block">{unique([...settings.libraryRoots]).length ? unique([...settings.libraryRoots]).join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
       </section>
-      <section className="settings-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">INCREMENTAL MEDIA SCAN</span>
-            <h2>{t("媒体扫描")}</h2>
-            <p className="muted">{t("递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。")}</p>
-          </div>
-          <div className="button-row">
-            <button className="primary-button" disabled={scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void startScan()}>{t("仅扫描视频")}</button>
-            <button disabled={scan?.status !== "running"} onClick={() => setScan(scanCoordinator.current?.cancel() ?? null)}>{t("取消")}</button>
-          </div>
-        </div>
-        <code className="path-block">{mediaRoots.length ? mediaRoots.join("\n") : t("尚未配置可扫描资料根目录")}</code>
-        {scan ? <div className={`progress ${scan.status}`}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></div> : null}
-        {scan?.result ? <>
-          <div className="mini-stat-grid">
-            <MiniStat label={t("扫描目录")} value={scan.result.roots.length} />
-            <MiniStat label={t("已发现")} value={scan.result.discovered} />
-            <MiniStat label={t("新增")} value={scan.result.added} />
-            <MiniStat label={t("已更新")} value={scan.result.updated} />
-            <MiniStat label={t("未变化")} value={scan.result.unchanged} />
-            <MiniStat label={t("已移除")} value={scan.result.removed} />
-          </div>
-          <details className="scan-root-report">
-            <summary>{t("本轮实际扫描的 {count} 个目录", { count: scan.result.roots.length })}</summary>
-            <code className="path-block">{scan.result.roots.join("\n")}</code>
-          </details>
-          {scan.result.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: scan.result.warnings.length })}</summary><ul>{scan.result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
-        </> : null}
-      </section>
+      <MediaScanSection
+        roots={mediaRoots}
+        scan={scan}
+        onStart={() => void startScan()}
+        onCancel={() => setScan(scanCoordinator.current?.cancel() ?? null)}
+      />
 
       <section className="settings-card table-card">
         <div className="section-heading">
@@ -509,23 +484,17 @@ export function DesktopMediaPage({
         </div> : null}
       </section>
 
-      {data.loading ? <LoadingState /> : data.error || !data.value ? <ErrorState error={data.error} /> : (
-        <section className="settings-card table-card">
-          <div className="section-heading"><div><span className="eyebrow">PRIVATE LOCAL DATA</span><h2>{data.value.media.length} {t("视频")} · {t("{count} 个资产", { count: data.value.assets.length })}</h2></div></div>
-          {data.value.media.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>{t("文件")}</th><th>{t("作品")}</th><th>{t("大小")}</th><th>{t("媒体参数")}</th><th>{t("操作")}</th></tr></thead><tbody>
-            {data.value.media.map((file) => {
-              const work = file.workId ? data.value!.works.get(file.workId) : undefined;
-              return <tr key={file.id}>
-                <td><strong>{file.fileName}</strong><small className="path-text">{file.path}</small></td>
-                <td>{work ? <><strong>{work.code}</strong><small>{localizeText(work.titles, metadataLanguage)}</small></> : <span className="status-chip warn">{t("未绑定")}</span>}</td>
-                <td>{formatBytes(file.fileSize ?? 0)}</td>
-                <td>{mediaSummary(file)}</td>
-                <td><div className="row-actions"><button onClick={() => void fileOpener.openPath(file.path)}>{t("打开")}</button><button onClick={() => void fileOpener.revealInFolder(file.path)}>{t("定位")}</button><button className={bindingMediaId === file.id ? "primary-button" : ""} onClick={() => setBindingMediaId((current) => current === file.id ? null : file.id)}>{t("管理绑定")}</button></div></td>
-              </tr>;
-            })}
-          </tbody></table></div> : <p className="muted">{t("尚未扫描到本地媒体。")} </p>}
-        </section>
-      )}
+      <MediaLibrarySection
+        loading={data.loading}
+        error={data.error}
+        media={data.value?.media}
+        works={data.value?.works}
+        assetCount={data.value?.assets.length}
+        bindingMediaId={bindingMediaId}
+        onOpen={(path) => void fileOpener.openPath(path)}
+        onReveal={(path) => void fileOpener.revealInFolder(path)}
+        onToggleBinding={(id) => setBindingMediaId((current) => current === id ? null : id)}
+      />
 
       <DesktopAssetStorageGovernance
         hasPrivateLibrary={Boolean(settings.libraryPath)}
@@ -596,12 +565,6 @@ function InfoCard({ label, value }: { label: string; value?: string }) {
   return <article className="info-card"><span>{label}</span><strong>{value && value !== "—" ? value : "—"}</strong></article>;
 }
 
-function mediaSummary(file: MediaFile): ReactNode {
-  const resolution = file.width && file.height ? `${file.width}×${file.height}` : null;
-  const codecs = [file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ");
-  return <><strong>{resolution ?? "—"}</strong><small>{codecs || (file.analysisStale ? "analysis stale" : "—")}</small></>;
-}
-
 function formatDuration(value?: number): string | undefined {
   if (!value || !Number.isFinite(value)) return undefined;
   const total = Math.round(value);
@@ -611,25 +574,8 @@ function formatDuration(value?: number): string | undefined {
   return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}` : `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function formatBytes(value: number): string {
-  if (!value) return "0 B";
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
-  return `${(value / 1024 ** index).toFixed(index > 2 ? 2 : 1)} ${units[index]}`;
-}
-
 function MiniStat({ label, value }: { label: string; value: number }) {
   return <div><span>{label}</span><strong>{value}</strong></div>;
-}
-
-function LoadingState() {
-  const { t } = useDesktopI18n();
-  return <section className="empty-state"><div className="loading-dot" /><strong>{t("正在读取资料库…")}</strong></section>;
-}
-
-function ErrorState({ error }: { error: unknown }) {
-  const { t } = useDesktopI18n();
-  return <section className="empty-state error-state"><span className="eyebrow">READ ERROR</span><h2>{t("无法读取当前页面")}</h2><p>{toMessage(error)}</p></section>;
 }
 
 function unique(values: string[]): string[] {

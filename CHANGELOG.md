@@ -9,6 +9,7 @@
 - Desktop Boundary Validator 跟随模块边界读取对应页面文件，继续守住详情页、Gallery、Presentation 与查询语义。
 - 第二批将资料包与设置页迁入独立模块，`App.tsx` 只负责全局状态、持久化和页面组合。
 - 第三批迁出 Media 工作台及其专属 Adapter / Importer / 状态展示 helper，并明确扫描编排与 React 展示的边界。
+- Media 扫描状态与媒体结果列表进一步提取为纯展示 Section，避免任务执行逻辑与表格 JSX 混杂。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency

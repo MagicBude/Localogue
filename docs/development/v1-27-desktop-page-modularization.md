@@ -32,4 +32,4 @@ Desktop 早期为了快速建立完整产品壳，把首页、作品、人物、
 
 第三批已将 Media 工作台迁入独立模块，并删除 `App.tsx` 中只为 Media 服务的 Adapter、Importer 与展示 helper。页面继续复用 `MediaScanCoordinator` 和各 Application Service；资料刷新使用 stale-while-refresh，避免列表闪烁和滚动位置跳动。
 
-后续优化应继续把 Media 的大段展示 JSX 按“同步状态、导入预览、词表修复、媒体列表”提取为纯展示组件，但编排状态和任务执行仍保留在同一个页面控制器中，避免子组件各自启动扫描或写入。
+Media 内部继续把扫描状态和媒体列表提取到 `desktop-media-sections.tsx`。这些 Section 只接收数据与回调，不创建 Coordinator、不写 Repository；页面控制器继续统一持有任务状态和执行顺序。后续可用同一模式提取导入预览与词表修复。

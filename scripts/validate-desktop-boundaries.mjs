@@ -142,6 +142,8 @@ if (!errors.length) {
   const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;
   const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
   const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
+  const desktopMediaSections = readFileSync(path.join(root, "apps/desktop/src/desktop-media-sections.tsx"), "utf8");
+  const desktopMediaSurface = desktopMediaPage + desktopMediaSections;
   const desktopPacksPage = readFileSync(path.join(root, "apps/desktop/src/desktop-packs-page.tsx"), "utf8");
   const desktopSettingsPage = readFileSync(path.join(root, "apps/desktop/src/desktop-settings-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
@@ -597,7 +599,7 @@ if (!errors.length) {
   if (!mediaCoordinator.includes("waitForCompletion") || !desktopMediaPage.includes("startScan({ waitForCompletion: true })")) {
     errors.push("V1-24 一键同步必须等待完整 MediaScanCoordinator 结束，不能在多媒体根目录尚未全部扫描时提前返回。");
   }
-  if (!desktopMediaPage.includes("本轮实际扫描的 {count} 个目录") || !desktopMediaPage.includes("scan.result.roots")) {
+  if (!desktopMediaSurface.includes("本轮实际扫描的 {count} 个目录") || !desktopMediaSurface.includes("scan.result.roots")) {
     errors.push("V1-24 Media 页面必须显示本轮实际成功扫描的根目录，便于验证多目录行为。");
   }
   if (!viteConfig.includes("codeSplitting") || !viteConfig.includes('name: "vendor"')) {
