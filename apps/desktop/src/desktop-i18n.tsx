@@ -30,6 +30,9 @@ const DesktopI18nContext = createContext<DesktopI18nValue | null>(null);
 
 const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "打开日志位置": "ログの場所を開く",
+    "已在文件管理器中定位 Localogue 日志。": "ファイルマネージャーで Localogue ログを表示しました。",
+    "无法打开日志位置：{error}": "ログの場所を開けません：{error}",
     "首页": "ホーム",
     "作品": "作品",
     "人物": "人物",
@@ -286,6 +289,9 @@ const translations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, s
     "没有候选。尝试输入番号或标题。": "候補がありません。品番またはタイトルを入力してください。",
   },
   en: {
+    "打开日志位置": "Open log location",
+    "已在文件管理器中定位 Localogue 日志。": "Revealed the Localogue log in the file manager.",
+    "无法打开日志位置：{error}": "Could not open the log location: {error}",
     "首页": "Home",
     "作品": "Works",
     "人物": "People",

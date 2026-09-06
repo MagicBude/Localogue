@@ -51,6 +51,8 @@ export const desktopBridge = {
   installSharedPortableFiles: (sourceId: string, sourceVersion: string, files: DesktopPortableFile[]) => invoke<string>("install_shared_portable_files", { sourceId, sourceVersion, files: files.map((file) => ({ ...file, bytes: Array.from(file.bytes) })) }),
   openPath: (path: string) => invoke<void>("open_path", { path }),
   revealInFolder: (path: string) => invoke<void>("reveal_in_folder", { path }),
+  appendAppLog: (level: "info" | "warn" | "error", message: string) => invoke<void>("append_app_log", { level, message }),
+  revealAppLog: () => invoke<void>("reveal_app_log"),
   openWebUrl: (url: string) => invoke<void>("open_web_url", { url }),
   probeMedia: (executable: string, filePath: string) =>
     invoke<DesktopMediaProbeResult>("probe_media", { request: { executable, filePath } }),

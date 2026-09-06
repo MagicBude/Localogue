@@ -184,6 +184,15 @@ export function DesktopSettingsPage({
     }
   }
 
+  async function revealLog(): Promise<void> {
+    try {
+      await desktopBridge.revealAppLog();
+      setMessage(t("已在文件管理器中定位 Localogue 日志。"));
+    } catch (error) {
+      setMessage(t("无法打开日志位置：{error}", { error: toMessage(error) }));
+    }
+  }
+
   return (
     <div className="page-stack">
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
@@ -283,6 +292,7 @@ export function DesktopSettingsPage({
           <InfoCard label={t("环境")} value={runtime?.environment} />
         </div>
         <code className="path-block">{runtime?.settingsPath ?? "—"}</code>
+        <div className="button-row"><button onClick={() => void revealLog()}>{t("打开日志位置")}</button></div>
       </section>
     </div>
   );

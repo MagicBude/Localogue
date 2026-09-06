@@ -20,6 +20,8 @@ commands.allow = [
   "install_shared_portable_files",
   "open_path",
   "reveal_in_folder",
+  "append_app_log",
+  "reveal_app_log",
   "open_web_url",
   "probe_media",
   "resolve_path",

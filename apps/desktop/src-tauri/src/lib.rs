@@ -4,7 +4,7 @@ use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet, VecDeque},
     fs::{self, File},
-    io::Read,
+    io::{Read, Write},
     path::{Path, PathBuf},
     process::Command,
     sync::atomic::{AtomicU64, Ordering},
@@ -17,6 +17,9 @@ use url::Url;
 
 const PROGRESS_EVENT: &str = "localogue://desktop-task-progress";
 const SETTINGS_FILE: &str = "desktop-settings.json";
+const APP_LOG_FILE: &str = "localogue.log";
+const MAX_APP_LOG_BYTES: u64 = 1024 * 1024;
+const APP_LOG_GENERATIONS: usize = 3;
 const MAX_PORTABLE_PACK_BYTES: usize = 256 * 1024 * 1024;
 const PERSONAL_PORTABLE_DIRECTORIES: &[&str] = &[
     "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
@@ -305,7 +308,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 7,
+        contract_revision: 8,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -739,6 +742,64 @@ fn open_path(app: AppHandle, path: String) -> Result<(), String> {
 fn reveal_in_folder(app: AppHandle, path: String) -> Result<(), String> {
     let target = require_existing_path(path)?;
     app.opener().reveal_item_in_dir(&target).map_err(display_error)
+}
+
+/// 追加一条经过脱敏的本地诊断日志。
+///
+/// WebView 只能提交级别与文本，不能指定文件路径。日志固定写入 App Local Data，达到
+/// 1 MiB 后保留三个历史分卷，避免长期使用无限增长。
+#[tauri::command]
+async fn append_app_log(app: AppHandle, level: String, message: String) -> Result<(), String> {
+    spawn_native_io("append_app_log", move || append_app_log_blocking(app, level, message)).await
+}
+
+fn append_app_log_blocking(app: AppHandle, level: String, message: String) -> Result<(), String> {
+    if !matches!(level.as_str(), "info" | "warn" | "error") { return Err("日志级别无效。".into()); }
+    let sanitized = redact_log_message(&app, &message.chars().take(8_000).collect::<String>())?;
+    let path = app_log_path(&app)?;
+    rotate_app_logs(&path)?;
+    if let Some(parent) = path.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+    let mut file = fs::OpenOptions::new().create(true).append(true).open(path).map_err(display_error)?;
+    let line = format!("{} [{}] {}\n", now_marker(), level.to_uppercase(), sanitized.replace('\r', " ").replace('\n', " "));
+    file.write_all(line.as_bytes()).map_err(display_error)
+}
+
+#[tauri::command]
+fn reveal_app_log(app: AppHandle) -> Result<(), String> {
+    let path = app_log_path(&app)?;
+    if !path.exists() { append_app_log_blocking(app.clone(), "info".into(), "Localogue 日志已创建。".into())?; }
+    app.opener().reveal_item_in_dir(&path).map_err(display_error)
+}
+
+fn app_log_path(app: &AppHandle) -> Result<PathBuf, String> {
+    app.path().app_local_data_dir().map(|path| path.join("logs").join(APP_LOG_FILE)).map_err(display_error)
+}
+
+fn rotate_app_logs(path: &Path) -> Result<(), String> {
+    if path.metadata().map(|value| value.len()).unwrap_or(0) < MAX_APP_LOG_BYTES { return Ok(()); }
+    for generation in (1..=APP_LOG_GENERATIONS).rev() {
+        let target = path.with_file_name(format!("{APP_LOG_FILE}.{generation}"));
+        if generation == APP_LOG_GENERATIONS && target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+        let source = if generation == 1 { path.to_path_buf() } else { path.with_file_name(format!("{APP_LOG_FILE}.{}", generation - 1)) };
+        if source.exists() { fs::rename(source, target).map_err(display_error)?; }
+    }
+    Ok(())
+}
+
+fn redact_log_message(app: &AppHandle, message: &str) -> Result<String, String> {
+    let mut output = message.to_string();
+    if let Ok(home) = app.path().home_dir() { output = output.replace(&path_to_string(&home), "<HOME>"); }
+    if let Ok(settings) = load_desktop_settings(app.clone()) {
+        let mut paths = vec![settings.library_path, settings.ffprobe_path].into_iter().flatten().collect::<Vec<_>>();
+        paths.extend(settings.library_roots);
+        paths.extend(settings.media_scan_paths);
+        paths.extend(settings.nfo_scan_paths);
+        paths.extend(settings.shared_pack_paths);
+        for (index, path) in paths.iter().filter(|value| !value.trim().is_empty()).enumerate() {
+            output = output.replace(path, &format!("<CONFIG_PATH_{}>", index + 1));
+        }
+    }
+    Ok(output)
 }
 
 #[tauri::command]
@@ -2336,6 +2397,8 @@ pub fn run() {
             install_shared_portable_files,
             open_path,
             reveal_in_folder,
+            append_app_log,
+            reveal_app_log,
             open_web_url,
             probe_media,
             resolve_path,

@@ -68,12 +68,21 @@ export default function App() {
   const [packInfos, setPackInfos] = useState<DesktopSharedPackInfo[]>([]);
   const [page, setPage] = useState<DesktopPage>("home");
   const [detail, setDetail] = useState<DetailTarget>(null);
-  const [message, setMessage] = useState(() => t("正在连接 Tauri Runtime…"));
+  const [message, setMessageState] = useState(() => t("正在连接 Tauri Runtime…"));
   const [busy, setBusy] = useState(false);
   const [libraryEpoch, setLibraryEpoch] = useState(0);
   const [progress, setProgress] = useState<DesktopTaskProgress | null>(null);
   // 递增令牌表达一次新的同步意图；Media 页面负责真正编排，避免 App 复制扫描业务。
   const [mediaSyncRequest, setMediaSyncRequest] = useState(0);
+
+  /**
+   * 所有页面状态消息从这里汇合，因此日志接入不需要让一百多个调用点分别理解文件 I/O。
+   * Native 端负责固定目录、轮转和路径脱敏；日志失败不能反过来阻断正常 UI。
+   */
+  const setMessage = useCallback((next: string) => {
+    setMessageState(next);
+    void desktopBridge.appendAppLog(/失败|无法|错误/.test(next) ? "error" : "info", next).catch(() => undefined);
+  }, []);
 
   const refreshSources = useCallback(async (next: DesktopBootstrapSettings) => {
     const inspected = await Promise.all(
