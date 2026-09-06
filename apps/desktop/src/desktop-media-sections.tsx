@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { localizeText } from "@/application/services/localization-service";
-import { findApprovedGenreAlias } from "@/application/services/genre-localization-service";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
@@ -10,7 +9,6 @@ import type { Work } from "@/domain/entities/work";
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard } from "./desktop-page-primitives";
 import type { DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
-import type { VocabularyRepairPreview, VocabularyRepairResult } from "./vocabulary-repair";
 
 /**
  * 纯展示组件只接收数据和回调，不创建 Coordinator，也不写 Repository。
@@ -74,13 +72,6 @@ export function MediaLibrarySection({ loading, error, media, works, assetCount, 
 }
 
 /** 导入预览只呈现候选和结果；Preview / Evidence / Import 的执行顺序仍由父页面控制。 */
-export function VocabularyAuditSection({ busy, preview, result, onPreview, onApply }: { busy: boolean; preview: VocabularyRepairPreview | null; result: VocabularyRepairResult | null; onPreview: () => void; onApply: () => void }) {
-  const { t, metadataLanguage } = useDesktopI18n();
-  return <section className="settings-card vocabulary-audit-card"><div className="section-heading"><div><span className="eyebrow">VOCABULARY AUDIT</span><h2>{t("分类词表审计")}</h2><p className="muted">{t("检查早期 NFO 导入把“系列: … / 单体作品 / イメージビデオ”等混入 Genre / Tag 的情况。先预览，再显式修复；用户手工 Tag 不会被删除。")}</p></div><div className="button-row"><button disabled={busy} onClick={onPreview}>{busy ? t("处理中…") : t("检查分类")}</button><button className="primary-button" disabled={busy || !preview?.affectedWorks} onClick={onApply}>{t("应用修复")}</button></div></div>
-    {preview ? <><div className="mini-stat-grid"><MiniStat label={t("扫描 Work")} value={preview.scannedWorks} /><MiniStat label={t("需要修复")} value={preview.affectedWorks} /><MiniStat label={t("移入 Series")} value={preview.movedToSeries} /><MiniStat label={t("移入作品类型")} value={preview.movedToWorkTypes} /><MiniStat label={t("移入 Genre")} value={preview.movedToGenres} /><MiniStat label={t("Unmapped 来源词")} value={preview.unmappedTerms.length} /></div>{preview.unmappedTerms.length ? <details><summary>{t("查看 unmapped 来源词（不会自动进入 Canonical）")}</summary><div className="token-list vocabulary-unmapped-list">{preview.unmappedTerms.slice(0, 200).map((term) => { const reference = findApprovedGenreAlias(term); const localized = reference ? (metadataLanguage === "zh-CN" ? reference["zh-CN"] : metadataLanguage === "en" ? reference.en : reference.ja) : undefined; return <code key={term} title={reference ? `${reference.sources.join(" / ")} · ${reference.note ?? "approved genre alias"}` : undefined}>{localized && localized !== term ? `${term} → ${localized}` : term}{reference ? ` · ${t("词表参考")}` : ""}</code>; })}</div></details> : null}<p className="muted">{t("将移除 {genres} 个早期 NFO Genre 引用和 {tags} 个早期 NFO Tag 引用，再按映射表重新分流。", { genres: preview.removedImportedGenres, tags: preview.removedImportedTags })}</p></> : <p className="muted">{t("尚未执行分类审计。这个工具专门修复早期 Desktop NFO Bootstrap 产生的分类污染。")}</p>}{result ? <p className="success-message">{t("上次修复：更新 {works} 个 Work · 新建 Series {series} · 新建 Genre {genres}", { works: result.updatedWorks, series: result.createdSeries, genres: result.createdGenres })}</p> : null}
-  </section>;
-}
-
 export function MediaProbeSection({ selectedPath, probing, progress, probe, onChoose, onOpen, onReveal }: { selectedPath: string; probing: boolean; progress: DesktopTaskProgress | null; probe: DesktopMediaProbeResult | null; onChoose: () => void; onOpen: () => void; onReveal: () => void }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">NATIVE PROBE</span><h2>{t("单文件检查")}</h2></div><button onClick={onChoose} disabled={probing}>{t("选择 MP4 / MKV…")}</button></div>{selectedPath ? <code className="path-block">{selectedPath}</code> : <p className="muted">{t("可选择任意受支持视频验证 ffprobe、打开与定位能力。")}</p>}<div className="button-row"><button disabled={!selectedPath} onClick={onOpen}>{t("默认播放器打开")}</button><button disabled={!selectedPath} onClick={onReveal}>{t("资源管理器中定位")}</button></div>{progress ? <div className={`progress ${progress.stage}`}><strong>{progress.stage}</strong><span>{progress.message}</span></div> : null}{probe ? <div className="detail-grid compact-grid"><InfoCard label={t("时长")} value={formatDuration(probe.durationSeconds)} /><InfoCard label={t("分辨率")} value={probe.width && probe.height ? `${probe.width} × ${probe.height}` : undefined} /><InfoCard label={t("视频编码")} value={probe.videoCodec} /><InfoCard label={t("音频编码")} value={probe.audioCodec} /><InfoCard label={t("封装格式")} value={probe.container} /></div> : null}</section>;

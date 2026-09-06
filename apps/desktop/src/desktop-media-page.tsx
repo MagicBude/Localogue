@@ -9,8 +9,9 @@ import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProg
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { MediaBindingPanel } from "./desktop-media-binding-panel";
-import { MediaLibrarySection, MediaProbeSection, MediaScanHistorySection, MediaScanSection, VocabularyAuditSection } from "./desktop-media-sections";
+import { MediaLibrarySection, MediaProbeSection, MediaScanHistorySection, MediaScanSection } from "./desktop-media-sections";
 import { MetadataImportSection } from "./desktop-metadata-import-section";
+import { VocabularyAuditSection } from "./desktop-vocabulary-audit-section";
 import { PageTitle } from "./desktop-page-primitives";
 import {
   importLocalAssetPreview,
