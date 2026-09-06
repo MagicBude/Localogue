@@ -21,7 +21,7 @@ import { desktopBridge } from "./tauri-bridge";
 
 // revision 9 才保证 provision_private_library(profileId) 会为每个 Profile
 // 创建独立目录；旧 Runtime 只能返回共享 user-library，必须阻止继续新建。
-const PROFILE_NATIVE_CONTRACT_REVISION = 9;
+const PROFILE_NATIVE_CONTRACT_REVISION = 10;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**
@@ -154,8 +154,18 @@ export function DesktopSettingsPage({
     const profile = activeLibraryProfile(settings);
     if (!profile) return;
     if (!window.confirm(t("删除资料库配置“{name}”？只删除路径预设，不会删除磁盘上的资料。", { name: profile.name }))) return;
+    const canDeleteManagedData = isManagedPrivateLibrary(profile.id, profile.libraryPath, runtime?.appLocalDataDir);
+    const deleteManagedData = canDeleteManagedData && window.confirm(t("是否同时删除“{name}”的 Localogue 管理数据？确定会永久删除作品、人物、图片副本和审计记录；影片内容根目录不会被删除。取消则只删除配置。", { name: profile.name }));
     try {
       await onPersistProfiles(removeLibraryProfile(settings, profile.id), t("资料库配置已删除：{name}", { name: profile.name }));
+      if (deleteManagedData && profile.libraryPath) {
+        try {
+          await desktopBridge.deleteManagedPrivateLibrary(profile.id, profile.libraryPath);
+          setMessage(t("资料库配置和 Localogue 管理数据已删除；影片原文件未删除。"));
+        } catch (error) {
+          setMessage(t("资料库配置已删除，但管理数据删除失败并仍保留在磁盘：{error}", { error: toMessage(error) }));
+        }
+      }
     } catch {
       // 父级已经显示保存错误。
     }
@@ -316,6 +326,12 @@ function PathList({ values, onRemove }: { values: string[]; onRemove: (value: st
 
 function unique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function isManagedPrivateLibrary(profileId: string, libraryPath?: string, appLocalDataDir?: string): boolean {
+  if (!libraryPath || !appLocalDataDir) return false;
+  const normalize = (value: string) => value.replaceAll("\\", "/").replace(/\/+$/, "").toLocaleLowerCase();
+  return normalize(libraryPath) === `${normalize(appLocalDataDir)}/libraries/${profileId.toLocaleLowerCase()}`;
 }
 
 function toMessage(error: unknown): string {

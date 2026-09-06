@@ -308,7 +308,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 9,
+        contract_revision: 10,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -409,6 +409,47 @@ fn provision_private_library(app: AppHandle, profile_id: Option<String>) -> Resu
         fs::create_dir_all(destination.join(directory)).map_err(display_error)?;
     }
     Ok(DesktopPrivateLibraryInfo { library_path: path_to_string(&destination), created })
+}
+
+/// 删除 Localogue 按 Profile ID 自动创建的 Private Library。
+///
+/// 用户手选目录、旧版 user-library、内容根目录和 Shared Pack 永远不满足这个路径等式。
+/// 删除前还会确认 Settings 已不再引用它，并拒绝包含链接/Reparse Point 的目录树。
+#[tauri::command]
+async fn delete_managed_private_library(app: AppHandle, profile_id: String, expected_path: String) -> Result<(), String> {
+    spawn_native_io("delete_managed_private_library", move || {
+        if !is_safe_id(&profile_id) { return Err("Library Profile id 包含不安全字符。".into()); }
+        validate_text_path(&expected_path)?;
+        let local_data = app.path().app_local_data_dir().map_err(display_error)?;
+        let managed = normalize_lexical(&local_data.join("libraries").join(&profile_id));
+        let expected = normalize_lexical(Path::new(&expected_path));
+        if expected != managed { return Err("只允许删除 Localogue 自动管理的 Profile Private Library。".into()); }
+        let settings = load_desktop_settings(app)?;
+        if settings.library_profiles.iter().any(|profile| profile.library_path.as_deref().map(Path::new).map(normalize_lexical).as_ref() == Some(&managed)) {
+            return Err("Private Library 仍被资料库配置引用，已拒绝删除。".into());
+        }
+        if !managed.exists() { return Ok(()); }
+        ensure_tree_contains_no_links(&managed)?;
+        fs::remove_dir_all(managed).map_err(display_error)
+    }).await
+}
+
+fn ensure_tree_contains_no_links(root: &Path) -> Result<(), String> {
+    let metadata = fs::symlink_metadata(root).map_err(display_error)?;
+    if metadata.file_type().is_symlink() || is_filesystem_reparse_point(&metadata) { return Err("受控资料库根目录是链接或 Reparse Point，已拒绝递归删除。".into()); }
+    // 继续使用可审计的迭代队列，避免深目录递归压栈，也不引入 Walker 的隐式跟随行为。
+    let mut pending = vec![root.to_path_buf()];
+    while let Some(directory) = pending.pop() {
+        for entry in fs::read_dir(&directory).map_err(display_error)? {
+            let path = entry.map_err(display_error)?.path();
+            let metadata = fs::symlink_metadata(&path).map_err(display_error)?;
+            if metadata.file_type().is_symlink() || is_filesystem_reparse_point(&metadata) {
+                return Err(format!("受控资料库包含链接或 Reparse Point，已拒绝递归删除：{}", path.display()));
+            }
+            if metadata.is_dir() { pending.push(path); }
+        }
+    }
+    Ok(())
 }
 
 
@@ -2431,6 +2472,7 @@ pub fn run() {
             save_desktop_settings,
             provision_example_library,
             provision_private_library,
+            delete_managed_private_library,
             pick_directory,
             pick_media_file,
             pick_image_file,

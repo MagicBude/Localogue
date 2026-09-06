@@ -6,6 +6,8 @@ V1-24 Foundation Cleanup 将 Desktop 的路径设置分成两个层次：**Libra
 
 新建普通 Profile 时，Desktop 会先在 App Local Data 的 `libraries/<profile-id>/` 下创建独立 Private Library。这个目录由 Native Runtime 根据受校验的 Profile ID 决定，WebView 不能指定任意写入根。用户只需选择影片所在的内容根目录；不同 Profile 不会因省略手工 Private Library 设置而共享上一资料库的数据。
 
+删除 Profile 时第一次确认始终只表达“删除配置”。如果它使用的是上述 Native-managed 目录，Desktop 会再询问是否同时永久删除 Localogue 管理的 Canonical、Asset 副本和审计数据；取消第二次确认就会保留数据。影片内容根、用户手选 Private Library、旧版 `user-library` 和 Shared Pack 不属于自动管理删除边界，Native Command 会拒绝递归删除这些路径。
+
 ## 先记住一个最简单的模型
 
 一个资料库配置可以理解成：
