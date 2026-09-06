@@ -1,5 +1,6 @@
 # Changelog
 
+- 修复人物译名保存会删除同语言其它合法罗马字名称的问题；编辑器现在只更新它实际显示的首选名称，其余拼写和历史名称保持不变。
 - Desktop 管理表单按 Work、Person 和共享规范化工具拆成三个模块；实体页面只依赖自己的 CRUD 组件，修改人物资料不再需要进入作品编辑文件。
 - Desktop 国际化模块拆分 React Provider 与近 1400 行纯翻译字典；以后补充界面文案时无需进入语言状态逻辑，降低误改 localStorage、回退或插值规则的风险。
 - Desktop 设置页增加 ffprobe.exe 文件选择与独立可用性检测，并解释缺少 ffprobe 时仍可建立媒体索引、只是没有清晰度与编码参数；Native Contract 升级至 revision 11。

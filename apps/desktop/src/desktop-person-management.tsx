@@ -129,9 +129,24 @@ function compactPersonDisplayNames(nameJa: string, nameZh: string, nameEn: strin
  * 这样编辑一次译名不会误删人物匹配和审计仍需使用的别名证据。
  */
 function mergePersonDisplayNames(existing: PersonName[], nameJa: string, nameZh: string, nameEn: string): PersonName[] {
-  const editable = (item: PersonName): boolean =>
-    (item.language === "ja" && item.type === "primary")
-    || (item.language === "zh-CN" && (item.type === "primary" || item.type === "localized"))
-    || (item.language === "en" && (item.type === "primary" || item.type === "localized" || item.type === "romanized"));
-  return [...compactPersonDisplayNames(nameJa, nameZh, nameEn), ...existing.filter((item) => !editable(item))];
+  const next = [...existing];
+
+  /**
+   * 表单展示的是按优先级找到的第一条名称，所以保存时也只更新同一条。
+   * 若把同语言、同类型的所有项先过滤掉，多种合法罗马字拼写也会一起丢失。
+   */
+  const updateOne = (language: "ja" | "zh-CN" | "en", types: PersonNameType[], value: string, fallbackType: PersonNameType): void => {
+    const index = types
+      .map((type) => next.findIndex((item) => item.language === language && item.type === type))
+      .find((candidate) => candidate >= 0) ?? -1;
+    const normalized = value.trim();
+    if (index >= 0 && normalized) next[index] = { ...next[index], value: normalized };
+    else if (index >= 0) next.splice(index, 1);
+    else if (normalized) next.push({ language, value: normalized, type: fallbackType });
+  };
+
+  updateOne("ja", ["primary"], nameJa, "primary");
+  updateOne("zh-CN", ["primary", "localized"], nameZh, "localized");
+  updateOne("en", ["primary", "romanized", "localized"], nameEn, "romanized");
+  return next;
 }
