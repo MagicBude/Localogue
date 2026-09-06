@@ -162,3 +162,10 @@ Web 页面使用轮询；Tauri 后续可以把同一模型映射成 Rust Event�
 运行期间       → Watcher 快速提示
 定期            → Reconcile
 ```
+# 清晰度为什么不是 Work 分类
+
+清晰度属于具体 `MediaFile` 的技术属性。同一 Work 可能同时关联 4K、1080P 和较低清晰度版本，因此不能在 Canonical Work 上保存一个单值“清晰度”。
+
+共享 `queryWorks` 会从每个关联 MediaFile 的 `width / height` 派生 `4k / 1080p / 720p / sd` 档位，再建立 `Work -> Set<ResolutionTier>` 索引。Works 筛选采用“任一关联版本命中”的语义，并像其它维度一样计算 self-excluding Facet：选择 4K 后，清晰度分组仍能显示切换到 1080P 会得到多少作品。
+
+没有成功执行 ffprobe、因而缺少宽高的媒体不会被猜成某个档位。用户仍可以用“有本地媒体”找到它，等技术分析成功后清晰度 Facet 会自动出现。

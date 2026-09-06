@@ -14,6 +14,9 @@ export type WorkSort =
   | "duration_asc"
   | "duration_desc";
 
+/** 清晰度来自关联 MediaFile；同一 Work 可以同时命中多个档位。 */
+export type MediaResolutionTier = "4k" | "1080p" | "720p" | "sd";
+
 export interface WorkQuery {
   text?: string;
   personIds?: string[];
@@ -24,6 +27,7 @@ export interface WorkQuery {
   genreIds?: string[];
   workTypeIds?: string[];
   tagIds?: string[];
+  resolutionTiers?: MediaResolutionTier[];
   releaseYears?: string[];
   releaseFrom?: string;
   releaseTo?: string;
@@ -51,6 +55,7 @@ export interface WorkFacets {
   genres: FacetCount[];
   workTypes: FacetCount[];
   tags: FacetCount[];
+  resolutions: FacetCount[];
 }
 
 export interface WorkSearchResult {

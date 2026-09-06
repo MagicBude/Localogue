@@ -41,6 +41,7 @@ interface ExplorerData {
   tags: FilterOption[];
   workTypes: FilterOption[];
   years: FilterOption[];
+  resolutions: FilterOption[];
 }
 
 export function DesktopWorkExplorer({
@@ -169,6 +170,8 @@ export function DesktopWorkExplorer({
       label: facet.id,
       count: facet.count,
     }));
+    const resolutionLabels: Record<string, string> = { "4k": "4K", "1080p": "1080P", "720p": "720P", sd: "SD" };
+    const resolutions = result.facets.resolutions.map((facet) => ({ id: facet.id, label: resolutionLabels[facet.id] ?? facet.id, count: facet.count }));
 
     return {
       result,
@@ -182,6 +185,7 @@ export function DesktopWorkExplorer({
       tags: tagOptions,
       workTypes,
       years,
+      resolutions,
     };
   }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage]);
 
@@ -295,6 +299,7 @@ function WorkFacetPanel({
       {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
       <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
       <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
+      <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
       <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
       <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
       <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
@@ -325,6 +330,7 @@ function DesktopWorkFilterChips({
     workTypeIds: toOptionMap(data.workTypes),
     tagIds: toOptionMap(data.tags),
     releaseYears: toOptionMap(data.years),
+    resolutionTiers: toOptionMap(data.resolutions),
   }), [data]);
 
   const chips: Array<{ key: keyof WorkQuery; value?: string; label: string }> = [];
@@ -338,6 +344,7 @@ function DesktopWorkFilterChips({
   pushArrayChips(chips, "workTypeIds", t("类型"), query.workTypeIds, maps.workTypeIds);
   pushArrayChips(chips, "tagIds", t("标签"), query.tagIds, maps.tagIds);
   pushArrayChips(chips, "releaseYears", t("年份"), query.releaseYears, maps.releaseYears);
+  pushArrayChips(chips, "resolutionTiers", t("清晰度"), query.resolutionTiers, maps.resolutionTiers);
   if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `${t("发行日期")} ≥ ${query.releaseFrom}` });
   if (query.releaseTo) chips.push({ key: "releaseTo", label: `${t("发行日期")} ≤ ${query.releaseTo}` });
   if (query.durationMin !== undefined) chips.push({ key: "durationMin", label: `${t("时长")} ≥ ${query.durationMin}` });

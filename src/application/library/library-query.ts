@@ -13,6 +13,7 @@ import type {
   WorkQuery,
   WorkSearchResult,
   WorkSort,
+  MediaResolutionTier,
 } from "@/domain/queries/work-query";
 
 const DEFAULT_PAGE_SIZE = 24;
@@ -33,6 +34,7 @@ export function queryWorks(
   const mediaWorkIds = new Set(
     mediaFiles.flatMap((item) => (item.workId ? [item.workId] : [])),
   );
+  const mediaResolutionsByWork = buildMediaResolutionIndex(mediaFiles);
   const subjectCoverWorkIds = new Set(
     assets
       .filter(
@@ -43,7 +45,7 @@ export function queryWorks(
   );
 
   const filtered = works.filter((work) =>
-    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds),
+    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork),
   );
   const sorted = [...filtered].sort(createWorkComparator(query.sort));
   const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
@@ -62,6 +64,7 @@ export function queryWorks(
       query,
       mediaWorkIds,
       subjectCoverWorkIds,
+      mediaResolutionsByWork,
     ),
   };
 }
@@ -130,6 +133,7 @@ function matchesWork(
   query: WorkQuery,
   mediaWorkIds: ReadonlySet<string> = new Set(),
   subjectCoverWorkIds: ReadonlySet<string> = new Set(),
+  mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>> = new Map(),
 ): boolean {
   if (query.text) {
     const needle = query.text.trim().toLocaleLowerCase();
@@ -153,6 +157,10 @@ function matchesWork(
   if (!containsAny(work.genreIds, query.genreIds)) return false;
   if (!containsAny(work.workTypeIds, query.workTypeIds)) return false;
   if (!containsAny(work.tagIds, query.tagIds)) return false;
+  if (query.resolutionTiers?.length) {
+    const tiers = mediaResolutionsByWork.get(work.id);
+    if (!tiers || !query.resolutionTiers.some((tier) => tiers.has(tier))) return false;
+  }
 
   const release = work.releaseDate?.value;
   if (query.releaseYears?.length) {
@@ -239,6 +247,7 @@ function buildWorkFacets(
   query: WorkQuery,
   mediaWorkIds: ReadonlySet<string>,
   subjectCoverWorkIds: ReadonlySet<string>,
+  mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>>,
 ): WorkFacets {
   const facetWorks = (ignoredKeys: Array<keyof WorkQuery>) => {
     const facetQuery = { ...query };
@@ -247,7 +256,7 @@ function buildWorkFacets(
     delete facetQuery.page;
     delete facetQuery.pageSize;
     return works.filter((work) =>
-      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds),
+      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork),
     );
   };
 
@@ -291,7 +300,29 @@ function buildWorkFacets(
       facetWorks(["workTypeIds"]).flatMap((work) => work.workTypeIds),
     ),
     tags: countFacet(facetWorks(["tagIds"]).flatMap((work) => work.tagIds)),
+    resolutions: countFacet(facetWorks(["resolutionTiers"]).flatMap((work) => [...(mediaResolutionsByWork.get(work.id) ?? [])])),
   };
+}
+
+/** 按实际视频像素归档；这是 MediaFile 的派生视图，不写回 Canonical Work。 */
+function buildMediaResolutionIndex(mediaFiles: readonly MediaFile[]): Map<string, Set<MediaResolutionTier>> {
+  const index = new Map<string, Set<MediaResolutionTier>>();
+  for (const file of mediaFiles) {
+    if (!file.workId || !file.width || !file.height) continue;
+    const longEdge = Math.max(file.width, file.height);
+    const shortEdge = Math.min(file.width, file.height);
+    const tier: MediaResolutionTier = longEdge >= 3840 || shortEdge >= 2160
+      ? "4k"
+      : longEdge >= 1920 || shortEdge >= 1080
+        ? "1080p"
+        : longEdge >= 1280 || shortEdge >= 720
+          ? "720p"
+          : "sd";
+    const tiers = index.get(file.workId) ?? new Set<MediaResolutionTier>();
+    tiers.add(tier);
+    index.set(file.workId, tiers);
+  }
+  return index;
 }
 
 function countFacet(values: string[]): FacetCount[] {
