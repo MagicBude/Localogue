@@ -32,3 +32,9 @@ Preview 现在先用一次 Works 查询建立 `Map<规范化番号, Work>`。建
 ## 为什么 Preview 仍保留自行扫描入口
 
 `previewNfoImport` 与 `previewLocalAssetImport` 的可选 `discoveredEntries` 参数用于编排优化。调用方不传快照时，它们仍能独立工作，方便高级预览、测试以及未来其它宿主复用。传入快照后，Preview 只做自己的解析和匹配，不再次访问目录树。
+
+## 忽略不需要扫描的目录
+
+在任意目录中创建一个空的 `.localogueignore` 文件，Desktop Native Walker 会跳过该目录及全部子目录。该规则同时作用于 NFO、图片和媒体发现，因为三者最终都经过同一个 Native Walker。
+
+V1 先使用目录级哨兵，不解析通配表达式。它的行为容易解释，也不会因错误规则意外排除同级其它作品。未来如果增加类似 `.gitignore` 的规则文件，应先定义匹配根、优先级和 Windows 大小写语义。

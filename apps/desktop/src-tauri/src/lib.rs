@@ -925,6 +925,9 @@ fn walk_files_blocking(request: WalkFilesRequest) -> Result<Vec<DesktopFileEntry
     let mut visited = HashSet::from([scan_visit_key(&root)]);
 
     while let Some(directory) = pending.pop_front() {
+        // `.localogueignore` 是目录级哨兵：放在哪一层，就跳过该层及其全部后代。
+        // 在 read_dir 之前判断，既减少 I/O，也确保被忽略目录中的内容从未进入扫描结果。
+        if directory.join(".localogueignore").is_file() { continue; }
         let entries = match fs::read_dir(&directory) {
             Ok(entries) => entries,
             Err(error) if directory == root => {
@@ -2272,6 +2275,28 @@ fn now_marker() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn walk_files_skips_localogueignore_subtree() {
+        let root = std::env::temp_dir().join(format!("localogue-ignore-{}", now_marker()));
+        let included = root.join("included");
+        let ignored = root.join("ignored");
+        fs::create_dir_all(&included).expect("create included");
+        fs::create_dir_all(&ignored).expect("create ignored");
+        fs::write(included.join("keep.mp4"), b"video").expect("write included");
+        fs::write(ignored.join("skip.mp4"), b"video").expect("write ignored");
+        fs::write(ignored.join(".localogueignore"), b"").expect("write sentinel");
+
+        let files = walk_files_blocking(WalkFilesRequest {
+            root: path_to_string(&root),
+            extensions: vec![".mp4".into()],
+            include_hidden: false,
+            max_files: Some(100),
+        }).expect("walk files");
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].name, "keep.mp4");
+        fs::remove_dir_all(root).expect("cleanup");
+    }
 
     #[test]
     fn asset_storage_cleanup_deletes_only_current_orphans() {
