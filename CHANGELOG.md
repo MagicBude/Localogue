@@ -22,6 +22,7 @@
 - Review 控制器迁入独立页面模块，Governance 入口缩减为路由；提交前重算、Snapshot、引用安全写入、审计与失败恢复顺序保持完整。
 - Media 人工绑定迁入独立模块，补充候选只读、目标复核、人工匹配标记、Receipt 与补偿回滚的教学注释。
 - 作品详情增加关联媒体列表，可直接调用系统默认播放器或在文件管理器中定位；多文件作品逐项操作，并继续经过受限 Native Open / Reveal 边界。
+- 修复删除当前或末尾作品图片后，画廊旧索引短暂越界导致 Desktop 白屏；删除按钮改为“解除 / 删除记录”，并明确原图与 Localogue 管理副本均不会立即删除。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency

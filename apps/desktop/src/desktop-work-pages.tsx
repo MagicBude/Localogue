@@ -110,7 +110,7 @@ export function DesktopWorkDetailPage({
         setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
         return;
       }
-      if (!window.confirm(t("从 {code} 解除并删除这个 Private Asset 元数据？\n\n{path}\n\n原始图片与 content-addressed 文件不会由 Desktop 自动物理删除。", { code: work.code, path: storagePath }))) return;
+      if (!window.confirm(t("从 {code} 解除并删除这个 Private Asset 记录？\n\n{path}\n\n原始图片不会改变；Localogue 管理的图片副本暂时保留，可稍后在存储治理中清理。", { code: work.code, path: storagePath }))) return;
       const nextWork: Work = { ...work, assetIds: work.assetIds.filter((value) => value !== assetId), updatedAt: new Date().toISOString() };
       await repository.saveWork(nextWork);
       try {
@@ -119,7 +119,7 @@ export function DesktopWorkDetailPage({
         await repository.saveWork(work);
         throw error;
       }
-      setMessage(t("已从 {code} 解除并删除 Private Asset 元数据；图片文件保留。", { code: work.code }));
+      setMessage(t("已从 {code} 解除并删除 Private Asset 记录；原图和管理副本均未删除。", { code: work.code }));
       onLibraryChanged();
     } catch (error) {
       setMessage(t("删除 Asset 失败：{error}", { error: toMessage(error) }));
@@ -198,7 +198,7 @@ export function DesktopWorkDetailPage({
             {sortWorkAssets(assets).map((asset) => (
               <article className="desktop-asset-management-row" key={asset.id}>
                 <div><strong>{assetTypeLabel(asset.type)}</strong><span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span><code className="desktop-asset-management-path">{asset.storagePath}</code></div>
-                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除")}</button>
+                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除记录")}</button>
               </article>
             ))}
           </div>

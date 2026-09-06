@@ -36,7 +36,13 @@ export function DesktopWorkAssetGallery({
     setOrientations(new Map());
   }, [workCode, candidateKey]);
 
-  const current = candidates[index];
+  /**
+   * 删除图片后，React 会先用新的 candidates 渲染一次，随后才执行上面的 Effect。
+   * 如果旧 index 指向已删除的末尾图片，直接读取 candidates[index] 会得到 undefined 并让页面崩溃。
+   * safeIndex 在渲染阶段立即夹紧范围；Effect 仍负责把持久的交互状态重置到第一张。
+   */
+  const safeIndex = Math.min(index, Math.max(candidates.length - 1, 0));
+  const current = candidates[safeIndex];
   const canNavigate = candidates.length > 1;
   const previous = () => setIndex((currentIndex) => (currentIndex - 1 + candidates.length) % candidates.length);
   const next = () => setIndex((currentIndex) => (currentIndex + 1) % candidates.length);
@@ -71,19 +77,19 @@ export function DesktopWorkAssetGallery({
         </> : null}
         <div className="desktop-work-gallery__overlay">
           <span>{assetTypeLabel(current.type)}</span>
-          <span>{`${index + 1} / ${candidates.length}`}</span>
+          <span>{`${safeIndex + 1} / ${candidates.length}`}</span>
         </div>
       </div>
       <div className="desktop-work-gallery__rail">
         <div className="desktop-work-gallery__tabs" role="tablist" aria-label={t("作品图片")}>
           {candidates.map((asset, assetIndex) => (
             <button
-              className={assetIndex === index ? "is-active" : ""}
+              className={assetIndex === safeIndex ? "is-active" : ""}
               key={asset.id}
               onClick={() => setIndex(assetIndex)}
               role="tab"
               type="button"
-              aria-selected={assetIndex === index}
+              aria-selected={assetIndex === safeIndex}
             >
               {assetTypeLabel(asset.type)} <small>{assetIndex + 1}</small>
             </button>
