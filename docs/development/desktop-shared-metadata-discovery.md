@@ -25,6 +25,8 @@ Unified Library Root 通常同时包含视频、NFO 和图片。旧实现为了�
 
 Preview 现在先用一次 Works 查询建立 `Map<规范化番号, Work>`。建立索引是 O(M)，随后 N 个文件各做一次近似 O(1) 的 Map 查找，总体变为 O(M + N)。索引只活在本次 Preview 内，不写入 Canonical，也不增加新的持久化真相源。
 
+图片的 `pending_work` 判断同样先把本轮 NFO 会创建的番号整理为 Set。否则每张图片再次遍历所有 NFO，仍会留下另一处 O(图片数 × NFO 数) 的隐藏成本。
+
 ## 为什么 Preview 仍保留自行扫描入口
 
 `previewNfoImport` 与 `previewLocalAssetImport` 的可选 `discoveredEntries` 参数用于编排优化。调用方不传快照时，它们仍能独立工作，方便高级预览、测试以及未来其它宿主复用。传入快照后，Preview 只做自己的解析和匹配，不再次访问目录树。

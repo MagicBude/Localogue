@@ -78,9 +78,13 @@ export async function previewLocalAssetImport(
   }
 
   const nfoStemCodes = new Map<string, string>();
+  const pendingNfoCodes = new Set<string>();
   for (const item of nfoPreview?.items ?? []) {
     if (!item.code) continue;
     nfoStemCodes.set(metadataStem(item.fileName), item.code);
+    // pending_work 只接受 NFO Preview 已明确识别、会在本轮导入创建的番号。
+    // 预先建 Set 后，每张图片无需再遍历全部 NFO 条目。
+    if (["new_work", "duplicate_code"].includes(item.status)) pendingNfoCodes.add(compactCode(item.code));
   }
 
   const items: LocalAssetImportItem[] = [];
@@ -101,7 +105,7 @@ export async function previewLocalAssetImport(
     }
 
     const matched = worksByCode.get(compactCode(code)) ?? null;
-    const pendingWork = !matched && (nfoPreview?.items.some((item) => item.code && compactCode(item.code) === compactCode(code) && ["new_work", "duplicate_code"].includes(item.status)) ?? false);
+    const pendingWork = !matched && pendingNfoCodes.has(compactCode(code));
     items.push({
       ...entry,
       fileName: entry.name,
