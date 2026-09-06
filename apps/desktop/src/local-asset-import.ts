@@ -5,6 +5,7 @@ import type { DesktopFileEntry } from "./contracts";
 
 import type { NfoImportPreview } from "./nfo-library-import";
 import { desktopBridge } from "./tauri-bridge";
+import { buildDesktopWorkCodeIndex } from "./desktop-work-code-index";
 
 const MAX_ASSET_FILES = 100_000;
 const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"];
@@ -64,6 +65,7 @@ export async function previewLocalAssetImport(
   discoveredEntries?: readonly DesktopFileEntry[],
 ): Promise<LocalAssetImportPreview> {
   const rootList = unique(roots.map((item) => item.trim()).filter(Boolean));
+  const worksByCode = await buildDesktopWorkCodeIndex(repository, compactCode);
   const discovered = new Map<string, Awaited<ReturnType<typeof desktopBridge.walkFiles>>[number]>();
   if (discoveredEntries) {
     for (const entry of discoveredEntries) discovered.set(normalizePath(entry.path), entry);
@@ -98,7 +100,7 @@ export async function previewLocalAssetImport(
       continue;
     }
 
-    const matched = await repository.findWorkByCode(code);
+    const matched = worksByCode.get(compactCode(code)) ?? null;
     const pendingWork = !matched && (nfoPreview?.items.some((item) => item.code && compactCode(item.code) === compactCode(code) && ["new_work", "duplicate_code"].includes(item.status)) ?? false);
     items.push({
       ...entry,

@@ -14,6 +14,7 @@ const required = [
   "apps/desktop/src/nfo-library-import.ts",
   "apps/desktop/src/local-asset-import.ts",
   "apps/desktop/src/desktop-metadata-discovery.ts",
+  "apps/desktop/src/desktop-work-code-index.ts",
   "apps/desktop/src/desktop-asset-image.tsx",
   "apps/desktop/src/desktop-work-results.tsx",
   "apps/desktop/src/desktop-asset-order.ts",
@@ -147,8 +148,14 @@ if (!errors.length) {
   const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
   const desktopWorkSurface = desktopApp + desktopWorkPages;
   const desktopMetadataDiscovery = readFileSync(path.join(root, "apps/desktop/src/desktop-metadata-discovery.ts"), "utf8");
+  const desktopWorkCodeIndex = readFileSync(path.join(root, "apps/desktop/src/desktop-work-code-index.ts"), "utf8");
+  const desktopNfoImport = readFileSync(path.join(root, "apps/desktop/src/nfo-library-import.ts"), "utf8");
+  const desktopAssetImport = readFileSync(path.join(root, "apps/desktop/src/local-asset-import.ts"), "utf8");
   if (!desktopMediaPage.includes("discoverDesktopMetadataFiles") || !desktopMetadataDiscovery.includes("nfoEntries") || !desktopMetadataDiscovery.includes("assetEntries")) {
     errors.push("Desktop NFO 与图片预览必须复用同一元数据目录发现快照。");
+  }
+  if (!desktopWorkCodeIndex.includes("buildDesktopWorkCodeIndex") || !desktopWorkCodeIndex.includes("new Map") || !desktopNfoImport.includes("buildDesktopWorkCodeIndex") || !desktopAssetImport.includes("buildDesktopWorkCodeIndex")) {
+    errors.push("Desktop 批量 NFO / 图片匹配必须复用一次性 Work 番号索引，禁止退回逐文件线性扫描。");
   }
   const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
   const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;

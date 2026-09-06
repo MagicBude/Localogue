@@ -13,6 +13,7 @@ import type { PartialDate } from "@/domain/value-objects/partial-date";
 import { NfoMetadataImporter } from "@/infrastructure/importers/nfo-importer";
 
 import { desktopBridge } from "./tauri-bridge";
+import { buildDesktopWorkCodeIndex } from "./desktop-work-code-index";
 
 const MAX_NFO_FILES = 10_000;
 
@@ -86,6 +87,7 @@ export async function previewNfoImport(
   discoveredEntries?: readonly DesktopFileEntry[],
 ): Promise<NfoImportPreview> {
   const importer = new NfoMetadataImporter();
+  const worksByCode = await buildDesktopWorkCodeIndex(repository, compactCode);
   const discovered = new Map<string, Awaited<ReturnType<typeof desktopBridge.walkFiles>>[number]>();
   const rootList = unique(roots.map((item) => item.trim()).filter(Boolean));
 
@@ -110,7 +112,7 @@ export async function previewNfoImport(
       const normalized = preview.candidates[0]?.normalized;
       const code = normalized?.code ? normalizeNfoCode(normalized.code) ?? normalized.code.trim().toUpperCase() : undefined;
       if (normalized && code) normalized.code = code;
-      const matched = code ? await repository.findWorkByCode(code) : null;
+      const matched = code ? worksByCode.get(compactCode(code)) ?? null : null;
       const title = normalized?.originalTitle ?? normalized?.title;
       const unmappedTerms = preview.candidates[0]?.warnings
         .filter((warning) => warning.code === "unmapped_classification" && warning.detail)

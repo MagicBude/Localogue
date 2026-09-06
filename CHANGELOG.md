@@ -6,6 +6,7 @@
 - 作品与人物图片的直接删除改为持久化回收站：独立 Receipt 保存最小恢复信息，界面可恢复最近一次移除，失败时会补偿 Asset 与主体引用。
 - 集中维护作品 Asset 排序规则；详情 Hero 按既有信息架构排除 poster 并优先 fanart / screenshot / gallery / cover，管理列表继续以 poster 为首。
 - Desktop 元数据预览与一键同步对同一个 Unified Root 只执行一次 Native 目录遍历，再把快照分流给 NFO 与图片解析器；媒体增量扫描继续保持独立取消与指纹语义。
+- NFO 与图片批量预览在开始时一次建立 Work 番号索引，移除逐文件线性扫描全部 Works 的近平方级匹配成本。
 - 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。
