@@ -21,6 +21,7 @@
 - Desktop 目录选择器会从当前 Private Library 或最近一个对应资料源目录打开，方便在现有位置附近调整目录名称，不再每次回到系统默认位置。
 - 资料包页的 Private Library 优先级项增加“打开位置”，通过既有受限 Reveal Command 在资源管理器中定位当前可写资料库。
 - Works 多维筛选增加 4K / 1080P / 720P / SD 清晰度 Facet；档位从关联 MediaFile 技术参数派生，同一 Work 拥有多个版本时可同时命中多个档位，不污染 Canonical Work 分类。
+- Desktop Work 编辑器可并存日文、中文、英文标题与简介；空语言不会写入 Canonical，Metadata Language 切换继续按现有回退规则显示对应文本。
 - 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。

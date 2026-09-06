@@ -7,6 +7,7 @@ import { localizeGenre } from "@/application/services/genre-localization-service
 import type { Organization } from "@/domain/entities/organization";
 import type { Person, PersonActivityStatus } from "@/domain/entities/person";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
+import type { LocalizedText } from "@/domain/value-objects/localized-text";
 
 import { useDesktopI18n } from "./desktop-i18n";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
@@ -104,8 +105,12 @@ export function WorkEditor({
   const [tagOptions, setTagOptions] = useState<Array<{ id: string; label: string }>>([]);
 
   const [code, setCode] = useState(work.code);
-  const [title, setTitle] = useState(localizeText(work.titles, "ja", ""));
-  const [description, setDescription] = useState(localizeText(work.descriptions, "zh-CN", ""));
+  const [titleJa, setTitleJa] = useState(work.titles.ja ?? "");
+  const [titleZh, setTitleZh] = useState(work.titles["zh-CN"] ?? "");
+  const [titleEn, setTitleEn] = useState(work.titles.en ?? "");
+  const [descriptionJa, setDescriptionJa] = useState(work.descriptions?.ja ?? "");
+  const [descriptionZh, setDescriptionZh] = useState(work.descriptions?.["zh-CN"] ?? "");
+  const [descriptionEn, setDescriptionEn] = useState(work.descriptions?.en ?? "");
   const [releaseDate, setReleaseDate] = useState(work.releaseDate?.value ?? "");
   const [duration, setDuration] = useState(work.durationMinutes ? String(work.durationMinutes) : "");
   const [makerId, setMakerId] = useState(work.makerId ?? "");
@@ -143,8 +148,9 @@ export function WorkEditor({
 
   async function save(): Promise<void> {
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
-    const normalizedTitle = title.trim();
-    if (!normalizedCode || !normalizedTitle) {
+    const titles = compactLocalizedText({ ja: titleJa, "zh-CN": titleZh, en: titleEn });
+    const descriptions = compactLocalizedText({ ja: descriptionJa, "zh-CN": descriptionZh, en: descriptionEn });
+    if (!normalizedCode || !Object.keys(titles).length) {
       setMessage(t("Work 的番号和标题不能为空。"));
       return;
     }
@@ -162,8 +168,8 @@ export function WorkEditor({
       const next: Work = {
         ...work,
         code: normalizedCode,
-        titles: { ...work.titles, ja: normalizedTitle },
-        ...(description.trim() ? { descriptions: { ...work.descriptions, "zh-CN": description.trim() } } : {}),
+        titles,
+        ...(Object.keys(descriptions).length ? { descriptions } : {}),
         ...(releaseDate.trim() ? { releaseDate: { value: releaseDate.trim(), precision: datePrecision(releaseDate.trim()) } } : {}),
         ...(duration.trim() && Number(duration) > 0 ? { durationMinutes: Number(duration) } : {}),
         personRelations: dedupeRelations(relations),
@@ -175,7 +181,7 @@ export function WorkEditor({
         tagIds,
         updatedAt: new Date().toISOString(),
       };
-      if (!description.trim()) delete next.descriptions;
+      if (!Object.keys(descriptions).length) delete next.descriptions;
       if (!releaseDate.trim()) delete next.releaseDate;
       if (!(duration.trim() && Number(duration) > 0)) delete next.durationMinutes;
       if (!makerId) delete next.makerId;
@@ -212,8 +218,12 @@ export function WorkEditor({
     </div>
     {open ? <div className="editor-grid">
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
-      <label>{t("日文标题")}<input value={title} onChange={(event) => setTitle(event.target.value)} /></label>
-      <label className="span-2">{t("中文简介")}<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={4} /></label>
+      <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} /></label>
+      <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
+      <label className="span-2">{t("英文标题")}<input value={titleEn} onChange={(event) => setTitleEn(event.target.value)} /></label>
+      <label>{t("日文简介")}<textarea value={descriptionJa} onChange={(event) => setDescriptionJa(event.target.value)} rows={4} /></label>
+      <label>{t("中文简介")}<textarea value={descriptionZh} onChange={(event) => setDescriptionZh(event.target.value)} rows={4} /></label>
+      <label className="span-2">{t("英文简介")}<textarea value={descriptionEn} onChange={(event) => setDescriptionEn(event.target.value)} rows={4} /></label>
       <label>{t("发行日期")}<input value={releaseDate} onChange={(event) => setReleaseDate(event.target.value)} placeholder="2026-09-03 / 2026-09 / 2026" /></label>
       <label>{t("时长（分钟）")}<input type="number" min="1" value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
       <label>{t("厂商")}<select value={makerId} onChange={(event) => setMakerId(event.target.value)}><option value="">{t("未设置")}</option>{makers.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
@@ -342,6 +352,11 @@ function dedupeRelations(values: WorkPersonRelation[]): WorkPersonRelation[] {
     seen.add(key);
     return true;
   });
+}
+
+/** 空输入不写入 JSON，避免语言切换把空字符串误当成有效翻译。 */
+function compactLocalizedText(value: Record<"ja" | "zh-CN" | "en", string>): LocalizedText {
+  return Object.fromEntries(Object.entries(value).map(([language, text]) => [language, text.trim()]).filter(([, text]) => text)) as LocalizedText;
 }
 
 function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }
