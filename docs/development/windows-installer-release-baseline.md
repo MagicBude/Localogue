@@ -17,6 +17,13 @@ pnpm desktop:build
 apps/desktop/src-tauri/target/release/bundle/nsis/
 ```
 
+不熟悉终端时，可以直接双击仓库根目录的两个脚本：
+
+- `build-desktop-exe.bat`：只生成可直接运行的裸 EXE，速度相对快；
+- `build-desktop-installer.bat`：生成 EXE 和可分发的 NSIS 安装程序。
+
+脚本内部先切换到自身所在的仓库根目录，再运行环境检查和发布预检。窗口在成功后会暂停，因此从资源管理器双击时也能看见产物位置。失败时脚本返回非零退出码，方便以后接入 CI，而不是无论成功失败都显示“完成”。
+
 ## 为什么采用 current-user 安装
 
 `currentUser` 将应用安装到当前用户可写的位置，一般不弹管理员授权。这更符合个人本地资料管理工具的首次使用体验，也避免为了安装程序授予整机级权限。
