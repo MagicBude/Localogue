@@ -9,7 +9,7 @@ import type { Person } from "@/domain/entities/person";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
-import { compactLocalizedText, datePrecision, message } from "./desktop-management-utils";
+import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 
 /** Desktop Work 的新建与编辑表单；查询和文件写入仍通过 Repository 完成。 */
@@ -174,6 +174,14 @@ export function WorkEditor({
       setMessage(t("Work 的番号和标题不能为空。"));
       return;
     }
+    if (releaseDate.trim() && !isValidPartialDate(releaseDate.trim())) {
+      setMessage(t("发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。"));
+      return;
+    }
+    if (duration.trim() && !isPositiveInteger(duration.trim())) {
+      setMessage(t("时长必须是大于 0 的整数分钟。"));
+      return;
+    }
     setBusy(true);
     try {
       const existingCode = await repository.findWorkByCode(normalizedCode);
@@ -191,7 +199,7 @@ export function WorkEditor({
         titles,
         ...(Object.keys(descriptions).length ? { descriptions } : {}),
         ...(releaseDate.trim() ? { releaseDate: { value: releaseDate.trim(), precision: datePrecision(releaseDate.trim()) } } : {}),
-        ...(duration.trim() && Number(duration) > 0 ? { durationMinutes: Number(duration) } : {}),
+        ...(duration.trim() ? { durationMinutes: Number(duration) } : {}),
         personRelations: dedupeRelations(relations),
         workTypeIds,
         ...(makerId ? { makerId } : {}),
@@ -203,7 +211,7 @@ export function WorkEditor({
       };
       if (!Object.keys(descriptions).length) delete next.descriptions;
       if (!releaseDate.trim()) delete next.releaseDate;
-      if (!(duration.trim() && Number(duration) > 0)) delete next.durationMinutes;
+      if (!duration.trim()) delete next.durationMinutes;
       if (!makerId) delete next.makerId;
       if (!labelId) delete next.labelId;
       await repository.saveWork(next);

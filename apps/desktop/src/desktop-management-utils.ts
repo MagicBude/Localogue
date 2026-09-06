@@ -7,14 +7,29 @@ export function datePrecision(value: string): "year" | "month" | "day" {
   return "day";
 }
 
+/**
+ * 校验允许不完整的日期，同时验证真实日历日期。
+ * 单靠 `YYYY-MM-DD` 正则会错误接受 2026-02-31，因此完整日期还要往返 UTC Date。
+ */
+export function isValidPartialDate(value: string): boolean {
+  if (/^\d{4}$/.test(value)) return true;
+  if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return true;
+  const match = /^(\d{4})-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.exec(value);
+  if (!match) return false;
+  const [year, month, day] = match.slice(1).map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+}
+
+/** 数量型 Domain 字段使用正整数，防止 1.5 或 Infinity 写入 Canonical JSON。 */
+export function isPositiveInteger(value: string): boolean {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0;
+}
+
 export function compactLocalizedText(value: Record<"ja" | "zh-CN" | "en", string>): LocalizedText {
   return Object.fromEntries(Object.entries(value).map(([language, text]) => [language, text.trim()]).filter(([, text]) => text)) as LocalizedText;
 }
 
-/**
- * 返回人物在某种语言下用于界面展示的名称。
- *
- * Person.names 还可能保存旧艺名、别名等历史事实，因此这里仅挑选 primary、
- * localized 或 romanized 名称，绝不能把数组中碰巧排在前面的 alias 当成可编辑主名称。
- */
+/** 把未知异常转换成适合界面显示的字符串，同时保留 Error.message。 */
 export function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }

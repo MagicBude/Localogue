@@ -9,6 +9,10 @@ import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
  */
 export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "発売日は有効な YYYY、YYYY-MM、または YYYY-MM-DD で入力してください。",
+    "时长必须是大于 0 的整数分钟。": "時間は 0 より大きい整数（分）で入力してください。",
+    "出生日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "生年月日は有効な YYYY、YYYY-MM、または YYYY-MM-DD で入力してください。",
+    "身高必须是大于 0 的整数厘米。": "身長は 0 より大きい整数（cm）で入力してください。",
     "打开日志位置": "ログの場所を開く",
     "已在文件管理器中定位 Localogue 日志。": "ファイルマネージャーで Localogue ログを表示しました。",
     "无法打开日志位置：{error}": "ログの場所を開けません：{error}",
@@ -269,6 +273,10 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "没有候选。尝试输入番号或标题。": "候補がありません。品番またはタイトルを入力してください。",
   },
   en: {
+    "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "Release date must be a valid YYYY, YYYY-MM, or YYYY-MM-DD value.",
+    "时长必须是大于 0 的整数分钟。": "Duration must be a whole number of minutes greater than 0.",
+    "出生日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "Birth date must be a valid YYYY, YYYY-MM, or YYYY-MM-DD value.",
+    "身高必须是大于 0 的整数厘米。": "Height must be a whole number of centimeters greater than 0.",
     "打开日志位置": "Open log location",
     "已在文件管理器中定位 Localogue 日志。": "Revealed the Localogue log in the file manager.",
     "无法打开日志位置：{error}": "Could not open the log location: {error}",

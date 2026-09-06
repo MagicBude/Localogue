@@ -4,7 +4,7 @@ import { getPreferredPersonName } from "@/application/services/localization-serv
 import type { Person, PersonActivityStatus, PersonName, PersonNameType } from "@/domain/entities/person";
 
 import { useDesktopI18n } from "./desktop-i18n";
-import { compactLocalizedText, datePrecision, message } from "./desktop-management-utils";
+import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 
 /** Desktop Person 的新建与编辑表单；名称类型在本模块内保持明确语义。 */
@@ -61,6 +61,14 @@ export function PersonEditor({ repository, person, onSaved, onDeleted, setMessag
 
   async function save(): Promise<void> {
     if (!nameJa.trim()) { setMessage(t("Person 主名称不能为空。")); return; }
+    if (birthDate.trim() && !isValidPartialDate(birthDate.trim())) {
+      setMessage(t("出生日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。"));
+      return;
+    }
+    if (height.trim() && !isPositiveInteger(height.trim())) {
+      setMessage(t("身高必须是大于 0 的整数厘米。"));
+      return;
+    }
     setBusy(true);
     try {
       const names = mergePersonDisplayNames(person.names, nameJa, nameZh, nameEn);
@@ -70,12 +78,12 @@ export function PersonEditor({ repository, person, onSaved, onDeleted, setMessag
         names,
         activityStatus: status,
         ...(birthDate.trim() ? { birthDate: { value: birthDate.trim(), precision: datePrecision(birthDate.trim()) } } : {}),
-        ...(height.trim() && Number(height) > 0 ? { heightCm: Number(height) } : {}),
+        ...(height.trim() ? { heightCm: Number(height) } : {}),
         ...(Object.keys(biographies).length ? { biographies } : {}),
         updatedAt: new Date().toISOString(),
       };
       if (!birthDate.trim()) delete next.birthDate;
-      if (!(height.trim() && Number(height) > 0)) delete next.heightCm;
+      if (!height.trim()) delete next.heightCm;
       if (!Object.keys(biographies).length) delete next.biographies;
       await repository.savePerson(next);
       setIsPrivate(true);
