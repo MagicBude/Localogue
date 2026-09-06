@@ -287,9 +287,16 @@ export async function scanMediaLibrary(
     for (let index = 0; index < candidates.length; index += 1) {
       throwIfAborted(signal);
       const item = candidates[index];
-      if (!(await fileSystem.exists(item.path, signal))) {
-        await repository.deleteMediaFile(item.id);
-        removed += 1;
+      try {
+        if (!(await fileSystem.exists(item.path, signal))) {
+          await repository.deleteMediaFile(item.id);
+          removed += 1;
+        }
+      } catch (error) {
+        if (isAbortError(error)) throw error;
+        // “不存在”和“当前无法确认”是两种状态。后者常见于网络盘断线或权限变化，
+        // 此时保留 MediaFile，并把原因交给日志和结果警告供用户处理。
+        warnings.push(`无法确认文件是否仍存在，已保留记录 ${item.fileName}: ${message(error)}`);
       }
       emit(hooks, {
         phase: "pruning",

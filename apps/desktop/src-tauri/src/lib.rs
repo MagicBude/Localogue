@@ -893,7 +893,9 @@ async fn path_exists(path: String) -> Result<bool, String> {
 
 fn path_exists_blocking(path: String) -> Result<bool, String> {
     validate_text_path(&path)?;
-    Ok(Path::new(&path).exists())
+    // Path::exists 会把权限错误、断线等未知状态压成 false，随后扫描器可能误删记录。
+    // try_exists 只有在操作系统明确报告不存在时才返回 false，其它情况保留为错误。
+    Path::new(&path).try_exists().map_err(display_error)
 }
 
 #[tauri::command]

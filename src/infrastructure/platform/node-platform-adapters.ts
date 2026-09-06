@@ -73,7 +73,10 @@ export class NodeFileSystemAdapter implements FileSystemPort {
       return true;
     } catch (error) {
       if (isAbortError(error)) throw error;
-      return false;
+      // 只有 ENOENT / ENOTDIR 能证明目标不存在。权限不足、网络盘断开等状态必须上抛，
+      // 让清理阶段保留旧记录，而不是把“无法确认”误当成“已经删除”。
+      if (isMissingPathError(error)) return false;
+      throw error;
     }
   }
 
@@ -114,6 +117,11 @@ export class NodeFileSystemAdapter implements FileSystemPort {
     await visit(root);
     return output;
   }
+}
+
+function isMissingPathError(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && "code" in error
+    && (error.code === "ENOENT" || error.code === "ENOTDIR"));
 }
 
 export class NodeMediaProbeAdapter implements MediaProbePort {
