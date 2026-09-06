@@ -8,6 +8,7 @@
 - Desktop 元数据预览与一键同步对同一个 Unified Root 只执行一次 Native 目录遍历，再把快照分流给 NFO 与图片解析器；媒体增量扫描继续保持独立取消与指纹语义。
 - NFO 与图片批量预览在开始时一次建立 Work 番号索引，移除逐文件线性扫描全部 Works 的近平方级匹配成本。
 - 图片 Preview 使用待创建 NFO 番号 Set 判断 `pending_work`，消除每张图片重复遍历全部 NFO 条目的第二处平方级成本。
+- Media Scan 每轮只预计算一次规范化 Work 番号及长番号优先顺序，避免为每个视频重复过滤、规范化和排序全部 Works。
 - 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。

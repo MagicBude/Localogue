@@ -134,6 +134,9 @@ export async function scanMediaLibrary(
     repository.listMediaFiles(),
   ]);
   const works = workResult.items;
+  // 匹配器在整轮扫描开始时只构造一次。旧实现对每个视频都重新规范化、过滤并排序
+  // 全部 Works，大资料库会把相同 CPU 工作重复数千次。
+  const matchWorkByPath = createWorkCodeMatcher(works, platform);
   const existingById = new Map(existing.map((item) => [item.id, item]));
   const scannedIds = new Set<string>();
   const pendingWrites: Array<{ media: MediaFile; isNew: boolean }> = [];
@@ -165,7 +168,7 @@ export async function scanMediaLibrary(
     const sidecars = observeSidecars(entry, sidecarIndex, platform);
     const sidecarChanged = !sameSidecars(previous?.sidecars, sidecars);
 
-    const codeMatch = matchWorkByCode(works, entry.path, platform);
+    const codeMatch = matchWorkByPath(entry.path);
     const binding = resolveBinding(previous, codeMatch);
     if (binding.workId) matched += 1;
     else unmatched += 1;
@@ -434,13 +437,19 @@ function resolveBinding(previous: MediaFile | undefined, codeMatch: Work | undef
   return codeMatch ? { workId: codeMatch.id, matchMethod: "code" } : {};
 }
 
-function matchWorkByCode(works: Work[], filePath: string, platform: PlatformServices): Work | undefined {
-  const extension = platform.fileSystem.extname(filePath);
-  const file = compactCode(platform.fileSystem.basename(filePath, extension));
-  return [...works]
-    .filter((work) => compactCode(work.code).length >= 4)
-    .sort((a, b) => compactCode(b.code).length - compactCode(a.code).length)
-    .find((work) => file.includes(compactCode(work.code)));
+function createWorkCodeMatcher(works: readonly Work[], platform: PlatformServices): (filePath: string) => Work | undefined {
+  // 长番号必须先匹配，避免短番号恰好是另一个完整番号的子串。
+  // normalizedCode 与排序结果在本轮扫描中固定，因此预计算一次即可。
+  const candidates = works
+    .map((work) => ({ work, normalizedCode: compactCode(work.code) }))
+    .filter((item) => item.normalizedCode.length >= 4)
+    .sort((a, b) => b.normalizedCode.length - a.normalizedCode.length);
+
+  return (filePath: string): Work | undefined => {
+    const extension = platform.fileSystem.extname(filePath);
+    const file = compactCode(platform.fileSystem.basename(filePath, extension));
+    return candidates.find((item) => file.includes(item.normalizedCode))?.work;
+  };
 }
 
 function compactCode(value: string): string {
