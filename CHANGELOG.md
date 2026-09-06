@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop MediaFile 列表拆为独立展示模块，明确 Work 查找只用于呈现，打开、定位与人工绑定仍由父页面控制，继续保持 Work / MediaFile 分离。
 - Desktop 分类词表审计拆成独立展示模块，展开 Preview 统计、unmapped 来源词说明与 Apply 结果的 JSX 格式，并保留父页面对实际修复动作的编排权。
 - Desktop NFO / 图片导入展示从媒体通用 Sections 中拆成独立模块，并按 Preview、Asset、Result 子组件格式化；移除上千字符单行 JSX，便于单独学习和维护导入界面。
 - Import Validation 增加结构化 `invalid_date` 警告；Desktop NFO Preview、Evidence 和直接导入结果会保留并展示被拒绝的原日期，不再静默丢弃。
