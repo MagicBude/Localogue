@@ -1,5 +1,7 @@
 # Changelog
 
+- Desktop 新建作品表单补齐日文、简体中文、英文标题与简介；标题只要求至少填写一种语言，并在写入前剔除空白语言值，避免把译名误存为日文原文。
+
 ## V1-27 Maintenance - Desktop Page Modularization I
 
 - Desktop 本地图片 Asset 记录导入前的原图路径，作品与人物详情可直接在文件管理器中定位；Portable Pack 导出会剥离本机绝对路径，避免泄露私人目录结构。

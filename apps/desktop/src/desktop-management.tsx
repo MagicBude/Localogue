@@ -24,13 +24,21 @@ export function CreateWorkPanel({
   const { t } = useDesktopI18n();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
-  const [title, setTitle] = useState("");
+  const [titleJa, setTitleJa] = useState("");
+  const [titleZh, setTitleZh] = useState("");
+  const [titleEn, setTitleEn] = useState("");
+  const [descriptionJa, setDescriptionJa] = useState("");
+  const [descriptionZh, setDescriptionZh] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function save(): Promise<void> {
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
-    const normalizedTitle = title.trim();
-    if (!normalizedCode || !normalizedTitle) {
+    // Canonical Work 保存的是按语言分开的 LocalizedText。这里与编辑页共用相同的
+    // 压缩规则，避免新建时先把中文塞进日文字段，之后还要靠用户手工纠正。
+    const titles = compactLocalizedText({ ja: titleJa, "zh-CN": titleZh, en: titleEn });
+    const descriptions = compactLocalizedText({ ja: descriptionJa, "zh-CN": descriptionZh, en: descriptionEn });
+    if (!normalizedCode || !Object.keys(titles).length) {
       setMessage(t("新建 Work 至少需要番号和标题。"));
       return;
     }
@@ -44,7 +52,8 @@ export function CreateWorkPanel({
         id: `work_${crypto.randomUUID()}`,
         code: normalizedCode,
         originalLanguage: "ja",
-        titles: { ja: normalizedTitle },
+        titles,
+        ...(Object.keys(descriptions).length ? { descriptions } : {}),
         workTypeIds: [],
         personRelations: [],
         seriesIds: [],
@@ -57,7 +66,12 @@ export function CreateWorkPanel({
       };
       await repository.saveWork(work);
       setCode("");
-      setTitle("");
+      setTitleJa("");
+      setTitleZh("");
+      setTitleEn("");
+      setDescriptionJa("");
+      setDescriptionZh("");
+      setDescriptionEn("");
       setOpen(false);
       setMessage(t("已在 Private Library 新建 Work {code}。", { code: work.code }));
       onSaved(work);
@@ -73,10 +87,15 @@ export function CreateWorkPanel({
       <div><span className="eyebrow">PRIVATE CRUD</span><h2>{t("新建作品")}</h2><p className="muted">{t("直接创建最小 Canonical Work；完整关系可进入详情页继续编辑。")}</p></div>
       <button className={open ? "ghost-button" : "primary-button"} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("+ 新建 Work")}</button>
     </div>
-    {open ? <div className="inline-form-grid">
+    {open ? <div className="editor-grid">
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} placeholder="MIDV-077" /></label>
-      <label>{t("日文标题")}<input value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t("作品标题")} /></label>
-      <div className="form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
+      <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} placeholder={t("作品标题")} /></label>
+      <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
+      <label>{t("英文标题")}<input value={titleEn} onChange={(event) => setTitleEn(event.target.value)} /></label>
+      <label>{t("日文简介")}<textarea value={descriptionJa} onChange={(event) => setDescriptionJa(event.target.value)} rows={4} /></label>
+      <label>{t("中文简介")}<textarea value={descriptionZh} onChange={(event) => setDescriptionZh(event.target.value)} rows={4} /></label>
+      <label className="span-2">{t("英文简介")}<textarea value={descriptionEn} onChange={(event) => setDescriptionEn(event.target.value)} rows={4} /></label>
+      <div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
     </div> : null}
   </section>;
 }
