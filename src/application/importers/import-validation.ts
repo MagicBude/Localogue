@@ -1,4 +1,5 @@
 import type { ImportWarning, NormalizedImportCandidate } from "@/domain/entities/evidence";
+import { parsePartialDate } from "@/domain/value-objects/partial-date";
 
 /**
  * V1-04 只做“导入前基本质量检查”。
@@ -9,6 +10,9 @@ export function validateImportCandidate(candidate: NormalizedImportCandidate): I
 
   if (!candidate.code) warnings.push({ code: "missing_code" });
   if (!candidate.title && !candidate.originalTitle) warnings.push({ code: "missing_title" });
+  if (candidate.releaseDate && !parsePartialDate(candidate.releaseDate)) {
+    warnings.push({ code: "invalid_date", detail: candidate.releaseDate });
+  }
   if (candidate.durationMinutes !== undefined && candidate.durationMinutes <= 0) {
     warnings.push({ code: "invalid_duration" });
   }

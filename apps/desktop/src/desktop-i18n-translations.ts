@@ -9,6 +9,7 @@ import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
  */
 export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "{count} 条解析提示": "解析メッセージ {count} 件",
     "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "発売日は有効な YYYY、YYYY-MM、または YYYY-MM-DD で入力してください。",
     "时长必须是大于 0 的整数分钟。": "時間は 0 より大きい整数（分）で入力してください。",
     "出生日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "生年月日は有効な YYYY、YYYY-MM、または YYYY-MM-DD で入力してください。",
@@ -273,6 +274,7 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "没有候选。尝试输入番号或标题。": "候補がありません。品番またはタイトルを入力してください。",
   },
   en: {
+    "{count} 条解析提示": "{count} parsing notices",
     "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "Release date must be a valid YYYY, YYYY-MM, or YYYY-MM-DD value.",
     "时长必须是大于 0 的整数分钟。": "Duration must be a whole number of minutes greater than 0.",
     "出生日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "Birth date must be a valid YYYY, YYYY-MM, or YYYY-MM-DD value.",

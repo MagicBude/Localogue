@@ -16,6 +16,7 @@ export type EvidenceSourceType =
 export type ImportWarningCode =
   | "missing_code"
   | "missing_title"
+  | "invalid_date"
   | "invalid_duration"
   | "missing_performers"
   | "json_row_not_object"

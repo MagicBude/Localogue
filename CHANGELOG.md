@@ -1,5 +1,6 @@
 # Changelog
 
+- Import Validation 增加结构化 `invalid_date` 警告；Desktop NFO Preview、Evidence 和直接导入结果会保留并展示被拒绝的原日期，不再静默丢弃。
 - PartialDate 的格式、精度与真实日历校验下沉到 Domain Value Object；Desktop 表单、NFO Bootstrap、人物编辑和 Review Commit 不再维护彼此漂移的日期解析规则。
 - Desktop Work / Person 编辑器在写入前校验部分日期的格式与真实日历日期，并拒绝小数、Infinity 等非法时长和身高，避免无效值进入 Canonical JSON。
 - 修复人物译名保存会删除同语言其它合法罗马字名称的问题；编辑器现在只更新它实际显示的首选名称，其余拼写和历史名称保持不变。

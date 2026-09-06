@@ -36,6 +36,8 @@ export interface NfoImportItem {
   normalized?: NormalizedImportCandidate;
   matchedWorkId?: string;
   error?: string;
+  /** Parser / Validator 的完整结构化警告；Evidence 必须原样保留，不能只留 UI 当前展示的一类。 */
+  warnings?: ImportWarning[];
   unmappedTerms?: string[];
 }
 
@@ -114,7 +116,8 @@ export async function previewNfoImport(
       if (normalized && code) normalized.code = code;
       const matched = code ? worksByCode.get(compactCode(code)) ?? null : null;
       const title = normalized?.originalTitle ?? normalized?.title;
-      const unmappedTerms = preview.candidates[0]?.warnings
+      const candidateWarnings = preview.candidates[0]?.warnings ?? [];
+      const unmappedTerms = candidateWarnings
         .filter((warning) => warning.code === "unmapped_classification" && warning.detail)
         .map((warning) => warning.detail!) ?? [];
 
@@ -133,6 +136,7 @@ export async function previewNfoImport(
         ...(code ? { code } : {}),
         ...(title ? { title } : {}),
         ...(normalized ? { normalized } : {}),
+        ...(candidateWarnings.length ? { warnings: candidateWarnings } : {}),
         ...(unmappedTerms.length ? { unmappedTerms } : {}),
         ...(matched ? { matchedWorkId: matched.id } : {}),
       });
@@ -177,7 +181,7 @@ export async function saveNfoPreviewAsEvidence(preview: NfoImportPreview): Promi
   let count = 0;
   for (const [index, group] of preview.groups.filter((item) => isImportable(item.representative) && item.representative.normalized).entries()) {
     const item = group.representative;
-    const warnings: ImportWarning[] = (item.unmappedTerms ?? []).map((detail) => ({ code: "unmapped_classification", detail }));
+    const warnings: ImportWarning[] = structuredClone(item.warnings ?? []);
     const record: EvidenceRecord = {
       schemaVersion: 1,
       id: `evidence_${Date.now()}_${String(index + 1).padStart(4, "0")}_${crypto.randomUUID().slice(0, 8)}`,
@@ -257,6 +261,9 @@ export async function importNfoPreview(
       else result.unchangedWorks += 1;
       result.imported += 1;
       if (item.unmappedTerms?.length) result.warnings.push(`${item.fileName}: ${item.unmappedTerms.length} 个来源分类词保持 unmapped：${item.unmappedTerms.join(" · ")}`);
+      for (const warning of item.warnings?.filter((value) => value.code === "invalid_date") ?? []) {
+        result.warnings.push(`${item.fileName}: 日期无效，未写入发行日期：${warning.detail ?? "—"}`);
+      }
     } catch (error) {
       result.skipped += 1;
       result.warnings.push(`${item.fileName}: ${message(error)}`);
