@@ -7,6 +7,7 @@ import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { Work } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
+import { InfoCard } from "./desktop-page-primitives";
 import type { DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import type { LocalAssetImportPreview, LocalAssetImportResult } from "./local-asset-import";
 import type { NfoImportItemStatus, NfoImportPreview, NfoImportResult } from "./nfo-library-import";
@@ -85,7 +86,6 @@ export function MediaProbeSection({ selectedPath, probing, progress, probe, onCh
 
 function MiniStat({ label, value }: { label: string; value: number }) { return <div><span>{label}</span><strong>{value}</strong></div>; }
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) { return <div className="section-title"><span className="eyebrow">{eyebrow}</span><h2>{title}</h2></div>; }
-function InfoCard({ label, value }: { label: string; value?: string }) { return <article className="info-card"><span>{label}</span><strong>{value && value !== "—" ? value : "—"}</strong></article>; }
 function formatDuration(value?: number): string | undefined { if (!value || !Number.isFinite(value)) return undefined; const total = Math.round(value); const hours = Math.floor(total / 3600); const minutes = Math.floor((total % 3600) / 60); const seconds = total % 60; return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}` : `${minutes}:${String(seconds).padStart(2, "0")}`; }
 function nfoStatusLabel(status: NfoImportItemStatus, t: (source: string, variables?: Record<string, string | number>) => string): string { switch (status) { case "new_work": return t("新 Work"); case "existing_work": return t("补充已有 Work"); case "missing_code": return t("缺少番号"); case "missing_title": return t("缺少标题"); case "duplicate_code": return t("重复番号"); case "parse_error": return t("解析失败"); } }
 function nfoStatusClass(status: NfoImportItemStatus): string { return status === "new_work" || status === "existing_work" ? "status-chip ok" : "status-chip warn"; }

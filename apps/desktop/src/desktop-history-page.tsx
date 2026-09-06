@@ -7,6 +7,7 @@ import type { CanonicalRestoreReceipt } from "@/domain/entities/snapshot";
 import type { Work } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
+import { GovernanceTitle } from "./desktop-page-primitives";
 import { desktopBridge } from "./tauri-bridge";
 
 /**
@@ -73,8 +74,4 @@ export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, 
   </div>;
 }
 
-function GovernanceTitle({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return <header className="governance-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{body}</p></header>;
-}
 function toMessage(error: unknown): string { return error instanceof Error ? error.message : String(error); }
-

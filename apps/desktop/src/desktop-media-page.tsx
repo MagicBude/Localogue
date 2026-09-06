@@ -8,6 +8,7 @@ import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governanc
 import { useDesktopI18n } from "./desktop-i18n";
 import { MediaBindingPanel } from "./desktop-management";
 import { MediaLibrarySection, MediaProbeSection, MediaScanSection, MetadataImportSection, VocabularyAuditSection } from "./desktop-media-sections";
+import { PageTitle } from "./desktop-page-primitives";
 import {
   importLocalAssetPreview,
   previewLocalAssetImport,
@@ -438,10 +439,6 @@ function effectiveNfoRoots(settings: DesktopBootstrapSettings): string[] {
 function effectiveAssetRoots(settings: DesktopBootstrapSettings): string[] {
   // 兼容旧配置：专用 NFO / Media 路径中的图片也应参与发现。
   return unique([...settings.libraryRoots, ...settings.nfoScanPaths, ...settings.mediaScanPaths]);
-}
-
-function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return <section className="page-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></section>;
 }
 
 function unique(values: string[]): string[] {

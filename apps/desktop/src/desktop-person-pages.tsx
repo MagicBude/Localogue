@@ -3,6 +3,7 @@ import { getPreferredPersonName, localizeText } from "@/application/services/loc
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
 import { CreatePersonPanel, PersonEditor } from "./desktop-management";
+import { InfoCard } from "./desktop-page-primitives";
 import { PersonAssetGovernance } from "./desktop-person-asset-governance";
 import { DesktopPersonExplorer } from "./desktop-person-explorer";
 import { resolvePersonPresentation } from "./desktop-presentation";
@@ -118,10 +119,6 @@ export function DesktopPersonDetailPage({
       <DesktopWorkExplorer repository={repository} onOpen={openWork} fixedPersonId={id} storageKey="localogue.desktop.person-related-work-view" />
     </div>
   );
-}
-
-function InfoCard({ label, value }: { label: string; value?: string }) {
-  return <article className="info-card"><span>{label}</span><strong>{value || "—"}</strong></article>;
 }
 
 function PageState({ children, error = false }: { children: ReactNode; error?: boolean }) {

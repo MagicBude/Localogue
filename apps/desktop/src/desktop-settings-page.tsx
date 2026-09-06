@@ -2,6 +2,7 @@ import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
+import { InfoCard, PageTitle } from "./desktop-page-primitives";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -293,14 +294,6 @@ function PathList({ values, onRemove }: { values: string[]; onRemove: (value: st
   return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><button className="danger-button" onClick={() => onRemove(path)}>{t("移除")}</button></li>)}</ul>;
 }
 
-function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return <section className="page-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></section>;
-}
-
-function InfoCard({ label, value }: { label: string; value?: string }) {
-  return <article className="info-card"><span>{label}</span><strong>{value && value !== "—" ? value : "—"}</strong></article>;
-}
-
 function unique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
@@ -308,4 +301,3 @@ function unique(values: string[]): string[] {
 function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
-

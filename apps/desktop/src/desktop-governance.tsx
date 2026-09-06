@@ -16,6 +16,7 @@ import type { CanonicalSnapshot } from "@/domain/entities/snapshot";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopCurationPage } from "./desktop-curation-page";
 import { DesktopHistoryPage } from "./desktop-history-page";
+import { GovernanceEmpty, GovernanceMetric, GovernanceTitle } from "./desktop-page-primitives";
 import { CommitPlanView, EntityDecisionList, FieldDecisionTable } from "./desktop-review-sections";
 import { desktopVocabularyRepository } from "./desktop-vocabulary-repository";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
@@ -247,10 +248,10 @@ function ReviewWorkbench({
             <section className="settings-card governance-analysis-card">
               <div className="section-heading"><div><span className="eyebrow">REVIEW ANALYSIS</span><h2>{analysis.code ?? selected.sourceName}</h2><p className="muted">{analysis.title ?? selected.sourceName}</p></div><span className={`governance-status is-${analysis.workStatus}`}>{analysis.workStatus}</span></div>
               <div className="governance-metrics">
-                <Metric label={t("已匹配")} value={analysis.summary.matchedEntities} />
-                <Metric label={t("新实体")} value={analysis.summary.newEntities} />
-                <Metric label={t("待决歧义")} value={analysis.summary.ambiguousEntities} />
-                <Metric label={t("字段冲突")} value={analysis.summary.conflictingFields} />
+                <GovernanceMetric label={t("已匹配")} value={analysis.summary.matchedEntities} />
+                <GovernanceMetric label={t("新实体")} value={analysis.summary.newEntities} />
+                <GovernanceMetric label={t("待决歧义")} value={analysis.summary.ambiguousEntities} />
+                <GovernanceMetric label={t("字段冲突")} value={analysis.summary.conflictingFields} />
               </div>
               {analysis.matchedWorkId ? <button onClick={() => openWork(analysis.matchedWorkId!)}>{t("打开当前 Canonical Work")}</button> : null}
             </section>
@@ -274,11 +275,5 @@ function ReviewWorkbench({
 
 
 
-
-function GovernanceTitle({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return <header className="governance-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{body}</p></header>;
-}
-function GovernanceEmpty({ title, body }: { title: string; body: string }) { return <section className="settings-card governance-empty"><h2>{title}</h2><p className="muted">{body}</p></section>; }
-function Metric({ label, value }: { label: string; value: number }) { return <div className="governance-metric"><span>{label}</span><strong>{value}</strong></div>; }
 
 function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }

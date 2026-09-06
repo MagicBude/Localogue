@@ -18,6 +18,7 @@
 - Curation 从 Governance 控制器迁入独立页面，并为异步完整度计算增加卸载保护；Review Commit 与 History Restore 写入链保持不变。
 - History Restore 迁入独立页面，Snapshot 恢复、Restore Receipt 与 Provenance 追加仍保持为一条完整用例。
 - Review 的字段决策、实体解析和 Commit Plan 预览提取为纯展示组件，治理控制器继续独占分析、计划与提交动作。
+- 页面标题、信息卡、治理标题与空状态等稳定结构统一为纯展示基础组件，减少跨页面语义和占位规则漂移。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency

@@ -45,3 +45,5 @@ History Restore 迁到 `desktop-history-page.tsx`，并保持 Snapshot 恢复、
 Review 的字段决策、实体解析和 Commit Plan 预览迁到 `desktop-review-sections.tsx`。这些组件只把用户选择转换为新的 `ReviewDecisions` 并通过回调上报，不生成 Plan、不执行 Commit；真正的治理操作仍由 Review 控制器协调。
 
 治理工作台先把 Curation 迁到 `desktop-curation-page.tsx`。完整度和重复候选是可重算的派生信号，Curation 页面只读取并展示它们；Review Commit 与 History Restore 仍留在 Governance 控制器，避免一次重构同时移动两条写入链。
+
+多个页面反复出现的页面标题、信息卡和治理空状态收口到 `desktop-page-primitives.tsx`。这类组件只统一 HTML 语义与样式契约，不接收 Repository、Native Bridge 或业务回调。判断是否值得抽取的标准不是“代码长得像”，而是它们是否表达相同、稳定的界面概念；页面专属的表格、按钮组和流程状态仍留在所属模块。
