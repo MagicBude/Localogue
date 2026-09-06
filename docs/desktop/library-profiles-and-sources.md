@@ -4,6 +4,8 @@ V1-24 Foundation Cleanup 将 Desktop 的路径设置分成两个层次：**Libra
 
 目标是让用户可以建立多个彼此独立的资料库，并在侧边栏快速切换，而不是每次手工改一组目录。Localogue 不预设资料库的内容分类，除内置开发 Fixture 固定叫“示例库”外，其余新建资料库只使用“资料库 1 / 资料库 2 …”这类中性默认名。
 
+新建普通 Profile 时，Desktop 会先在 App Local Data 的 `libraries/<profile-id>/` 下创建独立 Private Library。这个目录由 Native Runtime 根据受校验的 Profile ID 决定，WebView 不能指定任意写入根。用户只需选择影片所在的内容根目录；不同 Profile 不会因省略手工 Private Library 设置而共享上一资料库的数据。
+
 ## 先记住一个最简单的模型
 
 一个资料库配置可以理解成：

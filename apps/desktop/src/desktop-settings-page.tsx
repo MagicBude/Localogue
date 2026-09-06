@@ -7,7 +7,6 @@ import {
   activeLibraryProfile,
   addLibraryProfile,
   applyLibraryProfile,
-  createEmptyLibraryProfile,
   createLibraryProfile,
   createLibraryProfileId,
   hasUnsavedLibraryPaths,
@@ -20,7 +19,9 @@ import {
 import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
 
-const PROFILE_NATIVE_CONTRACT_REVISION = 2;
+// revision 9 才保证 provision_private_library(profileId) 会为每个 Profile
+// 创建独立目录；旧 Runtime 只能返回共享 user-library，必须阻止继续新建。
+const PROFILE_NATIVE_CONTRACT_REVISION = 9;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**
@@ -57,11 +58,20 @@ export function DesktopSettingsPage({
   }
 
   async function createProfile(): Promise<void> {
-    const prepared = syncActiveLibraryProfile(settings);
-    const name = nextLibraryProfileName(prepared, t("资料库"));
-    const next = addLibraryProfile(prepared, createEmptyLibraryProfile(createLibraryProfileId(), name));
     try {
-      await onPersistProfiles(next, t("已新建资料库：{name}。现在可以为它选择 Private Library / 内容根目录。", { name }));
+      const prepared = syncActiveLibraryProfile(settings);
+      const name = nextLibraryProfileName(prepared, t("资料库"));
+      const profileId = createLibraryProfileId();
+      const managed = await desktopBridge.provisionPrivateLibrary(profileId);
+      const profile = createLibraryProfile(
+        { ...prepared, libraryPath: managed.libraryPath, libraryRoots: [], mediaScanPaths: [], nfoScanPaths: [], sharedPackPaths: [] },
+        profileId,
+        name,
+      );
+      await onPersistProfiles(
+        addLibraryProfile(prepared, profile),
+        t("已新建资料库：{name}。Private Library 已自动准备好，只需添加内容根目录。", { name }),
+      );
     } catch {
       // 父级已经显示保存错误。
     }
@@ -211,7 +221,7 @@ export function DesktopSettingsPage({
             <button className="primary-button" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</button>
           </div>
         </div>
-        <p className="muted">{t("新建资料库默认使用“资料库 1、资料库 2…”等中性名称，不预设内容分类；名称可随时修改。每个资料库会记住 Private Library、内容根目录、高级兼容目录和 Shared Packs。")}</p>
+        <p className="muted">{t("新建资料库会自动获得独立的 Private Library；你只需添加影片所在的内容根目录。名称和高级设置以后都可以修改。")}</p>
         {profiles.length ? (
           <div className="profile-toolbar">
             <label>

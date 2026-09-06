@@ -10,6 +10,8 @@ Desktop 维护线开始页面模块化：Home、Works、People 及其详情已�
 
 Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:build` 会先校验四处版本、图标、内置资源和 ffprobe Sidecar 边界。本机已实际生成 `Localogue_0.1.25_x64-setup.exe`。该产物适合本机与小范围验收；公开发行仍需代码签名、干净 Windows 环境测试和更新渠道。
 
+新建 Library Profile 现在自动分配独立 Native-managed Private Library，普通用户只需要选择内容根目录；NFO 导入结果区修复表格负边距造成的轻微重叠，并明确未映射来源词属于当次导入提示而不是应用日志。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：

@@ -308,7 +308,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 8,
+        contract_revision: 9,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -386,8 +386,17 @@ fn provision_example_library(app: AppHandle) -> Result<DesktopExampleLibraryInfo
 /// 用户选择的是影片内容目录，而不是 JSON 写入目录。真正的可写目录固定在
 /// App Local Data/user-library，防止 WebView 借“新手设置”把任意磁盘位置变成写入根。
 #[tauri::command]
-fn provision_private_library(app: AppHandle) -> Result<DesktopPrivateLibraryInfo, String> {
-    let destination = app.path().app_local_data_dir().map_err(display_error)?.join("user-library");
+fn provision_private_library(app: AppHandle, profile_id: Option<String>) -> Result<DesktopPrivateLibraryInfo, String> {
+    // 首次设置沿用稳定的 user-library；设置页新建 Profile 时使用受校验的 Profile ID
+    // 建立独立目录。路径仍由 Native 决定，WebView 不能借此指定任意写入位置。
+    let local_data = app.path().app_local_data_dir().map_err(display_error)?;
+    let destination = match profile_id {
+        Some(id) => {
+            if !is_safe_id(&id) { return Err("Library Profile id 包含不安全字符。".into()); }
+            local_data.join("libraries").join(id)
+        },
+        None => local_data.join("user-library"),
+    };
     let created = !destination.exists();
     for directory in [
         "works", "people", "organizations", "series", "genres", "tags", "assets",

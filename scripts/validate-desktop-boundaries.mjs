@@ -299,7 +299,7 @@ if (!errors.length) {
   if (!rust.includes("example-shared-pack") || !rust.includes("provision_resource_snapshot") || !desktopApp.includes("sharedPackPaths.length === 0")) {
     errors.push("V1-24C 内置示例库必须自动修复 Starter Shared Pack，并使用 App Local Data 稳定副本。");
   }
-  if (!rust.includes("contract_revision: 8") || !rust.includes("preview_private_portable_files")) {
+  if (!rust.includes("contract_revision: 9") || !rust.includes("preview_private_portable_files")) {
     errors.push("V1-24C Native Runtime 必须升级 Contract revision 6 并开放带目标锁的 Portable Import Plan 命令。");
   }
   for (const token of ["expected_library_path", "same_library_path", "target_library_path", "当前资料库已在预览后发生切换"]) {
@@ -614,10 +614,10 @@ if (!errors.length) {
   if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
     errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 8")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 9")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
-  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
+  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 9") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
     errors.push("V1-24 Profile UI 必须在 Native Runtime 版本落后时阻止误保存并给出明确诊断。");
   }
   const tauriBuild = readFileSync(path.join(root, "apps/desktop/src-tauri/build.rs"), "utf8");
