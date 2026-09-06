@@ -1,6 +1,7 @@
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import { activeLibraryProfile } from "./library-profiles";
+import localogueIcon from "./assets/localogue-icon.png";
 
 export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings";
 
@@ -38,7 +39,7 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
   const validSharedCount = packInfos.filter((item) => item.valid).length;
 
   return <aside className="sidebar">
-    <button className="brand" onClick={() => onNavigate("home")}><span className="brand-mark">L</span><span className="brand-copy"><strong>Localogue</strong><small>{`Desktop · ${runtime?.version ?? "…"}`}</small></span></button>
+    <button className="brand" onClick={() => onNavigate("home")}><img className="brand-mark" src={localogueIcon} alt="" aria-hidden="true" /><span className="brand-copy"><strong>Localogue</strong><small>{`Desktop · ${runtime?.version ?? "…"}`}</small></span></button>
     <nav className="nav-list" aria-label="Desktop navigation">{NAV_ITEMS.map((item) => <button className={page === item.id ? "nav-item active" : "nav-item"} key={item.id} onClick={() => onNavigate(item.id)}><span className="nav-item-short" aria-hidden="true">{item.short}</span><span className="nav-item-label">{t(item.label)}</span><small>{item.eyebrow}</small></button>)}</nav>
     <div className="sidebar-spacer" />
     <div className="source-summary"><span className="eyebrow">{t("当前资料库")}</span>{settings.libraryProfiles?.length ? <><strong className="source-profile-name">{selectedProfile?.name ?? t("未绑定配置")}</strong><select className="source-profile-select" aria-label={t("快速切换资料库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择资料库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select></> : <strong className="source-profile-name">{t("尚未创建资料库")}</strong>}<small>{settings.libraryPath ? t("Private + {count} Shared", { count: validSharedCount }) : t("{count} Shared", { count: validSharedCount })}</small><button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t(settings.libraryProfiles?.length ? "管理资料库" : "+ 新建资料库")}</button></div>

@@ -28,7 +28,7 @@ p { line-height: 1.68; }
 .desktop-layout { min-height: 100vh; display: grid; grid-template-columns: 214px minmax(0, 1fr); }
 .sidebar { position: sticky; top: 0; height: 100vh; padding: 20px 16px; border-right: 1px solid var(--border); background: rgba(248,248,244,.94); display: flex; flex-direction: column; gap: 20px; }
 .brand { display: flex; align-items: center; gap: 11px; border: 0; background: transparent; text-align: left; padding: 5px; cursor: pointer; }
-.brand-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; background: #181817; color: white; font-weight: 850; font-size: 18px; }
+.brand-mark { display: block; width: 36px; height: 36px; border-radius: 11px; object-fit: cover; }
 .brand strong, .brand small { display: block; }
 .brand strong { font-size: 15px; }
 .brand small { color: var(--muted); margin-top: 2px; font-size: 11px; }
@@ -188,7 +188,7 @@ button:hover:not(:disabled) { border-color: #85857d; }
   body { background: #151614; }
   .sidebar { background: rgba(24,25,23,.96); }
   .topbar { background: rgba(21,22,20,.9); border-color: #333530; }
-  .brand-mark, .nav-item.active, .primary-button { background: #efefe9; color: #161714; border-color: #efefe9; }
+  .nav-item.active, .primary-button { background: #efefe9; color: #161714; border-color: #efefe9; }
   .nav-item:hover, .source-index, .avatar-placeholder { background: #2d2e2a; }
   input, button, .source-summary { background: #232420; border-color: var(--border-strong); color: #efefe9; }
   .status-line, .work-poster-placeholder, .path-block, .path-list li, .source-priority-list li, .people-inline button, .token-list code, .mini-stat-grid > div { background: #22231f; }

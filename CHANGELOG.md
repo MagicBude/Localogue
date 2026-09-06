@@ -24,6 +24,7 @@
 - 作品详情增加关联媒体列表，可直接调用系统默认播放器或在文件管理器中定位；多文件作品逐项操作，并继续经过受限 Native Open / Reveal 边界。
 - 修复删除当前或末尾作品图片后，画廊旧索引短暂越界导致 Desktop 白屏；删除按钮改为“解除 / 删除记录”，并明确原图与 Localogue 管理副本均不会立即删除。
 - Desktop 应用图标从黑底字母 L 更新为“影像画框 + 资料卡盒 + 定位书签”图形，并通过 Tauri CLI 统一生成 Windows、macOS 与 PNG 图标。
+- Desktop 图标进一步简化为胶片构成的 `L` 与单一播放切口；侧栏删除写死的黑色 L，改为复用同源品牌图片。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency
