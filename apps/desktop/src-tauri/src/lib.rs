@@ -393,6 +393,7 @@ fn provision_private_library(app: AppHandle) -> Result<DesktopPrivateLibraryInfo
         "works", "people", "organizations", "series", "genres", "tags", "assets",
         "asset-files", "media-files", "presentation-preferences", "media-binding-receipts",
         "asset-deletion-receipts",
+        "media-scan-history",
         "evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts",
         "provenance", "person-edits",
     ] {
@@ -1698,7 +1699,7 @@ fn restore_governance_snapshot_blocking(app: AppHandle, snapshot_id: String) -> 
 }
 
 fn is_private_audit_collection(collection: &str) -> bool {
-    matches!(collection, "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts" | "asset-deletion-receipts")
+    matches!(collection, "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts" | "asset-deletion-receipts" | "media-scan-history")
 }
 
 fn atomic_write_json(directory: &Path, id: &str, entity: &Value) -> Result<(), String> {
@@ -2211,6 +2212,11 @@ fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(),
             if !entity.get("asset").map(Value::is_object).unwrap_or(false) { return Err("asset-deletion-receipts 缺少 asset before-image。".into()); }
             let state = entity.get("state").and_then(Value::as_str).unwrap_or("");
             if !matches!(state, "pending" | "deleted" | "restored" | "failed") { return Err("asset-deletion-receipts.state 无效。".into()); }
+        },
+        "media-scan-history" => {
+            for field in ["recordedAt"] { require(field)?; }
+            if !entity.get("snapshot").map(Value::is_object).unwrap_or(false) { return Err("media-scan-history 缺少 snapshot。".into()); }
+            if !entity.get("durationMs").and_then(Value::as_u64).is_some() { return Err("media-scan-history.durationMs 无效。".into()); }
         },
         _ => return Err("无效的 Desktop Private Audit 集合。".into()),
     }

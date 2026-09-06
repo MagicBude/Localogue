@@ -4,6 +4,7 @@ import type { AssetDeletionReceipt } from "@/domain/entities/asset-deletion";
 import type { Genre, Tag } from "@/domain/entities/classification";
 import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
 import type { MediaFile } from "@/domain/entities/media-file";
+import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { PresentationPreference } from "@/domain/entities/presentation-preference";
@@ -140,6 +141,16 @@ export class TauriLibraryRepository implements LibraryRepository {
   saveAssetDeletionReceipt(receipt: AssetDeletionReceipt): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
     return desktopBridge.writePrivateAuditEntity("asset-deletion-receipts", receipt);
+  }
+
+  listMediaScanHistory(): Promise<MediaScanHistoryEntry[]> {
+    if (!this.privateRoot) return Promise.resolve([]);
+    return desktopBridge.readPrivateAuditCollection<MediaScanHistoryEntry>("media-scan-history");
+  }
+
+  saveMediaScanHistory(entry: MediaScanHistoryEntry): Promise<void> {
+    if (!this.privateRoot) return missingPrivateRoot();
+    return desktopBridge.writePrivateAuditEntity("media-scan-history", entry);
   }
 
   async listPresentationPreferences(): Promise<PresentationPreference[]> {

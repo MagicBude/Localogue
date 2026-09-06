@@ -1426,3 +1426,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .portable-import-target span { color: var(--muted, #6c6a63); font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .portable-import-target strong { font-size: 12px; }
 .portable-import-target code { overflow-wrap: anywhere; font-size: 9px; }
+
+/* 扫描历史默认折叠，保持新手主流程简洁；展开后用紧凑卡片展示最近诊断。 */
+.scan-history-card > summary { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.scan-history-card > summary > span { display: grid; gap: 4px; }
+.scan-history-list { display: grid; gap: 10px; margin-top: 14px; }
+.scan-history-list > article { display: grid; gap: 9px; padding: 12px; border: 1px solid var(--line, #ddd8ce); border-radius: 12px; background: var(--panel, #fff); }
+.scan-history-list > article > div:first-child { display: flex; justify-content: space-between; gap: 12px; }

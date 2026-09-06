@@ -125,7 +125,8 @@ export type DesktopPrivateAuditCollection =
   | "restore-receipts"
   | "provenance"
   | "media-binding-receipts"
-  | "asset-deletion-receipts";
+  | "asset-deletion-receipts"
+  | "media-scan-history";
 
 export type DesktopDeletableLibraryCollection =
   | "works"

@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
 import { discoverDesktopMetadataFiles } from "./desktop-metadata-discovery";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
+import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { MediaBindingPanel } from "./desktop-media-binding-panel";
-import { MediaLibrarySection, MediaProbeSection, MediaScanSection, MetadataImportSection, VocabularyAuditSection } from "./desktop-media-sections";
+import { MediaLibrarySection, MediaProbeSection, MediaScanHistorySection, MediaScanSection, MetadataImportSection, VocabularyAuditSection } from "./desktop-media-sections";
 import { PageTitle } from "./desktop-page-primitives";
 import {
   importLocalAssetPreview,
@@ -92,6 +93,7 @@ export function DesktopMediaPage({
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
   const handledAutoSyncRequest = useRef(0);
+  const recordedScanIds = useRef(new Set<string>());
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
@@ -106,13 +108,40 @@ export function DesktopMediaPage({
 
   // 使用 stale-while-refresh Hook：资料变化时保留旧列表，避免整个工作台闪烁并丢失滚动位置。
   const data = useStableAsyncData(async () => {
-    const [media, works, assets] = await Promise.all([
+    const [media, works, assets, scanHistory] = await Promise.all([
       repository.listMediaFiles(),
       repository.listWorks({ page: 1, pageSize: 100000 }),
       repository.listAssets(),
+      repository.listMediaScanHistory(),
     ]);
-    return { media, works: new Map(works.items.map((item) => [item.id, item])), assets };
+    return {
+      media,
+      works: new Map(works.items.map((item) => [item.id, item])),
+      assets,
+      scanHistory: scanHistory.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).slice(0, 20),
+    };
   }, [repository]);
+
+  async function recordScanHistory(snapshot: MediaScanJobSnapshot): Promise<void> {
+    if (["running", "cancelling"].includes(snapshot.status) || recordedScanIds.current.has(snapshot.id)) return;
+    recordedScanIds.current.add(snapshot.id);
+    const started = Date.parse(snapshot.startedAt);
+    const finished = Date.parse(snapshot.finishedAt ?? new Date().toISOString());
+    const entry: MediaScanHistoryEntry = {
+      schemaVersion: 1,
+      id: `media_scan_history_${snapshot.id}`,
+      snapshot,
+      durationMs: Number.isFinite(started) && Number.isFinite(finished) ? Math.max(0, finished - started) : 0,
+      recordedAt: snapshot.finishedAt ?? new Date().toISOString(),
+    };
+    try {
+      await repository.saveMediaScanHistory(entry);
+    } catch (error) {
+      // 允许后续重试；历史写入失败不改变已经完成的媒体扫描结果。
+      recordedScanIds.current.delete(snapshot.id);
+      throw error;
+    }
+  }
 
   async function startScan(options: { waitForCompletion?: boolean } = {}): Promise<MediaScanJobSnapshot | null> {
     if (!settings.libraryPath) {
@@ -157,8 +186,15 @@ export function DesktopMediaPage({
         if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
         scanTimer.current = null;
         setScan(final);
+        let historyError: unknown;
+        if (final) {
+          try { await recordScanHistory(final); }
+          catch (error) { historyError = error; }
+        }
         onLibraryChanged();
-        if (final?.status === "completed") {
+        if (historyError) {
+          setMessage(t("扫描完成，但保存历史失败：{error}", { error: toMessage(historyError) }));
+        } else if (final?.status === "completed") {
           setMessage(t("媒体扫描完成：已检查 {roots} 个目录，发现 {files} 个视频。", { roots: final.result?.roots.length ?? 0, files: final.result?.discovered ?? 0 }));
         } else {
           setMessage(final?.progress.message ?? t("媒体扫描已结束。"));
@@ -172,7 +208,9 @@ export function DesktopMediaPage({
         if (snapshot && !["running", "cancelling"].includes(snapshot.status)) {
           if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
           scanTimer.current = null;
-          onLibraryChanged();
+          void recordScanHistory(snapshot)
+            .then(onLibraryChanged)
+            .catch((error) => setMessage(t("扫描完成，但保存历史失败：{error}", { error: toMessage(error) })));
           setMessage(
             snapshot.status === "completed"
               ? t("媒体扫描完成：已检查 {roots} 个目录，发现 {files} 个视频。", { roots: snapshot.result?.roots.length ?? 0, files: snapshot.result?.discovered ?? 0 })
@@ -385,6 +423,7 @@ export function DesktopMediaPage({
         onStart={() => void startScan()}
         onCancel={() => setScan(scanCoordinator.current?.cancel() ?? null)}
       />
+      <MediaScanHistorySection entries={data.value?.scanHistory ?? []} />
 
       <MetadataImportSection
         roots={metadataRoots}

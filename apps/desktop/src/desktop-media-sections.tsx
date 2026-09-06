@@ -4,6 +4,7 @@ import { localizeText } from "@/application/services/localization-service";
 import { findApprovedGenreAlias } from "@/application/services/genre-localization-service";
 import type { MediaFile } from "@/domain/entities/media-file";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
+import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 import type { Work } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
@@ -33,6 +34,26 @@ export function MediaScanSection({ roots, scan, onStart, onCancel }: {
       <MiniStat label={t("扫描目录")} value={scan.result.roots.length} /><MiniStat label={t("已发现")} value={scan.result.discovered} /><MiniStat label={t("新增")} value={scan.result.added} /><MiniStat label={t("已更新")} value={scan.result.updated} /><MiniStat label={t("未变化")} value={scan.result.unchanged} /><MiniStat label={t("已移除")} value={scan.result.removed} />
     </div><details className="scan-root-report"><summary>{t("本轮实际扫描的 {count} 个目录", { count: scan.result.roots.length })}</summary><code className="path-block">{scan.result.roots.join("\n")}</code></details>{scan.result.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: scan.result.warnings.length })}</summary><ul>{scan.result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}</> : null}
   </section>;
+}
+
+/** 历史区只解释已落盘 Receipt，不参与任务轮询或扫描写入。 */
+export function MediaScanHistorySection({ entries }: { entries: MediaScanHistoryEntry[] }) {
+  const { t } = useDesktopI18n();
+  return <details className="settings-card scan-history-card">
+    <summary><span><span className="eyebrow">SCAN HISTORY · PRIVATE DIAGNOSTICS</span><strong>{t("扫描历史")}</strong></span><small>{t("最近 {count} 次", { count: entries.length })}</small></summary>
+    {entries.length ? <div className="scan-history-list">{entries.map((entry) => {
+      const { snapshot } = entry;
+      const result = snapshot.result;
+      return <article key={entry.id}>
+        <div><strong>{formatDateTime(entry.recordedAt)} · {scanStatusLabel(snapshot.status, t)}</strong><small>{t("耗时 {duration}", { duration: formatElapsed(entry.durationMs) })}</small></div>
+        <div className="desktop-dense-chips">
+          <span>{t("已发现")} {result?.discovered ?? "—"}</span><span>{t("新增")} {result?.added ?? "—"}</span><span>{t("已更新")} {result?.updated ?? "—"}</span><span>{t("未变化")} {result?.unchanged ?? "—"}</span><span>{t("未绑定")} {result?.unmatched ?? "—"}</span>
+        </div>
+        {snapshot.error ? <p className="desktop-presentation-warning">{snapshot.error}</p> : null}
+        {result?.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: result.warnings.length })}</summary><ul>{result.warnings.slice(0, 50).map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}
+      </article>;
+    })}</div> : <p className="muted">{t("还没有扫描历史；完成一次视频扫描后会自动记录。")}</p>}
+  </details>;
 }
 
 export function MediaLibrarySection({ loading, error, media, works, assetCount, bindingMediaId, onOpen, onReveal, onToggleBinding }: {
@@ -93,4 +114,7 @@ function assetStatusLabel(status: LocalAssetImportPreview["items"][number]["stat
 function assetStatusClass(status: LocalAssetImportPreview["items"][number]["status"]): string { return status === "ready" || status === "pending_work" ? "status-chip ok" : "status-chip warn"; }
 function mediaSummary(file: MediaFile): ReactNode { const resolution = file.width && file.height ? `${file.width}×${file.height}` : null; const codecs = [file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · "); return <><strong>{resolution ?? "—"}</strong><small>{codecs || (file.analysisStale ? "analysis stale" : "—")}</small></>; }
 function formatBytes(value: number): string { if (!value) return "0 B"; const units = ["B", "KB", "MB", "GB", "TB"]; const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1); return `${(value / 1024 ** index).toFixed(index > 2 ? 2 : 1)} ${units[index]}`; }
+function formatElapsed(milliseconds: number): string { const seconds = Math.round(milliseconds / 1000); if (seconds < 60) return `${seconds}s`; const minutes = Math.floor(seconds / 60); return `${minutes}m ${seconds % 60}s`; }
+function formatDateTime(value: string): string { const date = new Date(value); return Number.isNaN(date.getTime()) ? value : date.toLocaleString(); }
+function scanStatusLabel(status: MediaScanJobSnapshot["status"], t: (source: string) => string): string { switch (status) { case "completed": return t("已完成"); case "cancelled": return t("已取消"); case "failed": return t("失败"); case "running": return t("运行中"); case "cancelling": return t("正在取消"); } }
 function toMessage(error: unknown): string { return error instanceof Error ? error.message : String(error ?? "未知错误"); }

@@ -517,8 +517,14 @@ if (!errors.length) {
   for (const token of ["analyzeSingleEvidenceRecord", "buildCanonicalCommitPlan", "buildCurationOverview", "createGovernanceSnapshot", "restoreGovernanceSnapshot", "buildAdoptedProvenanceEvents", "buildRestoredProvenanceEvents"]) {
     if (!(desktopGovernance + desktopReview + desktopCuration + desktopHistory).includes(token)) errors.push(`V1-23 Desktop Governance 缺少共享治理服务或安全边界：${token}`);
   }
-  for (const collection of ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts", "asset-deletion-receipts"]) {
+  for (const collection of ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts", "asset-deletion-receipts", "media-scan-history"]) {
     if (!desktopContracts.includes(`"${collection}"`) || !rust.includes(`"${collection}"`)) errors.push(`V1-23 Private Audit Collection 未跨 Rust / TypeScript 同步：${collection}`);
+  }
+  if (!desktopMediaPage.includes("saveMediaScanHistory") || !desktopMediaPage.includes("MediaScanHistorySection")) {
+    errors.push("V1-27 Media Scan 必须保存终态历史，并在媒体页提供只读诊断入口。");
+  }
+  if (rust.match(/PERSONAL_PORTABLE_DIRECTORIES[\s\S]*?];/)?.[0].includes("media-scan-history")) {
+    errors.push("V1-27 Media Scan History 含本机扫描路径，不得进入 Personal Portable Pack。");
   }
   for (const token of ["safe_governance_relative_path", "configured_private_library_path", "atomic_write_json", "create_governance_snapshot", "restore_governance_snapshot"]) {
     if (!rust.includes(token)) errors.push(`V1-23 Native Governance Snapshot 边界缺少：${token}`);
