@@ -180,6 +180,8 @@ export async function importLocalAssetPreview(
             mimeType: stored.mimeType,
             fileSize: stored.fileSize,
             sha256: stored.sha256,
+            // 保留原图位置只为方便用户回到资料目录；真正展示仍读取稳定的管理副本。
+            localSourcePath: item.path,
             subjectType: "work",
             subjectId: work.id,
             createdAt: new Date().toISOString(),
@@ -187,6 +189,11 @@ export async function importLocalAssetPreview(
           await repository.saveAsset(asset);
           result.createdAssets += 1;
         } else {
+          // 内容 Hash 相同会复用 Asset；仍刷新本机来源路径，这样旧资料库再次同步后
+          // 也能获得“定位原图”，无需用户先删除再导入。
+          if (existing.localSourcePath !== item.path) {
+            await repository.saveAsset({ ...existing, localSourcePath: item.path });
+          }
           result.reusedAssets += 1;
         }
 

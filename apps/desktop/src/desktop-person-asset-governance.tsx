@@ -5,10 +5,12 @@ import type { Person } from "@/domain/entities/person";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
+import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 
 const PERSON_ASSET_NATIVE_CONTRACT_REVISION = 3;
+const fileOpener = new TauriFileOpenerAdapter();
 
 export function PersonAssetGovernance({
   person,
@@ -58,6 +60,7 @@ export function PersonAssetGovernance({
         mimeType: stored.mimeType,
         fileSize: stored.fileSize,
         sha256: stored.sha256,
+        localSourcePath: path,
         subjectType: "person",
         subjectId: person.id,
         createdAt: new Date().toISOString(),
@@ -120,6 +123,16 @@ export function PersonAssetGovernance({
     }
   }
 
+  async function revealSource(asset: Asset): Promise<void> {
+    if (!asset.localSourcePath) return;
+    try {
+      // Native 边界只让文件管理器选中路径，不会执行图片或开放通用 Shell。
+      await fileOpener.revealInFolder(asset.localSourcePath);
+    } catch (error) {
+      setMessage(t("无法定位原始图片：{error}", { error: message(error) }));
+    }
+  }
+
   return (
     <section className="settings-card desktop-person-assets">
       <div className="section-heading">
@@ -158,7 +171,10 @@ export function PersonAssetGovernance({
                   <strong>{assetTypeLabel(asset.type)}</strong>
                   <code>{asset.storagePath}</code>
                 </div>
-                <button className="danger-button" disabled={busy} onClick={() => void removeAsset(asset)} type="button">{t("解除 / 删除")}</button>
+                <div className="button-row">
+                  {asset.localSourcePath ? <button disabled={busy} onClick={() => void revealSource(asset)} type="button">{t("定位原图")}</button> : null}
+                  <button className="danger-button" disabled={busy} onClick={() => void removeAsset(asset)} type="button">{t("解除 / 删除")}</button>
+                </div>
               </article>
             ))}
           </div>

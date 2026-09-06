@@ -144,6 +144,14 @@ export function DesktopWorkDetailPage({
     }
   }
 
+  async function revealAssetSource(path: string): Promise<void> {
+    try {
+      await fileOpener.revealInFolder(path);
+    } catch (error) {
+      setMessage(t("无法定位原始图片：{error}", { error: toMessage(error) }));
+    }
+  }
+
   const makerName = work.makerId ? localizeText(organizations.get(work.makerId)?.names, metadataLanguage, work.makerId) : undefined;
   const labelName = work.labelId ? localizeText(organizations.get(work.labelId)?.names, metadataLanguage, work.labelId) : undefined;
   const seriesNames = work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, metadataLanguage, seriesId));
@@ -198,7 +206,10 @@ export function DesktopWorkDetailPage({
             {sortWorkAssets(assets).map((asset) => (
               <article className="desktop-asset-management-row" key={asset.id}>
                 <div><strong>{assetTypeLabel(asset.type)}</strong><span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span><code className="desktop-asset-management-path">{asset.storagePath}</code></div>
-                <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除记录")}</button>
+                <div className="button-row">
+                  {asset.localSourcePath ? <button onClick={() => void revealAssetSource(asset.localSourcePath!)}>{t("定位原图")}</button> : null}
+                  <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除记录")}</button>
+                </div>
               </article>
             ))}
           </div>

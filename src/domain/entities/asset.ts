@@ -31,6 +31,13 @@ export interface Asset {
   fileSize?: number;
   sha256?: string;
   sourceUrl?: string;
+  /**
+   * 图片被导入前的本机绝对路径，仅用于“在文件管理器中定位原图”。
+   *
+   * 这是设备相关的便利信息，不是可移植的 Canonical 事实。Personal Pack
+   * 导出时必须移除此字段；换一台电脑后仍由 storagePath 指向的管理副本保证显示。
+   */
+  localSourcePath?: string;
   subjectType?: AssetSubjectType;
   subjectId?: string;
   createdAt?: string;

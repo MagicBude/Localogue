@@ -2,6 +2,8 @@
 
 ## V1-27 Maintenance - Desktop Page Modularization I
 
+- Desktop 本地图片 Asset 记录导入前的原图路径，作品与人物详情可直接在文件管理器中定位；Portable Pack 导出会剥离本机绝对路径，避免泄露私人目录结构。
+
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。
 - 页面继续通过 `TauriLibraryRepository` 与共享 Query/Application Core 工作，没有扩大 Native 文件权限或复制业务规则。
 - 首页最近作品从固定 6 条扩展为最多 12 条，并增加“查看全部作品”入口，进入现有 Works Explorer。

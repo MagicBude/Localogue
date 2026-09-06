@@ -227,8 +227,13 @@ function inspectPortableAssetIntegrity(envelope: PortablePackEnvelope): DesktopP
 
 async function toPortableFile(file: DesktopPortableFile): Promise<PortablePackFile> {
   const path = normalizePackPath(file.path);
-  const bytes = toBytes(file.bytes);
+  const collectedBytes = toBytes(file.bytes);
   const binary = path.startsWith("asset-files/");
+  // 原图绝对路径只在当前电脑有效，也可能暴露私人目录结构。管理副本已随包导出，
+  // 因此剥离该字段不会影响恢复后的图片展示。
+  const bytes = !binary && path.startsWith("assets/") && path.endsWith(".json")
+    ? stripLocalAssetSourcePath(collectedBytes)
+    : collectedBytes;
   return {
     path,
     encoding: binary ? "base64" : "utf8",
@@ -236,6 +241,17 @@ async function toPortableFile(file: DesktopPortableFile): Promise<PortablePackFi
     sha256: await sha256Bytes(bytes),
     size: bytes.byteLength,
   };
+}
+
+function stripLocalAssetSourcePath(bytes: Uint8Array): Uint8Array {
+  try {
+    const asset = JSON.parse(new TextDecoder().decode(bytes)) as Record<string, unknown>;
+    delete asset.localSourcePath;
+    return new TextEncoder().encode(`${JSON.stringify(asset, null, 2)}\n`);
+  } catch {
+    // 非法 JSON 会在既有 Pack 校验中报错；这里不吞掉或改写原始问题。
+    return bytes;
+  }
 }
 
 function decodePortableFile(file: PortablePackFile): Uint8Array {

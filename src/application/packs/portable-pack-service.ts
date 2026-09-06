@@ -47,10 +47,24 @@ export async function exportPersonalPack(): Promise<{ bytes: Uint8Array; fileNam
   for (const directory of PERSONAL_DIRECTORIES) {
     files.push(...await collectFiles(root, directory, directory === "asset-files"));
   }
+  // localSourcePath 是设备私有提示，不属于可移植备份；内容寻址副本已包含在 asset-files。
+  for (const file of files) stripLocalAssetSourcePath(file);
   const envelope: PortablePackEnvelope = { schemaVersion: 1, format: "localogue-portable-pack", manifest, files };
   const bytes = encodePortablePack(envelope);
   assertPortableSize(bytes);
   return { bytes, fileName: `localogue-personal-${manifest.version}.localogue-pack` };
+}
+
+function stripLocalAssetSourcePath(file: PortablePackFile): void {
+  if (file.encoding !== "utf8" || !file.path.startsWith("assets/") || !file.path.endsWith(".json")) return;
+  try {
+    const asset = JSON.parse(file.content) as Record<string, unknown>;
+    if (!("localSourcePath" in asset)) return;
+    delete asset.localSourcePath;
+    Object.assign(file, makePortableFile(file.path, Buffer.from(`${JSON.stringify(asset, null, 2)}\n`, "utf8")));
+  } catch {
+    // 保留原文件，让既有 Portable Pack 校验返回真实 JSON 错误。
+  }
 }
 
 export async function exportSharedPack(configuredPath: string): Promise<{ bytes: Uint8Array; fileName: string }> {

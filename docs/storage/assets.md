@@ -29,6 +29,8 @@ V1-10 把两个概念明确分开：
 4. 创建 Asset JSON；
 5. 如果用户选择它作为头像/封面，再单独写 Presentation Preference。
 
+Desktop 从已有资料目录批量导入时还会记录可选的 `localSourcePath`，用于定位原图。它不会替代管理副本，并会在 Portable Pack 导出时剥离。
+
 ## Shared Pack Asset
 
 Shared Pack 可以携带只读 Asset JSON 和对应资源文件。`storagePath` 使用相对 Pack `library/` 根目录的安全路径。
