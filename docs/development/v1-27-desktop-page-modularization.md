@@ -49,3 +49,5 @@ Review 的字段决策、实体解析和 Commit Plan 预览迁到 `desktop-revie
 多个页面反复出现的页面标题、信息卡和治理空状态收口到 `desktop-page-primitives.tsx`。这类组件只统一 HTML 语义与样式契约，不接收 Repository、Native Bridge 或业务回调。判断是否值得抽取的标准不是“代码长得像”，而是它们是否表达相同、稳定的界面概念；页面专属的表格、按钮组和流程状态仍留在所属模块。
 
 Review 控制器迁到 `desktop-review-page.tsx`，`desktop-governance.tsx` 只保留 Private Library 前置检查和治理子页面路由。Review 中的状态按处理阶段排列为 Evidence 选择、重新分析、人工决策与 Plan 预览；Commit 仍严格执行“重新计算 fingerprint → 创建 before-image Snapshot → 按引用安全顺序写 Canonical → 追加 Provenance → 保存 Lifecycle 与 Receipt”，任一步失败都从 Snapshot 尝试补偿恢复。
+
+Media Binding 从混合的管理表单文件迁到 `desktop-media-binding-panel.tsx`。候选搜索只提供人工判断依据，文件名番号也只用于初始化查询；只有用户明确点击绑定后才写入 `matchMethod=manual`。MediaFile 与 Binding Receipt 是两个 JSON 写入，Receipt 失败时必须把 MediaFile 恢复为操作前对象，避免留下没有审计记录的人工关系。

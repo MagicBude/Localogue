@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
-import { inferCatalogFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
+import { normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import { WORK_TYPE_DEFINITIONS } from "@/application/importers/import-classification-normalizer";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
 import { localizeGenre } from "@/application/services/genre-localization-service";
-import type { MediaBindingReceipt } from "@/domain/entities/media-binding";
-import type { MediaFile } from "@/domain/entities/media-file";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person, PersonActivityStatus } from "@/domain/entities/person";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
@@ -313,67 +311,6 @@ export function PersonEditor({ repository, person, onSaved, onDeleted, setMessag
   }
 
   return <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">DESKTOP EDIT</span><h2>{t("编辑人物")}</h2><p className="muted">{isPrivate ? t("Private Person 可直接修改。") : t("Shared Person 保存时会创建 Private Override。")}</p></div><div className="button-row"><button onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Person")}</button> : null}</div></div>{open ? <div className="editor-grid"><label>{t("日文主名称")}<input value={name} onChange={(event) => setName(event.target.value)} /></label><label>{t("状态")}<select value={status} onChange={(event) => setStatus(event.target.value as PersonActivityStatus)}>{["active", "retired", "hiatus", "inactive", "unknown"].map((item) => <option key={item} value={item}>{activityStatusLabel(item as PersonActivityStatus, t)}</option>)}</select></label><label>{t("出生日期")}<input value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label><label>{t("身高（cm）")}<input type="number" min="1" value={height} onChange={(event) => setHeight(event.target.value)} /></label><label className="span-2">{t("中文简介")}<textarea rows={4} value={biography} onChange={(event) => setBiography(event.target.value)} /></label><div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div></div> : null}</section>;
-}
-
-export function MediaBindingPanel({ media, repository, onChanged, setMessage }: { media: MediaFile; repository: TauriLibraryRepository; onChanged: () => void; setMessage: (message: string) => void }) {
-  const { t, metadataLanguage } = useDesktopI18n();
-  const [query, setQuery] = useState("");
-  const [works, setWorks] = useState<Work[]>([]);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    let disposed = false;
-    const inferred = inferCatalogFilenameMetadata(media.fileName).code;
-    const initial = inferred ?? "";
-    setQuery(initial);
-    void repository.listWorks({ ...(initial ? { text: initial } : {}), page: 1, pageSize: 30, sort: "release_desc" }).then((result) => { if (!disposed) setWorks(result.items); });
-    return () => { disposed = true; };
-  }, [media.id, media.fileName, repository]);
-
-  async function search(): Promise<void> {
-    setBusy(true);
-    try {
-      const result = await repository.listWorks({ ...(query.trim() ? { text: query.trim() } : {}), page: 1, pageSize: 50, sort: "release_desc" });
-      setWorks(result.items);
-    } catch (error) { setMessage(t("查询 Work 候选失败：{error}", { error: message(error) })); }
-    finally { setBusy(false); }
-  }
-
-  async function bind(nextWorkId: string | null): Promise<void> {
-    setBusy(true);
-    const before = media.workId;
-    try {
-      if (nextWorkId) {
-        const target = await repository.findWorkById(nextWorkId);
-        if (!target) throw new Error(t("目标 Work 不存在。"));
-      }
-      const updated: MediaFile = { ...media, updatedAt: new Date().toISOString() };
-      if (nextWorkId) { updated.workId = nextWorkId; updated.matchMethod = "manual"; }
-      else { delete updated.workId; delete updated.matchMethod; }
-      await repository.saveMediaFile(updated);
-      try {
-        const receipt: MediaBindingReceipt = {
-          schemaVersion: 1,
-          id: `media_binding_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`,
-          mediaFileId: media.id,
-          mediaFilePath: media.path,
-          ...(before ? { beforeWorkId: before } : {}),
-          ...(nextWorkId ? { afterWorkId: nextWorkId } : {}),
-          action: before && nextWorkId ? "rebind" : nextWorkId ? "bind" : "unbind",
-          changedAt: new Date().toISOString(),
-        };
-        await repository.saveMediaBindingReceipt(receipt);
-      } catch (error) {
-        await repository.saveMediaFile(media);
-        throw new Error(t("绑定审计 Receipt 写入失败，已回滚 MediaFile：{error}", { error: message(error) }));
-      }
-      setMessage(nextWorkId ? t("已保存人工 Work 绑定，并记录 Media Binding Receipt。") : t("已解除 Work 绑定，并记录 Media Binding Receipt。"));
-      onChanged();
-    } catch (error) { setMessage(t("媒体绑定失败：{error}", { error: message(error) })); }
-    finally { setBusy(false); }
-  }
-
-  return <section className="settings-card binding-panel"><div className="section-heading"><div><span className="eyebrow">MANUAL MEDIA RESOLUTION</span><h2>{t("人工绑定")}：{media.fileName}</h2><p className="muted">{t("自动扫描只做保守番号匹配。这里可以搜索、绑定、重新绑定或解除，并写入 Private 审计 Receipt。")}</p></div>{media.workId ? <button className="danger-button" disabled={busy} onClick={() => void bind(null)}>{t("解除绑定")}</button> : null}</div><div className="binding-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("搜索番号或标题")} onKeyDown={(event) => { if (event.key === "Enter") void search(); }} /><button disabled={busy} onClick={() => void search()}>{busy ? t("查询中…") : t("搜索")}</button></div><div className="candidate-list">{works.map((work) => <article className="candidate-card" key={work.id}><div><strong>{work.code}</strong><p>{localizeText(work.titles, metadataLanguage)}</p><small>{work.id}</small></div><button className="primary-button" disabled={busy || media.workId === work.id} onClick={() => void bind(work.id)}>{media.workId === work.id ? t("当前绑定") : media.workId ? t("重新绑定") : t("绑定")}</button></article>)}{!works.length ? <p className="muted">{t("没有候选。尝试输入番号或标题。")} </p> : null}</div></section>;
 }
 
 function MultiSelect({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string }>; values: string[]; onChange: (values: string[]) => void }) {

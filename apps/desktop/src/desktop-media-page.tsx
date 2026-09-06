@@ -6,7 +6,7 @@ import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
-import { MediaBindingPanel } from "./desktop-management";
+import { MediaBindingPanel } from "./desktop-media-binding-panel";
 import { MediaLibrarySection, MediaProbeSection, MediaScanSection, MetadataImportSection, VocabularyAuditSection } from "./desktop-media-sections";
 import { PageTitle } from "./desktop-page-primitives";
 import {

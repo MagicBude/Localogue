@@ -159,10 +159,12 @@ if (!errors.length) {
     errors.push("V1-18 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
   }
   const desktopManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-management.tsx"), "utf8");
-  for (const feature of ["CreateWorkPanel", "WorkEditor", "CreatePersonPanel", "PersonEditor", "MediaBindingPanel"]) {
+  const desktopMediaBinding = readFileSync(path.join(root, "apps/desktop/src/desktop-media-binding-panel.tsx"), "utf8");
+  for (const feature of ["CreateWorkPanel", "WorkEditor", "CreatePersonPanel", "PersonEditor"]) {
     if (!desktopManagement.includes(feature)) errors.push(`V1-18 Desktop 交互对齐缺少：${feature}`);
   }
-  if (!desktopManagement.includes("Private Override") || !desktopManagement.includes("saveMediaBindingReceipt")) {
+  if (!desktopMediaBinding.includes("MediaBindingPanel")) errors.push("V1-18 Desktop 交互对齐缺少：MediaBindingPanel");
+  if (!desktopManagement.includes("Private Override") || !desktopMediaBinding.includes("saveMediaBindingReceipt")) {
     errors.push("V1-18 Shared 实体编辑必须写 Private Override，Media 手工绑定必须保留审计 Receipt。");
   }
   if (!desktopWorkSurface.includes("removePrivateAsset") || !desktopWorkSurface.includes("deletePrivateAsset")) {
