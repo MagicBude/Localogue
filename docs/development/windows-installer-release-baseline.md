@@ -40,3 +40,9 @@ apps/desktop/src-tauri/target/release/bundle/nsis/
 5. 完成 ffprobe 再分发决策，或在首次设置中更清楚地引导用户安装。
 
 安装器能够生成并不等于已经适合公开发布。签名和干净环境验收会直接影响 Windows SmartScreen 提示与升级可靠性，不能用开发机上“能启动”替代。
+
+## Release 图片为什么需要 `blob:` CSP
+
+`DesktopAssetImage` 不把磁盘绝对路径交给 WebView。Native Command 校验 Asset 归属和 `asset-files/` 边界后返回图片字节，React 再用 `Blob` 与 `URL.createObjectURL()` 创建临时地址。这类地址以 `blob:` 开头。
+
+Release WebView 会严格执行 `tauri.conf.json` 的 Content Security Policy。如果 `img-src` 只有 `'self' data:`，Native 读取虽然成功，浏览器仍会拦截最终图片，表现为所有封面破图。配置因此只在 `img-src` 增加 `blob:`；脚本、连接和通用本地路径权限没有随之放宽。Desktop Boundary Validator 会防止这个 Release 专属问题再次出现。

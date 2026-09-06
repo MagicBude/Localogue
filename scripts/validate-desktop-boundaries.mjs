@@ -551,6 +551,15 @@ if (!errors.length) {
     errors.push("V1-23 Shared Portable Pack 已存在安装目录只能在 id/version 完全一致且校验有效时复用。");
   }
 
+  // DesktopAssetImage 将受限 Native Command 返回的图片字节包装成临时 blob URL。
+  // Release WebView 会严格执行 CSP，因此 img-src 必须允许 blob:；权限只加在图片上，
+  // script-src / connect-src 仍不能借此访问任意本地文件。
+  const tauriConfig = JSON.parse(readFileSync(path.join(root, "apps/desktop/src-tauri/tauri.conf.json"), "utf8"));
+  const desktopCsp = tauriConfig.app?.security?.csp ?? "";
+  if (!/img-src[^;]*\bblob:/.test(desktopCsp)) {
+    errors.push("Desktop Release CSP 的 img-src 必须允许 DesktopAssetImage 生成的 blob: URL。");
+  }
+
   // V1-24 Desktop Presentation Preference: private display choice without Canonical mutation.
   const desktopPresentation = readFileSync(path.join(root, "apps/desktop/src/desktop-presentation.ts"), "utf8");
   const desktopPresentationWorkbench = readFileSync(path.join(root, "apps/desktop/src/desktop-presentation-workbench.tsx"), "utf8");

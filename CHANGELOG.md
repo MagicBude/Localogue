@@ -14,6 +14,7 @@
 - MediaFile 缺失清理只在操作系统明确确认路径不存在时删除记录；权限错误、网络盘断线等未知状态会保留记录并产生扫描警告。
 - 每轮媒体扫描进入终态后保存 Private Scan History Receipt；媒体页可查看最近 20 次状态、耗时、变更数量、未关联数量与警告，含本机路径的诊断历史不会进入 Portable Pack。
 - Desktop 启用 Windows NSIS current-user 安装包，并增加 `desktop:release:check` 快速验证版本、图标、内置资源和 ffprobe Sidecar 边界；`desktop:build` 现在会先预检再生成安装器。
+- 修复 Release CSP 漏掉 `img-src blob:` 导致 Native 已读取图片、WebView 却拦截临时图片 URL 的全局破图；权限仅增加到图片来源，不扩大脚本、网络或本地文件读取能力。
 - 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。
