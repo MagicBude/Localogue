@@ -9,6 +9,8 @@ import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
  */
 export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "分析已过期": "解析期限切れ",
+    "文件发生变化后旧技术参数会标记为过期，重新扫描成功后自动更新。": "ファイル変更後は古い技術情報を期限切れとして表示し、再スキャン成功時に自動更新します。",
     "{count} 条解析提示": "解析メッセージ {count} 件",
     "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "発売日は有効な YYYY、YYYY-MM、または YYYY-MM-DD で入力してください。",
     "时长必须是大于 0 的整数分钟。": "時間は 0 より大きい整数（分）で入力してください。",
@@ -274,6 +276,8 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "没有候选。尝试输入番号或标题。": "候補がありません。品番またはタイトルを入力してください。",
   },
   en: {
+    "分析已过期": "Analysis is stale",
+    "文件发生变化后旧技术参数会标记为过期，重新扫描成功后自动更新。": "After a file changes, old technical metadata is marked stale and updates after a successful rescan.",
     "{count} 条解析提示": "{count} parsing notices",
     "发行日期必须是有效的 YYYY、YYYY-MM 或 YYYY-MM-DD。": "Release date must be a valid YYYY, YYYY-MM, or YYYY-MM-DD value.",
     "时长必须是大于 0 的整数分钟。": "Duration must be a whole number of minutes greater than 0.",

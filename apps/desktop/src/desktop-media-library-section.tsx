@@ -45,7 +45,7 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
               <td><strong>{file.fileName}</strong><small className="path-text">{file.path}</small></td>
               <td>{work ? <><strong>{work.code}</strong><small>{localizeText(work.titles, metadataLanguage)}</small></> : <span className="status-chip warn">{t("未绑定")}</span>}</td>
               <td>{formatBytes(file.fileSize ?? 0)}</td>
-              <td>{mediaSummary(file)}</td>
+              <td>{mediaSummary(file, t)}</td>
               <td><div className="row-actions">
                 <button onClick={() => props.onOpen(file.path)}>{t("打开")}</button>
                 <button onClick={() => props.onReveal(file.path)}>{t("定位")}</button>
@@ -59,10 +59,15 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
   );
 }
 
-function mediaSummary(file: MediaFile): ReactNode {
+function mediaSummary(file: MediaFile, t: (source: string) => string): ReactNode {
   const resolution = file.width && file.height ? `${file.width}×${file.height}` : null;
   const codecs = [file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ");
-  return <><strong>{resolution ?? "—"}</strong><small>{codecs || (file.analysisStale ? "analysis stale" : "—")}</small></>;
+  return <>
+    <strong>{resolution ?? "—"}</strong>
+    <small title={file.analysisStale ? t("文件发生变化后旧技术参数会标记为过期，重新扫描成功后自动更新。") : undefined}>
+      {codecs || (file.analysisStale ? t("分析已过期") : "—")}
+    </small>
+  </>;
 }
 
 function formatBytes(value: number): string {
