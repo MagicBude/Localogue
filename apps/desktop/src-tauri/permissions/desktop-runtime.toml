@@ -10,6 +10,8 @@ commands.allow = [
   "delete_managed_private_library",
   "pick_directory",
   "pick_media_file",
+  "pick_ffprobe_file",
+  "check_ffprobe",
   "pick_image_file",
   "pick_portable_pack_file",
   "read_portable_pack_file",

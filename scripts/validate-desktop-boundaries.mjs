@@ -98,7 +98,7 @@ if (!errors.length) {
   const capability = readFileSync(path.join(root, "apps/desktop/src-tauri/capabilities/default.json"), "utf8");
   const permission = readFileSync(path.join(root, "apps/desktop/src-tauri/permissions/desktop-runtime.toml"), "utf8");
   if (!capability.includes('"desktop-runtime"')) errors.push("主窗口 Capability 必须显式引用 desktop-runtime 应用权限。");
-  const runtimeCommands = ["provision_example_library", "provision_private_library", "delete_managed_private_library", "pick_directory", "pick_image_file", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "preview_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "append_app_log", "reveal_app_log", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "read_resolved_asset_bytes", "inspect_private_asset_storage", "cleanup_private_asset_orphans", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
+  const runtimeCommands = ["provision_example_library", "provision_private_library", "delete_managed_private_library", "pick_directory", "pick_image_file", "pick_ffprobe_file", "check_ffprobe", "pick_portable_pack_file", "read_portable_pack_file", "save_portable_pack_file", "collect_private_portable_files", "preview_private_portable_files", "import_private_portable_files", "collect_shared_portable_files", "install_shared_portable_files", "open_path", "reveal_in_folder", "append_app_log", "reveal_app_log", "probe_media", "walk_files", "read_nfo_text", "import_private_asset_file", "read_private_asset_bytes", "read_resolved_asset_bytes", "inspect_private_asset_storage", "cleanup_private_asset_orphans", "sha256_file", "inspect_shared_pack", "read_library_collection", "write_library_entity", "read_private_audit_collection", "write_private_audit_entity", "read_private_presentation_preferences", "write_private_presentation_preference", "create_governance_snapshot", "restore_governance_snapshot", "delete_library_entity"];
   for (const command of runtimeCommands) {
     if (!permission.includes(`"${command}"`)) errors.push(`Desktop Runtime Permission 缺少命令：${command}`);
   }
@@ -299,7 +299,7 @@ if (!errors.length) {
   if (!rust.includes("example-shared-pack") || !rust.includes("provision_resource_snapshot") || !desktopApp.includes("sharedPackPaths.length === 0")) {
     errors.push("V1-24C 内置示例库必须自动修复 Starter Shared Pack，并使用 App Local Data 稳定副本。");
   }
-  if (!rust.includes("contract_revision: 10") || !rust.includes("preview_private_portable_files")) {
+  if (!rust.includes("contract_revision: 11") || !rust.includes("preview_private_portable_files")) {
     errors.push("V1-24C Native Runtime 必须升级 Contract revision 6 并开放带目标锁的 Portable Import Plan 命令。");
   }
   for (const token of ["expected_library_path", "same_library_path", "target_library_path", "当前资料库已在预览后发生切换"]) {
@@ -614,10 +614,10 @@ if (!errors.length) {
   if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
     errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 10")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 11")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
-  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 10") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
+  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 11") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
     errors.push("V1-24 Profile UI 必须在 Native Runtime 版本落后时阻止误保存并给出明确诊断。");
   }
   const tauriBuild = readFileSync(path.join(root, "apps/desktop/src-tauri/build.rs"), "utf8");

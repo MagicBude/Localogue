@@ -1,4 +1,4 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -19,9 +19,9 @@ import {
 import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
 
-// revision 9 才保证 provision_private_library(profileId) 会为每个 Profile
-// 创建独立目录；旧 Runtime 只能返回共享 user-library，必须阻止继续新建。
-const PROFILE_NATIVE_CONTRACT_REVISION = 10;
+// revision 11 同时保证 Profile 隔离、受控删除和 ffprobe 引导命令齐全；旧 EXE
+// 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
+const PROFILE_NATIVE_CONTRACT_REVISION = 11;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**
@@ -49,6 +49,7 @@ export function DesktopSettingsPage({
 }) {
   const { t } = useDesktopI18n();
   const profiles = settings.libraryProfiles ?? [];
+  const [ffprobeCheck, setFfprobeCheck] = useState<string>();
   const selectedProfile = activeLibraryProfile(settings);
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
@@ -204,6 +205,29 @@ export function DesktopSettingsPage({
     }
   }
 
+  async function chooseFfprobe(): Promise<void> {
+    try {
+      const path = await desktopBridge.pickFfprobeFile(settings.ffprobePath);
+      if (path) {
+        setSettings((current) => ({ ...current, ffprobePath: path }));
+        setFfprobeCheck(undefined);
+      }
+    } catch (error) {
+      setMessage(t("选择 ffprobe 失败：{error}", { error: toMessage(error) }));
+    }
+  }
+
+  async function checkFfprobe(): Promise<void> {
+    try {
+      const version = await desktopBridge.checkFfprobe(settings.ffprobePath?.trim() || "ffprobe");
+      setFfprobeCheck(version);
+      setMessage(t("ffprobe 已可用：{version}", { version }));
+    } catch (error) {
+      setFfprobeCheck(undefined);
+      setMessage(t("ffprobe 不可用：{error}", { error: toMessage(error) }));
+    }
+  }
+
   async function revealLog(): Promise<void> {
     try {
       await desktopBridge.revealAppLog();
@@ -297,7 +321,11 @@ export function DesktopSettingsPage({
       </details>
 
       <section className="settings-card form-card">
-        <label>ffprobe<input value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, ffprobePath: event.target.value }))} /></label>
+        <div>
+          <div className="section-heading"><div><h3>ffprobe</h3><p className="muted">{t("用于读取视频清晰度、时长和编码。留空会依次查找安装包资源和系统 PATH；找不到时仍能扫描作品文件。")}</p></div><div className="button-row"><button onClick={() => void chooseFfprobe()}>{t("选择 ffprobe.exe")}</button><button onClick={() => void checkFfprobe()}>{t("检测可用性")}</button></div></div>
+          <input value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} />
+          {ffprobeCheck ? <p className="status-line">{t("已检测：{version}", { version: ffprobeCheck })}</p> : null}
+        </div>
         <label>Localogue Web URL<input value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} /></label>
         <div className="button-row"><button onClick={() => void openWeb()}>{t("浏览器打开 Web")}</button><button className="primary-button" disabled={busy} onClick={onSave}>{busy ? t("保存中…") : t("保存桌面设置")}</button></div>
       </section>

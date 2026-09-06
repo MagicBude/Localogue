@@ -34,6 +34,8 @@ apps/desktop/src-tauri/target/release/bundle/nsis/
 
 当前安装器不捆绑 ffprobe。应用会依次尝试用户设置的 `ffprobe.exe`、应用资源目录和系统 PATH；没有 ffprobe 时仍可建立 MediaFile 索引，只是无法读取时长、分辨率和编码等技术参数。
 
+普通用户无需手写完整路径：在“设置”页点击“选择 ffprobe.exe”，选择 FFmpeg 安装目录中的同名程序，再点击“检测可用性”。检测通过会显示实际版本首行；留空检测则可确认系统 `PATH` 中的 ffprobe 是否可用。Native 端仍校验可执行文件名并以固定参数启动，文件选择器不会扩大成任意程序执行入口。
+
 要把 ffprobe 正式装入发行包，必须先确定每个 target triple 的二进制来源、FFmpeg 许可证文本、版本升级策略和 SHA-256 校验。发布预检目前主动拒绝 `externalBin`，防止仓库只有配置、实际安装包却缺少文件。
 
 ## 从“可安装”到“公开发布”还缺什么

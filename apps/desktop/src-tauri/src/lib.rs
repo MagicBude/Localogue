@@ -308,7 +308,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 10,
+        contract_revision: 11,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -478,6 +478,32 @@ async fn pick_media_file(app: AppHandle) -> Result<Option<String>, String> {
     Ok(picked
         .and_then(|selected| selected.into_path().ok())
         .map(|path| path_to_string(&path)))
+}
+
+#[tauri::command]
+async fn pick_ffprobe_file(app: AppHandle, initial_path: Option<String>) -> Result<Option<String>, String> {
+    let mut picker = app.dialog().file().add_filter("ffprobe", &["exe"]);
+    if let Some(initial) = initial_path.filter(|value| !value.trim().is_empty()) {
+        validate_text_path(&initial)?;
+        let path = PathBuf::from(initial);
+        // 设置保存的是文件路径；从父目录打开，用户升级 ffprobe 时无需重新逐层寻找。
+        if let Some(parent) = path.parent().filter(|value| value.is_dir()) { picker = picker.set_directory(parent); }
+    }
+    let selected = picker.blocking_pick_file().and_then(|value| value.into_path().ok());
+    if let Some(path) = &selected { validate_ffprobe_executable(&path_to_string(path))?; }
+    Ok(selected.map(|path| path_to_string(&path)))
+}
+
+#[tauri::command]
+async fn check_ffprobe(executable: String) -> Result<String, String> {
+    let resolved = resolve_ffprobe_executable(&executable)?;
+    // 进程等待放进 blocking worker，避免版本检测冻结 Tauri 主线程和整个界面。
+    spawn_native_io("check_ffprobe", move || {
+        let output = Command::new(resolved).arg("-version").output().map_err(|error| format!("无法启动 ffprobe：{error}"))?;
+        if !output.status.success() { return Err("ffprobe 版本检查返回非零状态。".into()); }
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        Ok(stdout.lines().next().unwrap_or("ffprobe").trim().to_string())
+    }).await
 }
 
 #[tauri::command]
@@ -2475,6 +2501,8 @@ pub fn run() {
             delete_managed_private_library,
             pick_directory,
             pick_media_file,
+            pick_ffprobe_file,
+            check_ffprobe,
             pick_image_file,
             pick_portable_pack_file,
             read_portable_pack_file,
