@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop Boundary 校验器同步 Work / Person / shared utils 的新模块路径，不再因删除旧聚合文件而误报架构缺失。
 - 为 ffprobe 路径输入框恢复可访问的语义标签，屏幕阅读器和点击标签聚焦均能正确识别字段用途。
 - 修复 Desktop 元数据导入区“保存为 Evidence”按钮绕过国际化的问题，日文和英文界面不再混入中文操作文案。
 - MediaFile 技术参数过期状态改为三语文案，并通过提示说明文件变化后的 stale 语义；移除中文 / 日文界面中的硬编码 `analysis stale`。

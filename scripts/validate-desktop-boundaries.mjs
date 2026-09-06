@@ -22,8 +22,14 @@ const required = [
   "apps/desktop/src/desktop-work-explorer.tsx",
   "apps/desktop/src/desktop-person-explorer.tsx",
   "apps/desktop/src/desktop-catalog-browser.tsx",
-  "apps/desktop/src/desktop-management.tsx",
+  "apps/desktop/src/desktop-work-management.tsx",
+  "apps/desktop/src/desktop-person-management.tsx",
+  "apps/desktop/src/desktop-management-utils.ts",
   "apps/desktop/src/desktop-i18n.tsx",
+  "apps/desktop/src/desktop-i18n-translations.ts",
+  "apps/desktop/src/desktop-metadata-import-section.tsx",
+  "apps/desktop/src/desktop-vocabulary-audit-section.tsx",
+  "apps/desktop/src/desktop-media-library-section.tsx",
   "apps/desktop/src/desktop-governance.tsx",
   "apps/desktop/src/desktop-presentation.ts",
   "apps/desktop/src/desktop-presentation-workbench.tsx",
@@ -145,9 +151,12 @@ if (!errors.length) {
   const desktopReview = readFileSync(path.join(root, "apps/desktop/src/desktop-review-page.tsx"), "utf8");
   const desktopAppShell = readFileSync(path.join(root, "apps/desktop/src/desktop-app-shell.tsx"), "utf8");
   const desktopWorkPages = readFileSync(path.join(root, "apps/desktop/src/desktop-work-pages.tsx"), "utf8");
+  const desktopWorkManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-work-management.tsx"), "utf8");
+  const desktopPersonManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-person-management.tsx"), "utf8");
+  const desktopManagementUtils = readFileSync(path.join(root, "apps/desktop/src/desktop-management-utils.ts"), "utf8");
   const desktopWorkMedia = readFileSync(path.join(root, "apps/desktop/src/desktop-work-media-section.tsx"), "utf8");
   const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
-  const desktopWorkSurface = desktopApp + desktopWorkPages;
+  const desktopWorkSurface = desktopApp + desktopWorkPages + desktopWorkManagement;
   const desktopMetadataDiscovery = readFileSync(path.join(root, "apps/desktop/src/desktop-metadata-discovery.ts"), "utf8");
   const desktopWorkCodeIndex = readFileSync(path.join(root, "apps/desktop/src/desktop-work-code-index.ts"), "utf8");
   const desktopNfoImport = readFileSync(path.join(root, "apps/desktop/src/nfo-library-import.ts"), "utf8");
@@ -169,7 +178,10 @@ if (!errors.length) {
   }
   const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
   const desktopMediaSections = readFileSync(path.join(root, "apps/desktop/src/desktop-media-sections.tsx"), "utf8");
-  const desktopMediaSurface = desktopMediaPage + desktopMediaSections;
+  const desktopMetadataImportSection = readFileSync(path.join(root, "apps/desktop/src/desktop-metadata-import-section.tsx"), "utf8");
+  const desktopVocabularyAuditSection = readFileSync(path.join(root, "apps/desktop/src/desktop-vocabulary-audit-section.tsx"), "utf8");
+  const desktopMediaLibrarySection = readFileSync(path.join(root, "apps/desktop/src/desktop-media-library-section.tsx"), "utf8");
+  const desktopMediaSurface = desktopMediaPage + desktopMediaSections + desktopMetadataImportSection + desktopVocabularyAuditSection + desktopMediaLibrarySection;
   const desktopPacksPage = readFileSync(path.join(root, "apps/desktop/src/desktop-packs-page.tsx"), "utf8");
   const desktopSettingsPage = readFileSync(path.join(root, "apps/desktop/src/desktop-settings-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
@@ -181,7 +193,9 @@ if (!errors.length) {
   if (!desktopMediaPage.includes("previewNfoImport") || !desktopMediaPage.includes("importNfoPreview")) {
     errors.push("V1-18 Desktop Media 页面必须保留独立 NFO Preview -> Explicit Import 流程。");
   }
-  const desktopManagement = readFileSync(path.join(root, "apps/desktop/src/desktop-management.tsx"), "utf8");
+  // CRUD 已按实体拆分；校验器也必须尊重模块边界，不能用已删除的聚合文件
+  // 迫使实现重新耦合。共享工具单独读取，便于继续保护统一校验入口。
+  const desktopManagement = desktopWorkManagement + desktopPersonManagement + desktopManagementUtils;
   const desktopMediaBinding = readFileSync(path.join(root, "apps/desktop/src/desktop-media-binding-panel.tsx"), "utf8");
   for (const feature of ["CreateWorkPanel", "WorkEditor", "CreatePersonPanel", "PersonEditor"]) {
     if (!desktopManagement.includes(feature)) errors.push(`V1-18 Desktop 交互对齐缺少：${feature}`);
@@ -213,7 +227,9 @@ if (!errors.length) {
   const desktopWorkExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-work-explorer.tsx"), "utf8");
   const desktopPersonExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-person-explorer.tsx"), "utf8");
   const desktopCatalogBrowser = readFileSync(path.join(root, "apps/desktop/src/desktop-catalog-browser.tsx"), "utf8");
-  const desktopI18n = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n.tsx"), "utf8");
+  const desktopI18nLogic = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n.tsx"), "utf8");
+  const desktopI18nTranslations = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n-translations.ts"), "utf8");
+  const desktopI18n = desktopI18nLogic + desktopI18nTranslations;
   const desktopStyles = readFileSync(path.join(root, "apps/desktop/src/styles.css"), "utf8");
   if (!desktopStyles.includes(".desktop-work-gallery__stage.is-landscape")) {
     errors.push("V1-24B Work Hero Gallery 必须保留横版展示样式。");
@@ -685,7 +701,8 @@ if (errors.length) {
 
 function collectDesktopTranslationKeys(source, language) {
   const output = new Set();
-  for (const declaration of ["const translations", "const supplementalTranslations"]) {
+  // 翻译字典已从 React Provider 拆出；同时兼容旧名称，避免校验器与文件布局耦合。
+  for (const declaration of ["const translations", "const supplementalTranslations", "const desktopTranslations", "const desktopSupplementalTranslations"]) {
     const declarationIndex = source.indexOf(declaration);
     if (declarationIndex < 0) continue;
     const languageMatch = new RegExp(`\\b${language}\\s*:\\s*\\{`).exec(source.slice(declarationIndex));
