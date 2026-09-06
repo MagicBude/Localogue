@@ -1,10 +1,9 @@
 import type { LocalizedText } from "@/domain/value-objects/localized-text";
+import { parsePartialDate } from "@/domain/value-objects/partial-date";
 
 /** Work 与 Person 表单共用的无状态规范化函数。 */
 export function datePrecision(value: string): "year" | "month" | "day" {
-  if (/^\d{4}$/.test(value)) return "year";
-  if (/^\d{4}-\d{2}$/.test(value)) return "month";
-  return "day";
+  return parsePartialDate(value)?.precision ?? "day";
 }
 
 /**
@@ -12,13 +11,7 @@ export function datePrecision(value: string): "year" | "month" | "day" {
  * 单靠 `YYYY-MM-DD` 正则会错误接受 2026-02-31，因此完整日期还要往返 UTC Date。
  */
 export function isValidPartialDate(value: string): boolean {
-  if (/^\d{4}$/.test(value)) return true;
-  if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return true;
-  const match = /^(\d{4})-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.exec(value);
-  if (!match) return false;
-  const [year, month, day] = match.slice(1).map(Number);
-  const parsed = new Date(Date.UTC(year, month - 1, day));
-  return parsed.getUTCFullYear() === year && parsed.getUTCMonth() === month - 1 && parsed.getUTCDate() === day;
+  return Boolean(parsePartialDate(value));
 }
 
 /** 数量型 Domain 字段使用正整数，防止 1.5 或 Infinity 写入 Canonical JSON。 */

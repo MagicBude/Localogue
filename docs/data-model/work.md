@@ -24,6 +24,8 @@
 | `createdAt` | 加入资料库时间 |
 | `updatedAt` | 最后修改时间 |
 
+`releaseDate` 和 Person 的 `birthDate` 共用 `PartialDate` Value Object：允许 `YYYY`、`YYYY-MM`、`YYYY-MM-DD`，并保存对应的 `year / month / day` 精度。解析器还会验证真实日历日期，因此 `2026-02-31` 不会因外形符合格式就进入 Canonical Library。Importer、Review 和手工编辑必须复用这一规则。
+
 ## 时长
 
 V1 直接支持 `durationMinutes`。

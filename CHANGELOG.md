@@ -1,5 +1,6 @@
 # Changelog
 
+- PartialDate 的格式、精度与真实日历校验下沉到 Domain Value Object；Desktop 表单、NFO Bootstrap、人物编辑和 Review Commit 不再维护彼此漂移的日期解析规则。
 - Desktop Work / Person 编辑器在写入前校验部分日期的格式与真实日历日期，并拒绝小数、Infinity 等非法时长和身高，避免无效值进入 Canonical JSON。
 - 修复人物译名保存会删除同语言其它合法罗马字名称的问题；编辑器现在只更新它实际显示的首选名称，其余拼写和历史名称保持不变。
 - Desktop 管理表单按 Work、Person 和共享规范化工具拆成三个模块；实体页面只依赖自己的 CRUD 组件，修改人物资料不再需要进入作品编辑文件。

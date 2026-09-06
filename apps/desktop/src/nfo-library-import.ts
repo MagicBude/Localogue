@@ -9,7 +9,7 @@ import type { Series } from "@/domain/entities/series";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 import type { DesktopFileEntry } from "./contracts";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
-import type { PartialDate } from "@/domain/value-objects/partial-date";
+import { parsePartialDate } from "@/domain/value-objects/partial-date";
 import { NfoMetadataImporter } from "@/infrastructure/importers/nfo-importer";
 
 import { desktopBridge } from "./tauri-bridge";
@@ -336,6 +336,7 @@ function buildWork(
   const now = new Date().toISOString();
   if (!existing) {
     const title = candidate.originalTitle ?? candidate.title;
+    const releaseDate = parsePartialDate(candidate.releaseDate);
     if (!title) throw new Error("新 Work 缺少标题。文件名只有番号时，需要 NFO XML 内提供 title/originaltitle。");
     return {
       schemaVersion: 1,
@@ -344,7 +345,7 @@ function buildWork(
       originalLanguage: "ja",
       titles: { ja: title },
       ...(candidate.description ? { descriptions: { ja: candidate.description } } : {}),
-      ...(toPartialDate(candidate.releaseDate) ? { releaseDate: toPartialDate(candidate.releaseDate) } : {}),
+      ...(releaseDate ? { releaseDate } : {}),
       ...(candidate.durationMinutes !== undefined ? { durationMinutes: candidate.durationMinutes } : {}),
       workTypeIds: unique(candidate.workTypes.map((value) => workTypeDefinition(value)?.id).filter((value): value is string => Boolean(value))),
       personRelations: relations.personRelations,
@@ -366,7 +367,7 @@ function buildWork(
   if (candidate.description && !next.descriptions?.ja) {
     next.descriptions = { ...(next.descriptions ?? {}), ja: candidate.description };
   }
-  if (!next.releaseDate) next.releaseDate = toPartialDate(candidate.releaseDate);
+  if (!next.releaseDate) next.releaseDate = parsePartialDate(candidate.releaseDate);
   if (next.durationMinutes === undefined && candidate.durationMinutes !== undefined) next.durationMinutes = candidate.durationMinutes;
   next.personRelations = mergeRelations(next.personRelations, relations.personRelations);
   next.workTypeIds = unique([...next.workTypeIds, ...candidate.workTypes.map((value) => workTypeDefinition(value)?.id).filter((value): value is string => Boolean(value))]);
@@ -553,13 +554,6 @@ function stableNamedId(prefix: string, value: string, hashText: (value: string) 
   return `${prefix}_nfo_${hashText(`${prefix}|${normalizeIdentityText(value)}`).slice(0, 12)}`;
 }
 
-function toPartialDate(value: string | undefined): PartialDate | undefined {
-  if (!value) return undefined;
-  if (/^\d{4}$/.test(value)) return { value, precision: "year" };
-  if (/^\d{4}-\d{2}$/.test(value)) return { value, precision: "month" };
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return { value, precision: "day" };
-  return undefined;
-}
 
 function compactCode(value: string): string {
   return value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");

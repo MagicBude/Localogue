@@ -7,7 +7,7 @@ import type {
   PersonNameType,
 } from "@/domain/entities/person";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
-import type { PartialDate } from "@/domain/value-objects/partial-date";
+import { parsePartialDate as parseDomainPartialDate, type PartialDate } from "@/domain/value-objects/partial-date";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 import { savePersonEditReceipt } from "@/infrastructure/people/person-edit-store";
 
@@ -155,9 +155,8 @@ function cleanLocalizedText(value: unknown) {
 
 function parsePartialDate(value: string | undefined): PartialDate | undefined {
   if (!value) return undefined;
-  if (/^\d{4}$/.test(value)) return { value, precision: "year" };
-  if (/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return { value, precision: "month" };
-  if (/^\d{4}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(value)) return { value, precision: "day" };
+  const parsed = parseDomainPartialDate(value);
+  if (parsed) return parsed;
   throw new PersonEditError("invalid_partial_date");
 }
 

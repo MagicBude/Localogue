@@ -13,7 +13,7 @@ import type { EntityResolution, EvidenceReviewAnalysis } from "@/domain/entities
 import type { Series } from "@/domain/entities/series";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
-import type { PartialDate } from "@/domain/value-objects/partial-date";
+import { parsePartialDate } from "@/domain/value-objects/partial-date";
 import { normalizeIdentityText } from "@/application/review/entity-resolution-service";
 import {
   entityDecisionKey,
@@ -305,7 +305,7 @@ function buildTargetWork(
   if (choose("description") && normalized.description) {
     base.descriptions = { ...(base.descriptions ?? {}), ja: normalized.description };
   }
-  if (choose("releaseDate")) base.releaseDate = toPartialDate(normalized.releaseDate);
+  if (choose("releaseDate")) base.releaseDate = parsePartialDate(normalized.releaseDate);
   if (choose("durationMinutes")) base.durationMinutes = normalized.durationMinutes;
 
   if (choose("performers") || choose("directors")) {
@@ -415,12 +415,6 @@ function stableWorkId(code: string): string {
   return normalized ? `work_${normalized}` : `work_${sha256Text(code).slice(0, 12)}`;
 }
 
-function toPartialDate(value: string | undefined): PartialDate | undefined {
-  if (!value) return undefined;
-  if (/^\d{4}$/.test(value)) return { value, precision: "year" };
-  if (/^\d{4}-\d{2}$/.test(value)) return { value, precision: "month" };
-  return { value, precision: "day" };
-}
 
 function changedWorkFields(before: Work, after: Work): string[] {
   const fields: Array<[string, unknown, unknown]> = [
