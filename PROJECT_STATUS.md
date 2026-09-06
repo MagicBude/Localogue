@@ -8,6 +8,8 @@ Desktop 维护线开始页面模块化：Home、Works、People 及其详情已�
 
 当前维护修正已统一文档、Community Catalog 审计口径与作品画廊行为：`registry:audit` 默认审计社区目录；作品详情画廊可完整浏览 poster / cover / gallery / fanart / screenshot，并按图片真实比例适配，不再固定为横版舞台。
 
+Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:build` 会先校验四处版本、图标、内置资源和 ffprobe Sidecar 边界。本机已实际生成 `Localogue_0.1.25_x64-setup.exe`。该产物适合本机与小范围验收；公开发行仍需代码签名、干净 Windows 环境测试和更新渠道。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：

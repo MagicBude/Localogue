@@ -27,7 +27,8 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
+    "targets": ["nsis"],
     "category": "Video",
     "shortDescription": "Local-first media metadata workbench",
     "icon": [
@@ -37,6 +38,13 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["SimpChinese", "English", "Japanese"],
+        "installerIcon": "icons/icon.ico"
+      }
+    },
     "resources": {
       "../../../examples/dev-library/template/": "examples/dev-library/template/",
       "../../../examples/shared-packs/starter-community-pack/": "examples/shared-packs/starter-community-pack/"

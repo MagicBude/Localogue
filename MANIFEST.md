@@ -10,6 +10,8 @@ Desktop 页面模块化维护已完成第一批：Home、Works、People 及其�
 
 维护修正：README 与 Series 模型文档已和当前实现对齐；`registry:audit` 默认审计 Community Catalog；作品详情画廊完整显示 poster / cover / gallery / fanart / screenshot，并根据真实图片比例切换舞台布局。
 
+Windows Desktop 已具备 NSIS current-user 安装包基线：`desktop:release:check` 在耗时编译前检查版本、图标、内置资源与 ffprobe 边界，`desktop:build` 已在本机实际生成 v0.1.25 x64 安装程序。公开发行所需的代码签名、干净环境安装/升级验收和自动更新仍属于后续发布工程。
+
 
 
 ## V1-27D Entity Localization / Browse Boundary
