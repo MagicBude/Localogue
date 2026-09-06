@@ -49,26 +49,17 @@ export function DesktopPresentationWorkbench({
   const [busyId, setBusyId] = useState<string | null>(null);
 
   async function reload(): Promise<void> {
-    const [works, people, assets, preferences] = await Promise.all([
-      repository.listWorks({ page: 1, pageSize: 100000, sort: "release_desc" }),
-      repository.listPeople({ page: 1, pageSize: 100000, sort: "name_asc" }),
-      repository.listAssets(),
-      repository.listPresentationPreferences(),
-    ]);
-    setData({ works: works.items, people: people.items, assets, preferences });
+    // 保存展示偏好后重新读取完整快照，确保候选 Asset 与 Preference 来自同一轮查询。
+    setData(await loadWorkbenchData(repository));
     setError(null);
   }
 
   useEffect(() => {
     let disposed = false;
-    void Promise.all([
-      repository.listWorks({ page: 1, pageSize: 100000, sort: "release_desc" }),
-      repository.listPeople({ page: 1, pageSize: 100000, sort: "name_asc" }),
-      repository.listAssets(),
-      repository.listPresentationPreferences(),
-    ]).then(([works, people, assets, preferences]) => {
+    // 首次加载和保存后的 reload 共用同一个查询函数，避免两条路径随模型扩展而漂移。
+    void loadWorkbenchData(repository).then((value) => {
       if (!disposed) {
-        setData({ works: works.items, people: people.items, assets, preferences });
+        setData(value);
         setError(null);
       }
     }).catch((value) => {
@@ -219,6 +210,20 @@ export function DesktopPresentationWorkbench({
       </div>
     </section>
   );
+}
+
+/**
+ * Work、Person、Asset 与 Presentation Preference 共同组成一次展示治理快照。
+ * 四个读取互不依赖，因此并行执行；返回前再组合，React 组件无需理解查询顺序。
+ */
+async function loadWorkbenchData(repository: TauriLibraryRepository): Promise<WorkbenchData> {
+  const [works, people, assets, preferences] = await Promise.all([
+    repository.listWorks({ page: 1, pageSize: 100000, sort: "release_desc" }),
+    repository.listPeople({ page: 1, pageSize: 100000, sort: "name_asc" }),
+    repository.listAssets(),
+    repository.listPresentationPreferences(),
+  ]);
+  return { works: works.items, people: people.items, assets, preferences };
 }
 
 export function PresentationAssetPicker({
