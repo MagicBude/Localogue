@@ -36,7 +36,7 @@ export function MetadataImportSection(props: MetadataImportSectionProps) {
         </div>
         <div className="button-row">
           <button disabled={busy} onClick={props.onPreview}>{busy ? t("处理中…") : t("预览 NFO + 图片")}</button>
-          <button disabled={busy || !nfoPreview?.importable} onClick={props.onSaveEvidence}>保存为 Evidence</button>
+          <button disabled={busy || !nfoPreview?.importable} onClick={props.onSaveEvidence}>{t("保存为 Evidence")}</button>
           <button className="primary-button" disabled={busy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={props.onImport}>{t("导入当前预览")}</button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 # Changelog
 
+- 修复 Desktop 元数据导入区“保存为 Evidence”按钮绕过国际化的问题，日文和英文界面不再混入中文操作文案。
 - MediaFile 技术参数过期状态改为三语文案，并通过提示说明文件变化后的 stale 语义；移除中文 / 日文界面中的硬编码 `analysis stale`。
 - Desktop MediaFile 列表拆为独立展示模块，明确 Work 查找只用于呈现，打开、定位与人工绑定仍由父页面控制，继续保持 Work / MediaFile 分离。
 - Desktop 分类词表审计拆成独立展示模块，展开 Preview 统计、unmapped 来源词说明与 Apply 结果的 JSX 格式，并保留父页面对实际修复动作的编排权。
