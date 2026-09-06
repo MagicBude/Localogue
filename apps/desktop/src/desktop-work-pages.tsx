@@ -9,6 +9,7 @@ import type { Work } from "@/domain/entities/work";
 
 import { CreateWorkPanel, WorkEditor } from "./desktop-management";
 import { latestRecycledAsset, recyclePrivateAsset, restoreRecycledAsset } from "./desktop-asset-recycle-service";
+import { sortWorkAssetsForManagement } from "./desktop-asset-order";
 import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
@@ -210,7 +211,7 @@ export function DesktopWorkDetailPage({
         </div>
         {assets.length ? (
           <div className="desktop-asset-management-list">
-            {sortWorkAssets(assets).map((asset) => (
+            {sortWorkAssetsForManagement(assets).map((asset) => (
               <article className="desktop-asset-management-row" key={asset.id}>
                 <div><strong>{assetTypeLabel(asset.type)}</strong><span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span><code className="desktop-asset-management-path">{asset.storagePath}</code></div>
                 <div className="button-row">
@@ -243,11 +244,6 @@ function DensePersonLinks({ relations, people, language, onOpen }: { relations: 
     const label = person ? getPreferredPersonName(person, language) : relation.personId;
     return <button key={`${relation.role}:${relation.personId}`} onClick={() => onOpen(relation.personId)} type="button">{label}</button>;
   })}</span>;
-}
-
-function sortWorkAssets(assets: Asset[]): Asset[] {
-  const priority: Record<Asset["type"], number> = { poster: 0, fanart: 1, screenshot: 2, cover: 3, gallery: 4, portrait: 5, logo: 6, subtitle: 7, document: 8, other: 9 };
-  return [...assets].sort((a, b) => priority[a.type] - priority[b.type] || a.id.localeCompare(b.id));
 }
 
 function PageState({ children, error = false }: { children: ReactNode; error?: boolean }) {

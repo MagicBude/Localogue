@@ -15,6 +15,7 @@ const required = [
   "apps/desktop/src/local-asset-import.ts",
   "apps/desktop/src/desktop-asset-image.tsx",
   "apps/desktop/src/desktop-work-results.tsx",
+  "apps/desktop/src/desktop-asset-order.ts",
   "apps/desktop/src/desktop-work-explorer.tsx",
   "apps/desktop/src/desktop-person-explorer.tsx",
   "apps/desktop/src/desktop-catalog-browser.tsx",
@@ -155,6 +156,7 @@ if (!errors.length) {
   const desktopPacksPage = readFileSync(path.join(root, "apps/desktop/src/desktop-packs-page.tsx"), "utf8");
   const desktopSettingsPage = readFileSync(path.join(root, "apps/desktop/src/desktop-settings-page.tsx"), "utf8");
   const desktopWorkGallery = readFileSync(path.join(root, "apps/desktop/src/desktop-work-asset-gallery.tsx"), "utf8");
+  const desktopAssetOrder = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-order.ts"), "utf8");
   const adapters = readFileSync(path.join(root, "apps/desktop/src/platform/tauri-platform-adapters.ts"), "utf8");
   if (!desktopMediaPage.includes("MediaScanCoordinator") || !desktopApp.includes("TauriLibraryRepository")) {
     errors.push("V1-18 Desktop 必须继续复用共享 MediaScanCoordinator 与完整浏览型 TauriLibraryRepository。");
@@ -180,8 +182,8 @@ if (!errors.length) {
   if (!desktopWorkSurface.includes("DesktopWorkAssetGallery") || !desktopWorkGallery.includes("desktop-work-gallery__arrow") || !desktopWorkSurface.includes("desktop-work-record--stacked")) {
     errors.push("V1-22 Hotfix Work Detail 必须保持顶部媒体画廊 + 下方全宽 Metadata Table，避免恢复左图右表的高度空洞布局。");
   }
-  if (!desktopWorkGallery.includes("isWorkGalleryAsset") || !desktopWorkGallery.includes('["poster", "cover", "gallery", "fanart", "screenshot"]')) {
-    errors.push("ADR-041 Work Detail Gallery 必须完整包含 poster / cover / gallery / fanart / screenshot 视觉资源。");
+  if (!desktopWorkGallery.includes("workHeroAssets") || !desktopAssetOrder.includes('["fanart", "screenshot", "gallery", "cover"]')) {
+    errors.push("Work Detail Hero 必须复用集中排序，并按信息架构展示 fanart / screenshot / gallery / cover。");
   }
   if (!desktopWorkGallery.includes("galleryOrientation") || !desktopWorkGallery.includes("naturalWidth") || !desktopWorkGallery.includes("naturalHeight")) {
     errors.push("ADR-041 Work Detail Gallery 必须根据 Asset 尺寸与图片真实尺寸适配方向。");
@@ -253,8 +255,8 @@ if (!errors.length) {
   if (!desktopStyles.includes("minmax(330px, 380px)") || !desktopStyles.includes("white-space: normal")) {
     errors.push("V1-20 Work Facet Rail 必须加宽并允许长筛选项换行，避免标签被窄栏截断。");
   }
-  for (const token of ['poster: 0', 'fanart: 1', 'screenshot: 2', 'cover: 3']) {
-    if (!desktopWorkSurface.includes(token) && !desktopWorkGallery.includes(token)) errors.push(`V1-20 Work Asset 展示顺序缺少：${token}`);
+  for (const token of ['"poster", "fanart", "screenshot", "cover"', '"fanart", "screenshot", "gallery", "cover"']) {
+    if (!desktopAssetOrder.includes(token)) errors.push(`Work Asset 集中排序规则缺少：${token}`);
   }
   if (desktopApp.includes("本地海报 / 封面 / Fanart")) {
     errors.push("V1-20 不允许继续使用中英混排且语义不明确的本地海报 / 封面 / Fanart 标题。");

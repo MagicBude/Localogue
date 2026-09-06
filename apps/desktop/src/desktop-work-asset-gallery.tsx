@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Asset } from "@/domain/entities/asset";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { workHeroAssets } from "./desktop-asset-order";
 import { useDesktopI18n } from "./desktop-i18n";
 
 type GalleryOrientation = "portrait" | "square" | "landscape";
@@ -24,7 +25,7 @@ export function DesktopWorkAssetGallery({
 }) {
   const { t } = useDesktopI18n();
   const candidates = useMemo(
-    () => sortGalleryAssets(assets).filter(isWorkGalleryAsset),
+    () => workHeroAssets(assets),
     [assets],
   );
   const candidateKey = useMemo(() => candidates.map((asset) => asset.id).join("\0"), [candidates]);
@@ -104,31 +105,10 @@ export function DesktopWorkAssetGallery({
   );
 }
 
-function isWorkGalleryAsset(asset: Asset): boolean {
-  if (!["poster", "cover", "gallery", "fanart", "screenshot"].includes(asset.type)) return false;
-  return !asset.mimeType || asset.mimeType.startsWith("image/");
-}
-
 function galleryOrientation(width?: number, height?: number): GalleryOrientation {
   if (!width || !height) return "landscape";
   const ratio = width / height;
   if (ratio < 0.8) return "portrait";
   if (ratio < 1.2) return "square";
   return "landscape";
-}
-
-function sortGalleryAssets(assets: Asset[]): Asset[] {
-  const priority: Record<Asset["type"], number> = {
-    poster: 0,
-    cover: 1,
-    gallery: 2,
-    fanart: 3,
-    screenshot: 4,
-    portrait: 5,
-    logo: 6,
-    subtitle: 7,
-    document: 8,
-    other: 9,
-  };
-  return [...assets].sort((a, b) => priority[a.type] - priority[b.type] || a.id.localeCompare(b.id));
 }
