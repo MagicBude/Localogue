@@ -8,7 +8,7 @@ import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
 import type { WorkQuery } from "@/domain/queries/work-query";
 
-import { CreateWorkPanel, WorkEditor } from "./desktop-management";
+import { CreateWorkPanel, WorkEditor } from "./desktop-work-management";
 import { latestRecycledAsset, recyclePrivateAsset, restoreRecycledAsset } from "./desktop-asset-recycle-service";
 import { sortWorkAssetsForManagement } from "./desktop-asset-order";
 import { PresentationAssetPicker } from "./desktop-presentation-workbench";

@@ -2,7 +2,7 @@ import { getPreferredPersonName, localizeText } from "@/application/services/loc
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
-import { CreatePersonPanel, PersonEditor } from "./desktop-management";
+import { CreatePersonPanel, PersonEditor } from "./desktop-person-management";
 import { InfoCard } from "./desktop-page-primitives";
 import { PersonAssetGovernance } from "./desktop-person-asset-governance";
 import { DesktopPersonExplorer } from "./desktop-person-explorer";
