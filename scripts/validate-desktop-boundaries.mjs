@@ -497,7 +497,7 @@ if (!errors.length) {
   if (!desktopWorkExplorer.includes("useStableAsyncData") || !desktopPersonExplorer.includes("useStableAsyncData") || !desktopCatalogBrowser.includes("useStableAsyncData")) {
     errors.push("V1-22 Works / People / Catalog 必须统一使用 Stable Async Refresh。 ");
   }
-  for (const token of ["desktop-work-record", "desktop-metadata-table", "DenseDetailRow", "DenseChips", 't("题材")', 't("标签")']) {
+  for (const token of ["desktop-work-record", "desktop-metadata-table", "DenseDetailRow", "DenseFilterLinks", 't("题材")', 't("标签")']) {
     if (!desktopWorkSurface.includes(token) && !desktopStyles.includes(token)) errors.push(`V1-22 Work Detail 高密度信息架构缺少：${token}`);
   }
   if (!desktopI18n.includes("语言（界面 + 元数据）") || !desktopI18n.includes("setMetadataLanguage(language)")) {

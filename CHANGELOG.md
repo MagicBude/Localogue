@@ -23,6 +23,7 @@
 - Works 多维筛选增加 4K / 1080P / 720P / SD 清晰度 Facet；档位从关联 MediaFile 技术参数派生，同一 Work 拥有多个版本时可同时命中多个档位，不污染 Canonical Work 分类。
 - Desktop Work 编辑器可并存日文、中文、英文标题与简介；空语言不会写入 Canonical，Metadata Language 切换继续按现有回退规则显示对应文本。
 - 删除 Library Profile 默认仍只移除配置；对 `App Local Data/libraries/<profile-id>` 下的 Native-managed Private Library 提供第二次明确确认，可选择永久删除管理数据，且删除前拒绝仍被引用、路径不匹配或含链接/Reparse Point 的目录树。
+- Work Detail 的 Maker、Label、Series、Work Type、Genre 与 Tag 改为可点击筛选入口，返回统一 Works Explorer 并携带对应 WorkQuery；不创建详情页专属过滤规则。
 - 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。

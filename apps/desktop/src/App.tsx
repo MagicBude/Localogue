@@ -14,6 +14,7 @@ import type {
   DesktopSharedPackInfo,
   DesktopTaskProgress,
 } from "./contracts";
+import type { WorkQuery } from "@/domain/queries/work-query";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -68,6 +69,7 @@ export default function App() {
   const [packInfos, setPackInfos] = useState<DesktopSharedPackInfo[]>([]);
   const [page, setPage] = useState<DesktopPage>("home");
   const [detail, setDetail] = useState<DetailTarget>(null);
+  const [worksInitialQuery, setWorksInitialQuery] = useState<WorkQuery | undefined>();
   const [message, setMessageState] = useState(() => t("正在连接 Tauri Runtime…"));
   const [busy, setBusy] = useState(false);
   const [libraryEpoch, setLibraryEpoch] = useState(0);
@@ -181,6 +183,13 @@ export default function App() {
   const navigate = useCallback((next: DesktopPage) => {
     setPage(next);
     setDetail(null);
+    if (next === "works") setWorksInitialQuery(undefined);
+  }, []);
+
+  const filterWorks = useCallback((query: WorkQuery) => {
+    setWorksInitialQuery(query);
+    setDetail(null);
+    setPage("works");
   }, []);
 
   const openWork = useCallback((id: string) => {
@@ -356,11 +365,12 @@ export default function App() {
               id={detail.id}
               onBack={() => setDetail(null)}
               openPerson={openPerson}
+              filterWorks={filterWorks}
               onLibraryChanged={refreshLibrary}
               setMessage={setMessage}
             />
           ) : (
-            <DesktopWorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+            <DesktopWorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} />
           )
         ) : page === "people" ? (
           detail?.kind === "person" ? (

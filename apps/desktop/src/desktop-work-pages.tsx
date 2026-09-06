@@ -6,6 +6,7 @@ import { getPreferredPersonName, localizeText } from "@/application/services/loc
 import type { Asset } from "@/domain/entities/asset";
 import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
+import type { WorkQuery } from "@/domain/queries/work-query";
 
 import { CreateWorkPanel, WorkEditor } from "./desktop-management";
 import { latestRecycledAsset, recyclePrivateAsset, restoreRecycledAsset } from "./desktop-asset-recycle-service";
@@ -29,11 +30,13 @@ export function DesktopWorksPage({
   openWork,
   onLibraryChanged,
   setMessage,
+  initialQuery,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
+  initialQuery?: WorkQuery;
 }) {
   const { t } = useDesktopI18n();
   return (
@@ -44,7 +47,7 @@ export function DesktopWorksPage({
         <p>{t("对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。")}</p>
       </section>
       <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} storageKey="localogue.desktop.work-view" />
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} />
     </div>
   );
 }
@@ -60,6 +63,7 @@ export function DesktopWorkDetailPage({
   openPerson,
   onLibraryChanged,
   setMessage,
+  filterWorks,
 }: {
   repository: TauriLibraryRepository;
   id: string;
@@ -67,6 +71,7 @@ export function DesktopWorkDetailPage({
   openPerson: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
+  filterWorks: (query: WorkQuery) => void;
 }) {
   const { t, metadataLanguage, assetTypeLabel } = useDesktopI18n();
   const data = useStableAsyncData(async () => {
@@ -192,12 +197,12 @@ export function DesktopWorkDetailPage({
             <DenseDetailRow label={t("时长")} value={work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : undefined} />
             <DenseDetailRow label={t("演员")}><DensePersonLinks relations={performers} people={people} language={metadataLanguage} onOpen={openPerson} /></DenseDetailRow>
             <DenseDetailRow label={t("导演")}><DensePersonLinks relations={directors} people={people} language={metadataLanguage} onOpen={openPerson} /></DenseDetailRow>
-            <DenseDetailRow label={t("厂商")} value={makerName} />
-            <DenseDetailRow label={t("厂牌")} value={labelName} />
-            <DenseDetailRow label={t("系列")}><DenseChips values={seriesNames} /></DenseDetailRow>
-            <DenseDetailRow label={t("作品类型")}><DenseChips values={workTypeNames} emphasis /></DenseDetailRow>
-            <DenseDetailRow label={t("题材")}><DenseChips values={genreNames} /></DenseDetailRow>
-            <DenseDetailRow label={t("标签")}><DenseChips values={tagNames} /></DenseDetailRow>
+            <DenseDetailRow label={t("厂商")}><DenseFilterLinks items={work.makerId && makerName ? [{ id: work.makerId, label: makerName }] : []} onOpen={(id) => filterWorks({ makerIds: [id] })} /></DenseDetailRow>
+            <DenseDetailRow label={t("厂牌")}><DenseFilterLinks items={work.labelId && labelName ? [{ id: work.labelId, label: labelName }] : []} onOpen={(id) => filterWorks({ labelIds: [id] })} /></DenseDetailRow>
+            <DenseDetailRow label={t("系列")}><DenseFilterLinks items={work.seriesIds.map((id, index) => ({ id, label: seriesNames[index] }))} onOpen={(id) => filterWorks({ seriesIds: [id] })} /></DenseDetailRow>
+            <DenseDetailRow label={t("作品类型")}><DenseFilterLinks items={work.workTypeIds.map((id, index) => ({ id, label: workTypeNames[index] }))} emphasis onOpen={(id) => filterWorks({ workTypeIds: [id] })} /></DenseDetailRow>
+            <DenseDetailRow label={t("题材")}><DenseFilterLinks items={work.genreIds.map((id, index) => ({ id, label: genreNames[index] }))} onOpen={(id) => filterWorks({ genreIds: [id] })} /></DenseDetailRow>
+            <DenseDetailRow label={t("标签")}><DenseFilterLinks items={work.tagIds.map((id, index) => ({ id, label: tagNames[index] }))} onOpen={(id) => filterWorks({ tagIds: [id] })} /></DenseDetailRow>
           </dl>
         </div>
       </section>
@@ -231,10 +236,11 @@ function DenseDetailRow({ label, value, children }: { label: string; value?: str
   return <div className="desktop-metadata-row"><dt>{label}</dt><dd>{children ?? (value && value !== "—" ? value : "—")}</dd></div>;
 }
 
-function DenseChips({ values, emphasis = false }: { values: string[]; emphasis?: boolean }) {
-  const visible = values.filter((value) => value && value !== "—");
+/** 关系按钮只生成 WorkQuery 入口，筛选语义继续由共享 queryWorks 统一处理。 */
+function DenseFilterLinks({ items, onOpen, emphasis = false }: { items: Array<{ id: string; label: string }>; onOpen: (id: string) => void; emphasis?: boolean }) {
+  const visible = items.filter((item) => item.label && item.label !== "—");
   if (!visible.length) return <>—</>;
-  return <span className="desktop-dense-chips">{visible.map((value) => <span className={emphasis ? "desktop-dense-chip is-strong" : "desktop-dense-chip"} key={value}>{value}</span>)}</span>;
+  return <span className="desktop-inline-entity-links">{visible.map((item) => <button className={emphasis ? "is-strong" : ""} key={item.id} onClick={() => onOpen(item.id)} type="button">{item.label}</button>)}</span>;
 }
 
 function DensePersonLinks({ relations, people, language, onOpen }: { relations: Work["personRelations"]; people: Map<string, Person>; language: "ja" | "zh-CN" | "en"; onOpen: (id: string) => void }) {

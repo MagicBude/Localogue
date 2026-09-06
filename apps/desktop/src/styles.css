@@ -1077,9 +1077,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
 }
 @media (prefers-color-scheme: dark) {
   .desktop-metadata-row dt { background: rgba(255,255,255,.025); }
-  .desktop-dense-chip.is-strong { background: rgba(255,255,255,.07); }
+.desktop-dense-chip.is-strong { background: rgba(255,255,255,.07); }
   .desktop-inline-entity-links button { color: #65a8ff; }
 }
+
+.desktop-inline-entity-links button.is-strong { font-weight: 800; }
 
 /* V1-23 Governance Parity -------------------------------------------------- */
 .governance-page { gap: 18px; }
