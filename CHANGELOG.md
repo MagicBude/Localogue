@@ -21,6 +21,7 @@
 - 页面标题、信息卡、治理标题与空状态等稳定结构统一为纯展示基础组件，减少跨页面语义和占位规则漂移。
 - Review 控制器迁入独立页面模块，Governance 入口缩减为路由；提交前重算、Snapshot、引用安全写入、审计与失败恢复顺序保持完整。
 - Media 人工绑定迁入独立模块，补充候选只读、目标复核、人工匹配标记、Receipt 与补偿回滚的教学注释。
+- 作品详情增加关联媒体列表，可直接调用系统默认播放器或在文件管理器中定位；多文件作品逐项操作，并继续经过受限 Native Open / Reveal 边界。
 - 新增 `docs/development/v1-27-desktop-page-modularization.md` 说明拆分原则与后续 Media / Packs / Settings 顺序。
 
 ## V1-27 Maintenance - Documentation / Gallery Consistency

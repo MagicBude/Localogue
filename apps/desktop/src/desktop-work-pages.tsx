@@ -12,9 +12,14 @@ import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
+import { DesktopWorkMediaSection } from "./desktop-work-media-section";
 import { useDesktopI18n } from "./desktop-i18n";
+import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
+
+// Adapter 没有 React 状态，可以在模块级复用；每次渲染重新 new 只会制造无意义对象。
+const fileOpener = new TauriFileOpenerAdapter();
 
 /** 作品库入口只负责创建入口与统一 WorkQuery 浏览器，不持有详情页状态。 */
 export function DesktopWorksPage({
@@ -121,6 +126,24 @@ export function DesktopWorkDetailPage({
     }
   }
 
+  async function playMedia(path: string): Promise<void> {
+    try {
+      // openPath 进入受限 Native Command；Rust 会再次校验文件存在且扩展名属于支持的视频类型。
+      await fileOpener.openPath(path);
+    } catch (error) {
+      setMessage(t("无法播放媒体：{error}", { error: toMessage(error) }));
+    }
+  }
+
+  async function revealMedia(path: string): Promise<void> {
+    try {
+      // reveal 只让系统文件管理器选中文件，不执行目标文件。
+      await fileOpener.revealInFolder(path);
+    } catch (error) {
+      setMessage(t("无法打开文件所在位置：{error}", { error: toMessage(error) }));
+    }
+  }
+
   const makerName = work.makerId ? localizeText(organizations.get(work.makerId)?.names, metadataLanguage, work.makerId) : undefined;
   const labelName = work.labelId ? localizeText(organizations.get(work.labelId)?.names, metadataLanguage, work.labelId) : undefined;
   const seriesNames = work.seriesIds.map((seriesId) => localizeText(series.get(seriesId)?.names, metadataLanguage, seriesId));
@@ -162,6 +185,7 @@ export function DesktopWorkDetailPage({
           </dl>
         </div>
       </section>
+      <DesktopWorkMediaSection media={media} onPlay={(path) => void playMedia(path)} onReveal={(path) => void revealMedia(path)} />
       <PresentationAssetPicker entityType="work" entityId={work.id} candidates={presentation.candidates} preference={presentationPreference} resolved={presentation.resolved} stalePreferredAssetId={presentation.stalePreferredAssetId} repository={repository} onSaved={onLibraryChanged} setMessage={setMessage} />
       <WorkEditor repository={repository} work={work} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
       <section className="settings-card desktop-local-assets-section">

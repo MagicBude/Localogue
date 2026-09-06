@@ -51,3 +51,5 @@ Review 的字段决策、实体解析和 Commit Plan 预览迁到 `desktop-revie
 Review 控制器迁到 `desktop-review-page.tsx`，`desktop-governance.tsx` 只保留 Private Library 前置检查和治理子页面路由。Review 中的状态按处理阶段排列为 Evidence 选择、重新分析、人工决策与 Plan 预览；Commit 仍严格执行“重新计算 fingerprint → 创建 before-image Snapshot → 按引用安全顺序写 Canonical → 追加 Provenance → 保存 Lifecycle 与 Receipt”，任一步失败都从 Snapshot 尝试补偿恢复。
 
 Media Binding 从混合的管理表单文件迁到 `desktop-media-binding-panel.tsx`。候选搜索只提供人工判断依据，文件名番号也只用于初始化查询；只有用户明确点击绑定后才写入 `matchMethod=manual`。MediaFile 与 Binding Receipt 是两个 JSON 写入，Receipt 失败时必须把 MediaFile 恢复为操作前对象，避免留下没有审计记录的人工关系。
+
+作品详情新增独立的 `desktop-work-media-section.tsx`。Repository 仍按 `workId` 提供关联媒体，Section 只显示文件并上报播放/定位意图；页面控制器再调用 `TauriFileOpenerAdapter`，Rust 最终校验路径、文件存在性和视频扩展名。多段或多版本作品逐项展示，不让界面擅自猜测默认文件。
