@@ -1,6 +1,7 @@
 import { inferCatalogFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import type { Asset, AssetType } from "@/domain/entities/asset";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
+import type { DesktopFileEntry } from "./contracts";
 
 import type { NfoImportPreview } from "./nfo-library-import";
 import { desktopBridge } from "./tauri-bridge";
@@ -60,17 +61,18 @@ export async function previewLocalAssetImport(
   roots: readonly string[],
   repository: LibraryRepository,
   nfoPreview?: NfoImportPreview | null,
+  discoveredEntries?: readonly DesktopFileEntry[],
 ): Promise<LocalAssetImportPreview> {
   const rootList = unique(roots.map((item) => item.trim()).filter(Boolean));
   const discovered = new Map<string, Awaited<ReturnType<typeof desktopBridge.walkFiles>>[number]>();
-  for (const root of rootList) {
-    const entries = await desktopBridge.walkFiles({
-      root,
-      extensions: IMAGE_EXTENSIONS,
-      includeHidden: false,
-      maxFiles: MAX_ASSET_FILES,
-    });
-    for (const entry of entries) discovered.set(normalizePath(entry.path), entry);
+  if (discoveredEntries) {
+    for (const entry of discoveredEntries) discovered.set(normalizePath(entry.path), entry);
+  } else {
+    // 独立高级预览保留原入口；统一同步传共享发现结果，解析器不关心目录怎样遍历。
+    for (const root of rootList) {
+      const entries = await desktopBridge.walkFiles({ root, extensions: IMAGE_EXTENSIONS, includeHidden: false, maxFiles: MAX_ASSET_FILES });
+      for (const entry of entries) discovered.set(normalizePath(entry.path), entry);
+    }
   }
 
   const nfoStemCodes = new Map<string, string>();

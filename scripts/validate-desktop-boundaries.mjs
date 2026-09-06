@@ -13,6 +13,7 @@ const required = [
   "apps/desktop/src/platform/tauri-library-repository.ts",
   "apps/desktop/src/nfo-library-import.ts",
   "apps/desktop/src/local-asset-import.ts",
+  "apps/desktop/src/desktop-metadata-discovery.ts",
   "apps/desktop/src/desktop-asset-image.tsx",
   "apps/desktop/src/desktop-work-results.tsx",
   "apps/desktop/src/desktop-asset-order.ts",
@@ -143,14 +144,18 @@ if (!errors.length) {
   const desktopAppShell = readFileSync(path.join(root, "apps/desktop/src/desktop-app-shell.tsx"), "utf8");
   const desktopWorkPages = readFileSync(path.join(root, "apps/desktop/src/desktop-work-pages.tsx"), "utf8");
   const desktopWorkMedia = readFileSync(path.join(root, "apps/desktop/src/desktop-work-media-section.tsx"), "utf8");
+  const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
   const desktopWorkSurface = desktopApp + desktopWorkPages;
+  const desktopMetadataDiscovery = readFileSync(path.join(root, "apps/desktop/src/desktop-metadata-discovery.ts"), "utf8");
+  if (!desktopMediaPage.includes("discoverDesktopMetadataFiles") || !desktopMetadataDiscovery.includes("nfoEntries") || !desktopMetadataDiscovery.includes("assetEntries")) {
+    errors.push("Desktop NFO 与图片预览必须复用同一元数据目录发现快照。");
+  }
   const desktopPersonPages = readFileSync(path.join(root, "apps/desktop/src/desktop-person-pages.tsx"), "utf8");
   const desktopDetailSurfaces = desktopWorkSurface + desktopPersonPages;
   if (!desktopWorkPages.includes("TauriFileOpenerAdapter") || !desktopWorkMedia.includes("打开所在位置") || !desktopWorkMedia.includes("播放")) {
     errors.push("Desktop Work Detail 必须为已关联 MediaFile 提供受限 Native 播放与定位入口。");
   }
   const desktopHomePage = readFileSync(path.join(root, "apps/desktop/src/desktop-home-page.tsx"), "utf8");
-  const desktopMediaPage = readFileSync(path.join(root, "apps/desktop/src/desktop-media-page.tsx"), "utf8");
   const desktopMediaSections = readFileSync(path.join(root, "apps/desktop/src/desktop-media-sections.tsx"), "utf8");
   const desktopMediaSurface = desktopMediaPage + desktopMediaSections;
   const desktopPacksPage = readFileSync(path.join(root, "apps/desktop/src/desktop-packs-page.tsx"), "utf8");

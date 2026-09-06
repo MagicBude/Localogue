@@ -7,6 +7,7 @@ import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { Series } from "@/domain/entities/series";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
+import type { DesktopFileEntry } from "./contracts";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 import type { PartialDate } from "@/domain/value-objects/partial-date";
 import { NfoMetadataImporter } from "@/infrastructure/importers/nfo-importer";
@@ -82,19 +83,20 @@ export interface NfoImportResult {
 export async function previewNfoImport(
   roots: readonly string[],
   repository: LibraryRepository,
+  discoveredEntries?: readonly DesktopFileEntry[],
 ): Promise<NfoImportPreview> {
   const importer = new NfoMetadataImporter();
   const discovered = new Map<string, Awaited<ReturnType<typeof desktopBridge.walkFiles>>[number]>();
   const rootList = unique(roots.map((item) => item.trim()).filter(Boolean));
 
-  for (const root of rootList) {
-    const entries = await desktopBridge.walkFiles({
-      root,
-      extensions: [".nfo"],
-      includeHidden: false,
-      maxFiles: MAX_NFO_FILES,
-    });
-    for (const entry of entries) discovered.set(normalizePath(entry.path), entry);
+  if (discoveredEntries) {
+    for (const entry of discoveredEntries) discovered.set(normalizePath(entry.path), entry);
+  } else {
+    // 独立高级预览仍可自行发现；一键同步会传入共享快照，避免与图片重复遍历。
+    for (const root of rootList) {
+      const entries = await desktopBridge.walkFiles({ root, extensions: [".nfo"], includeHidden: false, maxFiles: MAX_NFO_FILES });
+      for (const entry of entries) discovered.set(normalizePath(entry.path), entry);
+    }
   }
 
   const parsedItems: NfoImportItem[] = [];

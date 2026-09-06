@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
+import { discoverDesktopMetadataFiles } from "./desktop-metadata-discovery";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
@@ -202,8 +203,9 @@ export function DesktopMediaPage({
     setNfoResult(null);
     setAssetResult(null);
     try {
-      const nfo = await previewNfoImport(nfoRoots, repository);
-      const assets = await previewLocalAssetImport(assetRoots, repository, nfo);
+      const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots);
+      const nfo = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries);
+      const assets = await previewLocalAssetImport(assetRoots, repository, nfo, discovery.assetEntries);
       setNfoPreview(nfo);
       setAssetPreview(assets);
       setMessage(t("资料源扫描完成：发现 {nfo} 个 NFO（{works} 个 Work 候选）和 {images} 张图片（{linkable} 张可关联）。", { nfo: nfo.discovered, works: nfo.importable, images: assets.discovered, linkable: assets.linkable }));
@@ -270,7 +272,8 @@ export function DesktopMediaPage({
     setAssetResult(null);
     try {
       setMessage(t("统一资料库同步：正在发现 NFO 与本地图片…"));
-      const nfoPreviewNext = await previewNfoImport(nfoRoots, repository);
+      const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots);
+      const nfoPreviewNext = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries);
       setNfoPreview(nfoPreviewNext);
 
       let nfo: NfoImportResult | null = null;
@@ -281,7 +284,7 @@ export function DesktopMediaPage({
 
       // NFO 可能刚创建 Work；因此图片 Preview 故意放在 NFO Import 之后重新计算，
       // 让同一次“一键同步”里的 poster / cover 直接看到最新 Canonical Work。
-      const assetPreviewNext = await previewLocalAssetImport(assetRoots, repository, nfoPreviewNext);
+      const assetPreviewNext = await previewLocalAssetImport(assetRoots, repository, nfoPreviewNext, discovery.assetEntries);
       setAssetPreview(assetPreviewNext);
       let assets: LocalAssetImportResult | null = null;
       if (assetPreviewNext.linkable) {
