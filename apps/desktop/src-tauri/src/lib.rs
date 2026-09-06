@@ -21,7 +21,7 @@ const MAX_PORTABLE_PACK_BYTES: usize = 256 * 1024 * 1024;
 const PERSONAL_PORTABLE_DIRECTORIES: &[&str] = &[
     "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
     "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
-    "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+    "restore-receipts", "provenance", "person-edits", "media-binding-receipts", "asset-deletion-receipts",
 ];
 static NATIVE_IO_SEQUENCE: AtomicU64 = AtomicU64::new(1);
 const SAFE_MEDIA_EXTENSIONS: &[&str] = &[
@@ -389,6 +389,7 @@ fn provision_private_library(app: AppHandle) -> Result<DesktopPrivateLibraryInfo
     for directory in [
         "works", "people", "organizations", "series", "genres", "tags", "assets",
         "asset-files", "media-files", "presentation-preferences", "media-binding-receipts",
+        "asset-deletion-receipts",
         "evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts",
         "provenance", "person-edits",
     ] {
@@ -1631,7 +1632,7 @@ fn restore_governance_snapshot_blocking(app: AppHandle, snapshot_id: String) -> 
 }
 
 fn is_private_audit_collection(collection: &str) -> bool {
-    matches!(collection, "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts")
+    matches!(collection, "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts" | "asset-deletion-receipts")
 }
 
 fn atomic_write_json(directory: &Path, id: &str, entity: &Value) -> Result<(), String> {
@@ -2138,6 +2139,12 @@ fn validate_private_audit_entity(collection: &str, entity: &Value) -> Result<(),
             for field in ["mediaFileId", "mediaFilePath", "action", "changedAt"] { require(field)?; }
             let action = entity.get("action").and_then(Value::as_str).unwrap_or("");
             if !matches!(action, "bind" | "rebind" | "unbind") { return Err("media-binding-receipts.action 无效。".into()); }
+        },
+        "asset-deletion-receipts" => {
+            for field in ["subjectType", "subjectId", "state", "deletedAt", "updatedAt"] { require(field)?; }
+            if !entity.get("asset").map(Value::is_object).unwrap_or(false) { return Err("asset-deletion-receipts 缺少 asset before-image。".into()); }
+            let state = entity.get("state").and_then(Value::as_str).unwrap_or("");
+            if !matches!(state, "pending" | "deleted" | "restored" | "failed") { return Err("asset-deletion-receipts.state 无效。".into()); }
         },
         _ => return Err("无效的 Desktop Private Audit 集合。".into()),
     }

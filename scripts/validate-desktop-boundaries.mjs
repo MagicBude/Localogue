@@ -171,8 +171,8 @@ if (!errors.length) {
   if (!desktopManagement.includes("Private Override") || !desktopMediaBinding.includes("saveMediaBindingReceipt")) {
     errors.push("V1-18 Shared 实体编辑必须写 Private Override，Media 手工绑定必须保留审计 Receipt。");
   }
-  if (!desktopWorkSurface.includes("removePrivateAsset") || !desktopWorkSurface.includes("deletePrivateAsset")) {
-    errors.push("V1-18 Work 详情必须提供显式 Private Asset 解除/删除入口，避免引用保护导致 Work 无法完成删除闭环。");
+  if (!desktopWorkSurface.includes("removePrivateAsset") || !desktopWorkSurface.includes("recyclePrivateAsset")) {
+    errors.push("Work 详情必须通过可恢复服务移除 Private Asset，避免直接删除破坏误操作恢复闭环。");
   }
   for (const collection of ["works", "people", "genres", "tags", "assets", "media-files"]) {
     if (!desktopContracts.includes(`| "${collection}"`)) errors.push(`V1-22 DesktopDeletableLibraryCollection 缺少 Native 已受控开放的集合：${collection}`);
@@ -498,7 +498,7 @@ if (!errors.length) {
   for (const token of ["analyzeSingleEvidenceRecord", "buildCanonicalCommitPlan", "buildCurationOverview", "createGovernanceSnapshot", "restoreGovernanceSnapshot", "buildAdoptedProvenanceEvents", "buildRestoredProvenanceEvents"]) {
     if (!(desktopGovernance + desktopReview + desktopCuration + desktopHistory).includes(token)) errors.push(`V1-23 Desktop Governance 缺少共享治理服务或安全边界：${token}`);
   }
-  for (const collection of ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts"]) {
+  for (const collection of ["evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts", "asset-deletion-receipts"]) {
     if (!desktopContracts.includes(`"${collection}"`) || !rust.includes(`"${collection}"`)) errors.push(`V1-23 Private Audit Collection 未跨 Rust / TypeScript 同步：${collection}`);
   }
   for (const token of ["safe_governance_relative_path", "configured_private_library_path", "atomic_write_json", "create_governance_snapshot", "restore_governance_snapshot"]) {

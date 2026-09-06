@@ -31,6 +31,12 @@ V1-10 把两个概念明确分开：
 
 Desktop 从已有资料目录批量导入时还会记录可选的 `localSourcePath`，用于定位原图。它不会替代管理副本，并会在 Portable Pack 导出时剥离。
 
+## 可恢复移除
+
+作品或人物详情中的移除动作会删除 Private Asset JSON 和对应主体引用，但先在 `asset-deletion-receipts/` 写入恢复依据。用户可恢复最近移除的图片；原图与 `asset-files/` 管理副本均不会在这一步删除。
+
+这样把“误操作恢复”和“真正回收磁盘空间”分成两个明确动作。后者仍由存储治理中的孤儿文件清理负责。
+
 ## Shared Pack Asset
 
 Shared Pack 可以携带只读 Asset JSON 和对应资源文件。`storagePath` 使用相对 Pack `library/` 根目录的安全路径。

@@ -3,6 +3,8 @@
 ## V1-27 Maintenance - Desktop Page Modularization I
 
 - Desktop 本地图片 Asset 记录导入前的原图路径，作品与人物详情可直接在文件管理器中定位；Portable Pack 导出会剥离本机绝对路径，避免泄露私人目录结构。
+- 作品与人物图片的直接删除改为持久化回收站：独立 Receipt 保存最小恢复信息，界面可恢复最近一次移除，失败时会补偿 Asset 与主体引用。
+- 作品与人物图片改用持久化回收站流程：删除前保存 Asset before-image 和原关联，可一键恢复最近移除记录；失败时执行补偿恢复，图片二进制保持不变。
 
 - 将 Desktop 首页、作品库/详情、人物库/详情从 `App.tsx` 拆分为独立页面模块，顶层入口继续只负责 Runtime、Library Profile、导航和页面选择。
 - 页面继续通过 `TauriLibraryRepository` 与共享 Query/Application Core 工作，没有扩大 Native 文件权限或复制业务规则。

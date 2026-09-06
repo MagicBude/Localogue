@@ -19,6 +19,7 @@ const PERSONAL_ALLOWED = new Set([
   "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
   "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
   "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+  "asset-deletion-receipts",
 ]);
 
 export interface DesktopPortableAssetIntegrity {

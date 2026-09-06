@@ -4,6 +4,7 @@ import type { Asset, AssetType } from "@/domain/entities/asset";
 import type { Person } from "@/domain/entities/person";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
+import { latestRecycledAsset, recyclePrivateAsset, restoreRecycledAsset } from "./desktop-asset-recycle-service";
 import { useDesktopI18n } from "./desktop-i18n";
 import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
@@ -33,10 +34,15 @@ export function PersonAssetGovernance({
   const ordered = useMemo(() => orderAssets(assets, resolved?.id), [assets, resolved?.id]);
   const [activeId, setActiveId] = useState<string | undefined>(resolved?.id ?? ordered[0]?.id);
   const [busy, setBusy] = useState(false);
+  const [recycled, setRecycled] = useState<Awaited<ReturnType<typeof latestRecycledAsset>>>();
 
   useEffect(() => {
     setActiveId((current) => ordered.some((asset) => asset.id === current) ? current : (resolved?.id ?? ordered[0]?.id));
   }, [ordered, resolved?.id]);
+
+  useEffect(() => {
+    void latestRecycledAsset(repository, "person", person.id).then(setRecycled);
+  }, [repository, person.id, assets]);
 
   const active = ordered.find((asset) => asset.id === activeId) ?? ordered[0];
   const nativeReady = runtimeContractRevision >= PERSON_ASSET_NATIVE_CONTRACT_REVISION;
@@ -99,25 +105,26 @@ export function PersonAssetGovernance({
         setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
         return;
       }
-      if (!window.confirm(t("解除并删除这个人物 Private Asset 元数据？\n\n{path}\n\n若它仍被首选头像引用，需要先恢复默认。", { path: asset.storagePath }))) return;
-      const nextPerson: Person = {
-        ...person,
-        portraitAssetId: person.portraitAssetId === asset.id ? undefined : person.portraitAssetId,
-        galleryAssetIds: person.galleryAssetIds.filter((id) => id !== asset.id),
-        updatedAt: new Date().toISOString(),
-      };
-      const personChanged = nextPerson.portraitAssetId !== person.portraitAssetId || nextPerson.galleryAssetIds.length !== person.galleryAssetIds.length;
-      if (personChanged) await repository.savePerson(nextPerson);
-      try {
-        await repository.deletePrivateAsset(asset.id);
-      } catch (error) {
-        if (personChanged) await repository.savePerson(person).catch(() => undefined);
-        throw error;
-      }
-      setMessage(t("人物 Private Asset 元数据已删除；content-addressed 图片文件保留。"));
+      if (!window.confirm(t("把这个人物 Private Asset 移入回收站？\n\n{path}\n\n可以恢复；若它仍被首选头像引用，需要先恢复默认。", { path: asset.storagePath }))) return;
+      await recyclePrivateAsset(repository, asset, person);
+      setMessage(t("人物图片已移入回收站；content-addressed 图片文件保留。"));
       onLibraryChanged();
     } catch (error) {
       setMessage(t("删除人物图片失败：{error}", { error: message(error) }));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function restoreLastAsset(): Promise<void> {
+    if (!recycled) return;
+    setBusy(true);
+    try {
+      await restoreRecycledAsset(repository, recycled);
+      setMessage(t("已恢复最近移除的图片记录。"));
+      onLibraryChanged();
+    } catch (error) {
+      setMessage(t("恢复图片失败：{error}", { error: message(error) }));
     } finally {
       setBusy(false);
     }
@@ -144,6 +151,7 @@ export function PersonAssetGovernance({
         <div className="button-row">
           <button disabled={busy || !nativeReady} onClick={() => void importAsset("portrait")} type="button">+ {t("导入头像")}</button>
           <button disabled={busy || !nativeReady} onClick={() => void importAsset("gallery")} type="button">+ {t("导入 Gallery")}</button>
+          {recycled ? <button disabled={busy} onClick={() => void restoreLastAsset()} type="button">{t("恢复最近移除")}</button> : null}
         </div>
       </div>
 
@@ -173,7 +181,7 @@ export function PersonAssetGovernance({
                 </div>
                 <div className="button-row">
                   {asset.localSourcePath ? <button disabled={busy} onClick={() => void revealSource(asset)} type="button">{t("定位原图")}</button> : null}
-                  <button className="danger-button" disabled={busy} onClick={() => void removeAsset(asset)} type="button">{t("解除 / 删除")}</button>
+                  <button className="danger-button" disabled={busy} onClick={() => void removeAsset(asset)} type="button">{t("移入回收站")}</button>
                 </div>
               </article>
             ))}

@@ -25,6 +25,7 @@ const PERSONAL_DIRECTORIES = [
   "works", "people", "organizations", "series", "genres", "tags", "assets", "asset-files",
   "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots",
   "restore-receipts", "provenance", "person-edits", "media-binding-receipts",
+  "asset-deletion-receipts",
 ] as const;
 
 const SHARED_DIRECTORIES = ["library", "sources"] as const;

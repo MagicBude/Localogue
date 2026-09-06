@@ -8,6 +8,7 @@ import type { Person } from "@/domain/entities/person";
 import type { Work } from "@/domain/entities/work";
 
 import { CreateWorkPanel, WorkEditor } from "./desktop-management";
+import { latestRecycledAsset, recyclePrivateAsset, restoreRecycledAsset } from "./desktop-asset-recycle-service";
 import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
@@ -70,7 +71,7 @@ export function DesktopWorkDetailPage({
   const data = useStableAsyncData(async () => {
     const work = await repository.findWorkById(id);
     if (!work) return null;
-    const [people, organizations, series, genres, tags, media, allAssets, presentationPreference] = await Promise.all([
+    const [people, organizations, series, genres, tags, media, allAssets, presentationPreference, recycledAsset] = await Promise.all([
       repository.listPeople({ page: 1, pageSize: 99_999 }),
       repository.listOrganizations(),
       repository.listSeries(),
@@ -79,6 +80,7 @@ export function DesktopWorkDetailPage({
       repository.listMediaFiles(work.id),
       repository.listAssets(),
       repository.findPresentationPreference("work", work.id),
+      latestRecycledAsset(repository, "work", work.id),
     ]);
     const presentation = resolveWorkPresentation(work, allAssets, presentationPreference);
     const linkedAssetIds = new Set(work.assetIds);
@@ -94,35 +96,40 @@ export function DesktopWorkDetailPage({
       assets,
       presentationPreference,
       presentation,
+      recycledAsset,
     };
   }, [repository, id], toMessage);
 
   if (data.loading) return <PageState>{t("正在读取资料库…")}</PageState>;
   if (data.error || !data.value) return <PageState error>{data.value === null ? t("作品不存在。") : data.error}</PageState>;
-  const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation } = data.value;
+  const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation, recycledAsset } = data.value;
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
 
-  async function removePrivateAsset(assetId: string, storagePath: string): Promise<void> {
+  async function removePrivateAsset(asset: Asset): Promise<void> {
     try {
-      const isPrivateAsset = await repository.isPrivateEntity("assets", assetId);
+      const isPrivateAsset = await repository.isPrivateEntity("assets", asset.id);
       if (!isPrivateAsset) {
         setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
         return;
       }
-      if (!window.confirm(t("从 {code} 解除并删除这个 Private Asset 记录？\n\n{path}\n\n原始图片不会改变；Localogue 管理的图片副本暂时保留，可稍后在存储治理中清理。", { code: work.code, path: storagePath }))) return;
-      const nextWork: Work = { ...work, assetIds: work.assetIds.filter((value) => value !== assetId), updatedAt: new Date().toISOString() };
-      await repository.saveWork(nextWork);
-      try {
-        await repository.deletePrivateAsset(assetId);
-      } catch (error) {
-        await repository.saveWork(work);
-        throw error;
-      }
-      setMessage(t("已从 {code} 解除并删除 Private Asset 记录；原图和管理副本均未删除。", { code: work.code }));
+      if (!window.confirm(t("从 {code} 移除这个 Private Asset 记录？\n\n{path}\n\n可以通过“恢复最近移除”找回；原图和管理副本均不会删除。", { code: work.code, path: asset.storagePath }))) return;
+      await recyclePrivateAsset(repository, asset, work);
+      setMessage(t("已从 {code} 移入图片回收站；原图和管理副本均未删除。", { code: work.code }));
       onLibraryChanged();
     } catch (error) {
       setMessage(t("删除 Asset 失败：{error}", { error: toMessage(error) }));
+    }
+  }
+
+  async function restoreLastAsset(): Promise<void> {
+    if (!recycledAsset) return;
+    try {
+      await restoreRecycledAsset(repository, recycledAsset);
+      setMessage(t("已恢复最近移除的图片记录。"));
+      onLibraryChanged();
+    } catch (error) {
+      setMessage(t("恢复图片失败：{error}", { error: toMessage(error) }));
     }
   }
 
@@ -199,7 +206,7 @@ export function DesktopWorkDetailPage({
       <section className="settings-card desktop-local-assets-section">
         <div className="section-heading">
           <div><span className="eyebrow">WORK ASSETS</span><h2>{t("作品图片资产")}</h2></div>
-          <small className="muted">{t("{count} 个资产", { count: assets.length })}</small>
+          <div className="button-row"><small className="muted">{t("{count} 个资产", { count: assets.length })}</small>{recycledAsset ? <button onClick={() => void restoreLastAsset()}>{t("恢复最近移除")}</button> : null}</div>
         </div>
         {assets.length ? (
           <div className="desktop-asset-management-list">
@@ -208,7 +215,7 @@ export function DesktopWorkDetailPage({
                 <div><strong>{assetTypeLabel(asset.type)}</strong><span><code>{asset.type}</code> · {asset.mimeType ?? "local asset"}</span><code className="desktop-asset-management-path">{asset.storagePath}</code></div>
                 <div className="button-row">
                   {asset.localSourcePath ? <button onClick={() => void revealAssetSource(asset.localSourcePath!)}>{t("定位原图")}</button> : null}
-                  <button className="danger-button" onClick={() => void removePrivateAsset(asset.id, asset.storagePath)}>{t("解除 / 删除记录")}</button>
+                  <button className="danger-button" onClick={() => void removePrivateAsset(asset)}>{t("移入回收站")}</button>
                 </div>
               </article>
             ))}
