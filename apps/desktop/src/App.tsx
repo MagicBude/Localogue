@@ -72,6 +72,8 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [libraryEpoch, setLibraryEpoch] = useState(0);
   const [progress, setProgress] = useState<DesktopTaskProgress | null>(null);
+  // 递增令牌表达一次新的同步意图；Media 页面负责真正编排，避免 App 复制扫描业务。
+  const [mediaSyncRequest, setMediaSyncRequest] = useState(0);
 
   const refreshSources = useCallback(async (next: DesktopBootstrapSettings) => {
     const inspected = await Promise.all(
@@ -184,6 +186,12 @@ export default function App() {
 
   const refreshLibrary = useCallback(() => {
     setLibraryEpoch((value) => value + 1);
+  }, []);
+
+  const startUnifiedSync = useCallback(() => {
+    setDetail(null);
+    setPage("media");
+    setMediaSyncRequest((value) => value + 1);
   }, []);
 
   async function persistDesktopSettings(
@@ -331,7 +339,7 @@ export default function App() {
         {!hasLibrarySource && page !== "settings" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
-          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} />
+          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} />
         ) : page === "works" ? (
           detail?.kind === "work" ? (
           <DesktopWorkDetailPage
@@ -375,6 +383,7 @@ export default function App() {
             progress={progress}
             onLibraryChanged={refreshLibrary}
             runtimeContractRevision={runtime?.contractRevision ?? 0}
+            autoSyncRequest={mediaSyncRequest}
           />
         ) : page === "packs" ? (
           <DesktopPacksPage

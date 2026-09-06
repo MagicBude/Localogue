@@ -18,11 +18,15 @@ export function DesktopHomePage({
   openWork,
   openPerson,
   openWorks,
+  openMedia,
+  startUnifiedSync,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
   openPerson: (id: string) => void;
   openWorks: () => void;
+  openMedia: () => void;
+  startUnifiedSync: () => void;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const data = useStableAsyncData(async () => {
@@ -66,6 +70,7 @@ export function DesktopHomePage({
   if (data.loading) return <div className="empty-state"><span className="spinner" />{t("正在读取资料库…")}</div>;
   if (data.error || !data.value) return <div className="empty-state error-state">{data.error ?? t("无法读取资料库。")}</div>;
   const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
+  const unlinkedMediaCount = media.filter((file) => !file.workId).length;
 
   return (
     <div className="page-stack">
@@ -73,6 +78,10 @@ export function DesktopHomePage({
         <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
         <h1>{t("你的 Localogue，现在就在桌面端。")}</h1>
         <p>{t("V1-24 把 Private Presentation Preference 接入 Desktop；封面与头像选择不再改写 Canonical / Shared Pack。")}</p>
+        <div className="button-row desktop-home-primary-actions">
+          <button className="primary-button" type="button" onClick={startUnifiedSync}>{t("一键同步资料库")}</button>
+          {unlinkedMediaCount ? <button className="ghost-button" type="button" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</button> : null}
+        </div>
       </section>
       <section className="stat-grid">
         <Stat label={t("作品")} value={works.total} note="Canonical" />

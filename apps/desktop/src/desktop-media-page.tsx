@@ -64,6 +64,7 @@ export function DesktopMediaPage({
   progress,
   onLibraryChanged,
   runtimeContractRevision,
+  autoSyncRequest,
 }: {
   repository: TauriLibraryRepository;
   settings: DesktopBootstrapSettings;
@@ -71,6 +72,7 @@ export function DesktopMediaPage({
   progress: DesktopTaskProgress | null;
   onLibraryChanged: () => void;
   runtimeContractRevision: number;
+  autoSyncRequest: number;
 }) {
   const { t } = useDesktopI18n();
   const [scan, setScan] = useState<MediaScanJobSnapshot | null>(null);
@@ -88,6 +90,7 @@ export function DesktopMediaPage({
   const [vocabularyBusy, setVocabularyBusy] = useState(false);
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
+  const handledAutoSyncRequest = useRef(0);
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
@@ -300,6 +303,15 @@ export function DesktopMediaPage({
       setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
     }
   }
+
+  useEffect(() => {
+    // 首页只发出同步意图。令牌必须严格变大才执行，普通重渲染和返回 Media 页都不会重复扫描。
+    if (!autoSyncRequest || autoSyncRequest <= handledAutoSyncRequest.current) return;
+    handledAutoSyncRequest.current = autoSyncRequest;
+    void syncUnifiedLibrary();
+    // syncUnifiedLibrary 读取的是本次渲染的完整页面状态；把所有局部函数列入依赖反而会让每次渲染重跑。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSyncRequest]);
 
   async function auditVocabulary(): Promise<void> {
     setVocabularyBusy(true);

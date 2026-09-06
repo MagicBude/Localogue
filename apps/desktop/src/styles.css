@@ -74,6 +74,7 @@ button:hover:not(:disabled) { border-color: #85857d; }
 .desktop-hero::after { content: "L"; position: absolute; right: 28px; top: -42px; font-size: 210px; line-height: 1; font-weight: 900; opacity: .045; }
 .desktop-hero h1 { max-width: 820px; margin: 10px 0 16px; }
 .desktop-hero p { color: #b9b9b1; }
+.desktop-home-primary-actions { margin-top: 16px; position: relative; z-index: 1; }
 .section-title { display: flex; align-items: baseline; justify-content: space-between; padding-top: 10px; }
 .section-title h2 { margin: 0; }
 .section-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
