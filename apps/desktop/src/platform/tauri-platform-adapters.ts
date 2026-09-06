@@ -20,8 +20,8 @@ import { desktopBridge } from "../tauri-bridge";
 export class TauriFileDialogAdapter implements FileDialogPort {
   readonly supported = true;
 
-  pickDirectory(): Promise<string | null> {
-    return desktopBridge.pickDirectory();
+  pickDirectory(initialPath?: string): Promise<string | null> {
+    return desktopBridge.pickDirectory(initialPath);
   }
 
   pickFile(): Promise<string | null> {

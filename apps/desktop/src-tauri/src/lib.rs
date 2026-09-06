@@ -413,10 +413,15 @@ fn provision_private_library(app: AppHandle, profile_id: Option<String>) -> Resu
 
 
 #[tauri::command]
-async fn pick_directory(app: AppHandle) -> Result<Option<String>, String> {
-    Ok(app
-        .dialog()
-        .file()
+async fn pick_directory(app: AppHandle, initial_path: Option<String>) -> Result<Option<String>, String> {
+    let mut picker = app.dialog().file();
+    if let Some(initial) = initial_path.filter(|value| !value.trim().is_empty()) {
+        validate_text_path(&initial)?;
+        let path = PathBuf::from(initial);
+        // 初始目录只影响对话框打开位置，不授予任何读写权限；路径无效时回退系统默认。
+        if path.is_dir() { picker = picker.set_directory(path); }
+    }
+    Ok(picker
         .blocking_pick_folder()
         .and_then(|selected| selected.into_path().ok())
         .map(|path| path_to_string(&path)))

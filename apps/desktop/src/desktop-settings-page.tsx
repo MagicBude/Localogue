@@ -53,7 +53,7 @@ export function DesktopSettingsPage({
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   async function chooseLibrary(): Promise<void> {
-    const path = await fileDialog.pickDirectory();
+    const path = await fileDialog.pickDirectory(settings.libraryPath);
     if (path) setSettings((current) => ({ ...current, libraryPath: path }));
   }
 
@@ -162,25 +162,25 @@ export function DesktopSettingsPage({
   }
 
   async function addSharedPack(): Promise<void> {
-    const path = await fileDialog.pickDirectory();
+    const path = await fileDialog.pickDirectory(settings.sharedPackPaths.at(-1));
     if (!path) return;
     setSettings((current) => ({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) }));
   }
 
   async function addLibraryRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory();
+    const path = await fileDialog.pickDirectory(settings.libraryRoots.at(-1));
     if (!path) return;
     setSettings((current) => ({ ...current, libraryRoots: unique([...current.libraryRoots, path]) }));
   }
 
   async function addMediaRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory();
+    const path = await fileDialog.pickDirectory(settings.mediaScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
     if (!path) return;
     setSettings((current) => ({ ...current, mediaScanPaths: unique([...current.mediaScanPaths, path]) }));
   }
 
   async function addNfoRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory();
+    const path = await fileDialog.pickDirectory(settings.nfoScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
     if (!path) return;
     setSettings((current) => ({ ...current, nfoScanPaths: unique([...current.nfoScanPaths, path]) }));
   }

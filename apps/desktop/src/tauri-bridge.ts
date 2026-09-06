@@ -33,7 +33,7 @@ export const desktopBridge = {
     invoke<DesktopBootstrapSettings>("save_desktop_settings", { settings }),
   provisionExampleLibrary: () => invoke<DesktopExampleLibraryInfo>("provision_example_library"),
   provisionPrivateLibrary: (profileId?: string) => invoke<DesktopPrivateLibraryInfo>("provision_private_library", { profileId }),
-  pickDirectory: () => invoke<string | null>("pick_directory"),
+  pickDirectory: (initialPath?: string) => invoke<string | null>("pick_directory", { initialPath }),
   pickMediaFile: () => invoke<string | null>("pick_media_file"),
   pickImageFile: () => invoke<string | null>("pick_image_file"),
   pickPortablePackFile: () => invoke<string | null>("pick_portable_pack_file"),
