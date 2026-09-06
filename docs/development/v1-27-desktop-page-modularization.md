@@ -42,4 +42,6 @@ Desktop 外壳使用相同原则：`desktop-app-shell.tsx` 只渲染侧栏和顶
 
 History Restore 迁到 `desktop-history-page.tsx`，并保持 Snapshot 恢复、Restore Receipt、Provenance 追加三个步骤在同一个用例中。拆文件以业务用例为边界，不能把事务顺序拆成互不协调的按钮组件。
 
+Review 的字段决策、实体解析和 Commit Plan 预览迁到 `desktop-review-sections.tsx`。这些组件只把用户选择转换为新的 `ReviewDecisions` 并通过回调上报，不生成 Plan、不执行 Commit；真正的治理操作仍由 Review 控制器协调。
+
 治理工作台先把 Curation 迁到 `desktop-curation-page.tsx`。完整度和重复候选是可重算的派生信号，Curation 页面只读取并展示它们；Review Commit 与 History Restore 仍留在 Governance 控制器，避免一次重构同时移动两条写入链。
