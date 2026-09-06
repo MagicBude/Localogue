@@ -68,6 +68,15 @@ export function DesktopPacksPage({
     setSettings((current) => ({ ...current, sharedPackPaths: current.sharedPackPaths.filter((item) => item !== path) }));
   }
 
+  async function revealPrivateLibrary(): Promise<void> {
+    if (!privateLibraryPath) return;
+    try {
+      await desktopBridge.revealInFolder(privateLibraryPath);
+    } catch (error) {
+      setMessage(t("无法打开 Private Library：{error}", { error: toMessage(error) }));
+    }
+  }
+
   const hasDraftChanges = JSON.stringify(settings.sharedPackPaths) !== JSON.stringify(packInfos.map((item) => item.configuredPath));
 
   return (
@@ -76,7 +85,7 @@ export function DesktopPacksPage({
       <section className="settings-card">
         <div className="section-heading"><div><span className="eyebrow">SOURCE PRIORITY</span><h2>{t("当前资料源优先级")}</h2><p className="muted">{t("Private 永远最高；Shared Pack 顺序决定相同稳定 ID 的读取优先级。")}</p></div><div className="button-row"><button onClick={() => void addPack()}>{t("+ 挂载 Shared Pack")}</button><button className="primary-button" disabled={busy || !hasDraftChanges} onClick={() => void onSave()}>{busy ? t("保存中…") : t("保存资料包配置")}</button></div></div>
         <ol className="source-priority-list">
-          {privateLibraryPath ? <li><span className="source-index">1</span><div><strong>Private Library</strong><code>{privateLibraryPath}</code></div><span className="status-chip ok">WRITABLE</span></li> : null}
+          {privateLibraryPath ? <li><span className="source-index">1</span><div><strong>Private Library</strong><code>{privateLibraryPath}</code></div><div className="pack-actions"><span className="status-chip ok">WRITABLE</span><button onClick={() => void revealPrivateLibrary()}>{t("打开位置")}</button></div></li> : null}
           {settings.sharedPackPaths.map((path, index) => {
             const pack = packInfos.find((item) => item.configuredPath === path);
             return <li key={path}><span className="source-index">{index + (privateLibraryPath ? 2 : 1)}</span><div><strong>{pack?.name ?? path}</strong><code>{pack?.libraryPath ?? path}</code><small>{pack ? (pack.valid ? `${pack.id} · ${pack.version}${pack.license ? ` · ${pack.license}` : ""}` : pack.error) : t("尚未保存 / 重新校验")}</small></div><div className="pack-actions"><button disabled={index === 0} onClick={() => movePack(index, -1)}>↑</button><button disabled={index === settings.sharedPackPaths.length - 1} onClick={() => movePack(index, 1)}>↓</button><button className="danger-button" onClick={() => removePack(path)}>{t("卸载")}</button></div></li>;
