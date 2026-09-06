@@ -9,6 +9,7 @@ import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
  */
 export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "ffprobe 可执行文件路径": "ffprobe 実行ファイルのパス",
     "保存为 Evidence": "Evidence として保存",
     "分析已过期": "解析期限切れ",
     "文件发生变化后旧技术参数会标记为过期，重新扫描成功后自动更新。": "ファイル変更後は古い技術情報を期限切れとして表示し、再スキャン成功時に自動更新します。",
@@ -277,6 +278,7 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "没有候选。尝试输入番号或标题。": "候補がありません。品番またはタイトルを入力してください。",
   },
   en: {
+    "ffprobe 可执行文件路径": "ffprobe executable path",
     "保存为 Evidence": "Save as Evidence",
     "分析已过期": "Analysis is stale",
     "文件发生变化后旧技术参数会标记为过期，重新扫描成功后自动更新。": "After a file changes, old technical metadata is marked stale and updates after a successful rescan.",
