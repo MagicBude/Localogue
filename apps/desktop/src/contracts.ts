@@ -6,6 +6,7 @@ export type {
   DesktopBootstrapSettings,
   DesktopLibraryProfile,
   DesktopExampleLibraryInfo,
+  DesktopPrivateLibraryInfo,
   DesktopMediaProbeRequest,
   DesktopMediaProbeResult,
   DesktopRuntimeInfo,

@@ -39,6 +39,13 @@ struct DesktopExampleLibraryInfo {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopPrivateLibraryInfo {
+    library_path: String,
+    created: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopRuntimeInfo {
     runtime: &'static str,
     product_name: String,
@@ -298,7 +305,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 6,
+        contract_revision: 7,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -369,6 +376,25 @@ fn provision_example_library(app: AppHandle) -> Result<DesktopExampleLibraryInfo
         shared_pack_path: Some(path_to_string(&shared_destination)),
         created: library_created,
     })
+}
+
+/// 为首次使用创建 Localogue 自己管理的空 Private Library。
+///
+/// 用户选择的是影片内容目录，而不是 JSON 写入目录。真正的可写目录固定在
+/// App Local Data/user-library，防止 WebView 借“新手设置”把任意磁盘位置变成写入根。
+#[tauri::command]
+fn provision_private_library(app: AppHandle) -> Result<DesktopPrivateLibraryInfo, String> {
+    let destination = app.path().app_local_data_dir().map_err(display_error)?.join("user-library");
+    let created = !destination.exists();
+    for directory in [
+        "works", "people", "organizations", "series", "genres", "tags", "assets",
+        "asset-files", "media-files", "presentation-preferences", "media-binding-receipts",
+        "evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts",
+        "provenance", "person-edits",
+    ] {
+        fs::create_dir_all(destination.join(directory)).map_err(display_error)?;
+    }
+    Ok(DesktopPrivateLibraryInfo { library_path: path_to_string(&destination), created })
 }
 
 
@@ -2289,6 +2315,7 @@ pub fn run() {
             load_desktop_settings,
             save_desktop_settings,
             provision_example_library,
+            provision_private_library,
             pick_directory,
             pick_media_file,
             pick_image_file,

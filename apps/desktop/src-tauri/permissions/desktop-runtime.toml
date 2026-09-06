@@ -6,6 +6,7 @@ commands.allow = [
   "load_desktop_settings",
   "save_desktop_settings",
   "provision_example_library",
+  "provision_private_library",
   "pick_directory",
   "pick_media_file",
   "pick_image_file",

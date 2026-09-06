@@ -37,6 +37,12 @@ export interface DesktopExampleLibraryInfo {
   created: boolean;
 }
 
+/** Native 在 App Local Data 中创建的空白私人资料库；WebView 不提供目标路径。 */
+export interface DesktopPrivateLibraryInfo {
+  libraryPath: string;
+  created: boolean;
+}
+
 export interface DesktopBootstrapSettings {
   schemaVersion: 1;
   libraryPath?: string;

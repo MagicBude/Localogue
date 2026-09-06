@@ -9,6 +9,7 @@ import {
 
 import type {
   DesktopBootstrapSettings,
+  DesktopLibraryProfile,
   DesktopRuntimeInfo,
   DesktopSharedPackInfo,
   DesktopTaskProgress,
@@ -19,6 +20,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopSidebar, DesktopTopbar, type DesktopPage } from "./desktop-app-shell";
 import {
   activeLibraryProfile,
+  addLibraryProfile,
   applyLibraryProfile,
   ensureLibraryProfiles,
   hasUnsavedLibraryPaths,
@@ -28,6 +30,8 @@ import {
 
 // Native Profile 命令的最小契约版本；低版本 Runtime 只能读取旧设置，不能安全保存多资料库配置。
 const PROFILE_NATIVE_CONTRACT_REVISION = 2;
+// 一次选择初始化依赖 Native 创建受控 Private Library，因此必须等待 revision 7。
+const QUICK_SETUP_NATIVE_CONTRACT_REVISION = 7;
 
 /**
  * 页面模块按需下载。React.lazy 接受默认导出，因此这里把各文件的命名导出映射成 default。
@@ -255,6 +259,42 @@ export default function App() {
     await refreshSources(saved);
   }
 
+  async function quickSetupLibrary(): Promise<void> {
+    if ((runtime?.contractRevision ?? 0) < QUICK_SETUP_NATIVE_CONTRACT_REVISION) {
+      setMessage(t("首次设置需要新版 Native Runtime。请完全退出并重新启动 Desktop。"));
+      return;
+    }
+    setBusy(true);
+    try {
+      // 新手只选择“内容在哪里”。Localogue 的 JSON 写入根由 Native 固定创建在 App Local Data。
+      const contentRoot = await desktopBridge.pickDirectory();
+      if (!contentRoot) return;
+      const managed = await desktopBridge.provisionPrivateLibrary();
+      const now = new Date().toISOString();
+      const profile: DesktopLibraryProfile = {
+        id: `library_${crypto.randomUUID()}`,
+        name: t("我的资料库"),
+        description: t("由首次设置自动创建"),
+        libraryPath: managed.libraryPath,
+        libraryRoots: [contentRoot],
+        mediaScanPaths: [],
+        nfoScanPaths: [],
+        sharedPackPaths: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      const next = addLibraryProfile(ensureLibraryProfiles(savedSettings), profile);
+      await persistDesktopSettings(next, { syncActiveProfile: false });
+      setDetail(null);
+      setPage("home");
+      setMessage(t("资料库已经准备好。下一步点击首页的“一键同步”导入 NFO、图片和视频。"));
+    } catch (error) {
+      setMessage(t("首次设置失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const hasLibrarySource = readRoots.length > 0;
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
@@ -289,7 +329,7 @@ export default function App() {
 
         <Suspense fallback={<PageLoadingState />}>
         {!hasLibrarySource && page !== "settings" ? (
-          <EmptyLibrary onConfigure={() => navigate("settings")} />
+          <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
           <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} />
         ) : page === "works" ? (
@@ -369,14 +409,18 @@ export default function App() {
   );
 }
 
-function EmptyLibrary({ onConfigure }: { onConfigure: () => void }) {
+function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { busy: boolean; quickSetupReady: boolean; onQuickSetup: () => void; onConfigure: () => void }) {
   const { t } = useDesktopI18n();
   return (
     <section className="empty-state large-empty">
       <span className="eyebrow">NO LIBRARY SOURCE</span>
       <h1>{t("先连接你的资料库")}</h1>
-      <p>{t("Desktop 不再依赖浏览器页面。配置 Private Library 或挂载 Shared Pack 后，Works / People / Media 会直接在这个窗口读取同一套 Canonical JSON。")}</p>
-      <button className="primary-button" onClick={onConfigure}>{t("打开设置")}</button>
+      <p>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}</p>
+      <div className="button-row">
+        <button className="primary-button" disabled={busy || !quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择影片资料目录")}</button>
+        <button className="ghost-button" disabled={busy} onClick={onConfigure}>{t("高级设置")}</button>
+      </div>
+      {!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}
     </section>
   );
 }
