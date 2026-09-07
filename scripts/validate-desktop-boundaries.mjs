@@ -285,8 +285,12 @@ if (!errors.length) {
   if (!desktopStyles.includes("grid-template-columns: 188px") || !desktopStyles.includes("grid-template-columns: 72px")) {
     errors.push("V1-20 Desktop Sidebar 必须保持默认窄栏与折叠窄条两种明确宽度。");
   }
-  if (!desktopStyles.includes("minmax(330px, 380px)") || !desktopStyles.includes("white-space: normal")) {
-    errors.push("V1-20 Work Facet Rail 必须加宽并允许长筛选项换行，避免标签被窄栏截断。");
+  // V1-25 把旧左侧 Facet Rail 改成顶部栏 + 抽屉。校验产品约束，而不是绑定旧布局：
+  // 抽屉必须有足够宽的响应式卡片列，长分类名也必须能完整换行。
+  if (!desktopStyles.includes(".desktop-facet-bar__groups")
+    || !desktopStyles.includes("minmax(190px, 1fr)")
+    || !desktopStyles.includes("overflow-wrap: anywhere")) {
+    errors.push("Desktop Work Facet 抽屉必须使用响应式宽列并允许长筛选项换行，避免分类名被截断。");
   }
   for (const token of ['"poster", "fanart", "screenshot", "cover"', '"fanart", "screenshot", "gallery", "cover"']) {
     if (!desktopAssetOrder.includes(token)) errors.push(`Work Asset 集中排序规则缺少：${token}`);

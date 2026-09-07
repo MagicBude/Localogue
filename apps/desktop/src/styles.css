@@ -721,9 +721,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
   font-size: 12px;
 }
 .desktop-facet-options label span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Facet 名称可能是较长的日文或中文。允许自然换行，用户才能看到完整分类名；
+     grid 的 minmax(0, 1fr) 会让文字留在自己的列内，不挤压右侧计数。 */
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .desktop-facet-options label small {
   color: var(--muted);

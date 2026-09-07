@@ -46,9 +46,16 @@ export async function PUT(request: Request, context: { params: Promise<{ entityT
       favorite?: boolean | null;
       rating?: number | null;
     };
-    const assetId = body.assetId?.trim() || undefined;
+    // PUT 在这里采用“局部更新”语义。必须区分两种情况：
+    // 1. 请求没有 assetId：收藏或评分组件只想改自己的字段，应保留既有首图；
+    // 2. 请求明确传 assetId: null：展示偏好页要恢复默认首图，应删除既有选择。
+    // 如果只用 `body.assetId?.trim()`，这两种情况都会变成 undefined，随后一次收藏操作
+    // 就可能顺带清掉封面偏好。这也是为什么要检查属性是否真的存在于请求对象上。
+    const updatesAsset = Object.prototype.hasOwnProperty.call(body, "assetId");
+    const updatesRating = Object.prototype.hasOwnProperty.call(body, "rating");
+    const assetId = typeof body.assetId === "string" ? body.assetId.trim() || undefined : undefined;
 
-    if (assetId) await assertAssetCanBeUsed(entityType, id, assetId);
+    if (updatesAsset && assetId) await assertAssetCanBeUsed(entityType, id, assetId);
     else await assertEntity(entityType, id);
 
     const previous = await getPresentationPreference(entityType, id);
@@ -58,12 +65,16 @@ export async function PUT(request: Request, context: { params: Promise<{ entityT
       entityType,
       entityId: id,
       ...(previous ?? {}),
-      ...(entityType === "person"
-        ? { preferredPortraitAssetId: assetId }
-        : { preferredCoverAssetId: assetId }),
+      ...(updatesAsset
+        ? entityType === "person"
+          ? { preferredPortraitAssetId: assetId }
+          : { preferredCoverAssetId: assetId }
+        : {}),
       ...(typeof body.favorite === "boolean" ? { favorite: body.favorite } : {}),
-      // rating 为 null 表示“清除评分”，不写入；否则用 normalizeRating 收敛到 1–5 整数。
-      ...(body.rating === null ? {} : typeof body.rating === "number" ? { rating: normalizeRating(body.rating) } : {}),
+      // 明确传 null 时用 undefined 覆盖旧值；JSON 序列化会省略该字段，从而真正清除评分。
+      ...(updatesRating
+        ? { rating: typeof body.rating === "number" ? normalizeRating(body.rating) : undefined }
+        : {}),
       updatedAt: new Date().toISOString(),
     };
     // JSON.stringify 会忽略 undefined，因此“恢复默认”不会把空值硬写进文件。
