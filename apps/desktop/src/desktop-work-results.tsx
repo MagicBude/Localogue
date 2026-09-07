@@ -14,6 +14,7 @@ import { DesktopFavoriteButton } from "./desktop-favorite-button";
 import { DesktopWorkCard } from "./desktop-work-card";
 
 export type DesktopWorkViewMode = "grid" | "list" | "table" | "waterfall";
+export type DesktopWaterfallSize = "small" | "medium" | "large";
 
 export interface DesktopWorkCardViewModel {
   work: Work;
@@ -103,10 +104,12 @@ export function DesktopWorkViewSwitcher({
 export function DesktopWorkResults({
   cards,
   view,
+  waterfallSize = "medium",
   onOpen,
 }: {
   cards: DesktopWorkCardViewModel[];
   view: DesktopWorkViewMode;
+  waterfallSize?: DesktopWaterfallSize;
   onOpen: (id: string) => void;
 }) {
   const { t } = useDesktopI18n();
@@ -179,7 +182,7 @@ export function DesktopWorkResults({
 
   if (view === "waterfall") {
     return (
-      <div className="desktop-work-waterfall">
+      <div className={`desktop-work-waterfall is-${waterfallSize}`}>
         {cards.map((card) => (
           <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} />
         ))}

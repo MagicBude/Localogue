@@ -24,6 +24,7 @@ import {
   DesktopWorkResults,
   DesktopWorkViewSwitcher,
   type DesktopWorkViewMode,
+  type DesktopWaterfallSize,
 } from "./desktop-work-results";
 
 interface FilterOption {
@@ -34,6 +35,8 @@ interface FilterOption {
 
 interface ExplorerData {
   result: WorkSearchResult;
+  /** 用于生成这份结果的请求页码；避免旧结果反向覆盖用户刚点击的新页码。 */
+  requestedPage: number;
   cards: ReturnType<typeof buildDesktopWorkCards>;
   people: FilterOption[];
   directors: FilterOption[];
@@ -78,13 +81,21 @@ export function DesktopWorkExplorer({
     const saved = window.localStorage.getItem(storageKey);
     return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
+  const [waterfallSize, setWaterfallSize] = useState<DesktopWaterfallSize>(() => {
+    const saved = window.localStorage.getItem(`${storageKey}.waterfall-size`);
+    return saved === "small" || saved === "large" ? saved : "medium";
+  });
 
   const data = useAsyncExplorerData(async () => {
+    // 瀑布流用于连续纵向浏览，因此一次读取全部匹配作品且不显示分页器。
+    // 其它视图仍使用普通分页，避免海量资料库同时创建过多 DOM 节点。
+    const requestedPage = view === "waterfall" ? 1 : page;
+    const requestedPageSize = view === "waterfall" ? 100_000 : pageSize;
     const effectiveQuery: WorkQuery = {
       ...query,
       ...(fixedPersonId ? { personIds: [fixedPersonId] } : {}),
-      page,
-      pageSize,
+      page: requestedPage,
+      pageSize: requestedPageSize,
     };
     const result = await repository.listWorks(effectiveQuery);
     const [peopleResult, organizations, series, genres, tags, assets, preferences] = await Promise.all([
@@ -187,6 +198,7 @@ export function DesktopWorkExplorer({
 
     return {
       result,
+      requestedPage,
       cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage, preferences),
       people,
       directors,
@@ -201,7 +213,7 @@ export function DesktopWorkExplorer({
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view]);
 
   // 页码和筛选是“从详情返回后继续浏览”的导航上下文。使用 sessionStorage，
   // 让它只在当前应用会话内生效；关闭应用后仍从干净的第一页开始。
@@ -212,9 +224,13 @@ export function DesktopWorkExplorer({
   // 资料库切换或筛选变化后，总页数可能缩小。共享 queryWorks 会返回已经夹紧的
   // 实际页码，这里把组件 state 同步过去，避免 UI 继续拿“第 7 页”逐页往前翻。
   useEffect(() => {
-    const actualPage = data.value?.result.page;
-    if (actualPage !== undefined && actualPage !== page) setPage(actualPage);
-  }, [data.value?.result.page, page]);
+    if (view === "waterfall") return;
+    const completed = data.value;
+    // requestedPage 必须仍等于当前 state；否则这是上一轮请求留下的旧结果。
+    if (completed && completed.requestedPage === page && completed.result.page !== page) {
+      setPage(completed.result.page);
+    }
+  }, [data.value, page, view]);
 
   // 详情页返回时等待作品 DOM 恢复高度，再回到进入详情前的位置。该值只消费一次，
   // 后续筛选刷新不会反复拉动滚动条。
@@ -237,6 +253,11 @@ export function DesktopWorkExplorer({
     window.localStorage.setItem(storageKey, next);
   }
 
+  function changeWaterfallSize(next: DesktopWaterfallSize): void {
+    setWaterfallSize(next);
+    window.localStorage.setItem(`${storageKey}.waterfall-size`, next);
+  }
+
   function openWork(workId: string): void {
     // 在卸载 Explorer、进入详情页之前同步记录滚动位置；sessionStorage 是同步 API，
     // 因此不会发生导航已经完成而位置尚未来得及保存的竞态。
@@ -257,6 +278,8 @@ export function DesktopWorkExplorer({
         onChange={changeQuery}
         view={view}
         onViewChange={changeView}
+        waterfallSize={waterfallSize}
+        onWaterfallSizeChange={changeWaterfallSize}
         fixedPersonId={fixedPersonId}
         data={data.value}
       />
@@ -269,9 +292,9 @@ export function DesktopWorkExplorer({
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
-        <DesktopWorkResults cards={cards} view={view} onOpen={openWork} />
+        <DesktopWorkResults cards={cards} view={view} waterfallSize={waterfallSize} onOpen={openWork} />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
-        {result.total > pageSize ? (
+        {view !== "waterfall" && result.total > pageSize ? (
           <div className="desktop-pagination" aria-label={t("分页")}>
             <button disabled={result.page <= 1} onClick={() => setPage(Math.max(1, result.page - 1))}>← {t("上一页")}</button>
             <span>{result.page} / {pageCount}</span>
@@ -288,6 +311,8 @@ function WorkFacetPanel({
   onChange,
   view,
   onViewChange,
+  waterfallSize,
+  onWaterfallSizeChange,
   fixedPersonId,
   data,
 }: {
@@ -295,6 +320,8 @@ function WorkFacetPanel({
   onChange: (query: WorkQuery) => void;
   view: DesktopWorkViewMode;
   onViewChange: (view: DesktopWorkViewMode) => void;
+  waterfallSize: DesktopWaterfallSize;
+  onWaterfallSizeChange: (size: DesktopWaterfallSize) => void;
   fixedPersonId?: string;
   data: ExplorerData;
 }) {
@@ -369,6 +396,17 @@ function WorkFacetPanel({
         </button>
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
+
+        {view === "waterfall" ? (
+          <label className="field desktop-waterfall-size">
+            <span>{t("图片大小")}</span>
+            <select value={waterfallSize} onChange={(event) => onWaterfallSizeChange(event.target.value as DesktopWaterfallSize)}>
+              <option value="small">{t("小")}</option>
+              <option value="medium">{t("中")}</option>
+              <option value="large">{t("大")}</option>
+            </select>
+          </label>
+        ) : null}
 
         <button type="button" className="ghost-button desktop-facet-clear" onClick={() => onChange({ sort: "release_desc" })}>
           {t("清除")}

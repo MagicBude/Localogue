@@ -160,6 +160,10 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "列表": "リスト",
     "表格": "テーブル",
     "瀑布流": "滝",
+    "图片大小": "画像サイズ",
+    "小": "小",
+    "中": "中",
+    "大": "大",
     "查看详情": "詳細を見る",
     "作品视图": "作品ビュー",
     "分钟": "分",
@@ -439,6 +443,10 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
     "列表": "List",
     "表格": "Table",
     "瀑布流": "Waterfall",
+    "图片大小": "Image size",
+    "小": "Small",
+    "中": "Medium",
+    "大": "Large",
     "查看详情": "View detail",
     "作品视图": "Work view",
     "分钟": "min",
@@ -1426,4 +1434,3 @@ export const desktopAssetLabels: Record<SupportedLanguage, Record<string, string
     logo: "Logo",
   },
 };
-

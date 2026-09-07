@@ -90,7 +90,11 @@ button:hover:not(:disabled) { border-color: #85857d; }
 .compact-grid { margin-top: 14px; }
 
 .desktop-work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px; align-items: start; }
-.desktop-work-waterfall { column-count: 4; column-gap: 20px; }
+.desktop-work-waterfall { column-gap: 20px; }
+/* column-width 是期望宽度，浏览器会按可用空间自动决定列数。 */
+.desktop-work-waterfall.is-small { column-width: 150px; }
+.desktop-work-waterfall.is-medium { column-width: 210px; }
+.desktop-work-waterfall.is-large { column-width: 290px; }
 .desktop-work-waterfall > .desktop-work-card { break-inside: avoid; margin-bottom: 20px; }
 
 .desktop-work-card { min-width: 0; }
@@ -150,14 +154,8 @@ button:hover:not(:disabled) { border-color: #85857d; }
 }
 .desktop-work-card:hover .desktop-work-card__poster img { transform: scale(1.025); }
 
-@media (max-width: 1200px) {
-  .desktop-work-waterfall { column-count: 3; }
-}
-@media (max-width: 900px) {
-  .desktop-work-waterfall { column-count: 2; }
-}
 @media (max-width: 560px) {
-  .desktop-work-waterfall { column-count: 1; }
+  .desktop-work-waterfall { column-width: auto; column-count: 1; }
   .desktop-work-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 }
 
