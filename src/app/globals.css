@@ -15,6 +15,7 @@
   --radius-sm: 12px;
   --content-width: 1500px;
   --side-nav-width: 240px;
+  --favorite-color: #e5484d;
 }
 
 html[data-theme="dark"] {
@@ -360,12 +361,32 @@ code {
 }
 
 .side-nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   padding: 9px 12px;
   border-radius: var(--radius-sm);
   color: var(--text-soft);
   font-size: 0.92rem;
   position: relative;
   transition: background 140ms ease, color 140ms ease;
+}
+
+.side-nav__badge {
+  flex: 0 0 auto;
+  min-width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--favorite-color);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1;
 }
 
 .side-nav__link:hover {
@@ -1073,6 +1094,141 @@ code {
   .timeline li {
     grid-template-columns: 85px 1fr;
   }
+}
+
+/* --------------------------------------------------------------------------
+ * V1-27：收藏（心形按钮 / 卡片高亮）与作品个人评分
+ * -------------------------------------------------------------------------- */
+
+/* 收藏按钮：卡片右上角的悬浮心形，详情页则作为带文字的胶囊按钮。 */
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-soft);
+  border: 0;
+  background: transparent;
+  transition: color 150ms ease, background 150ms ease, transform 120ms ease;
+}
+
+.favorite-button:active {
+  transform: scale(0.92);
+}
+
+.favorite-button--card {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface), transparent 18%);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+/* 卡片形态下默认半透明，悬浮卡片或已收藏时更清晰，避免和海报争夺注意力。 */
+.favorite-button--card {
+  opacity: 0.82;
+}
+
+.work-card:hover .favorite-button--card,
+.work-card:focus-within .favorite-button--card,
+.favorite-button--card.is-active {
+  opacity: 1;
+}
+
+.favorite-button--card.is-active {
+  color: var(--favorite-color);
+}
+
+.favorite-button--detail {
+  gap: 7px;
+  min-height: 38px;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.favorite-button--detail.is-active {
+  color: var(--favorite-color);
+  border-color: color-mix(in srgb, var(--favorite-color), var(--line) 55%);
+}
+
+/* 收藏状态通过 :has() 给整张卡片加一抹主题色描边，作为“标签着色”式的视觉提示。 */
+.work-card:has(.favorite-button.is-active) {
+  border-radius: var(--radius-md);
+}
+
+.work-card:has(.favorite-button--card.is-active) .work-card__poster {
+  border-color: color-mix(in srgb, var(--favorite-color), var(--line) 35%);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--favorite-color), transparent 82%);
+}
+
+.work-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* 五星评分组件 */
+.rating-stars {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.rating-stars__label {
+  font-weight: 650;
+  color: var(--text);
+}
+
+.rating-stars__icons {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.rating-stars__star {
+  display: inline-flex;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  border-radius: 7px;
+  transition: color 130ms ease, transform 120ms ease;
+}
+
+.rating-stars__star:hover {
+  transform: scale(1.12);
+}
+
+.rating-stars__star.is-active {
+  color: #f5a623;
+}
+
+.rating-stars__clear {
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.empty-state__hint {
+  color: var(--text-soft);
+  font-size: 0.82rem;
 }
 
 /* --------------------------------------------------------------------------

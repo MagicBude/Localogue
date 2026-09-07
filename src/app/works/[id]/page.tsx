@@ -4,6 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { assetDisplayUrl, listWorkAssets } from "@/application/assets/presentation-asset-service";
+import { FavoriteButton } from "@/components/favorite-button";
+import { RatingStars } from "@/components/rating-stars";
 import { localizeText } from "@/application/services/localization-service";
 import { localizeGenre } from "@/application/services/genre-localization-service";
 import { presentWorkDetail } from "@/application/services/work-presentation-service";
@@ -91,6 +93,11 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
                 {workTypeLabels.get(id) ?? id}
               </span>
             ))}
+          </div>
+
+          <div className="work-detail-actions">
+            <FavoriteButton dictionary={dictionary} variant="detail" workId={work.id} />
+            <RatingStars dictionary={dictionary} workId={work.id} />
           </div>
 
           <dl className="detail-list">

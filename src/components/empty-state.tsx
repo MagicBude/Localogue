@@ -1,3 +1,8 @@
-export function EmptyState({ message }: { message: string }) {
-  return <div className="empty-state">{message}</div>;
+export function EmptyState({ message, hint }: { message: string; hint?: string }) {
+  return (
+    <div className="empty-state">
+      <p>{message}</p>
+      {hint ? <p className="empty-state__hint">{hint}</p> : null}
+    </div>
+  );
 }

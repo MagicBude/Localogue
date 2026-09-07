@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { FavoriteButton } from "@/components/favorite-button";
 import type { WorkCardViewModel } from "@/application/services/work-presentation-service";
 import type { UiDictionary } from "@/i18n/ui";
 
@@ -13,6 +14,8 @@ interface WorkCardProps {
 export function WorkCard({ work, dictionary, workTypeLabels = [] }: WorkCardProps) {
   return (
     <article className="work-card">
+      <FavoriteButton dictionary={dictionary} workId={work.id} />
+
       <Link className="work-card__poster" href={`/works/${work.id}`}>
         {work.posterPath ? (
           <Image

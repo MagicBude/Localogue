@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { PreferenceControls } from "@/components/preference-controls";
 import { ProfileSwitcher } from "@/components/profile-switcher";
+import { useFavorites } from "@/components/favorites-provider";
 import type { UiDictionary } from "@/i18n/ui";
 import type { UserPreferences } from "@/lib/preferences";
 
@@ -25,6 +26,7 @@ interface SideNavProps {
 export function SideNav({ dictionary, preferences }: SideNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { count: favoriteCount } = useFavorites();
 
   // 判断某个导航项是否“当前激活”：
   // - “首页 /”只有路径完全相等才算；
@@ -37,6 +39,7 @@ export function SideNav({ dictionary, preferences }: SideNavProps) {
     { href: "/works", label: dictionary.navWorks },
     { href: "/people", label: dictionary.navPeople },
     { href: "/browse", label: dictionary.navBrowse },
+    { href: "/favorites", label: dictionary.navFavorites, badge: favoriteCount },
     { href: "/import", label: dictionary.navImport },
     { href: "/review", label: dictionary.navReview },
     { href: "/curation", label: dictionary.navCuration },
@@ -91,7 +94,10 @@ export function SideNav({ dictionary, preferences }: SideNavProps) {
               key={item.href}
               onClick={() => setOpen(false)}
             >
-              {item.label}
+              <span>{item.label}</span>
+              {typeof item.badge === "number" && item.badge > 0 ? (
+                <span className="side-nav__badge">{item.badge}</span>
+              ) : null}
             </Link>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FavoritesProvider } from "@/components/favorites-provider";
 import { SideNav } from "@/components/side-nav";
 import { getUiDictionary } from "@/i18n/ui";
 import { getUserPreferences } from "@/lib/preferences";
@@ -35,8 +36,10 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <SideNav dictionary={dictionary} preferences={preferences} />
-        <main className="page-shell">{children}</main>
+        <FavoritesProvider>
+          <SideNav dictionary={dictionary} preferences={preferences} />
+          <main className="page-shell">{children}</main>
+        </FavoritesProvider>
       </body>
     </html>
   );

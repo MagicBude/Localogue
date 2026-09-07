@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import type { PresentationEntityType, PresentationPreference } from "@/domain/entities/presentation-preference";
+import {
+  type PresentationEntityType,
+  type PresentationPreference,
+  normalizeRating,
+} from "@/domain/entities/presentation-preference";
 import { libraryRepository } from "@/infrastructure/repositories/repository-provider";
 import {
   getPresentationPreference,
@@ -11,12 +15,37 @@ import {
 export const runtime = "nodejs";
 const entityTypes = new Set<PresentationEntityType>(["person", "work"]);
 
+/**
+ * 读取某个实体的展示偏好。
+ *
+ * 返回 { preference }，找不到时为 { preference: null }。
+ * 收藏按钮 / 评分组件在挂载时调用它来初始化自己的状态。
+ */
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ entityType: string; id: string }> },
+) {
+  try {
+    const { entityType: rawType, id } = await context.params;
+    const entityType = rawType as PresentationEntityType;
+    if (!entityTypes.has(entityType)) throw new Error("不支持的展示偏好实体类型。");
+    const preference = await getPresentationPreference(entityType, id);
+    return NextResponse.json({ preference });
+  } catch (error) {
+    return NextResponse.json({ error: message(error) }, { status: 400 });
+  }
+}
+
 export async function PUT(request: Request, context: { params: Promise<{ entityType: string; id: string }> }) {
   try {
     const { entityType: rawType, id } = await context.params;
     const entityType = rawType as PresentationEntityType;
     if (!entityTypes.has(entityType)) throw new Error("不支持的展示偏好实体类型。");
-    const body = await request.json() as { assetId?: string | null };
+    const body = (await request.json()) as {
+      assetId?: string | null;
+      favorite?: boolean | null;
+      rating?: number | null;
+    };
     const assetId = body.assetId?.trim() || undefined;
 
     if (assetId) await assertAssetCanBeUsed(entityType, id, assetId);
@@ -32,6 +61,9 @@ export async function PUT(request: Request, context: { params: Promise<{ entityT
       ...(entityType === "person"
         ? { preferredPortraitAssetId: assetId }
         : { preferredCoverAssetId: assetId }),
+      ...(typeof body.favorite === "boolean" ? { favorite: body.favorite } : {}),
+      // rating 为 null 表示“清除评分”，不写入；否则用 normalizeRating 收敛到 1–5 整数。
+      ...(body.rating === null ? {} : typeof body.rating === "number" ? { rating: normalizeRating(body.rating) } : {}),
       updatedAt: new Date().toISOString(),
     };
     // JSON.stringify 会忽略 undefined，因此“恢复默认”不会把空值硬写进文件。
