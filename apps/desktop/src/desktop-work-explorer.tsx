@@ -1,5 +1,7 @@
 import {
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type ReactNode,
@@ -62,8 +64,16 @@ export function DesktopWorkExplorer({
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
-  const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
-  const [page, setPage] = useState(1);
+  const stateStorageKey = `${storageKey}.navigation-state`;
+  const restoredState = useMemo(() => readExplorerNavigationState(stateStorageKey), [stateStorageKey]);
+  const pendingScrollY = useRef(restoredState?.scrollY);
+  const [query, setQuery] = useState<WorkQuery>(() => ({
+    sort: "release_desc",
+    ...restoredState?.query,
+    // 来自收藏页、人物页或分类入口的固定初始条件优先，不能被旧浏览状态冲掉。
+    ...initialQuery,
+  }));
+  const [page, setPage] = useState(() => restoredState?.page ?? 1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
     const saved = window.localStorage.getItem(storageKey);
     return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
@@ -193,6 +203,30 @@ export function DesktopWorkExplorer({
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
   }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision]);
 
+  // 页码和筛选是“从详情返回后继续浏览”的导航上下文。使用 sessionStorage，
+  // 让它只在当前应用会话内生效；关闭应用后仍从干净的第一页开始。
+  useEffect(() => {
+    writeExplorerNavigationState(stateStorageKey, { query, page });
+  }, [page, query, stateStorageKey]);
+
+  // 资料库切换或筛选变化后，总页数可能缩小。共享 queryWorks 会返回已经夹紧的
+  // 实际页码，这里把组件 state 同步过去，避免 UI 继续拿“第 7 页”逐页往前翻。
+  useEffect(() => {
+    const actualPage = data.value?.result.page;
+    if (actualPage !== undefined && actualPage !== page) setPage(actualPage);
+  }, [data.value?.result.page, page]);
+
+  // 详情页返回时等待作品 DOM 恢复高度，再回到进入详情前的位置。该值只消费一次，
+  // 后续筛选刷新不会反复拉动滚动条。
+  useEffect(() => {
+    if (!data.value || pendingScrollY.current === undefined) return;
+    const scrollY = pendingScrollY.current;
+    pendingScrollY.current = undefined;
+    clearExplorerReturnPosition(stateStorageKey);
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [data.value, stateStorageKey]);
+
   function changeQuery(next: WorkQuery): void {
     setPage(1);
     setQuery(next);
@@ -201,6 +235,13 @@ export function DesktopWorkExplorer({
   function changeView(next: DesktopWorkViewMode): void {
     setView(next);
     window.localStorage.setItem(storageKey, next);
+  }
+
+  function openWork(workId: string): void {
+    // 在卸载 Explorer、进入详情页之前同步记录滚动位置；sessionStorage 是同步 API，
+    // 因此不会发生导航已经完成而位置尚未来得及保存的竞态。
+    writeExplorerNavigationState(stateStorageKey, { query, page, scrollY: window.scrollY });
+    onOpen(workId);
   }
 
   if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
@@ -228,13 +269,13 @@ export function DesktopWorkExplorer({
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
-        <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
+        <DesktopWorkResults cards={cards} view={view} onOpen={openWork} />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
         {result.total > pageSize ? (
           <div className="desktop-pagination" aria-label={t("分页")}>
-            <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
-            <span>{page} / {pageCount}</span>
-            <button disabled={page >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
+            <button disabled={result.page <= 1} onClick={() => setPage(Math.max(1, result.page - 1))}>← {t("上一页")}</button>
+            <span>{result.page} / {pageCount}</span>
+            <button disabled={result.page >= pageCount} onClick={() => setPage(Math.min(pageCount, result.page + 1))}>{t("下一页")} →</button>
           </div>
         ) : null}
       </section>
@@ -505,6 +546,48 @@ function toggleValue(values: string[], value: string): string[] {
 
 function friendlyId(value: string): string {
   return value.replace(/^work[-_]?type[-_:]?/i, "").replace(/[-_]/g, " ") || value;
+}
+
+interface ExplorerNavigationState {
+  query: WorkQuery;
+  page: number;
+  scrollY?: number;
+}
+
+/** 本机状态可能来自旧版本或手工修改，读取失败时安全回到默认浏览状态。 */
+function readExplorerNavigationState(key: string): ExplorerNavigationState | undefined {
+  try {
+    const parsed = JSON.parse(window.sessionStorage.getItem(key) ?? "null") as Partial<ExplorerNavigationState> | null;
+    if (!parsed || typeof parsed !== "object") return undefined;
+    return {
+      query: parsed.query && typeof parsed.query === "object" ? parsed.query : {},
+      page: typeof parsed.page === "number" && Number.isInteger(parsed.page) && parsed.page > 0 ? parsed.page : 1,
+      ...(typeof parsed.scrollY === "number" && Number.isFinite(parsed.scrollY) && parsed.scrollY >= 0
+        ? { scrollY: parsed.scrollY }
+        : {}),
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function writeExplorerNavigationState(
+  key: string,
+  state: Omit<ExplorerNavigationState, "scrollY"> & { scrollY?: number },
+): void {
+  const previous = readExplorerNavigationState(key);
+  window.sessionStorage.setItem(key, JSON.stringify({
+    query: state.query,
+    page: state.page,
+    // 普通筛选更新时保留尚未消费的返回位置；打开作品时传入新位置覆盖它。
+    ...(state.scrollY !== undefined ? { scrollY: state.scrollY } : previous?.scrollY !== undefined ? { scrollY: previous.scrollY } : {}),
+  }));
+}
+
+function clearExplorerReturnPosition(key: string): void {
+  const current = readExplorerNavigationState(key);
+  if (!current) return;
+  window.sessionStorage.setItem(key, JSON.stringify({ query: current.query, page: current.page }));
 }
 
 function toOptionMap(options: FilterOption[]): Map<string, string> {
