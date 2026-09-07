@@ -64,7 +64,7 @@ export function DesktopWorkExplorer({
   const [page, setPage] = useState(1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
     const saved = window.localStorage.getItem(storageKey);
-    return saved === "list" || saved === "table" ? saved : "grid";
+    return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
 
   const data = useAsyncExplorerData(async () => {
@@ -253,7 +253,7 @@ function WorkFacetPanel({
   return (
     <aside className="desktop-facet-panel">
       <div className="desktop-facet-panel__heading">
-        <div><strong>{t("多维筛选")}</strong><small>{t("与 Web 共用 WorkQuery / Facet 规则")}</small></div>
+        <div><strong>{t("多维筛选")}</strong><small>{t("与 Web 共用 WorkQuery / Facet 规则，支持海报墙 / 瀑布流 / 列表 / 表格四种视图")}</small></div>
         <button type="button" onClick={() => onChange({ sort: "release_desc" })}>{t("清除")}</button>
       </div>
 

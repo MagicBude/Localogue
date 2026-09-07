@@ -11,8 +11,9 @@ import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
 import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopFavoriteButton } from "./desktop-favorite-button";
+import { DesktopWorkCard } from "./desktop-work-card";
 
-export type DesktopWorkViewMode = "grid" | "list" | "table";
+export type DesktopWorkViewMode = "grid" | "list" | "table" | "waterfall";
 
 export interface DesktopWorkCardViewModel {
   work: Work;
@@ -78,6 +79,7 @@ export function DesktopWorkViewSwitcher({
   const { t } = useDesktopI18n();
   const views: Array<{ id: DesktopWorkViewMode; label: string }> = [
     { id: "grid", label: t("海报墙") },
+    { id: "waterfall", label: t("瀑布流") },
     { id: "list", label: t("列表") },
     { id: "table", label: t("表格") },
   ];
@@ -172,27 +174,20 @@ export function DesktopWorkResults({
     );
   }
 
+  if (view === "waterfall") {
+    return (
+      <div className="desktop-work-waterfall">
+        {cards.map((card) => (
+          <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="work-grid desktop-work-grid-library">
+    <div className="desktop-work-grid">
       {cards.map((card) => (
-        <div className="work-tile-shell" key={card.work.id}>
-          <button className="work-tile desktop-poster-card" onClick={() => onOpen(card.work.id)} type="button">
-            <span className="desktop-work-poster">
-              <DesktopAssetImage
-                asset={card.poster}
-                alt={`${card.work.code} poster`}
-                fallback={<PosterPlaceholder code={card.work.code} />}
-              />
-            </span>
-            <span className="work-tile-body">
-              <small>{card.releaseDate}</small>
-              <strong>{card.work.code}</strong>
-              <span>{card.title}</span>
-              <em>{card.performerNames.join(" · ") || card.makerName || "—"}</em>
-            </span>
-          </button>
-          <DesktopFavoriteButton variant="card" workId={card.work.id} />
-        </div>
+        <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} />
       ))}
     </div>
   );
