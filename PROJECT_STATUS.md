@@ -12,6 +12,8 @@ Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:bui
 
 新建 Library Profile 现在自动分配独立 Native-managed Private Library，普通用户只需要选择内容根目录；NFO 导入结果区修复表格负边距造成的轻微重叠，并明确未映射来源词属于当次导入提示而不是应用日志。
 
+网页端现已采用与桌面端一致的 Library Profile 多资料库模型：设置页支持切换 / 重命名 / 删除 / 新建 Profile，顶栏提供仅多 Profile 时出现的切换下拉，并补齐桌面端独有的「添加示例库」能力；旧版单组路径在读取时自动升级为 Profile，扁平字段始终镜像当前 Profile。Web / Desktop 在资料库层对齐，详见 `docs/product/library-profiles-web.md`。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：
