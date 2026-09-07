@@ -25,6 +25,8 @@ interface FavoritesValue {
   favoriteIds: ReadonlySet<string>;
   ratingById: ReadonlyMap<string, number>;
   favoriteCount: number;
+  /** 每次成功写入私人偏好后递增，供依赖磁盘查询的作品列表精确刷新。 */
+  persistedRevision: number;
   isFavorite: (id: string) => boolean;
   getRating: (id: string) => number | undefined;
   toggleFavorite: (id: string) => void;
@@ -41,6 +43,7 @@ export function DesktopFavoritesProvider({
   children: ReactNode;
 }) {
   const [preferences, setPreferences] = useState<PresentationPreference[]>([]);
+  const [persistedRevision, setPersistedRevision] = useState(0);
 
   useEffect(() => {
     let disposed = false;
@@ -90,6 +93,8 @@ export function DesktopFavoritesProvider({
       ]);
       try {
         await repository.savePresentationPreference(next);
+        // 此时 Native 写入已经完成，随后触发的作品查询一定能读到新值。
+        setPersistedRevision((value) => value + 1);
       } catch {
         // 仅当内存里仍是本次乐观结果时回滚。若用户已经进行了更新的操作，
         // 旧请求失败不能覆盖新状态；对象引用在这里充当这一轮操作的身份标记。
@@ -110,12 +115,13 @@ export function DesktopFavoritesProvider({
       favoriteIds,
       ratingById,
       favoriteCount: favoriteIds.size,
+      persistedRevision,
       isFavorite: (id) => favoriteIds.has(id),
       getRating: (id) => ratingById.get(id),
       toggleFavorite: (id) => void persist(id, { favorite: !favoriteIds.has(id) }),
       setRating: (id, rating) => void persist(id, { rating: rating ?? null }),
     };
-  }, [preferences, repository]);
+  }, [preferences, persistedRevision, repository]);
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }

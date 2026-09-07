@@ -9,8 +9,8 @@ import { useDesktopI18n } from "./desktop-i18n";
  * 直接复用 Web/Desktop 共用的 DesktopWorkExplorer，初始查询限定 favoriteOnly: true。
  * 收藏数据来自私人展示偏好层，不修改 Canonical Work、不进 Shared Pack。
  *
- * 用 favoriteCount 作为 key 强制重挂载：在收藏页取消收藏时，explorer 会重新执行
- * listWorks 并立即反映最新的收藏集合，无需额外刷新按钮。
+ * DesktopWorkExplorer 会订阅“偏好成功持久化版本”，因此取消收藏后会在磁盘写入
+ * 完成时重新执行 listWorks；页面无需通过 key 销毁整个筛选器及其编辑状态。
  */
 export function DesktopFavoritesPage({
   repository,
@@ -35,7 +35,6 @@ export function DesktopFavoritesPage({
         </section>
       ) : (
         <DesktopWorkExplorer
-          key={favoriteCount}
           repository={repository}
           onOpen={openWork}
           storageKey="localogue.desktop.favorites-view"

@@ -15,6 +15,7 @@ import type { WorkQuery, WorkSearchResult, WorkSort } from "@/domain/queries/wor
 
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
+import { useFavorites } from "./desktop-favorites-provider";
 import { useStableAsyncData } from "./use-stable-async-data";
 import {
   buildDesktopWorkCards,
@@ -60,6 +61,7 @@ export function DesktopWorkExplorer({
   initialQuery?: WorkQuery;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
+  const { persistedRevision } = useFavorites();
   const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
   const [page, setPage] = useState(1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
@@ -187,7 +189,9 @@ export function DesktopWorkExplorer({
       years,
       resolutions,
     };
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage]);
+  // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
+  // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision]);
 
   function changeQuery(next: WorkQuery): void {
     setPage(1);
