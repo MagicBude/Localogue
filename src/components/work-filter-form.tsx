@@ -23,6 +23,7 @@ interface WorkFilterFormProps {
   genres?: FilterOption[];
   tags?: FilterOption[];
   years?: FilterOption[];
+  resolutions?: FilterOption[];
   fixedPersonId?: string;
   view?: "grid" | "list" | "table" | "waterfall";
 }
@@ -52,6 +53,7 @@ export function WorkFilterForm({
   genres = [],
   tags = [],
   years = [],
+  resolutions = [],
   fixedPersonId,
   view = "grid",
 }: WorkFilterFormProps) {
@@ -188,6 +190,15 @@ export function WorkFilterForm({
             label={dictionary.year}
             name="year"
             options={years}
+          />
+        ) : null}
+
+        {resolutions.length ? (
+          <FilterGroup
+            checked={query.resolutionTiers}
+            label={dictionary.resolution}
+            name="resolution"
+            options={resolutions}
           />
         ) : null}
 

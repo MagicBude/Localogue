@@ -125,6 +125,17 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
     label: facet.id,
     count: facet.count,
   }));
+  const resolutionLabels: Record<string, string> = {
+    "4k": "4K",
+    "1080p": "1080P",
+    "720p": "720P",
+    sd: "SD",
+  };
+  const resolutionOptions = result.facets.resolutions.map((facet) => ({
+    id: facet.id,
+    label: resolutionLabels[facet.id] ?? facet.id,
+    count: facet.count,
+  }));
 
   return (
     <div className="page-stack">
@@ -148,6 +159,7 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
           makers={makerOptions}
           people={peopleOptions}
           query={query}
+          resolutions={resolutionOptions}
           series={seriesOptions}
           tags={tagOptions}
           workTypes={workTypeOptions}
@@ -166,6 +178,7 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
               makers={makerOptions}
               people={peopleOptions}
               searchParams={rawParams}
+              resolutions={resolutionOptions}
               series={seriesOptions}
               tags={tagOptions}
               workTypes={workTypeOptions}

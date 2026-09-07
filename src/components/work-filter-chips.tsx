@@ -17,6 +17,7 @@ interface WorkFilterChipsProps {
   genres?: FilterOption[];
   tags?: FilterOption[];
   years?: FilterOption[];
+  resolutions?: FilterOption[];
   fixedPersonId?: string;
 }
 
@@ -45,6 +46,7 @@ export function WorkFilterChips({
   genres = [],
   tags = [],
   years = [],
+  resolutions = [],
   fixedPersonId,
 }: WorkFilterChipsProps) {
   const chips: ActiveChip[] = [];
@@ -58,6 +60,7 @@ export function WorkFilterChips({
     genre: toLabelMap(genres),
     tag: toLabelMap(tags),
     year: toLabelMap(years),
+    resolution: toLabelMap(resolutions),
   };
 
   pushScalar(chips, searchParams, "q", dictionary.keyword);
@@ -70,6 +73,7 @@ export function WorkFilterChips({
   pushMany(chips, searchParams, "genre", dictionary.genres, optionMaps.genre);
   pushMany(chips, searchParams, "tag", dictionary.tags, optionMaps.tag);
   pushMany(chips, searchParams, "year", dictionary.year, optionMaps.year);
+  pushMany(chips, searchParams, "resolution", dictionary.resolution, optionMaps.resolution);
   pushScalar(chips, searchParams, "releaseFrom", dictionary.dateFrom);
   pushScalar(chips, searchParams, "releaseTo", dictionary.dateTo);
   pushScalar(chips, searchParams, "durationMin", `${dictionary.duration} ≥`);

@@ -1,5 +1,5 @@
 import type { PersonQuery, PersonSort } from "@/domain/queries/person-query";
-import type { WorkQuery, WorkSort } from "@/domain/queries/work-query";
+import type { MediaResolutionTier, WorkQuery, WorkSort } from "@/domain/queries/work-query";
 
 export type RawSearchParams = Record<
   string,
@@ -25,6 +25,7 @@ export function parseWorkQuery(
     genreIds: many(params.genre),
     workTypeIds: many(params.workType),
     tagIds: many(params.tag),
+    resolutionTiers: toResolutionTiers(many(params.resolution)),
     releaseYears: many(params.year),
     releaseFrom: first(params.releaseFrom),
     releaseTo: first(params.releaseTo),
@@ -38,6 +39,14 @@ export function parseWorkQuery(
     page: toOptionalNumber(first(params.page)) ?? defaults.page ?? 1,
     pageSize: defaults.pageSize ?? 24,
   };
+}
+
+/** URL 可被手工修改，只允许 Domain 明确定义的清晰度档位进入查询。 */
+function toResolutionTiers(values: string[] | undefined): MediaResolutionTier[] | undefined {
+  const allowed = new Set<MediaResolutionTier>(["4k", "1080p", "720p", "sd"]);
+  const tiers = (values ?? []).filter((value): value is MediaResolutionTier =>
+    allowed.has(value as MediaResolutionTier));
+  return tiers.length ? [...new Set(tiers)] : undefined;
 }
 
 export function first(value: string | string[] | undefined): string | undefined {
