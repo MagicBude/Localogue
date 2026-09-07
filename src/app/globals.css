@@ -748,6 +748,26 @@ code {
   accent-color: var(--favorite-color, #e5484d);
 }
 
+.sort-form {
+  display: flex;
+  align-items: center;
+}
+
+.inline-field {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+}
+
+.inline-field select {
+  width: auto;
+  min-height: 0;
+  padding: 6px 9px;
+}
+
 .field--grow {
   min-width: 0;
 }
