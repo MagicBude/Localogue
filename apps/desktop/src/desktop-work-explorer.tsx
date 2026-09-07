@@ -280,8 +280,35 @@ function WorkFacetPanel({
           <option value="title_desc">{t("标题")} Z → A</option>
           <option value="created_desc">{t("最近创建")}</option>
           <option value="updated_desc">{t("最近更新")}</option>
+          <option value="rating_desc">{t("评分")} ↓</option>
+          <option value="rating_asc">{t("评分")} ↑</option>
         </select>
       </label>
+
+      <div className="desktop-facet-favorites">
+        <label className="field check-inline">
+          <input
+            type="checkbox"
+            checked={query.favoriteOnly === true}
+            onChange={(event) => patch({ favoriteOnly: event.target.checked || undefined })}
+          />
+          <span>{t("仅看收藏")}</span>
+        </label>
+        <label className="field">
+          <span>{t("评分至少")}</span>
+          <select
+            value={query.ratingMin ?? ""}
+            onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}
+          >
+            <option value="">{t("任意")}</option>
+            <option value="1">★1+</option>
+            <option value="2">★2+</option>
+            <option value="3">★3+</option>
+            <option value="4">★4+</option>
+            <option value="5">★5</option>
+          </select>
+        </label>
+      </div>
 
       <div className="desktop-filter-pair">
         <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
@@ -351,6 +378,8 @@ function DesktopWorkFilterChips({
   if (query.durationMax !== undefined) chips.push({ key: "durationMax", label: `${t("时长")} ≤ ${query.durationMax}` });
   if (query.hasCover !== undefined) chips.push({ key: "hasCover", label: `${t("封面")}：${query.hasCover ? t("是") : t("否")}` });
   if (query.hasMedia !== undefined) chips.push({ key: "hasMedia", label: `${t("媒体")}：${query.hasMedia ? t("是") : t("否")}` });
+  if (query.favoriteOnly) chips.push({ key: "favoriteOnly", label: t("仅看收藏") });
+  if (query.ratingMin !== undefined) chips.push({ key: "ratingMin", label: `${t("评分至少")} ${query.ratingMin}★` });
 
   if (!chips.length) return null;
   return (

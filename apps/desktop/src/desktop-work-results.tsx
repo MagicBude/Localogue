@@ -10,6 +10,7 @@ import { workTypeDefinition } from "@/application/importers/import-classificatio
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
 import { resolveWorkPresentation } from "./desktop-presentation";
+import { DesktopFavoriteButton } from "./desktop-favorite-button";
 
 export type DesktopWorkViewMode = "grid" | "list" | "table";
 
@@ -129,6 +130,7 @@ export function DesktopWorkResults({
               <span>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} ${t("分钟")}` : "—"}</span>
               <span>{card.makerName ?? "—"}</span>
             </div>
+            <DesktopFavoriteButton variant="inline" workId={card.work.id} />
           </article>
         ))}
       </div>
@@ -148,6 +150,7 @@ export function DesktopWorkResults({
               <th>{t("演员")}</th>
               <th>{t("厂商")}</th>
               <th>{t("类型")}</th>
+              <th>{t("收藏")}</th>
             </tr>
           </thead>
           <tbody>
@@ -160,6 +163,7 @@ export function DesktopWorkResults({
                 <td>{card.performerNames.join(" · ") || "—"}</td>
                 <td>{card.makerName ?? "—"}</td>
                 <td>{card.workTypeNames.join(" · ") || "—"}</td>
+                <td><DesktopFavoriteButton variant="inline" workId={card.work.id} /></td>
               </tr>
             ))}
           </tbody>
@@ -171,21 +175,24 @@ export function DesktopWorkResults({
   return (
     <div className="work-grid desktop-work-grid-library">
       {cards.map((card) => (
-        <button className="work-tile desktop-poster-card" key={card.work.id} onClick={() => onOpen(card.work.id)} type="button">
-          <span className="desktop-work-poster">
-            <DesktopAssetImage
-              asset={card.poster}
-              alt={`${card.work.code} poster`}
-              fallback={<PosterPlaceholder code={card.work.code} />}
-            />
-          </span>
-          <span className="work-tile-body">
-            <small>{card.releaseDate}</small>
-            <strong>{card.work.code}</strong>
-            <span>{card.title}</span>
-            <em>{card.performerNames.join(" · ") || card.makerName || "—"}</em>
-          </span>
-        </button>
+        <div className="work-tile-shell" key={card.work.id}>
+          <button className="work-tile desktop-poster-card" onClick={() => onOpen(card.work.id)} type="button">
+            <span className="desktop-work-poster">
+              <DesktopAssetImage
+                asset={card.poster}
+                alt={`${card.work.code} poster`}
+                fallback={<PosterPlaceholder code={card.work.code} />}
+              />
+            </span>
+            <span className="work-tile-body">
+              <small>{card.releaseDate}</small>
+              <strong>{card.work.code}</strong>
+              <span>{card.title}</span>
+              <em>{card.performerNames.join(" · ") || card.makerName || "—"}</em>
+            </span>
+          </button>
+          <DesktopFavoriteButton variant="card" workId={card.work.id} />
+        </div>
       ))}
     </div>
   );

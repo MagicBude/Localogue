@@ -19,6 +19,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopSidebar, DesktopTopbar, type DesktopPage } from "./desktop-app-shell";
+import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -40,6 +41,7 @@ const QUICK_SETUP_NATIVE_CONTRACT_REVISION = 7;
  */
 const DesktopHomePage = lazy(() => import("./desktop-home-page").then((module) => ({ default: module.DesktopHomePage })));
 const DesktopWorksPage = lazy(() => import("./desktop-work-pages").then((module) => ({ default: module.DesktopWorksPage })));
+const DesktopFavoritesPage = lazy(() => import("./desktop-favorites-page").then((module) => ({ default: module.DesktopFavoritesPage })));
 const DesktopWorkDetailPage = lazy(() => import("./desktop-work-pages").then((module) => ({ default: module.DesktopWorkDetailPage })));
 const DesktopPeoplePage = lazy(() => import("./desktop-person-pages").then((module) => ({ default: module.DesktopPeoplePage })));
 const DesktopPersonDetailPage = lazy(() => import("./desktop-person-pages").then((module) => ({ default: module.DesktopPersonDetailPage })));
@@ -353,6 +355,7 @@ export default function App() {
 
         <div className="status-line">{message}</div>
 
+        <DesktopFavoritesProvider repository={repository}>
         <Suspense fallback={<PageLoadingState />}>
         {!hasLibrarySource && page !== "settings" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
@@ -372,6 +375,11 @@ export default function App() {
           ) : (
             <DesktopWorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} />
           )
+        ) : page === "favorites" ? (
+          <DesktopFavoritesPage
+            repository={repository}
+            openWork={openWork}
+          />
         ) : page === "people" ? (
           detail?.kind === "person" ? (
             <DesktopPersonDetailPage
@@ -432,6 +440,7 @@ export default function App() {
           />
         )}
         </Suspense>
+        </DesktopFavoritesProvider>
       </main>
     </div>
   );

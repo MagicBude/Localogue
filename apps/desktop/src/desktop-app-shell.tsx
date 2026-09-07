@@ -3,13 +3,14 @@ import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import { activeLibraryProfile } from "./library-profiles";
 import localogueIcon from "./assets/localogue-icon.png";
 
-export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings";
+export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings" | "favorites";
 
 const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short: string }> = [
   { id: "home", label: "首页", eyebrow: "HOME", short: "HM" },
   { id: "works", label: "作品", eyebrow: "WORKS", short: "WK" },
   { id: "people", label: "人物", eyebrow: "PEOPLE", short: "PP" },
   { id: "browse", label: "浏览", eyebrow: "BROWSE", short: "BR" },
+  { id: "favorites", label: "收藏", eyebrow: "FAVORITES", short: "FA" },
   { id: "review", label: "审核", eyebrow: "REVIEW", short: "RV" },
   { id: "curation", label: "治理", eyebrow: "CURATION", short: "CU" },
   { id: "history", label: "历史", eyebrow: "HISTORY", short: "HI" },

@@ -16,6 +16,8 @@ import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { DesktopWorkMediaSection } from "./desktop-work-media-section";
+import { DesktopFavoriteButton } from "./desktop-favorite-button";
+import { DesktopRatingControl } from "./desktop-rating-control";
 import { useDesktopI18n } from "./desktop-i18n";
 import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
@@ -184,6 +186,8 @@ export function DesktopWorkDetailPage({
           <header className="desktop-work-record__header">
             <div className="desktop-work-record__headline">
               <span className="code-badge">{work.code}</span>
+              <DesktopFavoriteButton workId={work.id} variant="detail" />
+              <DesktopRatingControl workId={work.id} />
               <span className="desktop-work-record__summary-counts">
                 <span>{t("本地媒体")} <strong>{media.length}</strong></span>
                 <span>{t("作品图片")} <strong>{assets.length}</strong></span>
