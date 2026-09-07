@@ -1,5 +1,6 @@
 # Changelog
 
+- 新增作品收藏与个人评分（1–5 星）：收藏走私人展示偏好层 `PresentationPreference`，不修改 Canonical Work、不进入 Shared Pack；未配置 Private Library 时回退到 Git 忽略的 `data/library` 仍可本地保存。卡片右上角心形按钮一键收藏，侧栏新增带数量徽标的「收藏」入口与 `/favorites` 收藏页，作品详情页提供五星评分；收藏与评分字段相互独立，再次点击可清除。
 - 网页端引入与桌面端一致的 Library Profile 多资料库模型：设置页可切换 / 重命名 / 删除 / 新建 Profile，顶栏提供仅多 Profile 时出现的切换下拉，并补齐桌面端独有的「添加示例库」能力；旧版单组路径在读取时自动升级为 Profile，扁平字段始终镜像当前 Profile，既有消费者零改动。
 - Desktop Boundary 校验器同步 Work / Person / shared utils 的新模块路径，不再因删除旧聚合文件而误报架构缺失。
 - 为 ffprobe 路径输入框恢复可访问的语义标签，屏幕阅读器和点击标签聚焦均能正确识别字段用途。

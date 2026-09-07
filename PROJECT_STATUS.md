@@ -14,6 +14,8 @@ Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:bui
 
 网页端现已采用与桌面端一致的 Library Profile 多资料库模型：设置页支持切换 / 重命名 / 删除 / 新建 Profile，顶栏提供仅多 Profile 时出现的切换下拉，并补齐桌面端独有的「添加示例库」能力；旧版单组路径在读取时自动升级为 Profile，扁平字段始终镜像当前 Profile。Web / Desktop 在资料库层对齐，详见 `docs/product/library-profiles-web.md`。
 
+作品收藏与个人评分（1–5 星）已落地：复用官方 `PresentationPreference` 私人展示偏好层，不污染 Canonical Work、不进 Shared Pack；未配置 Private Library 时回退 `data/library` 仍可本地保存。卡片心形按钮、侧栏带徽标的「收藏」入口、`/favorites` 收藏页与详情页五星评分均已接入，详见 `docs/product/favorites-and-ratings.md`。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：
