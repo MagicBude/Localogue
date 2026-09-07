@@ -108,6 +108,23 @@ export function WorkResults({
     );
   }
 
+  if (view === "waterfall") {
+    return (
+      <div className="work-waterfall work-grid--library">
+        {works.map((work) => (
+          <WorkCard
+            dictionary={dictionary}
+            key={work.id}
+            work={work}
+            workTypeLabels={work.workTypeIds.map(
+              (id) => workTypeLabels.get(id) ?? id,
+            )}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="work-grid work-grid--library">
       {works.map((work) => (

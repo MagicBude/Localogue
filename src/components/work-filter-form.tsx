@@ -24,7 +24,7 @@ interface WorkFilterFormProps {
   tags?: FilterOption[];
   years?: FilterOption[];
   fixedPersonId?: string;
-  view?: "grid" | "list" | "table";
+  view?: "grid" | "list" | "table" | "waterfall";
 }
 
 /**

@@ -156,31 +156,33 @@ export default async function WorksPage({ searchParams }: WorksPageProps) {
         />
 
         <section className="results-panel" id="work-results">
-          <WorkFilterChips
-            action="/works"
-            dictionary={dictionary}
-            directors={directorOptions}
-            genres={genreOptions}
-            labels={labelOptions}
-            makers={makerOptions}
-            people={peopleOptions}
-            searchParams={rawParams}
-            series={seriesOptions}
-            tags={tagOptions}
-            workTypes={workTypeOptions}
-            years={yearOptions}
-          />
-
-          <div className="results-toolbar">
-            <p className="muted">
-              {dictionary.viewMode} · {result.total} {dictionary.resultCount}
-            </p>
-            <WorkViewSwitcher
+          <div className="filter-topbar">
+            <WorkFilterChips
               action="/works"
-              current={view}
               dictionary={dictionary}
+              directors={directorOptions}
+              genres={genreOptions}
+              labels={labelOptions}
+              makers={makerOptions}
+              people={peopleOptions}
               searchParams={rawParams}
+              series={seriesOptions}
+              tags={tagOptions}
+              workTypes={workTypeOptions}
+              years={yearOptions}
             />
+
+            <div className="results-toolbar">
+              <p className="muted">
+                {dictionary.viewMode} · {result.total} {dictionary.resultCount}
+              </p>
+              <WorkViewSwitcher
+                action="/works"
+                current={view}
+                dictionary={dictionary}
+                searchParams={rawParams}
+              />
+            </div>
           </div>
 
           {workCards.length ? (

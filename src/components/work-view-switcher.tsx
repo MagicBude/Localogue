@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { UiDictionary } from "@/i18n/ui";
 import type { RawSearchParams } from "@/lib/search-params";
 
-export type WorkViewMode = "grid" | "list" | "table";
+export type WorkViewMode = "grid" | "list" | "table" | "waterfall";
 
 interface WorkViewSwitcherProps {
   action: string;
@@ -33,6 +33,7 @@ export function WorkViewSwitcher({
     { id: "grid", label: dictionary.viewGrid },
     { id: "list", label: dictionary.viewList },
     { id: "table", label: dictionary.viewTable },
+    { id: "waterfall", label: dictionary.viewWaterfall },
   ];
 
   return (
@@ -54,7 +55,7 @@ export function WorkViewSwitcher({
 
 export function parseWorkView(value: string | string[] | undefined): WorkViewMode {
   const current = Array.isArray(value) ? value[0] : value;
-  return current === "list" || current === "table" ? current : "grid";
+  return current === "list" || current === "table" || current === "waterfall" ? current : "grid";
 }
 
 function buildViewHref(

@@ -29,6 +29,10 @@ export function WorkCard({ work, dictionary, workTypeLabels = [] }: WorkCardProp
         )}
       </Link>
 
+      <div className="work-card__overlay">
+        <Link href={`/works/${work.id}`}>{dictionary.viewDetail}</Link>
+      </div>
+
       <div className="work-card__body">
         <Link className="work-code" href={`/works/${work.id}`}>
           {work.code}

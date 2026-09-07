@@ -14,6 +14,7 @@
   --radius-md: 18px;
   --radius-sm: 12px;
   --content-width: 1500px;
+  --side-nav-width: 240px;
 }
 
 html[data-theme="dark"] {
@@ -172,9 +173,15 @@ code {
 }
 
 .page-shell {
-  width: min(calc(100% - 40px), var(--content-width));
-  margin: 0 auto;
-  padding: 44px 0 90px;
+  margin-left: var(--side-nav-width);
+  width: auto;
+  padding: 36px clamp(18px, 3.5vw, 52px) 90px;
+}
+
+/* 内容主体在这些页面里居中，避免侧栏出现后内容贴边 */
+.page-stack {
+  max-width: var(--content-width);
+  margin-inline: auto;
 }
 
 .page-stack {
@@ -313,6 +320,110 @@ code {
   letter-spacing: -0.04em;
 }
 
+.side-nav {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--side-nav-width);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 14px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  z-index: 40;
+  overflow-y: auto;
+}
+
+.side-nav__brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  padding: 6px 10px 18px;
+}
+
+.side-nav__brand-link {
+  font-size: 1.2rem;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+}
+
+.side-nav__brand-sub {
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+
+.side-nav__links {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.side-nav__link {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  position: relative;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.side-nav__link:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.side-nav__link.is-active {
+  background: var(--surface-strong);
+  color: var(--text);
+  font-weight: 640;
+}
+
+.side-nav__link.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.side-nav__footer {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.side-nav__toggle {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 50;
+  width: 42px;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  z-index: 35;
+}
+
 .work-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -320,11 +431,43 @@ code {
 }
 
 .work-grid--library {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
 }
 
 .work-card {
   min-width: 0;
+  position: relative;
+}
+
+/* 悬浮时右上角浮出“查看”快捷按钮，点击进入作品详情 */
+.work-card__overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface), transparent 16%);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 640;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.work-card:hover .work-card__overlay,
+.work-card:focus-within .work-card__overlay {
+  opacity: 1;
+  transform: none;
+}
+
+.work-card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
 }
 
 .work-card__poster,
@@ -496,7 +639,7 @@ code {
 
 .filter-panel {
   position: sticky;
-  top: 98px;
+  top: 16px;
   width: 100%;
   min-width: 0;
   max-height: calc(100vh - 120px);
@@ -798,6 +941,31 @@ code {
   margin-top: 8px;
 }
 
+@media (max-width: 960px) {
+  .page-shell {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+
+  .side-nav {
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    box-shadow: var(--shadow);
+  }
+
+  .side-nav.is-open {
+    transform: none;
+  }
+
+  .side-nav__toggle {
+    display: inline-flex;
+  }
+
+  .nav-backdrop.is-open {
+    display: block;
+  }
+}
+
 @media (max-width: 1180px) {
   .site-header__inner {
     grid-template-columns: 1fr auto;
@@ -829,15 +997,6 @@ code {
 }
 
 @media (max-width: 860px) {
-  .page-shell,
-  .site-header__inner {
-    width: min(calc(100% - 24px), var(--content-width));
-  }
-
-  .page-shell {
-    padding-top: 26px;
-  }
-
   .preference-controls {
     width: 100%;
     grid-column: 1 / -1;
@@ -929,11 +1088,37 @@ code {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
 }
 
 .results-toolbar p {
   margin: 0;
+}
+
+/* 把“已选筛选 chips + 视图切换”做成吸顶毛玻璃条，滚动时始终可见 */
+.filter-topbar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface), transparent 14%);
+  backdrop-filter: blur(16px);
+}
+
+.work-waterfall {
+  column-count: 4;
+  column-gap: 20px;
+}
+
+.work-waterfall > .work-card {
+  break-inside: avoid;
+  margin-bottom: 20px;
 }
 
 .view-switcher {

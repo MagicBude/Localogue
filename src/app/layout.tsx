@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SiteHeader } from "@/components/site-header";
+import { SideNav } from "@/components/side-nav";
 import { getUiDictionary } from "@/i18n/ui";
 import { getUserPreferences } from "@/lib/preferences";
 
@@ -35,7 +35,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <SiteHeader dictionary={dictionary} preferences={preferences} />
+        <SideNav dictionary={dictionary} preferences={preferences} />
         <main className="page-shell">{children}</main>
       </body>
     </html>
