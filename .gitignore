@@ -13,6 +13,9 @@ out/
 # Local instance settings
 .localogue/
 
+# WorkBuddy agent internal data (memory, cache, tool state) — local only
+.workbuddy/
+
 # Logs
 *.log
 
