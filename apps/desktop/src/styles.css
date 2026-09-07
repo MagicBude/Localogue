@@ -559,47 +559,141 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-asset-preview { background: #292a26; }
 }
 
-/* V1-19: Desktop faceted browsing and presentation parity. */
+/* V1-19: Desktop faceted browsing and presentation parity.
+   筛选从左侧栏改为顶部吸顶筛选栏 + 可折叠抽屉，释放整列宽度给海报墙。 */
 .desktop-library-layout {
   display: grid;
-  grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
+  gap: 16px;
 }
-.desktop-facet-panel {
-  position: sticky;
-  top: 78px;
-  display: grid;
-  gap: 12px;
-  max-height: calc(100vh - 112px);
-  overflow: auto;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--panel);
-}
-.desktop-facet-panel__heading,
 .desktop-person-filter-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
-.desktop-facet-panel__heading > div,
 .desktop-person-filter-heading > div {
   display: grid;
   gap: 2px;
 }
-.desktop-facet-panel__heading small,
 .desktop-person-filter-heading small { color: var(--muted); }
-.desktop-filter-pair {
+
+/* 顶部吸顶筛选栏：半透明毛玻璃，始终悬浮在结果区上方。 */
+.desktop-facet-bar {
+  position: sticky;
+  top: 12px;
+  z-index: 9;
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(247, 247, 243, .92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .05);
+}
+@media (prefers-color-scheme: dark) {
+  .desktop-facet-bar {
+    background: rgba(24, 25, 22, .92);
+    border-color: #34352f;
+  }
+}
+.desktop-facet-bar__primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+}
+.desktop-facet-bar__primary .field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.desktop-facet-bar__primary .field > span {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.desktop-facet-search { flex: 1 1 240px; }
+.desktop-facet-search input { width: 100%; }
+.desktop-facet-bar__primary .field:not(.desktop-facet-search) { flex: 0 1 150px; }
+.desktop-facet-bar__primary .check-inline { flex: 0 0 auto; align-self: end; }
+
+/* 「更多筛选」开关与清除按钮，与字段底部对齐。 */
+.desktop-facet-toggle,
+.desktop-facet-clear {
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+}
+.desktop-facet-toggle[aria-expanded="true"] { border-color: #85857d; }
+.desktop-facet-toggle__badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #181817;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+@media (prefers-color-scheme: dark) {
+  .desktop-facet-toggle__badge { background: #f2f2ef; color: #181817; }
+}
+.desktop-facet-toggle__caret { opacity: .6; font-size: 10px; }
+
+/* 抽屉：日期/时长/布尔成对排布，Facet 组以卡片网格平铺。 */
+.desktop-facet-bar__drawer {
+  display: grid;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.desktop-facet-bar__pairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.desktop-facet-bar__pairs .desktop-filter-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  flex: 1 1 300px;
+}
+.desktop-facet-bar__pairs .field {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.desktop-facet-bar__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
 }
 .desktop-facet-group {
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--panel-soft, #fafaf7);
+}
+@media (prefers-color-scheme: dark) {
+  .desktop-facet-group { background: #20211e; }
 }
 .desktop-facet-group summary {
   display: flex;
@@ -607,13 +701,15 @@ select[multiple] { min-height: 105px; padding: 6px; }
   gap: 10px;
   cursor: pointer;
   user-select: none;
+  font-size: 12px;
+  font-weight: 700;
 }
-.desktop-facet-group summary small { color: var(--muted); }
+.desktop-facet-group summary small { color: var(--muted); font-weight: 500; }
 .desktop-facet-options {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   margin-top: 8px;
-  max-height: 230px;
+  max-height: 190px;
   overflow: auto;
 }
 .desktop-facet-options label {
@@ -621,7 +717,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 7px;
-  min-height: 28px;
+  min-height: 26px;
   font-size: 12px;
 }
 .desktop-facet-options label span {
@@ -744,13 +840,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-person-detail-copy h1 { margin: 8px 0; }
 
 @media (max-width: 1180px) {
-  .desktop-library-layout { grid-template-columns: 230px minmax(0, 1fr); }
   .desktop-person-filter-grid { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
   .desktop-person-search { grid-column: span 2; }
 }
 @media (max-width: 860px) {
-  .desktop-library-layout { grid-template-columns: 1fr; }
-  .desktop-facet-panel { position: static; max-height: none; }
   .desktop-person-filter-grid { grid-template-columns: 1fr 1fr; }
   .desktop-person-search { grid-column: 1 / -1; }
   .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
@@ -851,27 +944,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
   font-size: 10px;
 }
 
-/* The facet rail is intentionally wider than V1-19. The collapsible app sidebar
-   gives the catalog enough horizontal space without shrinking poster results. */
-.desktop-library-layout {
-  grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
-  gap: 20px;
-}
-.desktop-facet-panel { padding: 18px; }
-.desktop-facet-panel .field,
+/* 顶部筛选栏下没有左侧轨道，整列宽度都留给海报墙。 */
+.desktop-facet-bar .field,
 .desktop-person-filter-panel .field { min-width: 0; }
-.desktop-facet-panel input,
-.desktop-facet-panel select { min-width: 0; }
-.desktop-facet-group summary span,
-.desktop-facet-options label span {
-  overflow-wrap: anywhere;
-}
-.desktop-facet-options label span {
-  white-space: normal;
-  line-height: 1.35;
-}
-.desktop-facet-options { max-height: 270px; }
-.desktop-filter-pair { gap: 10px; }
+.desktop-facet-bar input,
+.desktop-facet-bar select { min-width: 0; }
 
 .desktop-asset-card-body > span {
   display: flex;
@@ -888,7 +965,6 @@ select[multiple] { min-height: 105px; padding: 6px; }
 }
 
 @media (max-width: 1260px) {
-  .desktop-library-layout { grid-template-columns: minmax(300px, 340px) minmax(0, 1fr); }
   .desktop-language-controls label { min-width: 104px; }
   .desktop-language-controls select { min-width: 104px; }
 }
@@ -896,12 +972,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
   /* Keep collapse semantics explicit: the user-controlled button remains the
      single source of truth instead of visually forcing a collapsed sidebar. */
   .desktop-layout:not(.is-sidebar-collapsed) { grid-template-columns: 168px minmax(0, 1fr); }
-  .desktop-library-layout { grid-template-columns: minmax(290px, 320px) minmax(0, 1fr); }
   .topbar-actions { width: 100%; justify-content: flex-start; }
 }
 @media (max-width: 900px) {
-  .desktop-library-layout { grid-template-columns: 1fr; }
-  .desktop-facet-panel { position: static; max-height: none; }
+  .desktop-facet-bar { position: static; }
 }
 @media (prefers-color-scheme: dark) {
   .desktop-asset-card-body > span code { background: rgba(255,255,255,.06); }
@@ -1180,13 +1254,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
 
 
 @media (min-width: 1800px) {
-  .desktop-library-layout { grid-template-columns: minmax(340px, 400px) minmax(0, 1fr); gap: 24px; }
   .desktop-work-table { min-width: 1080px; }
 }
 
 @media (min-width: 2400px) {
   .content-shell { padding-inline: clamp(40px, 2.4vw, 82px); }
-  .desktop-library-layout { grid-template-columns: minmax(360px, 430px) minmax(0, 1fr); }
 }
 @media (prefers-color-scheme: dark) {
   .desktop-metadata-row dt { background: rgba(255,255,255,.025); }
@@ -1567,8 +1639,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .rating-star:hover { transform: scale(1.12); }
 .rating-star.is-active { color: #f2b01e; }
 
-/* 筛选栏：收藏与评分并排一行。 */
-.desktop-facet-favorites { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 8px; border-top: 1px dashed var(--border, #ddd8ce); }
+/* 筛选栏里的「仅看收藏」等复选项，与字段底部对齐。 */
 .field.check-inline { display: flex; flex-direction: row; align-items: center; gap: 8px; }
 .field.check-inline input { width: auto; margin: 0; }
 .field.check-inline span { font-size: 12px; font-weight: 700; color: var(--text, #171713); }

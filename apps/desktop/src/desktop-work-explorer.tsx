@@ -210,6 +210,8 @@ export function DesktopWorkExplorer({
       <WorkFacetPanel
         query={query}
         onChange={changeQuery}
+        view={view}
+        onViewChange={changeView}
         fixedPersonId={fixedPersonId}
         data={data.value}
       />
@@ -221,7 +223,6 @@ export function DesktopWorkExplorer({
             {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
-          <DesktopWorkViewSwitcher current={view} onChange={changeView} />
         </div>
         <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
@@ -240,53 +241,54 @@ export function DesktopWorkExplorer({
 function WorkFacetPanel({
   query,
   onChange,
+  view,
+  onViewChange,
   fixedPersonId,
   data,
 }: {
   query: WorkQuery;
   onChange: (query: WorkQuery) => void;
+  view: DesktopWorkViewMode;
+  onViewChange: (view: DesktopWorkViewMode) => void;
   fixedPersonId?: string;
   data: ExplorerData;
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
+  const [drawerOpen, setDrawerOpen] = useState(() => countAdvancedFilters(query) > 0);
+  const advancedCount = countAdvancedFilters(query);
   return (
-    <aside className="desktop-facet-panel">
-      <div className="desktop-facet-panel__heading">
-        <div><strong>{t("多维筛选")}</strong><small>{t("与 Web 共用 WorkQuery / Facet 规则，支持海报墙 / 瀑布流 / 列表 / 表格四种视图")}</small></div>
-        <button type="button" onClick={() => onChange({ sort: "release_desc" })}>{t("清除")}</button>
-      </div>
+    <aside className="desktop-facet-bar">
+      <div className="desktop-facet-bar__primary">
+        <label className="field desktop-facet-search">
+          <input
+            aria-label={t("搜索番号或标题")}
+            value={query.text ?? ""}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })}
+            placeholder={t("搜索番号或标题")}
+            type="search"
+          />
+        </label>
 
-      <label className="field">
-        <span>{t("搜索番号或标题")}</span>
-        <input
-          value={query.text ?? ""}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })}
-          placeholder={t("例如 MIDV-077 / 标题")}
-          type="search"
-        />
-      </label>
+        <label className="field">
+          <span>{t("排序")}</span>
+          <select value={query.sort ?? "release_desc"} onChange={(event) => patch({ sort: event.target.value as WorkSort })}>
+            <option value="release_desc">{t("发行日期")} ↓</option>
+            <option value="release_asc">{t("发行日期")} ↑</option>
+            <option value="duration_desc">{t("时长")} ↓</option>
+            <option value="duration_asc">{t("时长")} ↑</option>
+            <option value="code_asc">{t("番号")} A → Z</option>
+            <option value="code_desc">{t("番号")} Z → A</option>
+            <option value="title_asc">{t("标题")} A → Z</option>
+            <option value="title_desc">{t("标题")} Z → A</option>
+            <option value="created_desc">{t("最近创建")}</option>
+            <option value="updated_desc">{t("最近更新")}</option>
+            <option value="rating_desc">{t("评分")} ↓</option>
+            <option value="rating_asc">{t("评分")} ↑</option>
+          </select>
+        </label>
 
-      <label className="field">
-        <span>{t("排序")}</span>
-        <select value={query.sort ?? "release_desc"} onChange={(event) => patch({ sort: event.target.value as WorkSort })}>
-          <option value="release_desc">{t("发行日期")} ↓</option>
-          <option value="release_asc">{t("发行日期")} ↑</option>
-          <option value="duration_desc">{t("时长")} ↓</option>
-          <option value="duration_asc">{t("时长")} ↑</option>
-          <option value="code_asc">{t("番号")} A → Z</option>
-          <option value="code_desc">{t("番号")} Z → A</option>
-          <option value="title_asc">{t("标题")} A → Z</option>
-          <option value="title_desc">{t("标题")} Z → A</option>
-          <option value="created_desc">{t("最近创建")}</option>
-          <option value="updated_desc">{t("最近更新")}</option>
-          <option value="rating_desc">{t("评分")} ↓</option>
-          <option value="rating_asc">{t("评分")} ↑</option>
-        </select>
-      </label>
-
-      <div className="desktop-facet-favorites">
-        <label className="field check-inline">
+        <label className="field check-inline desktop-facet-fav">
           <input
             type="checkbox"
             checked={query.favoriteOnly === true}
@@ -294,7 +296,8 @@ function WorkFacetPanel({
           />
           <span>{t("仅看收藏")}</span>
         </label>
-        <label className="field">
+
+        <label className="field desktop-facet-rating">
           <span>{t("评分至少")}</span>
           <select
             value={query.ratingMin ?? ""}
@@ -308,31 +311,56 @@ function WorkFacetPanel({
             <option value="5">★5</option>
           </select>
         </label>
+
+        <button
+          type="button"
+          className="desktop-facet-toggle"
+          aria-expanded={drawerOpen}
+          onClick={() => setDrawerOpen((value) => !value)}
+        >
+          <span>{t("更多筛选")}</span>
+          {advancedCount ? <span className="desktop-facet-toggle__badge">{advancedCount}</span> : null}
+          <span className="desktop-facet-toggle__caret">{drawerOpen ? "▴" : "▾"}</span>
+        </button>
+
+        <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
+
+        <button type="button" className="ghost-button desktop-facet-clear" onClick={() => onChange({ sort: "release_desc" })}>
+          {t("清除")}
+        </button>
       </div>
 
-      <div className="desktop-filter-pair">
-        <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
-        <label className="field"><span>{t("发行日期")} ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
-      </div>
-      <div className="desktop-filter-pair">
-        <label className="field"><span>{t("时长")} ≥</span><input min="0" value={query.durationMin ?? ""} onChange={(event) => patch({ durationMin: parseOptionalNumber(event.target.value) })} placeholder="90" type="number" /></label>
-        <label className="field"><span>{t("时长")} ≤</span><input min="0" value={query.durationMax ?? ""} onChange={(event) => patch({ durationMax: parseOptionalNumber(event.target.value) })} placeholder="180" type="number" /></label>
-      </div>
-      <div className="desktop-filter-pair">
-        <BooleanSelect label={t("有封面")} value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
-        <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
-      </div>
+      {drawerOpen ? (
+        <div className="desktop-facet-bar__drawer">
+          <div className="desktop-facet-bar__pairs">
+            <div className="desktop-filter-pair">
+              <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
+              <label className="field"><span>{t("发行日期")} ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
+            </div>
+            <div className="desktop-filter-pair">
+              <label className="field"><span>{t("时长")} ≥</span><input min="0" value={query.durationMin ?? ""} onChange={(event) => patch({ durationMin: parseOptionalNumber(event.target.value) })} placeholder="90" type="number" /></label>
+              <label className="field"><span>{t("时长")} ≤</span><input min="0" value={query.durationMax ?? ""} onChange={(event) => patch({ durationMax: parseOptionalNumber(event.target.value) })} placeholder="180" type="number" /></label>
+            </div>
+            <div className="desktop-filter-pair">
+              <BooleanSelect label={t("有封面")} value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
+              <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
+            </div>
+          </div>
 
-      {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
-      <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
-      <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
-      <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
-      <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
+          <div className="desktop-facet-bar__groups">
+            {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
+            <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
+            <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
+            <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
+            <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
+          </div>
+        </div>
+      ) : null}
     </aside>
   );
 }
@@ -502,4 +530,28 @@ function removeChip(query: WorkQuery, key: keyof WorkQuery, value?: string): Wor
     delete (next as Record<string, unknown>)[key];
   }
   return next;
+}
+
+/**
+ * 统计“抽屉”中已选的高级筛选数量：用于「更多筛选」按钮上的徽标，
+ * 以及首次进入时是否自动展开抽屉。基础栏里的搜索/排序/收藏/评分不计入，
+ * 因为它们始终可见。
+ */
+function countAdvancedFilters(query: WorkQuery): number {
+  const arrayKeys: Array<keyof WorkQuery> = [
+    "personIds", "directorIds", "releaseYears", "resolutionTiers",
+    "workTypeIds", "makerIds", "labelIds", "seriesIds", "genreIds", "tagIds",
+  ];
+  let count = 0;
+  for (const key of arrayKeys) {
+    const value = query[key];
+    if (Array.isArray(value)) count += value.length;
+  }
+  if (query.releaseFrom) count += 1;
+  if (query.releaseTo) count += 1;
+  if (query.durationMin !== undefined) count += 1;
+  if (query.durationMax !== undefined) count += 1;
+  if (query.hasCover !== undefined) count += 1;
+  if (query.hasMedia !== undefined) count += 1;
+  return count;
 }
