@@ -1,5 +1,6 @@
 # Changelog
 
+- 桌面端补齐瀑布流视图并统一海报卡片样式：将 `DesktopWorkViewMode` 扩展为 grid / waterfall / list / table 四种，新增 `DesktopWorkCard` 组件对齐网页端 `WorkCard`（圆角海报、悬浮“查看详情”overlay、番号/标题/演员/类型 chip、收藏按钮）；海报墙与瀑布流共用新卡片，旧版 `.work-tile` 卡片与相关 dead CSS 清理移除；筛选面板头部文案同步改为“支持海报墙 / 瀑布流 / 列表 / 表格四种视图”。瀑布流使用 CSS columns 实现 masonry 布局，并补全响应式列数与暗黑模式。
 - 桌面端补齐收藏 / 评分的完整交互界面：新增 `DesktopFavoritesProvider`，通过 `repository.list/savePresentationPreference` 加载并在客户端乐观更新收藏与评分（沿用私人展示偏好层，不写 Canonical Work、不进 Shared Pack）；作品浏览器的 grid / list / table 三种视图注入 `inline` / `card` 变体收藏按钮，详情页新增五星评分控件与 `detail` 变体收藏按钮；侧栏新增「收藏」导航项与独立收藏页（以 `favoriteOnly` 为初始查询、用 `key={favoriteCount}` 强制重挂实现取消收藏后列表实时刷新）；作品浏览器 Facet 新增「仅看收藏」勾选与「评分至少」下拉，并接入 `rating_desc` / `rating_asc` 排序，筛选 Chips 与 URL 深链同步覆盖；日 / 英翻译表补齐相关文案。该桌面端 UI 与网页端功能对齐，但走 Repository 私有方法而非网页 HTTP API。
 - 桌面端作品查询接入收藏 / 评分筛选与评分排序：`TauriLibraryRepository.listWorks` 在 `favoriteOnly` / `ratingMin` 或 `rating_*` 排序激活时，经 `desktopBridge` 读取私人展示偏好并注入共享纯函数 `queryWorks`，与网页端 `JsonLibraryRepository` 行为对齐；此前桌面端收藏 / 评分筛选为 no-op。
 - 收藏页支持按评分 / 发行日排序：`/favorites` 新增排序下拉（收藏顺序 / 评分高→低 / 评分低→高 / 发行日新→旧 / 旧→新），排序仅作用于内存中的卡片数组并通过 URL 的 `sort` 参数深链，刷新 / 复制链接均可还原；评分排序复用私人展示偏好层的 `listWorkRatings()`，不触及 Canonical Work。
