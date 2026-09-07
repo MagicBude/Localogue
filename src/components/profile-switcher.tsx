@@ -51,13 +51,21 @@ export function ProfileSwitcher({ label }: ProfileSwitcherProps) {
     if (!id || id === activeId) return;
     setBusy(true);
     try {
-      await fetch("/api/settings/profile", {
+      const response = await fetch("/api/settings/profile", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ action: "switch", id }),
       });
+      const payload = await response.json() as { error?: string };
+      if (!response.ok) {
+        throw new Error(payload.error ?? "切换资料库失败。");
+      }
+      // 只有服务端确认设置文件已写入后才更新选择框。这样写入失败时，界面不会
+      // 假装已经切换到另一个资料库，随后又显示旧资料而让用户困惑。
       setActiveId(id);
       router.refresh();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : String(error));
     } finally {
       setBusy(false);
     }

@@ -43,6 +43,10 @@ export default async function SettingsPage() {
       </section>
 
       <SettingsForm
+        // Profile 切换后必须重建表单的本地 state。否则 React 会保留上一个 Profile
+        // 初始化出来的输入值，用户下一次“保存”就可能把旧路径写进新 Profile。
+        // key 表达的是：不同 Profile 是不同的一份编辑草稿，而不是同一表单换了标题。
+        key={overview.settings.activeLibraryProfileId ?? "no-active-profile"}
         language={preferences.uiLanguage}
         settings={overview.settings}
         effectivePrivatePath={overview.effective.privateLibraryPath}
