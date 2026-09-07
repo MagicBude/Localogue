@@ -1,5 +1,6 @@
 # Changelog
 
+- 桌面端作品查询接入收藏 / 评分筛选与评分排序：`TauriLibraryRepository.listWorks` 在 `favoriteOnly` / `ratingMin` 或 `rating_*` 排序激活时，经 `desktopBridge` 读取私人展示偏好并注入共享纯函数 `queryWorks`，与网页端 `JsonLibraryRepository` 行为对齐；此前桌面端收藏 / 评分筛选为 no-op。
 - 收藏页支持按评分 / 发行日排序：`/favorites` 新增排序下拉（收藏顺序 / 评分高→低 / 评分低→高 / 发行日新→旧 / 旧→新），排序仅作用于内存中的卡片数组并通过 URL 的 `sort` 参数深链，刷新 / 复制链接均可还原；评分排序复用私人展示偏好层的 `listWorkRatings()`，不触及 Canonical Work。
 - 收藏按钮覆盖列表与表格视图：作品浏览器的 list / table 表现层新增紧凑型 `inline` 收藏按钮（新增 `FavoriteButton variant="inline"`），与卡片 / 详情 / 收藏页共用同一 `FavoritesProvider` 乐观更新；grid / waterfall / list / table 四种视图现已全部可从任意视图一键收藏。
 - 作品浏览器筛选 / 排序规则链接入收藏与评分：在既有 `WorkQuery` 上新增 `favoriteOnly` 与 `ratingMin`（1–5，越界自动收敛）两个筛选维度，以及 `rating_desc` / `rating_asc` 排序；收藏与评分数据来自私人展示偏好层（`PresentationPreference`），由 Repository 在查询真正用到时才加载并注入 `queryWorks`，不污染 Canonical Work、不进 Shared Pack。筛选器、活跃 Chips 与 URL 深链全部覆盖新维度，刷新 / 前进后退 / 复制链接均保真。

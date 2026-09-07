@@ -53,6 +53,39 @@ export class TauriLibraryRepository implements LibraryRepository {
       this.listMediaFiles(),
       this.readMerged<Asset>("assets"),
     ]);
+
+    // 私人展示偏好（收藏 / 评分）按需加载：只有筛选或排序真正用到时才读偏好文件，
+    // 与 Web 端 JsonLibraryRepository 保持同一套纯函数查询核心（queryWorks）。
+    // 桌面端偏好读取走 desktopBridge.readPrivatePresentationPreferences()，
+    // 不依赖 Web 的 getPrivateRuntimeLibraryPath()。
+    const needsPreference =
+      query.favoriteOnly ||
+      query.ratingMin !== undefined ||
+      query.sort === "rating_desc" ||
+      query.sort === "rating_asc";
+    if (needsPreference) {
+      const preferences = await this.listPresentationPreferences();
+      const favoriteWorkIds = new Set(
+        preferences
+          .filter((item) => item.entityType === "work" && item.favorite === true)
+          .map((item) => item.entityId),
+      );
+      const ratingById = new Map<string, number>();
+      for (const item of preferences) {
+        if (item.entityType === "work" && typeof item.rating === "number") {
+          ratingById.set(item.entityId, item.rating);
+        }
+      }
+      return queryWorks(
+        works,
+        query,
+        mediaFiles,
+        assets,
+        favoriteWorkIds,
+        ratingById,
+      );
+    }
+
     return queryWorks(works, query, mediaFiles, assets);
   }
 
