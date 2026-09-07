@@ -30,6 +30,8 @@ export function queryWorks(
   query: WorkQuery = {},
   mediaFiles: readonly MediaFile[] = [],
   assets: readonly Asset[] = [],
+  favoriteWorkIds: ReadonlySet<string> = new Set(),
+  ratingById: ReadonlyMap<string, number> = new Map(),
 ): WorkSearchResult {
   const mediaWorkIds = new Set(
     mediaFiles.flatMap((item) => (item.workId ? [item.workId] : [])),
@@ -45,9 +47,9 @@ export function queryWorks(
   );
 
   const filtered = works.filter((work) =>
-    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork),
+    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, favoriteWorkIds, ratingById),
   );
-  const sorted = [...filtered].sort(createWorkComparator(query.sort));
+  const sorted = [...filtered].sort(createWorkComparator(query.sort, ratingById));
   const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
   const requestedPage = positiveInteger(query.page, 1);
   const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
@@ -65,6 +67,8 @@ export function queryWorks(
       mediaWorkIds,
       subjectCoverWorkIds,
       mediaResolutionsByWork,
+      favoriteWorkIds,
+      ratingById,
     ),
   };
 }
@@ -134,6 +138,8 @@ function matchesWork(
   mediaWorkIds: ReadonlySet<string> = new Set(),
   subjectCoverWorkIds: ReadonlySet<string> = new Set(),
   mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>> = new Map(),
+  favoriteWorkIds: ReadonlySet<string> = new Set(),
+  ratingById: ReadonlyMap<string, number> = new Map(),
 ): boolean {
   if (query.text) {
     const needle = query.text.trim().toLocaleLowerCase();
@@ -195,6 +201,12 @@ function matchesWork(
     if (hasCover !== query.hasCover) return false;
   }
 
+  if (query.favoriteOnly && !favoriteWorkIds.has(work.id)) return false;
+  if (query.ratingMin !== undefined) {
+    const rating = ratingById.get(work.id);
+    if (rating === undefined || rating < query.ratingMin) return false;
+  }
+
   return true;
 }
 
@@ -208,7 +220,8 @@ function containsScalar(value: string | undefined, expected?: string[]): boolean
   return value !== undefined && expected.includes(value);
 }
 
-function createWorkComparator(sort: WorkSort = "release_desc") {
+function createWorkComparator(sort: WorkSort = "release_desc", ratingById: ReadonlyMap<string, number> = new Map()) {
+  const ratingOf = (work: Work) => ratingById.get(work.id) ?? 0;
   return (a: Work, b: Work): number => {
     switch (sort) {
       case "release_asc":
@@ -238,6 +251,10 @@ function createWorkComparator(sort: WorkSort = "release_desc") {
         );
       case "duration_desc":
         return (b.durationMinutes ?? -1) - (a.durationMinutes ?? -1);
+      case "rating_asc":
+        return ratingOf(a) - ratingOf(b);
+      case "rating_desc":
+        return ratingOf(b) - ratingOf(a);
     }
   };
 }
@@ -248,6 +265,8 @@ function buildWorkFacets(
   mediaWorkIds: ReadonlySet<string>,
   subjectCoverWorkIds: ReadonlySet<string>,
   mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>>,
+  favoriteWorkIds: ReadonlySet<string> = new Set(),
+  ratingById: ReadonlyMap<string, number> = new Map(),
 ): WorkFacets {
   const facetWorks = (ignoredKeys: Array<keyof WorkQuery>) => {
     const facetQuery = { ...query };
@@ -256,7 +275,7 @@ function buildWorkFacets(
     delete facetQuery.page;
     delete facetQuery.pageSize;
     return works.filter((work) =>
-      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork),
+      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, favoriteWorkIds, ratingById),
     );
   };
 

@@ -732,6 +732,22 @@ code {
   gap: 8px;
 }
 
+.field.check-inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.field.check-inline input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
+  accent-color: var(--favorite-color, #e5484d);
+}
+
 .field--grow {
   min-width: 0;
 }

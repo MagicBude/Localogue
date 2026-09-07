@@ -77,6 +77,19 @@ export function WorkFilterChips({
   pushBoolean(chips, searchParams, "hasCover", dictionary.hasCover, dictionary);
   pushBoolean(chips, searchParams, "hasMedia", dictionary.hasMedia, dictionary);
 
+  const favoriteOnlyValue = first(searchParams.favoriteOnly);
+  if (favoriteOnlyValue === "true") {
+    chips.push({ key: "favoriteOnly", value: "true", label: dictionary.favoritesOnly });
+  }
+  const ratingMinValue = first(searchParams.ratingMin);
+  if (ratingMinValue) {
+    chips.push({
+      key: "ratingMin",
+      value: ratingMinValue,
+      label: `${dictionary.ratedAtLeast}：${ratingMinValue}★`,
+    });
+  }
+
   if (!chips.length) return null;
 
   return (

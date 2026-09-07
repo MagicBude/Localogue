@@ -12,6 +12,8 @@ Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:bui
 
 新建 Library Profile 现在自动分配独立 Native-managed Private Library，普通用户只需要选择内容根目录；NFO 导入结果区修复表格负边距造成的轻微重叠，并明确未映射来源词属于当次导入提示而不是应用日志。
 
+作品浏览器筛选 / 排序规则链现已接入收藏与评分：在 `WorkQuery` 增加 `favoriteOnly` / `ratingMin` 筛选与 `rating_desc` / `rating_asc` 排序，收藏与评分数据按需从私人展示偏好层注入查询核心，并完整覆盖筛选器、活跃 Chips 与 URL 深链；未配置收藏 / 评分时所有新维度自动退化为“不过滤”，不增加纯浏览请求的开销。
+
 网页端现已采用与桌面端一致的 Library Profile 多资料库模型：设置页支持切换 / 重命名 / 删除 / 新建 Profile，顶栏提供仅多 Profile 时出现的切换下拉，并补齐桌面端独有的「添加示例库」能力；旧版单组路径在读取时自动升级为 Profile，扁平字段始终镜像当前 Profile。Web / Desktop 在资料库层对齐，详见 `docs/product/library-profiles-web.md`。
 
 作品收藏与个人评分（1–5 星）已落地：复用官方 `PresentationPreference` 私人展示偏好层，不污染 Canonical Work、不进 Shared Pack；未配置 Private Library 时回退 `data/library` 仍可本地保存。卡片心形按钮、侧栏带徽标的「收藏」入口、`/favorites` 收藏页与详情页五星评分均已接入，详见 `docs/product/favorites-and-ratings.md`。

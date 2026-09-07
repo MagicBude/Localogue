@@ -12,7 +12,9 @@ export type WorkSort =
   | "title_asc"
   | "title_desc"
   | "duration_asc"
-  | "duration_desc";
+  | "duration_desc"
+  | "rating_desc"
+  | "rating_asc";
 
 /** 清晰度来自关联 MediaFile；同一 Work 可以同时命中多个档位。 */
 export type MediaResolutionTier = "4k" | "1080p" | "720p" | "sd";
@@ -35,6 +37,10 @@ export interface WorkQuery {
   durationMax?: number;
   hasMedia?: boolean;
   hasCover?: boolean;
+  /** 仅显示已收藏的作品（私人展示偏好层，不污染 Canonical Work）。 */
+  favoriteOnly?: boolean;
+  /** 仅显示评分 ≥ 该值的作品；1–5。 */
+  ratingMin?: number;
   sort?: WorkSort;
   page?: number;
   pageSize?: number;

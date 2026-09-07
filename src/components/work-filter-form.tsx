@@ -84,6 +84,8 @@ export function WorkFilterForm({
             <option value="code_desc">番号 Z → A</option>
             <option value="title_asc">标题 A → Z</option>
             <option value="title_desc">标题 Z → A</option>
+            <option value="rating_desc">{dictionary.rating} ↓</option>
+            <option value="rating_asc">{dictionary.rating} ↑</option>
           </select>
         </label>
 
@@ -134,6 +136,32 @@ export function WorkFilterForm({
             value={query.hasMedia}
             dictionary={dictionary}
           />
+        </div>
+
+        <div className="field-row">
+          <label className="field check-inline">
+            <input
+              defaultChecked={query.favoriteOnly ?? false}
+              name="favoriteOnly"
+              type="checkbox"
+              value="true"
+            />
+            <span>{dictionary.favoritesOnly}</span>
+          </label>
+          <label className="field">
+            <span>{dictionary.ratedAtLeast}</span>
+            <select
+              defaultValue={query.ratingMin ? String(query.ratingMin) : ""}
+              name="ratingMin"
+            >
+              <option value="">{dictionary.any}</option>
+              <option value="5">★ 5</option>
+              <option value="4">★ 4+</option>
+              <option value="3">★ 3+</option>
+              <option value="2">★ 2+</option>
+              <option value="1">★ 1+</option>
+            </select>
+          </label>
         </div>
 
         {!fixedPersonId && people.length ? (

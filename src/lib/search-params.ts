@@ -32,6 +32,8 @@ export function parseWorkQuery(
     durationMax: toOptionalNumber(first(params.durationMax)),
     hasMedia: toOptionalBoolean(first(params.hasMedia)),
     hasCover: toOptionalBoolean(first(params.hasCover)),
+    favoriteOnly: toOptionalBoolean(first(params.favoriteOnly)),
+    ratingMin: clampRating(toOptionalNumber(first(params.ratingMin))),
     sort: toWorkSort(first(params.sort)) ?? defaults.sort ?? "release_desc",
     page: toOptionalNumber(first(params.page)) ?? defaults.page ?? 1,
     pageSize: defaults.pageSize ?? 24,
@@ -51,6 +53,12 @@ function toOptionalNumber(value: string | undefined): number | undefined {
   if (!value?.trim()) return undefined;
   const number = Number(value);
   return Number.isFinite(number) ? number : undefined;
+}
+
+/** 评分范围 1–5；越界或非数字一律视为未设置。 */
+function clampRating(value: number | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  return Math.min(5, Math.max(1, Math.round(value)));
 }
 
 function toOptionalBoolean(value: string | undefined): boolean | undefined {
@@ -73,6 +81,8 @@ function toWorkSort(value: string | undefined): WorkSort | undefined {
     "title_desc",
     "duration_asc",
     "duration_desc",
+    "rating_desc",
+    "rating_asc",
   ];
 
   return allowed.includes(value as WorkSort) ? (value as WorkSort) : undefined;

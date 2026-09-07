@@ -46,6 +46,25 @@ export async function listFavoriteWorkIds(): Promise<string[]> {
     .map((item) => item.entityId);
 }
 
+/**
+ * 返回「作品 ID → 评分」映射，供作品浏览器按评分筛选 / 排序使用。
+ *
+ * 评分属于私人展示偏好层，这里只读取，绝不回写 Canonical Work。
+ * 未评分作品不会出现在映射里（视为 0 / 未评分）。
+ */
+export async function listWorkRatings(): Promise<Map<string, number>> {
+  const root = getPrivateRuntimeLibraryPath();
+  const store = new JsonFileStore(root);
+  const items = await store.readCollection<PresentationPreference>(COLLECTION);
+  const ratings = new Map<string, number>();
+  for (const item of items) {
+    if (item.entityType === "work" && typeof item.rating === "number") {
+      ratings.set(item.entityId, item.rating);
+    }
+  }
+  return ratings;
+}
+
 export function makePresentationPreferenceId(
   entityType: PresentationEntityType,
   entityId: string,

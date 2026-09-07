@@ -12,6 +12,7 @@ import type { PersonQuery, PersonSearchResult } from "@/domain/queries/person-qu
 import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
 import { queryPeople, queryWorks } from "@/application/library/library-query";
 import { JsonFileStore, type JsonStoreRoots } from "@/infrastructure/repositories/json-file-store";
+import { listFavoriteWorkIds, listWorkRatings } from "@/infrastructure/presentation/presentation-preference-store";
 
 /**
  * V1 的文件化 Repository。
@@ -46,6 +47,29 @@ export class JsonLibraryRepository implements LibraryRepository {
       this.listMediaFiles(),
       this.store.readCollection<Asset>("assets"),
     ]);
+
+    // 私人展示偏好（收藏 / 评分）按需加载：只有筛选或排序真正用到时才读偏好文件，
+    // 避免对纯浏览请求增加无谓的磁盘读取。
+    const needsPreference =
+      query.favoriteOnly ||
+      query.ratingMin !== undefined ||
+      query.sort === "rating_desc" ||
+      query.sort === "rating_asc";
+    if (needsPreference) {
+      const [favoriteWorkIds, ratingById] = await Promise.all([
+        listFavoriteWorkIds(),
+        listWorkRatings(),
+      ]);
+      return queryWorks(
+        works,
+        query,
+        mediaFiles,
+        assets,
+        new Set(favoriteWorkIds),
+        ratingById,
+      );
+    }
+
     return queryWorks(works, query, mediaFiles, assets);
   }
 
