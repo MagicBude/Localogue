@@ -21,37 +21,44 @@ export function DesktopWorkCard({ card, onOpen }: DesktopWorkCardProps) {
 
   return (
     <article className="desktop-work-card">
-      <DesktopFavoriteButton variant="card" workId={work.id} />
+      <div className="desktop-work-card__media">
+        <DesktopFavoriteButton variant="card" workId={work.id} />
 
-      <button
-        className="desktop-work-card__poster"
-        onClick={() => onOpen(work.id)}
-        type="button"
-        aria-label={`${work.code} ${title}`}
-      >
-        <DesktopAssetImage
-          asset={poster}
-          alt={`${work.code} poster`}
-          fallback={<PosterPlaceholder code={work.code} />}
-        />
-      </button>
-
-      <button
-        className="desktop-work-card__overlay"
-        onClick={() => onOpen(work.id)}
-        type="button"
-      >
-        {t("查看详情")}
-      </button>
-
-      <div className="desktop-work-card__body">
         <button
-          className="desktop-work-card__code"
+          className="desktop-work-card__poster"
+          onClick={() => onOpen(work.id)}
+          type="button"
+          aria-label={`${work.code} ${title}`}
+        >
+          <DesktopAssetImage
+            asset={poster}
+            alt={`${work.code} poster`}
+            fallback={<PosterPlaceholder code={work.code} />}
+          />
+        </button>
+
+        <button
+          className="desktop-work-card__overlay"
           onClick={() => onOpen(work.id)}
           type="button"
         >
-          {work.code}
+          {t("查看详情")}
         </button>
+      </div>
+
+      <div className="desktop-work-card__body">
+        <div className="desktop-work-card__identity">
+          <button
+            className="desktop-work-card__code"
+            onClick={() => onOpen(work.id)}
+            type="button"
+          >
+            {work.code}
+          </button>
+          {workTypeNames.map((label) => (
+            <span className="desktop-work-card__chip" key={label}>{label}</span>
+          ))}
+        </div>
         <h3>
           <button onClick={() => onOpen(work.id)} type="button">
             {title}
@@ -71,16 +78,6 @@ export function DesktopWorkCard({ card, onOpen }: DesktopWorkCardProps) {
           <p className="desktop-work-card__people">{performerNames.join(" · ")}</p>
         ) : makerName ? (
           <p className="desktop-work-card__people">{makerName}</p>
-        ) : null}
-
-        {workTypeNames.length ? (
-          <div className="desktop-work-card__chips">
-            {workTypeNames.map((label) => (
-              <span className="desktop-work-card__chip" key={label}>
-                {label}
-              </span>
-            ))}
-          </div>
         ) : null}
       </div>
     </article>

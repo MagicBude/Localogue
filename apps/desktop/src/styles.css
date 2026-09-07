@@ -93,10 +93,13 @@ button:hover:not(:disabled) { border-color: #85857d; }
 .desktop-work-waterfall { column-count: 4; column-gap: 20px; }
 .desktop-work-waterfall > .desktop-work-card { break-inside: avoid; margin-bottom: 20px; }
 
-.desktop-work-card { position: relative; min-width: 0; }
+.desktop-work-card { min-width: 0; }
+.desktop-work-card__media { position: relative; }
 .desktop-work-card__overlay {
   position: absolute;
-  top: 10px;
+  /* 收藏按钮固定在右上角；详情入口放到右下角，两个独立操作不再互相遮挡。 */
+  top: auto;
+  bottom: 10px;
   right: 10px;
   z-index: 2;
   padding: 6px 11px;
@@ -175,6 +178,13 @@ button:hover:not(:disabled) { border-color: #85857d; }
 }
 
 .desktop-work-card__body { padding: 12px 4px 0; }
+.desktop-work-card__identity,
+.desktop-work-list-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .desktop-work-card__body h3 { margin: 4px 0 6px; font-size: 1rem; line-height: 1.35; }
 .desktop-work-card__body h3 button,
 .desktop-work-card__code {
@@ -212,13 +222,13 @@ button:hover:not(:disabled) { border-color: #85857d; }
 .desktop-work-card__chip {
   display: inline-flex;
   align-items: center;
-  min-height: 25px;
-  padding: 0 9px;
+  min-height: 21px;
+  padding: 0 7px;
   border: 1px solid var(--border, #ddd8ce);
   border-radius: 999px;
   background: var(--panel-soft, #faf9f5);
   color: var(--muted, #6c6a63);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 650;
 }
 
@@ -460,6 +470,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
   padding: 0;
   text-align: left;
 }
+.desktop-work-list-heading .favorite-button--inline { margin-left: auto; }
 .desktop-work-list-main h3 { margin: 4px 0 0; font-size: 15px; line-height: 1.45; }
 .desktop-work-list-main p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
 .work-code { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; font-weight: 850; }
@@ -580,7 +591,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
 /* 顶部吸顶筛选栏：半透明毛玻璃，始终悬浮在结果区上方。 */
 .desktop-facet-bar {
   position: sticky;
-  top: 12px;
+  /* 顶部应用栏本身也是 sticky（约 76px 高），筛选栏需停在它的下方。 */
+  top: 88px;
   z-index: 9;
   display: grid;
   gap: 12px;
@@ -976,7 +988,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-layout:not(.is-sidebar-collapsed) { grid-template-columns: 168px minmax(0, 1fr); }
   .topbar-actions { width: 100%; justify-content: flex-start; }
 }
-@media (max-width: 900px) {
+@media (max-width: 1040px) {
+  /* 此宽度下顶部工具栏会换行，高度不再固定；取消第二层吸顶可避免覆盖。 */
   .desktop-facet-bar { position: static; }
 }
 @media (prefers-color-scheme: dark) {

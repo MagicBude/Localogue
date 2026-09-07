@@ -122,17 +122,20 @@ export function DesktopWorkResults({
                 fallback={<PosterPlaceholder code={card.work.code} />}
               />
             </button>
-            <button className="desktop-work-list-main" onClick={() => onOpen(card.work.id)} type="button">
-              <strong className="work-code">{card.work.code}</strong>
-              <h3>{card.title}</h3>
+            <div className="desktop-work-list-main">
+              <div className="desktop-work-list-heading">
+                <button className="table-link work-code" onClick={() => onOpen(card.work.id)} type="button">{card.work.code}</button>
+                {card.workTypeNames.map((label) => <span className="desktop-work-card__chip" key={label}>{label}</span>)}
+                <DesktopFavoriteButton variant="inline" workId={card.work.id} />
+              </div>
+              <h3><button className="table-link" onClick={() => onOpen(card.work.id)} type="button">{card.title}</button></h3>
               <p>{card.performerNames.join(" · ") || "—"}</p>
-            </button>
+            </div>
             <div className="desktop-work-list-facts">
               <span>{card.releaseDate}</span>
               <span>{card.work.durationMinutes !== undefined ? `${card.work.durationMinutes} ${t("分钟")}` : "—"}</span>
               <span>{card.makerName ?? "—"}</span>
             </div>
-            <DesktopFavoriteButton variant="inline" workId={card.work.id} />
           </article>
         ))}
       </div>
