@@ -91,7 +91,18 @@ export function DesktopFavoritesProvider({
       try {
         await repository.savePresentationPreference(next);
       } catch {
-        // 写入失败：保留乐观状态，等待下次用户操作或刷新重试。
+        // 仅当内存里仍是本次乐观结果时回滚。若用户已经进行了更新的操作，
+        // 旧请求失败不能覆盖新状态；对象引用在这里充当这一轮操作的身份标记。
+        setPreferences((current) => {
+          const currentItem = current.find(
+            (item) => item.entityType === "work" && item.entityId === workId,
+          );
+          if (currentItem !== next) return current;
+          const withoutOptimistic = current.filter(
+            (item) => !(item.entityType === "work" && item.entityId === workId),
+          );
+          return existing ? [...withoutOptimistic, existing] : withoutOptimistic;
+        });
       }
     };
 

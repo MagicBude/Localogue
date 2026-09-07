@@ -40,27 +40,21 @@ export function RatingStars({ workId, dictionary }: RatingStarsProps) {
 
   async function rate(value: number) {
     // 再次点击当前星级 → 清除。
+    const previous = rating;
     const next = rating === value ? null : value;
     setRating(next);
     try {
-      await fetch(`/api/presentation/work/${workId}`, {
+      const response = await fetch(`/api/presentation/work/${workId}`, {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ rating: next }),
       });
+      // fetch 只有网络中断时才会 reject；HTTP 400/500 仍会正常 resolve。
+      // 因此必须显式检查 ok，否则界面会显示新评分，磁盘里却没有保存。
+      if (!response.ok) throw new Error("保存评分失败。");
     } catch {
-      // 写入失败时回退到本地原值，让用户感知到未保存。
-      void loadLatest();
-    }
-  }
-
-  async function loadLatest() {
-    try {
-      const response = await fetch(`/api/presentation/work/${workId}`);
-      const data: { preference?: { rating?: number | null } } = await response.json();
-      setRating(typeof data.preference?.rating === "number" ? data.preference.rating : null);
-    } catch {
-      /* 忽略 */
+      // 写入失败时立即回退到操作前的值，使界面与持久化数据保持一致。
+      setRating(previous);
     }
   }
 
