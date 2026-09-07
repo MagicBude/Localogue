@@ -16,6 +16,8 @@ Desktop 发布基线现已启用 NSIS current-user 安装器；`pnpm desktop:bui
 
 作品收藏与个人评分（1–5 星）已落地：复用官方 `PresentationPreference` 私人展示偏好层，不污染 Canonical Work、不进 Shared Pack；未配置 Private Library 时回退 `data/library` 仍可本地保存。卡片心形按钮、侧栏带徽标的「收藏」入口、`/favorites` 收藏页与详情页五星评分均已接入，详见 `docs/product/favorites-and-ratings.md`。
 
+本地视频抽帧生成封面已落地：作品详情页可一键从首个可读取的本地视频截帧，作为私人封面偏好（不修改 Canonical Work、不进 Shared Pack）；设置页新增 `ffmpegPath`，未安装 / 未配置 ffmpeg 时返回结构化降级原因而非报错。抽帧走 `MediaFramePort` + `NodeFrameAdapter`，沿用 ffprobe 的平台边界；详见 `docs/product/cover-frame-extraction.md`。
+
 
 
 V1-27D 在不增加 Browse 级联筛选的前提下继续完善目录可读性：

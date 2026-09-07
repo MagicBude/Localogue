@@ -137,6 +137,12 @@ const dictionaries = {
     clearRating: "評価を消す",
     favoritesEmpty: "まだお気に入りがありません",
     favoritesHint: "作品カードのハートアイコンを押すとここに追加されます。",
+    coverFrame: "動画から表紙を抽出",
+    coverFrameHint: "ローカルの ffmpeg で作品の最初に読み取れる動画から1フレームを抽出し、私用の表紙として設定します（作品本体は変更しません）。",
+    generateCover: "表紙を生成",
+    generatingCover: "生成中…",
+    coverGenerated: "表紙として設定しました。",
+    coverGenerateFailed: "表紙の生成に失敗しました。",
   },
   "zh-CN": {
     brandSubtitle: "本地优先的个人媒体资料库",
@@ -274,6 +280,12 @@ const dictionaries = {
     clearRating: "清除评分",
     favoritesEmpty: "还没有收藏任何作品",
     favoritesHint: "点击作品卡片上的心形图标即可收藏。",
+    coverFrame: "从视频抽帧生成封面",
+    coverFrameHint: "使用本地 ffmpeg 从作品首个可读取视频抽取一帧，作为你的私人封面偏好（不修改作品本体）。",
+    generateCover: "生成封面",
+    generatingCover: "正在生成…",
+    coverGenerated: "已生成并设为封面。",
+    coverGenerateFailed: "生成封面失败。",
   },
   en: {
     brandSubtitle: "A local-first personal media catalog",
@@ -411,6 +423,12 @@ const dictionaries = {
     clearRating: "Clear rating",
     favoritesEmpty: "No favorites yet",
     favoritesHint: "Tap the heart icon on any work card to add it here.",
+    coverFrame: "Generate cover from video",
+    coverFrameHint: "Use local ffmpeg to extract one frame from the first readable video of this work and set it as your private cover preference (the work itself is not modified).",
+    generateCover: "Generate cover",
+    generatingCover: "Generating…",
+    coverGenerated: "Set as cover.",
+    coverGenerateFailed: "Failed to generate cover.",
   },
 } as const;
 

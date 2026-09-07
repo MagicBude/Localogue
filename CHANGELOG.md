@@ -1,5 +1,6 @@
 # Changelog
 
+- 新增本地视频抽帧生成封面：作品详情页可一键从首个可读取的本地视频截取一帧，作为私人封面偏好；抽出的帧上传为 `poster` Asset 并通过 `PresentationPreference.preferredCoverAssetId` 指向它，不修改 Canonical Work、不进 Shared Pack。设置页新增 `ffmpegPath` 字段（与 `ffprobePath` 同构），未安装 / 未配置 ffmpeg 时接口返回结构化降级原因而非报错，代码当下可验证、装好 ffmpeg 即直接产出封面。抽帧走 `MediaFramePort` + `NodeFrameAdapter`，沿用 ffprobe 的平台边界与 `execFile` 调用方式。
 - 新增作品收藏与个人评分（1–5 星）：收藏走私人展示偏好层 `PresentationPreference`，不修改 Canonical Work、不进入 Shared Pack；未配置 Private Library 时回退到 Git 忽略的 `data/library` 仍可本地保存。卡片右上角心形按钮一键收藏，侧栏新增带数量徽标的「收藏」入口与 `/favorites` 收藏页，作品详情页提供五星评分；收藏与评分字段相互独立，再次点击可清除。
 - 网页端引入与桌面端一致的 Library Profile 多资料库模型：设置页可切换 / 重命名 / 删除 / 新建 Profile，顶栏提供仅多 Profile 时出现的切换下拉，并补齐桌面端独有的「添加示例库」能力；旧版单组路径在读取时自动升级为 Profile，扁平字段始终镜像当前 Profile，既有消费者零改动。
 - Desktop Boundary 校验器同步 Work / Person / shared utils 的新模块路径，不再因删除旧聚合文件而误报架构缺失。

@@ -41,6 +41,9 @@
     "ffprobePath": {
       "type": "string"
     },
+    "ffmpegPath": {
+      "type": "string"
+    },
     "nfoScanPaths": {
       "type": "array",
       "items": {

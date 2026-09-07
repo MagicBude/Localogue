@@ -9,6 +9,8 @@ import type {
   FileHashPort,
   FileOpenerPort,
   FileSystemPort,
+  MediaFramePort,
+  MediaFrameResult,
   MediaProbePort,
   MediaProbeResult,
   PlatformFileEntry,
@@ -163,6 +165,56 @@ export class NodeMediaProbeAdapter implements MediaProbePort {
         } catch (parseError) {
           reject(parseError);
         }
+      });
+    });
+  }
+
+  isExecutableMissing(error: unknown): boolean {
+    return error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT";
+  }
+}
+
+/**
+ * 用 ffmpeg 从视频抽取单帧作为封面候选。
+ *
+ * 关键点（与 NodeMediaProbeAdapter 一致）：
+ * - 通过 execFile + 参数数组调用，绝不拼接 Shell 命令字符串；
+ * - windowsHide 避免 Windows 上弹出黑框；
+ * - 只抽取一帧（-frames:v 1），超时 30 秒由调用方 AbortSignal 控制。
+ */
+export class NodeFrameAdapter implements MediaFramePort {
+  extractFrame(
+    executable: string,
+    videoPath: string,
+    outputPath: string,
+    options?: { timeSeconds?: number; signal?: AbortSignal },
+  ): Promise<MediaFrameResult> {
+    throwIfAborted(options?.signal);
+    const timeSeconds =
+      typeof options?.timeSeconds === "number" && Number.isFinite(options.timeSeconds) && options.timeSeconds >= 0
+        ? options.timeSeconds
+        : 5;
+    return new Promise<MediaFrameResult>((resolve, reject) => {
+      execFile(executable, [
+        "-y",
+        "-ss", String(timeSeconds),
+        "-i", videoPath,
+        "-frames:v", "1",
+        "-q:v", "2",
+        "-f", "image2",
+        outputPath,
+      ], {
+        timeout: 30_000,
+        windowsHide: true,
+        maxBuffer: 1024 * 1024,
+        encoding: "utf8",
+        signal: options?.signal,
+      }, (error) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve({});
       });
     });
   }

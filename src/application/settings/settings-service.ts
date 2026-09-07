@@ -52,6 +52,7 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
   const mediaScanPaths = stringArray(input.mediaScanPaths, "mediaScanPaths");
   const nfoScanPaths = stringArray(input.nfoScanPaths, "nfoScanPaths");
   const ffprobePath = optionalStringField(input.ffprobePath, "ffprobePath");
+  const ffmpegPath = optionalStringField(input.ffmpegPath, "ffmpegPath");
 
   const current = readInstanceSettings();
   const draft: InstanceSettings = {
@@ -62,6 +63,7 @@ export async function updateInstanceSettings(input: unknown): Promise<SettingsOv
     ...(mediaScanPaths.length ? { mediaScanPaths } : { mediaScanPaths: [] }),
     ...(nfoScanPaths.length ? { nfoScanPaths } : { nfoScanPaths: [] }),
     ...(ffprobePath ? { ffprobePath } : { ffprobePath: undefined }),
+    ...(ffmpegPath ? { ffmpegPath } : { ffmpegPath: undefined }),
   };
   const synced = syncActiveLibraryProfile(draft) as InstanceSettings;
   const saved = saveInstanceSettings(synced);

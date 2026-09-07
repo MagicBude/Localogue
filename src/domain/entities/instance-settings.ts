@@ -24,6 +24,8 @@ export interface InstanceSettings {
   nfoScanPaths?: string[];
   /** ffprobe 可执行文件。为空时使用 PATH 中的 ffprobe。 */
   ffprobePath?: string;
+  /** ffmpeg 可执行文件。为空时使用 PATH 中的 ffmpeg。封面抽帧功能需要它。 */
+  ffmpegPath?: string;
   /**
    * 多资料库配置：每个 Profile 是一组独立的资料源预设（私人 Library / 统一根目录 / 共享包）。
    * 引入自 V1-24A 的 Library Profile 模型，网页端现已与桌面端对齐。

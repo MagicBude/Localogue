@@ -54,6 +54,27 @@ export interface MediaProbePort {
   isExecutableMissing(error: unknown): boolean;
 }
 
+export interface MediaFrameResult {
+  width?: number;
+  height?: number;
+}
+
+/**
+ * 封面抽帧：从视频的某个时间点抽取一帧，写入指定的输出图片文件。
+ *
+ * 与 MediaProbePort 一样属于平台能力：Application 层只依赖这个接口，
+ * 真正的 ffmpeg 调用由 Node / Tauri Adapter 完成，便于以后在桌面端复用。
+ */
+export interface MediaFramePort {
+  extractFrame(
+    executable: string,
+    videoPath: string,
+    outputPath: string,
+    options?: { timeSeconds?: number; signal?: AbortSignal },
+  ): Promise<MediaFrameResult>;
+  isExecutableMissing(error: unknown): boolean;
+}
+
 export interface FileHashPort {
   sha256Text(value: string): string;
   sha256File(filePath: string, signal?: AbortSignal): Promise<string>;

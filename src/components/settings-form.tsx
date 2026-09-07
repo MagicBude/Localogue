@@ -38,6 +38,7 @@ export function SettingsForm({
   const [mediaScanText, setMediaScanText] = useState((settings.mediaScanPaths ?? []).join("\n"));
   const [nfoScanText, setNfoScanText] = useState((settings.nfoScanPaths ?? []).join("\n"));
   const [ffprobePath, setFfprobePath] = useState(settings.ffprobePath ?? "");
+  const [ffmpegPath, setFfmpegPath] = useState(settings.ffmpegPath ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -78,6 +79,7 @@ export function SettingsForm({
           mediaScanPaths: mediaScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           nfoScanPaths: nfoScanText.split(/\r?\n/).map((item) => item.trim()).filter(Boolean),
           ffprobePath,
+          ffmpegPath,
         }),
       });
       const body = await response.json() as { error?: string };
@@ -267,6 +269,11 @@ export function SettingsForm({
           <span>{text.ffprobePath}</span>
           <input value={ffprobePath} onChange={(event: ChangeEvent<HTMLInputElement>) => setFfprobePath(event.target.value)} placeholder="ffprobe" />
           <small>{text.ffprobeHelp}</small>
+        </label>
+        <label className="settings-field">
+          <span>{text.ffmpegPath}</span>
+          <input value={ffmpegPath} onChange={(event: ChangeEvent<HTMLInputElement>) => setFfmpegPath(event.target.value)} placeholder="ffmpeg" />
+          <small>{text.ffmpegHelp}</small>
         </label>
       </section>
 

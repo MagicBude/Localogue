@@ -74,6 +74,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
   const mediaScanPaths = normalizePathArray(input.mediaScanPaths);
   const nfoScanPaths = normalizePathArray(input.nfoScanPaths);
   const ffprobePath = normalizeOptionalPath(input.ffprobePath);
+  const ffmpegPath = normalizeOptionalPath(input.ffmpegPath);
   const libraryProfiles = normalizeProfiles(input.libraryProfiles);
 
   return {
@@ -84,6 +85,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
     ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),
+    ...(ffmpegPath ? { ffmpegPath } : {}),
     ...(libraryProfiles.length ? { libraryProfiles } : {}),
     ...(typeof input.activeLibraryProfileId === "string" && input.activeLibraryProfileId
       ? { activeLibraryProfileId: input.activeLibraryProfileId }

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { assetDisplayUrl, listWorkAssets } from "@/application/assets/presentation-asset-service";
 import { FavoriteButton } from "@/components/favorite-button";
 import { RatingStars } from "@/components/rating-stars";
+import { GenerateCoverButton } from "@/components/generate-cover-button";
 import { localizeText } from "@/application/services/localization-service";
 import { localizeGenre } from "@/application/services/genre-localization-service";
 import { presentWorkDetail } from "@/application/services/work-presentation-service";
@@ -240,6 +241,14 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
         activeAssetId={view.posterAssetId}
         writable={isPrivateLibraryConfigured()}
       />
+
+      {isPrivateLibraryConfigured() && mediaFiles.length > 0 ? (
+        <section className="detail-section">
+          <h2>{dictionary.coverFrame}</h2>
+          <p className="muted">{dictionary.coverFrameHint}</p>
+          <GenerateCoverButton workId={work.id} language={preferences.uiLanguage} />
+        </section>
+      ) : null}
 
       <section className="detail-section">
         <h2>{dictionary.localFiles}</h2>
