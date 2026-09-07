@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import type { WorkCardViewModel } from "@/application/services/work-presentation-service";
+import { FavoriteButton } from "@/components/favorite-button";
 import { WorkCard } from "@/components/work-card";
 import type { WorkViewMode } from "@/components/work-view-switcher";
 import type { UiDictionary } from "@/i18n/ui";
@@ -45,6 +46,11 @@ export function WorkResults({
                 <Link href={`/works/${work.id}`}>{work.title}</Link>
               </h3>
               <p className="muted">{work.performerNames.join(" · ") || "—"}</p>
+              <FavoriteButton
+                dictionary={dictionary}
+                variant="inline"
+                workId={work.id}
+              />
             </div>
             <div className="work-list-row__facts">
               <span>{work.releaseDate}</span>
@@ -74,6 +80,7 @@ export function WorkResults({
               <th>{dictionary.performer}</th>
               <th>{dictionary.maker}</th>
               <th>{dictionary.workTypes}</th>
+              <th>{dictionary.favorite}</th>
             </tr>
           </thead>
           <tbody>
@@ -99,6 +106,13 @@ export function WorkResults({
                   {work.workTypeIds
                     .map((id) => workTypeLabels.get(id) ?? id)
                     .join(" · ") || "—"}
+                </td>
+                <td>
+                  <FavoriteButton
+                    dictionary={dictionary}
+                    variant="inline"
+                    workId={work.id}
+                  />
                 </td>
               </tr>
             ))}

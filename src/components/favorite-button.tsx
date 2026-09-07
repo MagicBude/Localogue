@@ -6,8 +6,8 @@ import type { UiDictionary } from "@/i18n/ui";
 interface FavoriteButtonProps {
   workId: string;
   dictionary: UiDictionary;
-  /** card：悬浮在海报右上角的小心形；detail：详情页带文字的按钮。 */
-  variant?: "card" | "detail";
+  /** card：悬浮在海报右上角的小心形；detail：详情页带文字的按钮；inline：列表/表格行内的紧凑图标按钮。 */
+  variant?: "card" | "detail" | "inline";
 }
 
 /**
@@ -40,6 +40,21 @@ export function FavoriteButton({ workId, dictionary, variant = "card" }: Favorit
       >
         <HeartIcon filled={active} />
         <span>{label}</span>
+      </button>
+    );
+  }
+
+  if (variant === "inline") {
+    return (
+      <button
+        className={`favorite-button favorite-button--inline${active ? " is-active" : ""}`}
+        onClick={handleClick}
+        type="button"
+        aria-pressed={active}
+        aria-label={label}
+        title={label}
+      >
+        <HeartIcon filled={active} />
       </button>
     );
   }

@@ -1,5 +1,6 @@
 # Changelog
 
+- 收藏按钮覆盖列表与表格视图：作品浏览器的 list / table 表现层新增紧凑型 `inline` 收藏按钮（新增 `FavoriteButton variant="inline"`），与卡片 / 详情 / 收藏页共用同一 `FavoritesProvider` 乐观更新；grid / waterfall / list / table 四种视图现已全部可从任意视图一键收藏。
 - 作品浏览器筛选 / 排序规则链接入收藏与评分：在既有 `WorkQuery` 上新增 `favoriteOnly` 与 `ratingMin`（1–5，越界自动收敛）两个筛选维度，以及 `rating_desc` / `rating_asc` 排序；收藏与评分数据来自私人展示偏好层（`PresentationPreference`），由 Repository 在查询真正用到时才加载并注入 `queryWorks`，不污染 Canonical Work、不进 Shared Pack。筛选器、活跃 Chips 与 URL 深链全部覆盖新维度，刷新 / 前进后退 / 复制链接均保真。
 - 新增本地视频抽帧生成封面：作品详情页可一键从首个可读取的本地视频截取一帧，作为私人封面偏好；抽出的帧上传为 `poster` Asset 并通过 `PresentationPreference.preferredCoverAssetId` 指向它，不修改 Canonical Work、不进 Shared Pack。设置页新增 `ffmpegPath` 字段（与 `ffprobePath` 同构），未安装 / 未配置 ffmpeg 时接口返回结构化降级原因而非报错，代码当下可验证、装好 ffmpeg 即直接产出封面。抽帧走 `MediaFramePort` + `NodeFrameAdapter`，沿用 ffprobe 的平台边界与 `execFile` 调用方式。
 - 新增作品收藏与个人评分（1–5 星）：收藏走私人展示偏好层 `PresentationPreference`，不修改 Canonical Work、不进入 Shared Pack；未配置 Private Library 时回退到 Git 忽略的 `data/library` 仍可本地保存。卡片右上角心形按钮一键收藏，侧栏新增带数量徽标的「收藏」入口与 `/favorites` 收藏页，作品详情页提供五星评分；收藏与评分字段相互独立，再次点击可清除。

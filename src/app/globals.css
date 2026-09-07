@@ -1177,6 +1177,21 @@ code {
   border-color: color-mix(in srgb, var(--favorite-color), var(--line) 55%);
 }
 
+.favorite-button--inline {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  color: var(--text-soft);
+}
+
+.favorite-button--inline:hover {
+  background: var(--surface-soft, color-mix(in srgb, var(--text), transparent 92%));
+}
+
+.favorite-button--inline.is-active {
+  color: var(--favorite-color);
+}
+
 /* 收藏状态通过 :has() 给整张卡片加一抹主题色描边，作为“标签着色”式的视觉提示。 */
 .work-card:has(.favorite-button.is-active) {
   border-radius: var(--radius-md);
