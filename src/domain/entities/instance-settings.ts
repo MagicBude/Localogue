@@ -24,6 +24,14 @@ export interface InstanceSettings {
   nfoScanPaths?: string[];
   /** ffprobe 可执行文件。为空时使用 PATH 中的 ffprobe。 */
   ffprobePath?: string;
+  /**
+   * 多资料库配置：每个 Profile 是一组独立的资料源预设（私人 Library / 统一根目录 / 共享包）。
+   * 引入自 V1-24A 的 Library Profile 模型，网页端现已与桌面端对齐。
+   * 平面字段（libraryPath / libraryRoots …）始终等于当前激活 Profile，便于旧代码继续直接读取。
+   */
+  libraryProfiles?: import("./library-profile").LibraryProfile[];
+  /** 当前激活的 Profile ID；缺失时回退到 libraryProfiles 的第一个。 */
+  activeLibraryProfileId?: string;
   updatedAt?: string;
 }
 

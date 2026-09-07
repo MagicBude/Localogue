@@ -4,6 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import type { InstanceSettings } from "@/domain/entities/instance-settings";
+import type { LibraryProfile } from "@/domain/entities/library-profile";
 import type { ResolvedSharedPack } from "@/domain/entities/shared-pack";
 import { getSettingsDictionary } from "@/i18n/settings";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
@@ -15,6 +16,8 @@ interface SettingsFormProps {
   pathSource: "environment" | "settings" | null;
   settingsPath: string;
   sharedPacks: ResolvedSharedPack[];
+  libraryProfiles: LibraryProfile[];
+  activeLibraryProfileId?: string;
 }
 
 export function SettingsForm({
@@ -24,6 +27,8 @@ export function SettingsForm({
   pathSource,
   settingsPath,
   sharedPacks,
+  libraryProfiles,
+  activeLibraryProfileId,
 }: SettingsFormProps) {
   const router = useRouter();
   const text = getSettingsDictionary(language);
@@ -35,6 +40,27 @@ export function SettingsForm({
   const [ffprobePath, setFfprobePath] = useState(settings.ffprobePath ?? "");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
+
+  const [newProfileName, setNewProfileName] = useState("");
+  const [profileBusy, setProfileBusy] = useState(false);
+
+  async function profileAction(body: Record<string, unknown>) {
+    setProfileBusy(true);
+    try {
+      const response = await fetch("/api/settings/profile", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const payload = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? text.failed);
+      router.refresh();
+    } catch (caught) {
+      window.alert(caught instanceof Error ? caught.message : String(caught));
+    } finally {
+      setProfileBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,6 +92,95 @@ export function SettingsForm({
 
   return (
     <form className="settings-stack" onSubmit={submit}>
+      <section className="settings-card">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">LIBRARIES · PROFILES</span>
+            <h2>{text.profilesTitle}</h2>
+          </div>
+        </div>
+        <p className="muted">{text.profilesDescription}</p>
+
+        <ul className="profile-list">
+          {libraryProfiles.map((profile) => (
+            <li
+              key={profile.id}
+              className={profile.id === activeLibraryProfileId ? "profile-row profile-row--active" : "profile-row"}
+            >
+              <div className="profile-row__main">
+                <strong>{profile.name}</strong>
+                {profile.id === activeLibraryProfileId
+                  ? <span className="status-chip status-chip--ok">{text.activeProfile}</span>
+                  : null}
+                <code>{profile.libraryPath ?? "（未设置路径）"}</code>
+              </div>
+              <div className="profile-actions">
+                {profile.id !== activeLibraryProfileId
+                  ? (
+                    <button
+                      type="button"
+                      disabled={profileBusy}
+                      onClick={() => profileAction({ action: "switch", id: profile.id })}
+                    >
+                      {text.switchProfile}
+                    </button>
+                  )
+                  : null}
+                <button
+                  type="button"
+                  disabled={profileBusy}
+                  onClick={() => {
+                    const next = window.prompt(text.profileNamePlaceholder, profile.name);
+                    if (next && next.trim()) {
+                      profileAction({ action: "rename", id: profile.id, name: next.trim() });
+                    }
+                  }}
+                >
+                  {text.renameProfile}
+                </button>
+                <button
+                  type="button"
+                  className="danger-button"
+                  disabled={profileBusy}
+                  onClick={() => {
+                    if (window.confirm(text.confirmDeleteProfile)) {
+                      profileAction({ action: "remove", id: profile.id });
+                    }
+                  }}
+                >
+                  {text.deleteProfile}
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div className="profile-create">
+          <input
+            value={newProfileName}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setNewProfileName(event.target.value)}
+            placeholder={text.profileNamePlaceholder}
+          />
+          <button
+            type="button"
+            disabled={profileBusy}
+            onClick={() => {
+              profileAction({ action: "create", name: newProfileName.trim() || undefined });
+              setNewProfileName("");
+            }}
+          >
+            {text.addProfile}
+          </button>
+        </div>
+
+        <div className="profile-example">
+          <button type="button" disabled={profileBusy} onClick={() => profileAction({ action: "seed-demo" })}>
+            {profileBusy ? text.exampleLibraryBusy : text.addExampleLibrary}
+          </button>
+          <small>{text.addExampleLibraryHint}</small>
+        </div>
+      </section>
+
       <section className="settings-card">
         <div className="section-heading">
           <div>

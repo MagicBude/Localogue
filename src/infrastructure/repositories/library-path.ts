@@ -1,8 +1,11 @@
 import path from "node:path";
 
 import type { PrivateLibraryPathSource } from "@/domain/entities/instance-settings";
+import { resolveActiveSources } from "@/domain/entities/library-profile";
 import type { ResolvedSharedPack } from "@/domain/entities/shared-pack";
-import { readInstanceSettings } from "@/infrastructure/settings/instance-settings-store";
+import {
+  readInstanceSettingsWithProfiles,
+} from "@/infrastructure/settings/instance-settings-store";
 import { resolveSharedPacks } from "@/infrastructure/shared-packs/shared-pack-resolver";
 
 export interface EffectiveLibraryConfiguration {
@@ -53,9 +56,10 @@ export function isPrivateLibraryConfigured(): boolean {
 }
 
 export function getEffectiveLibraryConfiguration(): EffectiveLibraryConfiguration {
-  const settings = readInstanceSettings();
-  const privateResolution = getPrivateLibraryPathResolution(settings.libraryPath);
-  const sharedPacks = resolveSharedPacks(settings.sharedPackPaths);
+  const settings = readInstanceSettingsWithProfiles();
+  const sources = resolveActiveSources(settings);
+  const privateResolution = getPrivateLibraryPathResolution(sources.libraryPath);
+  const sharedPacks = resolveSharedPacks(sources.sharedPackPaths);
   const validSharedRoots = sharedPacks
     .filter((pack) => pack.valid && pack.libraryPath)
     .map((pack) => pack.libraryPath as string);
@@ -90,7 +94,7 @@ function getPrivateLibraryPathResolution(settingsLibraryPath?: string): {
     };
   }
 
-  const configured = settingsLibraryPath ?? readInstanceSettings().libraryPath;
+  const configured = settingsLibraryPath ?? resolveActiveSources(readInstanceSettingsWithProfiles()).libraryPath;
   if (configured?.trim()) {
     return {
       path: path.resolve(/* turbopackIgnore: true */ process.cwd(), configured.trim()),

@@ -49,6 +49,8 @@ export default async function SettingsPage() {
         pathSource={overview.effective.privateLibraryPathSource}
         settingsPath={overview.settingsPath}
         sharedPacks={overview.effective.sharedPacks}
+        libraryProfiles={overview.settings.libraryProfiles ?? []}
+        activeLibraryProfileId={overview.settings.activeLibraryProfileId}
       />
     </div>
   );

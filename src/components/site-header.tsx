@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { PreferenceControls } from "@/components/preference-controls";
+import { ProfileSwitcher } from "@/components/profile-switcher";
 import type { UiDictionary } from "@/i18n/ui";
 import type { UserPreferences } from "@/lib/preferences";
 
@@ -41,6 +42,8 @@ export function SiteHeader({ preferences, dictionary }: SiteHeaderProps) {
           theme={preferences.theme}
           dictionary={dictionary}
         />
+
+        <ProfileSwitcher label={dictionary.libraryProfile} />
       </div>
     </header>
   );

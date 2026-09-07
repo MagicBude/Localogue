@@ -2,6 +2,10 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import type { InstanceSettings } from "@/domain/entities/instance-settings";
+import {
+  ensureLibraryProfiles,
+  type LibraryProfile,
+} from "@/domain/entities/library-profile";
 
 const DEFAULT_SETTINGS: InstanceSettings = {
   schemaVersion: 1,
@@ -29,12 +33,22 @@ export function getInstanceSettingsPath(): string {
 export function readInstanceSettings(): InstanceSettings {
   try {
     const parsed = JSON.parse(readFileSync(getInstanceSettingsPath(), "utf8")) as Partial<InstanceSettings>;
-    return normalizeSettings(parsed);
+    return ensureLibraryProfiles(normalizeSettings(parsed));
   } catch (error) {
     if (isMissingFileError(error)) return { ...DEFAULT_SETTINGS };
     // 设置损坏不能悄悄切换到另一个真实资料库，因此在服务器端明确抛错。
     throw new Error(`无法读取 Localogue 实例设置：${toErrorMessage(error)}`);
   }
+}
+
+/**
+ * 读取并迁移为含 Library Profile 的形状（与 readInstanceSettings 等价，仅为语义清晰保留）。
+ *
+ * 旧的单实例设置（只有平面字段）会在内存中平滑升级成单个 Profile，
+ * 平面字段保持等于当前激活 Profile，因此下游解析逻辑无需感知差异。
+ */
+export function readInstanceSettingsWithProfiles(): InstanceSettings {
+  return readInstanceSettings();
 }
 
 export function saveInstanceSettings(input: InstanceSettings): InstanceSettings {
@@ -60,6 +74,7 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
   const mediaScanPaths = normalizePathArray(input.mediaScanPaths);
   const nfoScanPaths = normalizePathArray(input.nfoScanPaths);
   const ffprobePath = normalizeOptionalPath(input.ffprobePath);
+  const libraryProfiles = normalizeProfiles(input.libraryProfiles);
 
   return {
     schemaVersion: 1,
@@ -69,8 +84,30 @@ function normalizeSettings(input: Partial<InstanceSettings>): InstanceSettings {
     ...(mediaScanPaths.length ? { mediaScanPaths } : {}),
     ...(nfoScanPaths.length ? { nfoScanPaths } : {}),
     ...(ffprobePath ? { ffprobePath } : {}),
+    ...(libraryProfiles.length ? { libraryProfiles } : {}),
+    ...(typeof input.activeLibraryProfileId === "string" && input.activeLibraryProfileId
+      ? { activeLibraryProfileId: input.activeLibraryProfileId }
+      : {}),
     ...(typeof input.updatedAt === "string" ? { updatedAt: input.updatedAt } : {}),
   };
+}
+
+function normalizeProfiles(input: unknown): LibraryProfile[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .filter((item): item is LibraryProfile => Boolean(item) && typeof item === "object" && typeof (item as LibraryProfile).id === "string")
+    .map((profile) => ({
+      id: profile.id,
+      name: typeof profile.name === "string" && profile.name.trim() ? profile.name.trim() : "未命名资料库",
+      ...(typeof profile.description === "string" && profile.description.trim() ? { description: profile.description.trim() } : {}),
+      ...(typeof profile.libraryPath === "string" && profile.libraryPath.trim() ? { libraryPath: profile.libraryPath.trim() } : {}),
+      libraryRoots: normalizePathArray(profile.libraryRoots),
+      mediaScanPaths: normalizePathArray(profile.mediaScanPaths),
+      nfoScanPaths: normalizePathArray(profile.nfoScanPaths),
+      sharedPackPaths: normalizePathArray(profile.sharedPackPaths),
+      createdAt: typeof profile.createdAt === "string" ? profile.createdAt : new Date().toISOString(),
+      updatedAt: typeof profile.updatedAt === "string" ? profile.updatedAt : new Date().toISOString(),
+    }));
 }
 
 function normalizePathArray(value: unknown): string[] {
