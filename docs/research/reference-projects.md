@@ -111,3 +111,9 @@ Electron + Vue 3 的本地 NFO 影视库。Localogue 主要参考其后续版本
 Localogue 不采用“扫描到 NFO 就自动成为数据库真相”的模型，长期仍保持 Evidence → Review → Canonical；V1-16 仅为用户明确确认的本地存量迁移提供 fill / merge Bootstrap 例外。也不复制该 GPL-3.0 项目的具体实现代码。
 
 详见：[local-javlibrary 对 Localogue 的参考价值](local-javlibrary-reference.md)。
+
+## JavBoss
+
+Go + React 的本地视频 / JAV 管理工具。Localogue 主要参考其渐进瀑布流、返回位置恢复、紧凑快捷动作、截图浏览和目录管理体验；不复制 GPL-3.0 代码，也不采用“扫描 / 在线刮削直接成为资料真相”的模型。
+
+详见：[JavBoss 对 Localogue 的参考审查](javboss-reference.md)。
