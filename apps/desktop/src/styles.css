@@ -505,6 +505,15 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .table-title-link { font-weight: 650; line-height: 1.45; }
 .desktop-pagination { display: flex; justify-content: center; align-items: center; gap: 12px; }
 .desktop-pagination span { color: var(--muted); font-size: 11px; }
+.desktop-infinite-scroll-sentinel {
+  display: flex;
+  justify-content: center;
+  min-height: 72px;
+  padding: 20px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.desktop-infinite-scroll-sentinel button { min-width: 140px; }
 .desktop-work-detail-hero {
   display: grid;
   grid-template-columns: 190px minmax(0,1fr);

@@ -19,6 +19,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useFavorites } from "./desktop-favorites-provider";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
 import {
   buildDesktopWorkCards,
   DesktopWorkResults,
@@ -85,17 +86,19 @@ export function DesktopWorkExplorer({
     const saved = window.localStorage.getItem(`${storageKey}.waterfall-size`);
     return saved === "small" || saved === "large" ? saved : "medium";
   });
+  const [waterfallPage, setWaterfallPage] = useState(1);
+  const [waterfallCards, setWaterfallCards] = useState<ReturnType<typeof buildDesktopWorkCards>>([]);
+  const [waterfallRequestPending, setWaterfallRequestPending] = useState(false);
 
   const data = useAsyncExplorerData(async () => {
-    // 瀑布流用于连续纵向浏览，因此一次读取全部匹配作品且不显示分页器。
-    // 其它视图仍使用普通分页，避免海量资料库同时创建过多 DOM 节点。
-    const requestedPage = view === "waterfall" ? 1 : page;
-    const requestedPageSize = view === "waterfall" ? 100_000 : pageSize;
+    // 瀑布流的“连续”只是一种交互表现，数据层仍按页读取。这样即使资料库有
+    // 数万部作品，首次打开也只创建一小批卡片，不会一次占满内存或阻塞 WebView。
+    const requestedPage = view === "waterfall" ? waterfallPage : page;
     const effectiveQuery: WorkQuery = {
       ...query,
       ...(fixedPersonId ? { personIds: [fixedPersonId] } : {}),
       page: requestedPage,
-      pageSize: requestedPageSize,
+      pageSize,
     };
     const result = await repository.listWorks(effectiveQuery);
     const [peopleResult, organizations, series, genres, tags, assets, preferences] = await Promise.all([
@@ -213,7 +216,17 @@ export function DesktopWorkExplorer({
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view, waterfallPage]);
+
+  // 每批瀑布流结果完成后按作品 ID 追加。去重既能防住异步刷新，也允许未来
+  // Repository 在扫描期间总数发生变化，而不会让同一张卡片重复出现。
+  useEffect(() => {
+    if (view !== "waterfall" || !data.value || data.value.requestedPage !== waterfallPage) return;
+    setWaterfallCards((current) => data.value!.requestedPage === 1
+      ? data.value!.cards
+      : [...new Map([...current, ...data.value!.cards].map((card) => [card.work.id, card])).values()]);
+    setWaterfallRequestPending(false);
+  }, [data.value, view, waterfallPage]);
 
   // 页码和筛选是“从详情返回后继续浏览”的导航上下文。使用 sessionStorage，
   // 让它只在当前应用会话内生效；关闭应用后仍从干净的第一页开始。
@@ -237,20 +250,43 @@ export function DesktopWorkExplorer({
   useEffect(() => {
     if (!data.value || pendingScrollY.current === undefined) return;
     const scrollY = pendingScrollY.current;
+    const visibleCards = view === "waterfall" ? waterfallCards : data.value.cards;
+    const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+    // 返回到瀑布流深处时，第一批卡片可能还不足以撑到原位置。先继续请求下一批，
+    // 等页面高度足够后再恢复滚动，避免浏览器把目标位置夹到当前页面底部。
+    if (view === "waterfall" && scrollY > maxScrollY + 24 && visibleCards.length < data.value.result.total) {
+      requestNextWaterfallPage();
+      return;
+    }
     pendingScrollY.current = undefined;
     clearExplorerReturnPosition(stateStorageKey);
     const frame = window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
     return () => window.cancelAnimationFrame(frame);
-  }, [data.value, stateStorageKey]);
+  }, [data.value, stateStorageKey, view, waterfallCards]);
 
   function changeQuery(next: WorkQuery): void {
     setPage(1);
+    setWaterfallPage(1);
+    setWaterfallCards([]);
+    setWaterfallRequestPending(false);
     setQuery(next);
   }
 
   function changeView(next: DesktopWorkViewMode): void {
+    if (next === "waterfall" && view !== "waterfall") {
+      setWaterfallPage(1);
+      setWaterfallCards([]);
+      setWaterfallRequestPending(false);
+    }
     setView(next);
     window.localStorage.setItem(storageKey, next);
+  }
+
+  function requestNextWaterfallPage(): void {
+    if (waterfallRequestPending || data.refreshing) return;
+    setWaterfallRequestPending(true);
+    setWaterfallPage((current) => current + 1);
   }
 
   function changeWaterfallSize(next: DesktopWaterfallSize): void {
@@ -268,7 +304,8 @@ export function DesktopWorkExplorer({
   if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取作品。")}</ExplorerState>;
 
-  const { result, cards } = data.value;
+  const { result } = data.value;
+  const cards = view === "waterfall" ? waterfallCards : data.value.cards;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
 
   return (
@@ -288,11 +325,20 @@ export function DesktopWorkExplorer({
         <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
-            {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
+            {view === "waterfall"
+              ? t("已显示 {shown} / {count} 项作品", { shown: cards.length, count: result.total })
+              : t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
         <DesktopWorkResults cards={cards} view={view} waterfallSize={waterfallSize} onOpen={openWork} />
+        {view === "waterfall" && cards.length ? (
+          <DesktopInfiniteScrollSentinel
+            hasMore={cards.length < result.total}
+            loading={waterfallRequestPending || data.refreshing}
+            onLoadMore={requestNextWaterfallPage}
+          />
+        ) : null}
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
         {view !== "waterfall" && result.total > pageSize ? (
           <div className="desktop-pagination" aria-label={t("分页")}>
