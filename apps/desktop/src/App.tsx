@@ -443,6 +443,7 @@ export default function App() {
         ) : page === "works" ? (
           detail?.kind === "work" ? (
           <DesktopWorkDetailPage
+              key={`${savedSettings.libraryPath ?? "shared"}:work:${detail.id}`}
               repository={repository}
               id={detail.id}
               onBack={returnToPreviousLocation}
@@ -462,6 +463,7 @@ export default function App() {
         ) : page === "people" ? (
           detail?.kind === "person" ? (
             <DesktopPersonDetailPage
+              key={`${savedSettings.libraryPath ?? "shared"}:person:${detail.id}`}
               repository={repository}
               id={detail.id}
               onBack={returnToPreviousLocation}

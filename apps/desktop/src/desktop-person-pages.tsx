@@ -99,7 +99,7 @@ export function DesktopPersonDetailPage({
       </section>
       <PersonAssetGovernance person={person} assets={personAssets} resolved={portrait} repository={repository} runtimeContractRevision={runtimeContractRevision} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />
       <PresentationAssetPicker entityType="person" entityId={person.id} candidates={presentation.candidates} preference={presentationPreference} resolved={presentation.resolved} stalePreferredAssetId={presentation.stalePreferredAssetId} repository={repository} onSaved={onLibraryChanged} setMessage={setMessage} />
-      <PersonEditor repository={repository} person={person} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
+      <PersonEditor key={person.id} repository={repository} person={person} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
       <section className="detail-grid">
         <InfoCard label={t("出生日期")} value={person.birthDate?.value} />
         <InfoCard label={t("出生地")} value={localizeText(person.birthPlace, metadataLanguage)} />

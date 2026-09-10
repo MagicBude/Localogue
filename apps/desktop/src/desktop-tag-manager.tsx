@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { localizeText } from "@/application/services/localization-service";
 import type { Tag } from "@/domain/entities/classification";
@@ -28,12 +28,14 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
   const [newCategory, setNewCategory] = useState("");
   const [localCategories, setLocalCategories] = useState<string[]>([]);
   const [pendingDelete, setPendingDelete] = useState<Tag | null>(null);
+  // ref 同步锁住写入意图，防止 React 更新按钮 disabled 前的连续点击启动第二次写入。
+  const mutationInFlight = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     let disposed = false;
-    void Promise.all(tags.map(async (tag) => [tag.id, await repository.isPrivateEntity("tags", tag.id)] as const))
-      .then((pairs) => { if (!disposed) setPrivateIds(new Set(pairs.filter(([, value]) => value).map(([id]) => id))); })
+    void repository.listPrivateTagIds()
+      .then((ids) => { if (!disposed) setPrivateIds(new Set(ids)); })
       .catch((error) => setMessage(t("读取标签归属失败：{error}", { error: toMessage(error) })));
     return () => { disposed = true; };
   }, [open, repository, setMessage, t, tags]);
@@ -61,6 +63,8 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
   }
 
   async function saveTag(next: Tag, success: string): Promise<void> {
+    if (mutationInFlight.current) return;
+    mutationInFlight.current = true;
     setBusyId(next.id);
     try {
       await repository.saveTag(next);
@@ -69,6 +73,7 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
     } catch (error) {
       setMessage(t("保存标签失败：{error}", { error: toMessage(error) }));
     } finally {
+      mutationInFlight.current = false;
       setBusyId(undefined);
     }
   }
@@ -83,6 +88,8 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
     const from = categories.indexOf(category);
     const to = from + direction;
     if (from < 0 || to < 0 || to >= categories.length) return;
+    if (mutationInFlight.current) return;
+    mutationInFlight.current = true;
     const reordered = [...categories];
     [reordered[from], reordered[to]] = [reordered[to]!, reordered[from]!];
     setBusyId(`category:${category}`);
@@ -97,12 +104,15 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
     } catch (error) {
       setMessage(t("调整分类顺序失败：{error}", { error: toMessage(error) }));
     } finally {
+      mutationInFlight.current = false;
       setBusyId(undefined);
     }
   }
 
   async function removeTag(tag: Tag): Promise<void> {
     if (!privateIds.has(tag.id)) return;
+    if (mutationInFlight.current) return;
+    mutationInFlight.current = true;
     setBusyId(tag.id);
     try {
       await repository.deletePrivateTag(tag.id);
@@ -112,6 +122,7 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
     } catch (error) {
       setMessage(t("删除标签失败：{error}", { error: toMessage(error) }));
     } finally {
+      mutationInFlight.current = false;
       setBusyId(undefined);
     }
   }
@@ -137,8 +148,8 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
         <div className="tag-manager__list">
           {sortedTags.map((tag) => <div key={tag.id}>
             <span><strong>{tagLabel(tag, metadataLanguage)}</strong><small>{privateIds.has(tag.id) ? "Private" : "Shared / built-in"}</small></span>
-            <select disabled={busyId === tag.id} value={tag.category ?? ""} onChange={(event) => void assignCategory(tag, event.target.value)}><option value="">{t("未分类")}</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
-            <UiButton disabled={!privateIds.has(tag.id) || busyId === tag.id} onClick={() => setPendingDelete(tag)} variant="danger">{t("删除")}</UiButton>
+            <select aria-label={`${tagLabel(tag, metadataLanguage)} · ${t("标签管理")}`} disabled={Boolean(busyId)} value={tag.category ?? ""} onChange={(event) => void assignCategory(tag, event.target.value)}><option value="">{t("未分类")}</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
+            <UiButton disabled={!privateIds.has(tag.id) || Boolean(busyId)} onClick={() => setPendingDelete(tag)} variant="danger">{t("删除")}</UiButton>
           </div>)}
         </div>
       </div>

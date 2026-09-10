@@ -214,7 +214,7 @@ export function DesktopWorkDetailPage({
       </section>
       <DesktopWorkMediaSection media={media} onPlay={(path) => void playMedia(path)} onReveal={(path) => void revealMedia(path)} />
       <PresentationAssetPicker entityType="work" entityId={work.id} candidates={presentation.candidates} preference={presentationPreference} resolved={presentation.resolved} stalePreferredAssetId={presentation.stalePreferredAssetId} repository={repository} onSaved={onLibraryChanged} setMessage={setMessage} />
-      <WorkEditor repository={repository} work={work} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
+      <WorkEditor key={work.id} repository={repository} work={work} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
       <section className="settings-card desktop-local-assets-section">
         <div className="section-heading">
           <div><span className="eyebrow">WORK ASSETS</span><h2>{t("作品图片资产")}</h2></div>

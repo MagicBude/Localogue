@@ -207,6 +207,13 @@ export class TauriLibraryRepository implements LibraryRepository {
     return values.some((item) => item.id === id);
   }
 
+  /** 批量归属检查只读取一次集合，避免标签管理为每个标签重复读取整个目录。 */
+  async listPrivateTagIds(): Promise<string[]> {
+    if (!this.privateRoot) return [];
+    const values = await desktopBridge.readLibraryCollection<Tag>(this.privateRoot, "tags");
+    return values.map((tag) => tag.id);
+  }
+
   async deletePrivateWork(id: string): Promise<void> {
     if (!this.privateRoot) return missingPrivateRoot();
     await desktopBridge.deleteLibraryEntity("works", id);
