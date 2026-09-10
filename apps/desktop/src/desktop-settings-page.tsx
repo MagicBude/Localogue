@@ -19,6 +19,9 @@ import {
 import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
 import type { DesktopSettingsModule } from "./desktop-app-shell";
+import { UiButton } from "./ui/button";
+import { UiEmptyState, UiFeedback } from "./ui/feedback";
+import { UiTextField } from "./ui/form-control";
 
 // revision 11 同时保证 Profile 隔离、受控删除和 ffprobe 引导命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
@@ -259,17 +262,17 @@ export function DesktopSettingsPage({
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
 
       {!profileNativeRuntimeReady ? (
-        <div className="status-line">
+        <UiFeedback tone="warning">
           {t("Desktop Native Runtime 与当前界面版本不一致。请完全退出并重新启动 Desktop；开发环境若仍未更新，请执行一次 Rust clean 后重启。")}
-        </div>
+        </UiFeedback>
       ) : null}
 
       <section className="settings-card library-profile-card settings-module-library">
         <div className="section-heading">
           <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("资料库")}</h2></div>
           <div className="button-row">
-            <button disabled={busy || !profileNativeRuntimeReady} onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</button>
-            <button className="primary-button" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</button>
+            <UiButton disabled={busy || !profileNativeRuntimeReady} onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</UiButton>
+            <UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</UiButton>
           </div>
         </div>
         <p className="muted">{t("新建资料库会自动获得独立的 Private Library；你只需添加影片所在的内容根目录。名称和高级设置以后都可以修改。")}</p>
@@ -287,7 +290,7 @@ export function DesktopSettingsPage({
               <button className="danger-button" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={() => void deleteProfile()}>{t("删除资料库")}</button>
             </div>
           </div>
-        ) : <p className="empty-profile-hint">{t("还没有资料库。点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")}</p>}
+        ) : <UiEmptyState title={t("还没有资料库")} description={t("点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")} action={<UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</UiButton>} />}
       </section>
 
       <details className="settings-card advanced-source-settings source-model-card settings-module-library">
@@ -341,11 +344,8 @@ export function DesktopSettingsPage({
       <section className="settings-card form-card settings-module-tools">
         <div>
           <div className="section-heading"><div><h3>ffprobe</h3><p className="muted">{t("用于读取视频清晰度、时长和编码。留空会依次查找安装包资源和系统 PATH；找不到时仍能扫描作品文件。")}</p></div><div className="button-row"><button onClick={() => void chooseFfprobe()}>{t("选择 ffprobe.exe")}</button><button onClick={() => void checkFfprobe()}>{t("检测可用性")}</button></div></div>
-          <label>
-            <span>{t("ffprobe 可执行文件路径")}</span>
-            <input value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} />
-          </label>
-          {ffprobeCheck ? <p className="status-line">{t("已检测：{version}", { version: ffprobeCheck })}</p> : null}
+          <UiTextField label={t("ffprobe 可执行文件路径")} value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} />
+          {ffprobeCheck ? <UiFeedback tone="success">{t("已检测：{version}", { version: ffprobeCheck })}</UiFeedback> : null}
         </div>
         <label>Localogue Web URL<input value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} /></label>
         <div className="button-row"><button onClick={() => void openWeb()}>{t("浏览器打开 Web")}</button><button className="primary-button" disabled={busy} onClick={onSave}>{busy ? t("保存中…") : t("保存桌面设置")}</button></div>

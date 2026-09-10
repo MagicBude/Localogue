@@ -4,6 +4,9 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { useDesktopI18n } from "../desktop-i18n";
 import { desktopBridge } from "../tauri-bridge";
+import { UiButton } from "./button";
+import { UiEmptyState } from "./feedback";
+import { UiSelectField, UiTextField } from "./form-control";
 
 type LogLevel = "all" | "INFO" | "WARN" | "ERROR";
 
@@ -47,17 +50,17 @@ export function LogViewerDialog({ trigger, setMessage }: { trigger: ReactNode; s
       <Dialog.Content className="ui-dialog-content log-viewer-dialog" aria-describedby="log-viewer-description">
         <div className="ui-dialog-header">
           <div><Dialog.Title>{t("程序日志")}</Dialog.Title><Dialog.Description id="log-viewer-description">{t("显示当前日志最近 1000 行；可以按级别和关键词筛选。")}</Dialog.Description></div>
-          <Dialog.Close className="ui-icon-button" aria-label={t("关闭")}><Dismiss20Regular /></Dialog.Close>
+          <Dialog.Close asChild><UiButton aria-label={t("关闭")} icon={<Dismiss20Regular />} size="icon" variant="ghost" /></Dialog.Close>
         </div>
         <div className="log-viewer-toolbar">
-          <label><span>{t("日志级别")}</span><select value={level} onChange={(event) => setLevel(event.target.value as LogLevel)}><option value="all">{t("全部")}</option><option value="INFO">INFO</option><option value="WARN">WARN</option><option value="ERROR">ERROR</option></select></label>
-          <label className="log-viewer-search"><span>{t("关键词")}</span><input value={keyword} placeholder={t("筛选日志内容")} onChange={(event) => setKeyword(event.target.value)} /></label>
-          <button onClick={() => void refresh()} disabled={loading}><ArrowClockwise20Regular />{loading ? t("读取中…") : t("刷新")}</button>
-          <button onClick={() => void reveal()}><FolderOpen20Regular />{t("打开文件所在位置")}</button>
+          <UiSelectField label={t("日志级别")} value={level} onChange={(event) => setLevel(event.target.value as LogLevel)}><option value="all">{t("全部")}</option><option value="INFO">INFO</option><option value="WARN">WARN</option><option value="ERROR">ERROR</option></UiSelectField>
+          <UiTextField className="log-viewer-search" label={t("关键词")} value={keyword} placeholder={t("筛选日志内容")} onChange={(event) => setKeyword(event.target.value)} />
+          <UiButton icon={<ArrowClockwise20Regular />} loading={loading} onClick={() => void refresh()}>{loading ? t("读取中…") : t("刷新")}</UiButton>
+          <UiButton icon={<FolderOpen20Regular />} onClick={() => void reveal()}>{t("打开文件所在位置")}</UiButton>
         </div>
         <div className="log-viewer-summary">{t("显示 {visible} 行，当前日志共 {total} 行。", { visible: lines.length, total: rawLog.split(/\r?\n/).filter(Boolean).length })}</div>
         <div className="log-viewer-table" role="log" aria-live="polite">
-          {lines.length ? lines.map((line, index) => <div className="log-viewer-line" key={`${index}-${line}`}><span>{index + 1}</span><code>{line}</code></div>) : <div className="log-viewer-empty">{loading ? t("正在读取日志…") : t("没有符合条件的日志。")}</div>}
+          {lines.length ? lines.map((line, index) => <div className="log-viewer-line" key={`${index}-${line}`}><span>{index + 1}</span><code>{line}</code></div>) : <UiEmptyState title={loading ? t("正在读取日志…") : t("没有符合条件的日志。")} />}
         </div>
       </Dialog.Content>
     </Dialog.Portal>

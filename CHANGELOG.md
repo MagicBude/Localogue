@@ -1,5 +1,7 @@
 # Changelog
 
+- 修复 `pnpm-workspace.yaml` 残留 `approve-builds` 占位值导致所有 pnpm 检查和 Desktop BAT 在真正执行前退出的问题；只显式批准锁文件中现有的 `esbuild` 与 `unrs-resolver` 构建脚本，不开放任意依赖脚本。
+- Desktop 建立渐进式基础控件层：新增 `UiButton`、`UiTextField` / `UiSelectField`、`UiFeedback` 与 `UiEmptyState`，统一按钮 loading/图标/尺寸、表单标签与错误关联、进度状态和空状态语义；首批迁移关于页、程序日志弹窗及设置页关键入口，业务动作、Native 日志安全边界和现有页面结构保持不变。
 - Desktop 视觉层级继续桌面化：顶栏移除与页面正文重复的页名，只保留产品版本和全局操作，并为刷新、设置补充 Fluent 图标；页面标题从网页式 43px 收紧到 28px，说明文案和垂直留白同步缩小。主操作统一改用 Fluent 蓝色，按钮圆角、悬停和键盘焦点状态统一。
 - Desktop 新增统一 `ContextTabBar` UI Primitive：资料库、资料维护和设置的顶部分类全部使用一致的 Fluent 图标、间距、选中指示与 `aria-current` 语义；设置模块面板同步移除大阴影并收紧圆角和垂直间距，更接近 115-Desktop 的扁平设置列表。
 - Desktop 程序日志改为应用内弹窗查看：受限 Native Command 只读取 App Local Data 中固定的 `localogue.log`，前端默认展示最近 1,000 行并支持级别、关键词筛选和刷新；保留“打开文件所在位置”供用户通过系统文件管理器删除或管理当前及轮转日志。读取使用 blocking worker，不向 WebView 开放任意文件读取能力。

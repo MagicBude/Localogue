@@ -1,2 +1,7 @@
 packages:
   - "apps/*"
+allowBuilds:
+  # 两者都是锁文件内现有工具链依赖。显式批准后，pnpm 不会在每条脚本前
+  # 因未完成的交互式 approve-builds 状态退出；不等于允许任意依赖执行脚本。
+  esbuild: true
+  unrs-resolver: true

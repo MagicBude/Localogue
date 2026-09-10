@@ -4,6 +4,8 @@
 
 **V1-27D：Entity Localization & Browse Relationship Presentation。**
 
+Desktop UI 基础层开始渐进统一：第一批新增按钮、输入/选择、状态反馈和空状态 Primitive，并先迁移关于页、日志弹窗与设置关键入口。后续页面按实际维护触达逐步复用，不进行一次性全量 JSX 重写；Fluent Icons / Radix 继续只承担图标与无样式交互，视觉主题仍由 Localogue CSS 维护。
+
 Desktop 产品流程优化已经从信息架构开始：原有十一项平铺菜单收敛为首页、资料库、导入与整理、资料维护、设置五个一级任务区，领域浏览与治理页面作为二级入口按需展开。“导入与整理”已经合并为单页连续工作台，统一目录同步、媒体扫描、NFO / 图片导入和 Evidence 核对可以从上到下完成；现有 Repository、Query、Evidence Review、Media Scan 与 Native 安全边界保持不变。桌面已实际启动并检查完整页面布局，仍待用户操作验收。
 
 多目录体验开始向 JavBoss 的 Directory Scope 靠拢：设置目录即时保存，工作台持续展示全部已添加目录并支持逐目录增量同步，作品页可按一个或多个 `MediaFile.scanRoot` 查看内容；设置页面按任务模块切换，统一同步显示可持续观察的阶段状态。当前目录筛选只覆盖已经扫描且成功关联 Work 的本地媒体，目录自定义名称、启停和离线状态留待下一阶段完善。
