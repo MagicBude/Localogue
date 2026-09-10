@@ -1156,6 +1156,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
 @keyframes dialog-rise { from { opacity: 0; transform: translateY(8px) scale(.995); } }
 @keyframes ui-spin { to { transform: rotate(360deg); } }
 @keyframes ui-toast-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+/* 总停留时间由 App 的 4.5 秒计时器控制；最后 180ms 淡出，不改变页面布局。
+   消息以 revision 重新挂载，让相同文本的连续操作也获得完整展示时间。 */
+.ui-toast--info, .ui-toast--success { animation: ui-toast-in .18s ease-out, ui-toast-out .18s ease-in 4.32s forwards; }
+@keyframes ui-toast-out { to { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .ui-toast { animation: none; } }
 @media (max-width: 720px) { .ui-toast { top: 72px; right: 12px; width: calc(100vw - 24px); } }
 @media (max-width: 980px) { .log-viewer-toolbar { grid-template-columns: 130px 1fr; } }
 

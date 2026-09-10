@@ -432,7 +432,7 @@ export default function App() {
           onOpenSettings={() => navigate("settings")}
         />
 
-        {message ? <UiToast closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
+        {message ? <UiToast key={messageState.revision} closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 
         <DesktopFavoritesProvider repository={repository} setMessage={setMessage}>
         <Suspense fallback={<PageLoadingState />}>
