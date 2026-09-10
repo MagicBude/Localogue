@@ -1,6 +1,8 @@
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type ReactNode,
@@ -67,6 +69,7 @@ export function DesktopWorkExplorer({
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
+  const loadMorePending = useRef(false);
   const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
   const [page, setPage] = useState(1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
@@ -203,6 +206,12 @@ export function DesktopWorkExplorer({
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
   }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view]);
 
+  // Observer 与“加载更多”按钮可能在同一帧触发。同步锁先于 React 下一次渲染生效，
+  // 防止一次请求意外跳过多个批次；查询结束（包括失败）后再允许用户重试。
+  useEffect(() => {
+    if (!data.refreshing) loadMorePending.current = false;
+  }, [data.refreshing, data.value]);
+
   function changeQuery(next: WorkQuery): void {
     setPage(1);
     setQuery(next);
@@ -219,7 +228,8 @@ export function DesktopWorkExplorer({
   const waterfallTotal = data.value?.result.total ?? 0;
   const hasMoreWaterfallItems = isWaterfall && waterfallCardCount < waterfallTotal;
   const loadMoreWaterfallItems = useCallback(() => {
-    if (!hasMoreWaterfallItems || data.refreshing) return;
+    if (!hasMoreWaterfallItems || data.refreshing || loadMorePending.current) return;
+    loadMorePending.current = true;
     setPage((value) => value + 1);
   }, [data.refreshing, hasMoreWaterfallItems]);
 

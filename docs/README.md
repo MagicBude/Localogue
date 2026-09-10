@@ -2,6 +2,9 @@
 
 本目录是 Localogue 的长期设计依据。文档不是附属品，而是项目的一部分。
 
+- [Desktop 全流程审核台账与验收路径](development/desktop-ux-audit.md)
+- [Localogue 换机交接与继续工作提示词](development/localogue-handoff.md)
+
 ## 产品
 
 - [愿景](product/vision.md)

@@ -5,7 +5,7 @@
 - `https://www.javbus.com/genre`
 - `https://www.javbus.com/uncensored/genre`
 
-两个页面合计发现 888 个来源标签，按页面标题归纳为 9 个来源分类：
+两个页面当时合计发现 888 个来源条目（尚非去重后的唯一标签数，也不是完整三语词表导入），按页面标题归纳为 9 个来源分类：
 
 | JavBus 分类原文 | 中文展示 | English presentation | 命中数量 |
 | --- | --- | --- | ---: |

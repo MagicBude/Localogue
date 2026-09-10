@@ -2,6 +2,8 @@
 
 ## 阶段名称
 
+Desktop 全流程审核持续进行：新增离线三语帮助、首页分类导航、异常详情返回和作品取消编辑能力；已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
+
 **V1-27D：Entity Localization & Browse Relationship Presentation**
 
 当前产品版本继续为 `0.1.25`。V1-27A/B/C 已建立 Organization / Series Registry Evidence 与 Community Catalog；V1-27D 完善多语言显示和父级关系展示，不把 Browse 扩展成级联作品筛选器。
