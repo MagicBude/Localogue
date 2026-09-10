@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useMemo,
   useState,
   type ChangeEvent,
@@ -23,6 +24,7 @@ import {
   DesktopWorkViewSwitcher,
   type DesktopWorkViewMode,
 } from "./desktop-work-results";
+import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
 
 interface FilterOption {
   id: string;
@@ -71,11 +73,14 @@ export function DesktopWorkExplorer({
   });
 
   const data = useAsyncExplorerData(async () => {
+    // 瀑布流的 page 表示“已加载批次”。Repository 仍执行同一个 WorkQuery，
+    // 只是每次取回从第一项到当前批次的稳定前缀，避免 React 另存一份可能过期的卡片数据。
+    const waterfall = view === "waterfall";
     const effectiveQuery: WorkQuery = {
       ...query,
       ...(fixedPersonId ? { personIds: [fixedPersonId] } : {}),
-      page,
-      pageSize,
+      page: waterfall ? 1 : page,
+      pageSize: waterfall ? page * pageSize : pageSize,
     };
     const result = await repository.listWorks(effectiveQuery);
     const [peopleResult, organizations, series, genres, tags, assets, preferences] = await Promise.all([
@@ -194,7 +199,7 @@ export function DesktopWorkExplorer({
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view]);
 
   function changeQuery(next: WorkQuery): void {
     setPage(1);
@@ -202,9 +207,19 @@ export function DesktopWorkExplorer({
   }
 
   function changeView(next: DesktopWorkViewMode): void {
+    setPage(1);
     setView(next);
     window.localStorage.setItem(storageKey, next);
   }
+
+  const isWaterfall = view === "waterfall";
+  const waterfallCardCount = data.value?.cards.length ?? 0;
+  const waterfallTotal = data.value?.result.total ?? 0;
+  const hasMoreWaterfallItems = isWaterfall && waterfallCardCount < waterfallTotal;
+  const loadMoreWaterfallItems = useCallback(() => {
+    if (!hasMoreWaterfallItems || data.refreshing) return;
+    setPage((value) => value + 1);
+  }, [data.refreshing, hasMoreWaterfallItems]);
 
   if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取作品。")}</ExplorerState>;
@@ -227,13 +242,22 @@ export function DesktopWorkExplorer({
         <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
-            {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
+            {isWaterfall
+              ? t("已显示 {shown} / {count} 项作品", { shown: cards.length, count: result.total })
+              : t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
         <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
-        {result.total > pageSize ? (
+        {isWaterfall && cards.length ? (
+          <DesktopInfiniteScrollSentinel
+            hasMore={hasMoreWaterfallItems}
+            loading={data.refreshing}
+            onLoadMore={loadMoreWaterfallItems}
+          />
+        ) : null}
+        {!isWaterfall && result.total > pageSize ? (
           <div className="desktop-pagination" aria-label={t("分页")}>
             <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
             <span>{page} / {pageCount}</span>
