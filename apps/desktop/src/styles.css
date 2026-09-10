@@ -1019,6 +1019,21 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .ui-feedback--success { border-color: #a9cfb3; background: #eef8f0; color: #285e37; }
 .ui-feedback--warning { border-color: #dac38d; background: #fff8e7; color: #765918; }
 .ui-feedback--error { border-color: #dfaaa4; background: #fff1ef; color: #8d3028; }
+.ui-toast { position: fixed; z-index: 70; top: 78px; right: 20px; width: min(440px, calc(100vw - 108px)); min-height: 48px; display: grid; grid-template-columns: 22px minmax(0, 1fr) 34px; align-items: center; gap: 10px; padding: 7px 7px 7px 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--text); box-shadow: 0 10px 30px rgba(0,0,0,.16); animation: ui-toast-in .18s ease-out; }
+.ui-toast__status { width: 20px; height: 20px; }
+.ui-toast > span { font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.ui-toast--info .ui-toast__status { color: var(--accent); }
+.ui-toast--success { border-color: #a9cfb3; background: #eef8f0; }
+.ui-toast--success .ui-toast__status { color: #278241; }
+.ui-toast--warning { border-color: #dac38d; background: #fff8e7; }
+.ui-toast--warning .ui-toast__status { color: #a36b00; }
+.ui-toast--error { border-color: #dfaaa4; background: #fff1ef; }
+.ui-toast--error .ui-toast__status { color: #b33b31; }
+@media (prefers-color-scheme: dark) {
+  .ui-toast--success { border-color: #31543a; background: #203326; }
+  .ui-toast--warning { border-color: #604c2b; background: #3a3020; }
+  .ui-toast--error { border-color: #65413d; background: #3a2523; }
+}
 
 .ui-empty-state { min-height: 108px; display: grid; place-items: center; align-content: center; gap: 6px; padding: 20px; border: 1px dashed var(--border-strong); border-radius: 12px; background: color-mix(in srgb, var(--panel) 74%, transparent); color: var(--muted); text-align: center; }
 .ui-empty-state > strong { color: var(--text); font-size: 13px; }
@@ -1057,6 +1072,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
 @keyframes dialog-fade { from { opacity: 0; } }
 @keyframes dialog-rise { from { opacity: 0; transform: translateY(8px) scale(.995); } }
 @keyframes ui-spin { to { transform: rotate(360deg); } }
+@keyframes ui-toast-in { from { opacity: 0; transform: translateY(-8px) scale(.98); } }
+@media (max-width: 720px) { .ui-toast { top: 72px; right: 12px; width: calc(100vw - 24px); } }
 @media (max-width: 980px) { .log-viewer-toolbar { grid-template-columns: 130px 1fr; } }
 
 .topbar { min-height: 70px; }

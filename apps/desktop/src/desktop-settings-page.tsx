@@ -9,7 +9,6 @@ import {
   applyLibraryProfile,
   createLibraryProfile,
   createLibraryProfileId,
-  hasUnsavedLibraryPaths,
   isDevFixtureLibraryPath,
   nextLibraryProfileName,
   removeLibraryProfile,
@@ -22,7 +21,7 @@ import type { DesktopSettingsModule } from "./desktop-app-shell";
 import { UiButton } from "./ui/button";
 import { UiActionDialog } from "./ui/action-dialog";
 import { UiEmptyState, UiFeedback } from "./ui/feedback";
-import { UiTextField } from "./ui/form-control";
+import { UiSelectField, UiTextField } from "./ui/form-control";
 
 // revision 11 同时保证 Profile 隔离、受控删除和 ffprobe 引导命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
@@ -39,7 +38,7 @@ export function DesktopSettingsPage({
   setSettings,
   busy,
   packInfos,
-  onSave,
+  onPersistSettings,
   onPersistProfiles,
   onOpenPacks,
   settingsModule,
@@ -50,7 +49,7 @@ export function DesktopSettingsPage({
   setSettings: Dispatch<SetStateAction<DesktopBootstrapSettings>>;
   busy: boolean;
   packInfos: DesktopSharedPackInfo[];
-  onSave: () => void;
+  onPersistSettings: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   onPersistProfiles: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   onOpenPacks: () => void;
   settingsModule: DesktopSettingsModule;
@@ -64,11 +63,12 @@ export function DesktopSettingsPage({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteManagedData, setDeleteManagedData] = useState(false);
   const selectedProfile = activeLibraryProfile(settings);
+  const selectedProfileIsManaged = Boolean(selectedProfile && isManagedPrivateLibrary(selectedProfile.id, selectedProfile.libraryPath, runtime?.appLocalDataDir));
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   async function chooseLibrary(): Promise<void> {
     const path = await fileDialog.pickDirectory(settings.libraryPath);
-    if (path) setSettings((current) => ({ ...current, libraryPath: path }));
+    if (path) await saveOrdinarySettings({ ...settings, libraryPath: path }, t("私人资料存储位置已自动保存。"));
   }
 
   async function createProfile(): Promise<void> {
@@ -130,16 +130,12 @@ export function DesktopSettingsPage({
   }
 
   async function selectProfile(profileId: string): Promise<void> {
-    const profile = (settings.libraryProfiles ?? []).find((item) => item.id === profileId);
-    if (!profile || profile.id === settings.activeLibraryProfileId) return;
-
-    if (selectedProfile) {
-      const activeSnapshot = applyLibraryProfile(settings, selectedProfile);
-      if (hasUnsavedLibraryPaths(settings, activeSnapshot) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
-    }
+    const prepared = syncActiveLibraryProfile(settings);
+    const profile = (prepared.libraryProfiles ?? []).find((item) => item.id === profileId);
+    if (!profile || profile.id === prepared.activeLibraryProfileId) return;
 
     try {
-      await onPersistProfiles(applyLibraryProfile(settings, profile), t("已切换资料库：{name}", { name: profile.name }));
+      await onPersistProfiles(applyLibraryProfile(prepared, profile), t("已切换资料库：{name}", { name: profile.name }));
     } catch {
       // 父级已经显示保存错误。
     }
@@ -248,7 +244,7 @@ export function DesktopSettingsPage({
     try {
       const path = await desktopBridge.pickFfprobeFile(settings.ffprobePath);
       if (path) {
-        setSettings((current) => ({ ...current, ffprobePath: path }));
+        await saveOrdinarySettings({ ...settings, ffprobePath: path }, t("ffprobe 路径已自动保存。"));
         setFfprobeCheck(undefined);
       }
     } catch (error) {
@@ -276,6 +272,14 @@ export function DesktopSettingsPage({
     }
   }
 
+  async function saveOrdinarySettings(next: DesktopBootstrapSettings, message: string): Promise<void> {
+    try {
+      await onPersistSettings(next, message);
+    } catch {
+      // App 统一显示保存失败并保留当前输入，用户修正后可再次离开字段触发保存。
+    }
+  }
+
   return (
     <div className={`page-stack settings-page settings-mode-${settingsModule}`}>
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
@@ -297,13 +301,10 @@ export function DesktopSettingsPage({
         <p className="muted">{t("新建资料库会自动获得独立的 Private Library；你只需添加影片所在的内容根目录。名称和高级设置以后都可以修改。")}</p>
         {profiles.length ? (
           <div className="profile-toolbar">
-            <label>
-              <span>{t("当前资料库")}</span>
-              <select disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
+            <UiSelectField label={t("当前资料库")} disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
                 <option value="" disabled>{t("选择资料库…")}</option>
                 {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
-              </select>
-            </label>
+            </UiSelectField>
             <div className="button-row">
               <UiButton disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openRenameProfile}>{t("重命名")}</UiButton>
               <UiButton variant="danger" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openDeleteProfile}>{t("删除资料库")}</UiButton>
@@ -324,14 +325,14 @@ export function DesktopSettingsPage({
       </UiActionDialog>
 
       <UiActionDialog
-        actions={<><UiButton variant="ghost" onClick={() => setDeleteOpen(false)}>{t("取消")}</UiButton><UiButton variant="danger" loading={busy} onClick={() => void deleteProfile()}>{deleteManagedData ? t("删除配置和管理数据") : t("只删除配置")}</UiButton></>}
+        actions={<><UiButton variant="ghost" onClick={() => setDeleteOpen(false)}>{t("取消")}</UiButton><UiButton variant="danger" loading={busy} onClick={() => void deleteProfile()}>{deleteManagedData ? t("删除资料库和管理数据") : t("从列表移除")}</UiButton></>}
         closeLabel={t("关闭")}
-        description={t("默认只删除路径预设，不会移动、重命名或删除影片内容目录。")}
+        description={selectedProfileIsManaged ? t("从列表移除只会删除资料库配置；如需清理 Localogue 为它保存的管理数据，请在下方明确勾选。影片内容目录始终保留。") : t("这个资料库使用用户选择的存储位置。移除后磁盘资料会完整保留，Localogue 不会递归删除用户目录。")}
         onOpenChange={setDeleteOpen}
         open={deleteOpen}
         title={t("删除资料库“{name}”？", { name: selectedProfile?.name ?? "" })}
       >
-        {selectedProfile && isManagedPrivateLibrary(selectedProfile.id, selectedProfile.libraryPath, runtime?.appLocalDataDir) ? <label className="ui-action-dialog__choice"><input type="checkbox" checked={deleteManagedData} onChange={(event) => setDeleteManagedData(event.target.checked)} /><span><strong>{t("同时删除 Localogue 管理数据")}</strong><small>{t("将永久删除该资料库中的作品、人物、图片副本和审计记录；影片内容根目录仍不会删除。")}</small></span></label> : null}
+        {selectedProfileIsManaged ? <label className="ui-action-dialog__choice"><input type="checkbox" checked={deleteManagedData} onChange={(event) => setDeleteManagedData(event.target.checked)} /><span><strong>{t("同时删除 Localogue 管理数据")}</strong><small>{t("将永久删除该资料库中的作品、人物、图片副本和审计记录；影片内容根目录仍不会删除。")}</small></span></label> : <UiFeedback tone="info">{t("如需清理这个自选目录，请在文件管理器中自行确认内容；Localogue 不会把它当作缓存自动删除。")}</UiFeedback>}
       </UiActionDialog>
 
       <details className="settings-card advanced-source-settings source-model-card settings-module-library">
@@ -349,18 +350,18 @@ export function DesktopSettingsPage({
         <div className="advanced-settings-stack">
           <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
           <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
-          <div className="button-row"><button onClick={() => void chooseLibrary()}>{t("选择目录")}</button>{settings.libraryPath ? <button className="danger-button" onClick={() => setSettings((current) => ({ ...current, libraryPath: undefined }))}>{t("清除 Private Library")}</button> : null}</div>
+          <div className="button-row"><UiButton onClick={() => void chooseLibrary()}>{t("选择目录")}</UiButton>{settings.libraryPath ? <UiButton variant="danger" onClick={() => void saveOrdinarySettings({ ...settings, libraryPath: undefined }, t("私人资料存储位置已清除并自动保存。"))}>{t("清除 Private Library")}</UiButton> : null}</div>
         </div>
       </details>
 
       <section className="settings-card featured-card settings-module-library">
-        <div className="section-heading"><div><span className="eyebrow">CONTENT ROOTS</span><h2>{t("内容根目录（推荐）")}</h2></div><button className="primary-button" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</button></div>
+        <div className="section-heading"><div><span className="eyebrow">CONTENT ROOTS</span><h2>{t("内容根目录（推荐）")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</UiButton></div>
         <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
         <PathList values={settings.libraryRoots} onRemove={(path) => void removePath("libraryRoots", path)} />
       </section>
 
       <section className="settings-card settings-module-sources">
-        <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><div className="button-row"><button onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</button><button className="primary-button" onClick={onOpenPacks}>{t("导入、导出与备份")}</button></div></div>
+        <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><div className="button-row"><UiButton onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</UiButton><UiButton variant="primary" onClick={onOpenPacks}>{t("导入、导出与备份")}</UiButton></div></div>
         <p className="muted">{t("适合社区公共元数据。推荐继续把 localogue-community-data 作为独立 Shared Pack 维护，而不是复制进每个私人资料库。")}</p>
         <PathList values={settings.sharedPackPaths} onRemove={(path) => void removePath("sharedPackPaths", path)} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
@@ -370,12 +371,12 @@ export function DesktopSettingsPage({
         <summary><span><span className="eyebrow">ADVANCED COMPATIBILITY</span><strong>{t("高级兼容目录")}</strong></span><small>{t("大多数用户不需要配置")}</small></summary>
         <div className="advanced-settings-stack">
           <div>
-            <div className="section-heading"><div><h3>{t("额外媒体目录")}</h3></div><button onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</button></div>
+            <div className="section-heading"><div><h3>{t("额外媒体目录")}</h3></div><UiButton onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</UiButton></div>
             <p className="muted">{t("只在影片不位于上面的内容根目录中时添加；多个目录会全部参与同步和媒体扫描。")}</p>
             <PathList values={settings.mediaScanPaths} onRemove={(path) => void removePath("mediaScanPaths", path)} />
           </div>
           <div>
-            <div className="section-heading"><div><h3>{t("额外 NFO / 图片目录")}</h3></div><button onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</button></div>
+            <div className="section-heading"><div><h3>{t("额外 NFO / 图片目录")}</h3></div><UiButton onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</UiButton></div>
             <p className="muted">{t("只在 NFO / 海报完全放在另一处时添加；这里也会参与 poster / fanart / thumb 发现。")}</p>
             <PathList values={settings.nfoScanPaths} onRemove={(path) => void removePath("nfoScanPaths", path)} />
           </div>
@@ -384,12 +385,12 @@ export function DesktopSettingsPage({
 
       <section className="settings-card form-card settings-module-tools">
         <div>
-          <div className="section-heading"><div><h3>ffprobe</h3><p className="muted">{t("用于读取视频清晰度、时长和编码。留空会依次查找安装包资源和系统 PATH；找不到时仍能扫描作品文件。")}</p></div><div className="button-row"><button onClick={() => void chooseFfprobe()}>{t("选择 ffprobe.exe")}</button><button onClick={() => void checkFfprobe()}>{t("检测可用性")}</button></div></div>
-          <UiTextField label={t("ffprobe 可执行文件路径")} value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} />
+          <div className="section-heading"><div><h3>ffprobe</h3><p className="muted">{t("用于读取视频清晰度、时长和编码。留空会依次查找安装包资源和系统 PATH；找不到时仍能扫描作品文件。")}</p></div><div className="button-row"><UiButton disabled={busy} onClick={() => void chooseFfprobe()}>{t("选择 ffprobe.exe")}</UiButton><UiButton disabled={busy} onClick={() => void checkFfprobe()}>{t("检测可用性")}</UiButton></div></div>
+          <UiTextField label={t("ffprobe 可执行文件路径")} description={t("修改后离开输入框即自动保存。") } value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} onBlur={(event) => void saveOrdinarySettings({ ...settings, ffprobePath: event.currentTarget.value }, t("ffprobe 路径已自动保存。"))} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
           {ffprobeCheck ? <UiFeedback tone="success">{t("已检测：{version}", { version: ffprobeCheck })}</UiFeedback> : null}
         </div>
-        <label>Localogue Web URL<input value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} /></label>
-        <div className="button-row"><button onClick={() => void openWeb()}>{t("浏览器打开 Web")}</button><button className="primary-button" disabled={busy} onClick={onSave}>{busy ? t("保存中…") : t("保存桌面设置")}</button></div>
+        <UiTextField label="Localogue Web URL" description={t("修改后离开输入框即自动保存。") } value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} onBlur={(event) => void saveOrdinarySettings({ ...settings, webUrl: event.currentTarget.value }, t("Web URL 已自动保存。"))} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
+        <div className="button-row"><UiButton disabled={busy} onClick={() => void openWeb()}>{t("浏览器打开 Web")}</UiButton><span className="muted">{busy ? t("正在自动保存…") : t("设置会自动保存")}</span></div>
       </section>
 
       <section className="settings-card soft-card settings-module-about">
@@ -402,7 +403,7 @@ export function DesktopSettingsPage({
           <InfoCard label={t("环境")} value={runtime?.environment} />
         </div>
         <code className="path-block">{runtime?.settingsPath ?? "—"}</code>
-        <div className="button-row"><button onClick={() => void revealLog()}>{t("打开日志位置")}</button></div>
+        <div className="button-row"><UiButton onClick={() => void revealLog()}>{t("打开日志位置")}</UiButton></div>
       </section>
     </div>
   );
@@ -411,7 +412,7 @@ export function DesktopSettingsPage({
 function PathList({ values, onRemove }: { values: string[]; onRemove: (value: string) => void }) {
   const { t } = useDesktopI18n();
   if (!values.length) return <p className="muted">{t("尚未配置。")} </p>;
-  return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><button className="danger-button" onClick={() => onRemove(path)}>{t("移除")}</button></li>)}</ul>;
+  return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><UiButton size="compact" variant="danger" onClick={() => onRemove(path)}>{t("移除")}</UiButton></li>)}</ul>;
 }
 
 function unique(values: string[]): string[] {

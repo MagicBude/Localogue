@@ -1,5 +1,7 @@
 # Changelog
 
+- Desktop 普通设置改为自动保存：ffprobe / Web URL 编辑后离开字段即落盘，文件选择与 Private Library 位置变更立即保存，移除重复的“保存桌面设置”按钮；普通设置写入按操作顺序串行执行，Profile 切换先同步当前界面值，避免快速连续编辑或切换产生覆盖竞态。全局消息改为顶栏下方的右上角浮层 Toast，不再推动页面内容；成功/普通消息显示 4.5 秒后淡出，错误和警告继续保留并可手动关闭。
+- 资料库移除对话框根据存储归属解释真实能力：用户自选目录只显示“从列表移除”并明确磁盘资料保留；只有 Native-managed Private Library 才提供显式删除管理数据选项。日志、应用设置等全局数据不再被含混描述成单库“缓存”。
 - Desktop 资料库重命名与删除不再调用浏览器原生 `prompt / confirm`：新增统一 Radix `UiActionDialog`，重命名可直接编辑并回车保存；删除在一个对话框中明确区分“只删除配置”和“同时删除受管数据”，默认保持非破坏性，影片内容根目录始终不删除。
 - Desktop 第二批基础控件迁移覆盖全局消息、页面懒加载、首次资料库引导、首页读写状态和媒体诊断：loading / error / empty 使用统一反馈语义，媒体扫描与 ffprobe 单文件检查使用一致的按钮忙碌状态和完成/取消/失败色调；Coordinator、取消信号与 MediaFile 规则保持不变。
 - 修复 `pnpm-workspace.yaml` 残留 `approve-builds` 占位值导致所有 pnpm 检查和 Desktop BAT 在真正执行前退出的问题；只显式批准锁文件中现有的 `esbuild` 与 `unrs-resolver` 构建脚本，不开放任意依赖脚本。

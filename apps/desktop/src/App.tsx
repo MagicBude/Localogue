@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -21,13 +22,13 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopSidebar, DesktopTopbar, type DesktopPage, type DesktopSettingsModule } from "./desktop-app-shell";
 import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import { UiButton } from "./ui/button";
-import { UiEmptyState, UiFeedback } from "./ui/feedback";
+import { UiEmptyState } from "./ui/feedback";
+import { UiToast, type ToastTone } from "./ui/toast";
 import {
   activeLibraryProfile,
   addLibraryProfile,
   applyLibraryProfile,
   ensureLibraryProfiles,
-  hasUnsavedLibraryPaths,
   isDevFixtureLibraryPath,
   syncActiveLibraryProfile,
 } from "./library-profiles";
@@ -76,21 +77,34 @@ export default function App() {
   const [page, setPage] = useState<DesktopPage>("home");
   const [detail, setDetail] = useState<DetailTarget>(null);
   const [worksInitialQuery, setWorksInitialQuery] = useState<WorkQuery | undefined>();
-  const [message, setMessageState] = useState(() => t("正在连接 Tauri Runtime…"));
+  const [messageState, setMessageState] = useState(() => ({ revision: 0, text: t("正在连接 Tauri Runtime…") }));
+  const message = messageState.text;
+  const messageTone = classifyMessageTone(message);
   const [busy, setBusy] = useState(false);
   const [libraryEpoch, setLibraryEpoch] = useState(0);
   const [progress, setProgress] = useState<DesktopTaskProgress | null>(null);
   // 递增令牌表达一次新的同步意图；Media 页面负责真正编排，避免 App 复制扫描业务。
   const [mediaSyncRequest, setMediaSyncRequest] = useState(0);
+  const ordinarySaveQueue = useRef<Promise<void>>(Promise.resolve());
+  const ordinarySaveCount = useRef(0);
 
   /**
    * 所有页面状态消息从这里汇合，因此日志接入不需要让一百多个调用点分别理解文件 I/O。
    * Native 端负责固定目录、轮转和路径脱敏；日志失败不能反过来阻断正常 UI。
    */
   const setMessage = useCallback((next: string) => {
-    setMessageState(next);
+    setMessageState((current) => ({ revision: current.revision + 1, text: next }));
     void desktopBridge.appendAppLog(/失败|无法|错误/.test(next) ? "error" : "info", next).catch(() => undefined);
   }, []);
+
+  // 成功/普通提示只负责确认动作已完成，停留过久会挤占内容并形成视觉噪音。
+  // 需要用户处理的错误和警告不会自动消失。
+  useEffect(() => {
+    if (!message || messageTone === "error" || messageTone === "warning") return;
+    const revision = messageState.revision;
+    const timer = window.setTimeout(() => setMessageState((current) => current.revision === revision ? { ...current, text: "" } : current), 4_500);
+    return () => window.clearTimeout(timer);
+  }, [message, messageState.revision, messageTone]);
 
   const refreshSources = useCallback(async (next: DesktopBootstrapSettings) => {
     const inspected = await Promise.all(
@@ -269,13 +283,45 @@ export default function App() {
     }
   }
 
-  async function switchLibraryProfile(profileId: string): Promise<void> {
-    const profile = (savedSettings.libraryProfiles ?? []).find((item) => item.id === profileId);
-    if (!profile || profile.id === savedSettings.activeLibraryProfileId) return;
-    if (hasUnsavedLibraryPaths(settings, savedSettings) && !window.confirm(t("当前设置页还有未保存的资料源修改。切换资料库会放弃这些修改，继续吗？"))) return;
-
+  async function persistOrdinarySettings(
+    next: DesktopBootstrapSettings,
+    successMessage: string,
+  ): Promise<DesktopBootstrapSettings> {
+    ordinarySaveCount.current += 1;
+    setBusy(true);
+    let savedResult: DesktopBootstrapSettings | undefined;
+    let saveError: unknown;
+    const operation = ordinarySaveQueue.current
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          savedResult = await persistDesktopSettings(next);
+          setMessage(successMessage);
+        } catch (error) {
+          saveError = error;
+          setMessage(t("保存失败：{error}", { error: toMessage(error) }));
+        }
+      });
+    ordinarySaveQueue.current = operation;
     try {
-      const next = applyLibraryProfile(savedSettings, profile);
+      await operation;
+      if (saveError) throw saveError;
+      if (!savedResult) throw new Error(t("保存失败：{error}", { error: "Unknown save result" }));
+      return savedResult;
+    } finally {
+      ordinarySaveCount.current -= 1;
+      if (ordinarySaveCount.current === 0) setBusy(false);
+    }
+  }
+
+  async function switchLibraryProfile(profileId: string): Promise<void> {
+    try {
+      // 切换前先把当前界面值同步回旧 Profile；applyLibraryProfile 再替换路径字段，
+      // ffprobe / Web URL 等全局普通设置因此不会被旧 savedSettings 覆盖。
+      const prepared = syncActiveLibraryProfile(settings);
+      const profile = (prepared.libraryProfiles ?? []).find((item) => item.id === profileId);
+      if (!profile || profile.id === prepared.activeLibraryProfileId) return;
+      const next = applyLibraryProfile(prepared, profile);
       await persistProfileMutation(next, t("已切换资料库：{name}", { name: profile.name }));
     } catch {
       // persistProfileMutation 已给出错误信息。
@@ -360,7 +406,7 @@ export default function App() {
           onOpenSettings={() => navigate("settings")}
         />
 
-        <UiFeedback tone="info">{message}</UiFeedback>
+        {message ? <UiToast closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 
         <DesktopFavoritesProvider repository={repository}>
         <Suspense fallback={<PageLoadingState />}>
@@ -446,7 +492,7 @@ export default function App() {
             setSettings={setSettings}
             busy={busy}
             packInfos={packInfos}
-            onSave={() => void saveSettings()}
+            onPersistSettings={persistOrdinarySettings}
             onPersistProfiles={persistProfileMutation}
             onOpenPacks={() => navigate("packs")}
             settingsModule={settingsModule}
@@ -486,6 +532,13 @@ function invalidPackInfo(path: string, error: unknown): DesktopSharedPackInfo {
     valid: false,
     error: toMessage(error),
   };
+}
+
+function classifyMessageTone(message: string): ToastTone {
+  if (/失败|无法|错误|failed|error|cannot|失敗|エラー/i.test(message)) return "error";
+  if (/请先|需要|警告|不可用|未配置|不能|禁止|拒绝|阻塞|warning|required|unavailable|cannot|blocked|please|必要|警告|禁止|拒否|利用できません/i.test(message)) return "warning";
+  if (/已|完成|成功|保存|创建|删除|更新|导入|同步|连接|done|saved|created|deleted|updated|complete|success|完了|保存|作成|削除|更新|接続/i.test(message)) return "success";
+  return "info";
 }
 
 function unique(values: string[]): string[] {
