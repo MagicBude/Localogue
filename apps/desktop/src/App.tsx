@@ -452,7 +452,7 @@ export default function App() {
               setMessage={setMessage}
             />
           ) : (
-            <DesktopWorksPage repository={repository} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} />
+            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} />
           )
         ) : page === "favorites" ? (
           <DesktopFavoritesPage

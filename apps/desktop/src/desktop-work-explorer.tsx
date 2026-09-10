@@ -51,6 +51,7 @@ interface ExplorerData {
 export function DesktopWorkExplorer({
   repository,
   onOpen,
+  onOpenPerson,
   fixedPersonId,
   pageSize = 24,
   storageKey = "localogue.desktop.work-view",
@@ -58,6 +59,7 @@ export function DesktopWorkExplorer({
 }: {
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
+  onOpenPerson?: (id: string) => void;
   fixedPersonId?: string;
   pageSize?: number;
   storageKey?: string;
@@ -184,7 +186,7 @@ export function DesktopWorkExplorer({
 
     return {
       result,
-      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage, preferences),
+      cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage, preferences, genres, tags),
       people,
       directors,
       makers,
@@ -248,7 +250,14 @@ export function DesktopWorkExplorer({
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
-        <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
+        <DesktopWorkResults
+          cards={cards}
+          view={view}
+          onOpen={onOpen}
+          onOpenPerson={onOpenPerson}
+          onSelectGenre={(id) => changeQuery({ ...query, genreIds: [id] })}
+          onSelectTag={(id) => changeQuery({ ...query, tagIds: [id] })}
+        />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
         {isWaterfall && cards.length ? (
           <DesktopInfiniteScrollSentinel

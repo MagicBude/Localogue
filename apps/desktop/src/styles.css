@@ -102,7 +102,7 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .detail-grid, .runtime-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
 .compact-grid { margin-top: 14px; }
 
-.desktop-work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px; align-items: start; }
+.desktop-work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 16px; align-items: stretch; }
 .desktop-work-waterfall { column-gap: 20px; }
 /* column-width 是期望宽度，浏览器会按可用空间自动决定列数。 */
 .desktop-work-waterfall.is-small { column-width: 150px; }
@@ -111,6 +111,20 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .desktop-work-waterfall > .desktop-work-card { break-inside: avoid; margin-bottom: 20px; }
 
 .desktop-work-card { min-width: 0; }
+.desktop-work-grid > .desktop-work-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  border: 1px solid var(--border, #ddd8ce);
+  border-radius: 12px;
+  background: var(--panel, #fff);
+  box-shadow: 0 4px 14px rgba(0,0,0,.045);
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.desktop-work-grid > .desktop-work-card:hover { border-color: #b8c9df; box-shadow: 0 10px 24px rgba(35,74,120,.1); transform: translateY(-1px); }
+.desktop-work-grid .desktop-work-card__poster { aspect-ratio: 16 / 10; border: 0; border-radius: 0; box-shadow: none; }
+.desktop-work-grid .desktop-work-card__body { flex: 1; padding: 11px 12px 13px; }
 .desktop-work-card__media { position: relative; }
 .desktop-work-card__overlay {
   position: absolute;
@@ -224,6 +238,31 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
   font-size: 0.78rem;
 }
 .desktop-work-card__people { margin-top: 5px; }
+.desktop-work-card__people button,
+.desktop-work-card__people span {
+  border: 0;
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: #f5efff;
+  color: #7050a0;
+  font: inherit;
+}
+.desktop-work-card__people button { cursor: pointer; }
+.desktop-work-card__people button:hover { background: #eadcff; color: #563681; }
+.desktop-work-card__classifications { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.desktop-work-card__classifications button {
+  min-height: 22px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: .68rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+.desktop-work-card__classifications button.is-genre { background: #fff0df; border-color: #ffd5a6; color: #b85b10; }
+.desktop-work-card__classifications button.is-tag { background: #eaf4ff; border-color: #cce3fb; color: #276aa7; }
+.desktop-work-card__classifications button:hover { filter: saturate(1.12) brightness(.97); }
+.desktop-work-card__classifications button:disabled { cursor: default; opacity: 1; }
 .desktop-work-card__chips {
   display: flex;
   flex-wrap: wrap;

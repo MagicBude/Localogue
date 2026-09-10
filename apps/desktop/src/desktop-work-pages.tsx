@@ -30,12 +30,14 @@ const fileOpener = new TauriFileOpenerAdapter();
 export function DesktopWorksPage({
   repository,
   openWork,
+  openPerson,
   onLibraryChanged,
   setMessage,
   initialQuery,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
+  openPerson: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
   initialQuery?: WorkQuery;
@@ -49,7 +51,7 @@ export function DesktopWorksPage({
         <p>{t("对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。")}</p>
       </section>
       <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} />
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} />
     </div>
   );
 }

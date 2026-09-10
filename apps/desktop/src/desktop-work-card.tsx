@@ -6,6 +6,9 @@ import type { DesktopWorkCardViewModel } from "./desktop-work-results";
 interface DesktopWorkCardProps {
   card: DesktopWorkCardViewModel;
   onOpen: (id: string) => void;
+  onOpenPerson?: (id: string) => void;
+  onSelectGenre?: (id: string) => void;
+  onSelectTag?: (id: string) => void;
 }
 
 /**
@@ -15,9 +18,9 @@ interface DesktopWorkCardProps {
  * 标题/番号/演员/类型 chip 的信息层级；收藏按钮作为卡片级别的 Presentation
  * Preference 操作，不修改 Canonical Work。
  */
-export function DesktopWorkCard({ card, onOpen }: DesktopWorkCardProps) {
+export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onSelectTag }: DesktopWorkCardProps) {
   const { t } = useDesktopI18n();
-  const { work, title, releaseDate, performerNames, makerName, workTypeNames, poster } = card;
+  const { work, title, releaseDate, performers, makerName, workTypeNames, genres, tags, poster } = card;
 
   return (
     <article className="desktop-work-card">
@@ -74,10 +77,25 @@ export function DesktopWorkCard({ card, onOpen }: DesktopWorkCardProps) {
           ) : null}
         </div>
 
-        {performerNames.length ? (
-          <p className="desktop-work-card__people">{performerNames.join(" · ")}</p>
+        {performers.length ? (
+          <div className="desktop-work-card__people" aria-label={t("演员")}>
+            {performers.map((performer) => onOpenPerson ? (
+              <button key={performer.id} onClick={() => onOpenPerson(performer.id)} type="button">{performer.name}</button>
+            ) : <span key={performer.id}>{performer.name}</span>)}
+          </div>
         ) : makerName ? (
           <p className="desktop-work-card__people">{makerName}</p>
+        ) : null}
+
+        {genres.length || tags.length ? (
+          <div className="desktop-work-card__classifications">
+            {genres.slice(0, 6).map((genre) => (
+              <button className="is-genre" disabled={!onSelectGenre} key={genre.id} onClick={() => onSelectGenre?.(genre.id)} type="button">{genre.label}</button>
+            ))}
+            {tags.slice(0, 6).map((tag) => (
+              <button className="is-tag" disabled={!onSelectTag} key={tag.id} onClick={() => onSelectTag?.(tag.id)} type="button">{tag.label}</button>
+            ))}
+          </div>
         ) : null}
       </div>
     </article>

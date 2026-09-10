@@ -3,9 +3,11 @@ import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
 import type { PresentationPreference } from "@/domain/entities/presentation-preference";
 import type { Work } from "@/domain/entities/work";
+import type { Genre, Tag } from "@/domain/entities/classification";
 import type { SupportedLanguage } from "@/domain/value-objects/localized-text";
 import { getPreferredPersonName, localizeText } from "@/application/services/localization-service";
 import { workTypeDefinition } from "@/application/importers/import-classification-normalizer";
+import { localizeGenre } from "@/application/services/genre-localization-service";
 
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -21,8 +23,11 @@ export interface DesktopWorkCardViewModel {
   title: string;
   releaseDate: string;
   performerNames: string[];
+  performers: Array<{ id: string; name: string; person: Person }>;
   makerName?: string;
   workTypeNames: string[];
+  genres: Array<{ id: string; label: string }>;
+  tags: Array<{ id: string; label: string }>;
   poster?: Asset;
 }
 
@@ -33,11 +38,15 @@ export function buildDesktopWorkCards(
   assets: Asset[],
   metadataLanguage: SupportedLanguage,
   preferences: PresentationPreference[] = [],
+  genres: Genre[] = [],
+  tags: Tag[] = [],
 ): DesktopWorkCardViewModel[] {
   const peopleById = new Map(people.map((item) => [item.id, item]));
   const organizationsById = new Map(organizations.map((item) => [item.id, item]));
   const preferenceByWorkId = new Map(preferences.filter((item) => item.entityType === "work").map((item) => [item.entityId, item]));
   const assetsById = new Map(assets.map((item) => [item.id, item]));
+  const genresById = new Map(genres.map((item) => [item.id, item]));
+  const tagsById = new Map(tags.map((item) => [item.id, item]));
   const subjectAssets = new Map<string, Asset[]>();
   for (const asset of assets) {
     if (asset.subjectType !== "work" || !asset.subjectId) continue;
@@ -50,21 +59,24 @@ export function buildDesktopWorkCards(
     const referenced = work.assetIds.map((id) => assetsById.get(id)).filter((item): item is Asset => Boolean(item));
     const candidates = uniqueAssets([...referenced, ...(subjectAssets.get(work.id) ?? [])]);
     const poster = resolveWorkPresentation(work, candidates, preferenceByWorkId.get(work.id)).resolved;
-    const performerNames = work.personRelations
+    const performers = work.personRelations
       .filter((relation) => relation.role === "performer")
       .sort((a, b) => (a.billingOrder ?? 999) - (b.billingOrder ?? 999))
       .map((relation) => peopleById.get(relation.personId))
       .filter((person): person is Person => Boolean(person))
-      .map((person) => getPreferredPersonName(person, metadataLanguage));
+      .map((person) => ({ id: person.id, name: getPreferredPersonName(person, metadataLanguage), person }));
     const maker = work.makerId ? organizationsById.get(work.makerId) : undefined;
 
     return {
       work,
       title: localizeText(work.titles, metadataLanguage),
       releaseDate: work.releaseDate?.value ?? "—",
-      performerNames,
+      performerNames: performers.map((item) => item.name),
+      performers,
       makerName: maker ? localizeText(maker.names, metadataLanguage) : undefined,
       workTypeNames: work.workTypeIds.map((id) => { const definition = workTypeDefinition(id); return definition ? localizeText(definition.names, metadataLanguage, id) : id; }),
+      genres: work.genreIds.map((id) => ({ id, label: localizeGenre(genresById.get(id), metadataLanguage, id) })),
+      tags: work.tagIds.map((id) => ({ id, label: localizeText(tagsById.get(id)?.names, metadataLanguage, id) })),
       poster,
     };
   });
@@ -106,11 +118,17 @@ export function DesktopWorkResults({
   view,
   waterfallSize = "medium",
   onOpen,
+  onOpenPerson,
+  onSelectGenre,
+  onSelectTag,
 }: {
   cards: DesktopWorkCardViewModel[];
   view: DesktopWorkViewMode;
   waterfallSize?: DesktopWaterfallSize;
   onOpen: (id: string) => void;
+  onOpenPerson?: (id: string) => void;
+  onSelectGenre?: (id: string) => void;
+  onSelectTag?: (id: string) => void;
 }) {
   const { t } = useDesktopI18n();
   if (view === "list") {
@@ -184,7 +202,7 @@ export function DesktopWorkResults({
     return (
       <div className={`desktop-work-waterfall is-${waterfallSize}`}>
         {cards.map((card) => (
-          <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} />
+          <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
         ))}
       </div>
     );
@@ -193,7 +211,7 @@ export function DesktopWorkResults({
   return (
     <div className="desktop-work-grid">
       {cards.map((card) => (
-        <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} />
+        <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
       ))}
     </div>
   );
