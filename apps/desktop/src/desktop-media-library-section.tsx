@@ -5,6 +5,8 @@ import type { MediaFile } from "@/domain/entities/media-file";
 import type { Work } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
+import { UiButton } from "./ui/button";
+import { UiEmptyState } from "./ui/feedback";
 
 interface MediaLibrarySectionProps {
   loading: boolean;
@@ -28,8 +30,8 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { loading, error, media, works } = props;
 
-  if (loading) return <section className="empty-state"><div className="loading-dot" /><strong>{t("正在读取资料库…")}</strong></section>;
-  if (error || !media || !works) return <section className="empty-state error-state"><span className="eyebrow">READ ERROR</span><h2>{t("无法读取当前页面")}</h2><p>{toMessage(error)}</p></section>;
+  if (loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  if (error || !media || !works) return <UiEmptyState eyebrow="READ ERROR" tone="error" title={t("无法读取当前页面")} description={toMessage(error)} />;
 
   return (
     <section className="settings-card table-card">
@@ -47,14 +49,14 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
               <td>{formatBytes(file.fileSize ?? 0)}</td>
               <td>{mediaSummary(file, t)}</td>
               <td><div className="row-actions">
-                <button onClick={() => props.onOpen(file.path)}>{t("打开")}</button>
-                <button onClick={() => props.onReveal(file.path)}>{t("定位")}</button>
-                <button className={props.bindingMediaId === file.id ? "primary-button" : ""} onClick={() => props.onToggleBinding(file.id)}>{t("管理绑定")}</button>
+                <UiButton size="compact" onClick={() => props.onOpen(file.path)}>{t("打开")}</UiButton>
+                <UiButton size="compact" onClick={() => props.onReveal(file.path)}>{t("定位")}</UiButton>
+                <UiButton size="compact" variant={props.bindingMediaId === file.id ? "primary" : "default"} onClick={() => props.onToggleBinding(file.id)}>{t("管理绑定")}</UiButton>
               </div></td>
             </tr>;
           })}</tbody>
         </table>
-      </div> : <p className="muted">{t("尚未扫描到本地媒体。")} </p>}
+      </div> : <UiEmptyState title={t("尚未扫描到本地媒体。")} />}
     </section>
   );
 }

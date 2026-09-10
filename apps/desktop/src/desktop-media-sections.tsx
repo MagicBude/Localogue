@@ -4,6 +4,8 @@ import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard } from "./desktop-page-primitives";
 import type { DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
+import { UiButton } from "./ui/button";
+import { UiFeedback } from "./ui/feedback";
 
 /**
  * 纯展示组件只接收数据和回调，不创建 Coordinator，也不写 Repository。
@@ -18,9 +20,9 @@ export function MediaScanSection({ roots, scan, onStart, onCancel }: {
   const { t } = useDesktopI18n();
   const running = scan?.status === "running" || scan?.status === "cancelling";
   return <section className="settings-card">
-    <div className="section-heading"><div><span className="eyebrow">INCREMENTAL MEDIA SCAN</span><h2>{t("媒体扫描")}</h2><p className="muted">{t("递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。")}</p></div><div className="button-row"><button className="primary-button" disabled={running} onClick={onStart}>{t("仅扫描视频")}</button><button disabled={scan?.status !== "running"} onClick={onCancel}>{t("取消")}</button></div></div>
+    <div className="section-heading"><div><span className="eyebrow">INCREMENTAL MEDIA SCAN</span><h2>{t("媒体扫描")}</h2><p className="muted">{t("递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。")}</p></div><div className="button-row"><UiButton variant="primary" loading={running} onClick={onStart}>{t("仅扫描视频")}</UiButton><UiButton disabled={scan?.status !== "running"} onClick={onCancel}>{t("取消")}</UiButton></div></div>
     <code className="path-block">{roots.length ? roots.join("\n") : t("尚未配置可扫描资料根目录")}</code>
-    {scan ? <div className={`progress ${scan.status}`}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></div> : null}
+    {scan ? <UiFeedback tone={scanTone(scan.status)}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></UiFeedback> : null}
     {scan?.result ? <><div className="mini-stat-grid">
       <MiniStat label={t("扫描目录")} value={scan.result.roots.length} /><MiniStat label={t("已发现")} value={scan.result.discovered} /><MiniStat label={t("新增")} value={scan.result.added} /><MiniStat label={t("已更新")} value={scan.result.updated} /><MiniStat label={t("未变化")} value={scan.result.unchanged} /><MiniStat label={t("已移除")} value={scan.result.removed} />
     </div><details className="scan-root-report"><summary>{t("本轮实际扫描的 {count} 个目录", { count: scan.result.roots.length })}</summary><code className="path-block">{scan.result.roots.join("\n")}</code></details>{scan.result.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: scan.result.warnings.length })}</summary><ul>{scan.result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}</> : null}
@@ -49,7 +51,14 @@ export function MediaScanHistorySection({ entries }: { entries: MediaScanHistory
 
 export function MediaProbeSection({ selectedPath, probing, progress, probe, onChoose, onOpen, onReveal }: { selectedPath: string; probing: boolean; progress: DesktopTaskProgress | null; probe: DesktopMediaProbeResult | null; onChoose: () => void; onOpen: () => void; onReveal: () => void }) {
   const { t } = useDesktopI18n();
-  return <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">NATIVE PROBE</span><h2>{t("单文件检查")}</h2></div><button onClick={onChoose} disabled={probing}>{t("选择 MP4 / MKV…")}</button></div>{selectedPath ? <code className="path-block">{selectedPath}</code> : <p className="muted">{t("可选择任意受支持视频验证 ffprobe、打开与定位能力。")}</p>}<div className="button-row"><button disabled={!selectedPath} onClick={onOpen}>{t("默认播放器打开")}</button><button disabled={!selectedPath} onClick={onReveal}>{t("资源管理器中定位")}</button></div>{progress ? <div className={`progress ${progress.stage}`}><strong>{progress.stage}</strong><span>{progress.message}</span></div> : null}{probe ? <div className="detail-grid compact-grid"><InfoCard label={t("时长")} value={formatDuration(probe.durationSeconds)} /><InfoCard label={t("分辨率")} value={probe.width && probe.height ? `${probe.width} × ${probe.height}` : undefined} /><InfoCard label={t("视频编码")} value={probe.videoCodec} /><InfoCard label={t("音频编码")} value={probe.audioCodec} /><InfoCard label={t("封装格式")} value={probe.container} /></div> : null}</section>;
+  return <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">NATIVE PROBE</span><h2>{t("单文件检查")}</h2></div><UiButton loading={probing} onClick={onChoose}>{t("选择 MP4 / MKV…")}</UiButton></div>{selectedPath ? <code className="path-block">{selectedPath}</code> : <p className="muted">{t("可选择任意受支持视频验证 ffprobe、打开与定位能力。")}</p>}<div className="button-row"><UiButton disabled={!selectedPath} onClick={onOpen}>{t("默认播放器打开")}</UiButton><UiButton disabled={!selectedPath} onClick={onReveal}>{t("资源管理器中定位")}</UiButton></div>{progress ? <UiFeedback tone={progress.stage === "failed" ? "error" : progress.stage === "completed" ? "success" : "info"}><strong>{progress.stage}</strong><span>{progress.message}</span></UiFeedback> : null}{probe ? <div className="detail-grid compact-grid"><InfoCard label={t("时长")} value={formatDuration(probe.durationSeconds)} /><InfoCard label={t("分辨率")} value={probe.width && probe.height ? `${probe.width} × ${probe.height}` : undefined} /><InfoCard label={t("视频编码")} value={probe.videoCodec} /><InfoCard label={t("音频编码")} value={probe.audioCodec} /><InfoCard label={t("封装格式")} value={probe.container} /></div> : null}</section>;
+}
+
+function scanTone(status: MediaScanJobSnapshot["status"]): "info" | "success" | "warning" | "error" {
+  if (status === "completed") return "success";
+  if (status === "failed") return "error";
+  if (status === "cancelled" || status === "cancelling") return "warning";
+  return "info";
 }
 
 function MiniStat({ label, value }: { label: string; value: number }) { return <div><span>{label}</span><strong>{value}</strong></div>; }

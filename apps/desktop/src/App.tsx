@@ -20,6 +20,8 @@ import { desktopBridge } from "./tauri-bridge";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopSidebar, DesktopTopbar, type DesktopPage, type DesktopSettingsModule } from "./desktop-app-shell";
 import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
+import { UiButton } from "./ui/button";
+import { UiEmptyState, UiFeedback } from "./ui/feedback";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -358,7 +360,7 @@ export default function App() {
           onOpenSettings={() => navigate("settings")}
         />
 
-        <div className="status-line">{message}</div>
+        <UiFeedback tone="info">{message}</UiFeedback>
 
         <DesktopFavoritesProvider repository={repository}>
         <Suspense fallback={<PageLoadingState />}>
@@ -461,23 +463,20 @@ export default function App() {
 function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { busy: boolean; quickSetupReady: boolean; onQuickSetup: () => void; onConfigure: () => void }) {
   const { t } = useDesktopI18n();
   return (
-    <section className="empty-state large-empty">
-      <span className="eyebrow">NO LIBRARY SOURCE</span>
-      <h1>{t("先连接你的资料库")}</h1>
-      <p>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}</p>
-      <div className="button-row">
-        <button className="primary-button" disabled={busy || !quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择影片资料目录")}</button>
-        <button className="ghost-button" disabled={busy} onClick={onConfigure}>{t("高级设置")}</button>
-      </div>
-      {!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}
-    </section>
+    <UiEmptyState
+      className="large-empty"
+      eyebrow="NO LIBRARY SOURCE"
+      title={t("先连接你的资料库")}
+      description={<>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}{!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}</>}
+      action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择影片资料目录")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
+    />
   );
 }
 
 /** 页面代码正在按需加载时保持稳定高度，避免 WebView 因内容骤缩跳回顶部。 */
 function PageLoadingState() {
   const { t } = useDesktopI18n();
-  return <section className="empty-state"><div className="loading-dot" /><strong>{t("正在读取资料库…")}</strong></section>;
+  return <UiEmptyState busy title={t("正在读取资料库…")} />;
 }
 
 function invalidPackInfo(path: string, error: unknown): DesktopSharedPackInfo {

@@ -8,6 +8,8 @@ import { resolvePersonPresentation } from "./desktop-presentation";
 import { buildDesktopWorkCards, DesktopWorkResults } from "./desktop-work-results";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { UiButton } from "./ui/button";
+import { UiEmptyState } from "./ui/feedback";
 
 /**
  * Desktop 首页只组合资料库摘要和最近内容。
@@ -67,8 +69,8 @@ export function DesktopHomePage({
     };
   }, [repository, metadataLanguage], toMessage);
 
-  if (data.loading) return <div className="empty-state"><span className="spinner" />{t("正在读取资料库…")}</div>;
-  if (data.error || !data.value) return <div className="empty-state error-state">{data.error ?? t("无法读取资料库。")}</div>;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={t("无法读取资料库。")} description={data.error} />;
   const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
   const unlinkedMediaCount = media.filter((file) => !file.workId).length;
 
@@ -79,8 +81,8 @@ export function DesktopHomePage({
         <h1>{t("你的 Localogue，现在就在桌面端。")}</h1>
         <p>{t("V1-24 把 Private Presentation Preference 接入 Desktop；封面与头像选择不再改写 Canonical / Shared Pack。")}</p>
         <div className="button-row desktop-home-primary-actions">
-          <button className="primary-button" type="button" onClick={startUnifiedSync}>{t("一键同步资料库")}</button>
-          {unlinkedMediaCount ? <button className="ghost-button" type="button" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</button> : null}
+          <UiButton variant="primary" onClick={startUnifiedSync}>{t("一键同步资料库")}</UiButton>
+          {unlinkedMediaCount ? <UiButton variant="ghost" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
         </div>
       </section>
       <section className="stat-grid">
@@ -93,7 +95,7 @@ export function DesktopHomePage({
       <SectionTitle
         eyebrow="RECENT WORKS"
         title={t("最近作品")}
-        action={<button className="ghost-button" onClick={openWorks} type="button">{t("查看全部作品")}</button>}
+        action={<UiButton variant="ghost" onClick={openWorks}>{t("查看全部作品")}</UiButton>}
       />
       <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} />
       {featuredPeople.length ? <>
