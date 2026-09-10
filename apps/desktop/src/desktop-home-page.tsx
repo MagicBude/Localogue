@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Asset } from "@/domain/entities/asset";
+import type { WorkQuery } from "@/domain/queries/work-query";
 
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopPersonCard } from "./desktop-person-explorer";
@@ -20,6 +21,7 @@ export function DesktopHomePage({
   openWork,
   openPerson,
   openWorks,
+  filterWorks,
   openMedia,
   startUnifiedSync,
 }: {
@@ -27,12 +29,13 @@ export function DesktopHomePage({
   openWork: (id: string) => void;
   openPerson: (id: string) => void;
   openWorks: () => void;
+  filterWorks: (query: WorkQuery) => void;
   openMedia: () => void;
   startUnifiedSync: () => void;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const data = useStableAsyncData(async () => {
-    const [works, people, organizations, series, media, assets, preferences] = await Promise.all([
+    const [works, people, organizations, series, media, assets, preferences, genres, tags] = await Promise.all([
       repository.listWorks({ page: 1, pageSize: 100_000, sort: "release_desc" }),
       repository.listPeople({ page: 1, pageSize: 100_000, sort: "name_asc" }),
       repository.listOrganizations(),
@@ -40,6 +43,8 @@ export function DesktopHomePage({
       repository.listMediaFiles(),
       repository.listAssets(),
       repository.listPresentationPreferences(),
+      repository.listGenres(),
+      repository.listTags(),
     ]);
     const recentWorks = works.items.slice(0, 12);
     const performerIds = new Set(recentWorks.flatMap((work) => work.personRelations.filter((relation) => relation.role === "performer").map((relation) => relation.personId)));
@@ -65,7 +70,7 @@ export function DesktopHomePage({
       featuredPeople,
       workCounts,
       portraitByPersonId,
-      recentCards: buildDesktopWorkCards(recentWorks, people.items, organizations, assets, metadataLanguage, preferences),
+      recentCards: buildDesktopWorkCards(recentWorks, people.items, organizations, assets, metadataLanguage, preferences, genres, tags),
     };
   }, [repository, metadataLanguage], toMessage);
 
@@ -97,7 +102,9 @@ export function DesktopHomePage({
         title={t("最近作品")}
         action={<UiButton variant="ghost" onClick={openWorks}>{t("查看全部作品")}</UiButton>}
       />
-      <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} />
+      <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} onOpenPerson={openPerson}
+        onSelectGenre={(id) => filterWorks({ genreIds: [id] })}
+        onSelectTag={(id) => filterWorks({ tagIds: [id] })} />
       {featuredPeople.length ? <>
         <SectionTitle eyebrow="PEOPLE" title={t("相关人物")} />
         <div className="desktop-person-grid desktop-home-people-grid">

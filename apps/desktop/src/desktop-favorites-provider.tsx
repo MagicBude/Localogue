@@ -9,6 +9,7 @@ import {
 
 import type { PresentationPreference } from "@/domain/entities/presentation-preference";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useDesktopI18n } from "./desktop-i18n";
 
 /**
  * 桌面端收藏 / 评分的私人展示偏好上下文。
@@ -38,10 +39,13 @@ const FavoritesContext = createContext<FavoritesValue | null>(null);
 export function DesktopFavoritesProvider({
   repository,
   children,
+  setMessage,
 }: {
   repository: TauriLibraryRepository;
   children: ReactNode;
+  setMessage: (message: string) => void;
 }) {
+  const { t } = useDesktopI18n();
   const [preferences, setPreferences] = useState<PresentationPreference[]>([]);
   const [persistedRevision, setPersistedRevision] = useState(0);
 
@@ -49,11 +53,11 @@ export function DesktopFavoritesProvider({
     let disposed = false;
     void repository.listPresentationPreferences().then((items) => {
       if (!disposed) setPreferences(items);
-    }).catch(() => {
-      // 读取失败不阻断界面；收藏按钮会表现为“未收藏”，刷新可重试。
+    }).catch((error: unknown) => {
+      if (!disposed) setMessage(t("读取收藏与评分失败：{error}", { error: error instanceof Error ? error.message : String(error) }));
     });
     return () => { disposed = true; };
-  }, [repository]);
+  }, [repository, setMessage, t]);
 
   const value = useMemo<FavoritesValue>(() => {
     const favoriteIds = new Set<string>();
@@ -84,7 +88,7 @@ export function DesktopFavoritesProvider({
         preferredCoverAssetId: existing?.preferredCoverAssetId,
         updatedAt: new Date().toISOString(),
       };
-      // 乐观更新内存快照，确保 UI 立即响应；持久化失败也保留本地状态。
+      // 乐观更新内存快照；持久化失败回滚本次结果，并明确告知用户保存没有成功。
       setPreferences((current) => [
         ...current.filter(
           (item) => !(item.entityType === "work" && item.entityId === workId),
@@ -95,7 +99,8 @@ export function DesktopFavoritesProvider({
         await repository.savePresentationPreference(next);
         // 此时 Native 写入已经完成，随后触发的作品查询一定能读到新值。
         setPersistedRevision((value) => value + 1);
-      } catch {
+      } catch (error: unknown) {
+        setMessage(t("保存失败：{error}", { error: error instanceof Error ? error.message : String(error) }));
         // 仅当内存里仍是本次乐观结果时回滚。若用户已经进行了更新的操作，
         // 旧请求失败不能覆盖新状态；对象引用在这里充当这一轮操作的身份标记。
         setPreferences((current) => {
@@ -121,7 +126,7 @@ export function DesktopFavoritesProvider({
       toggleFavorite: (id) => void persist(id, { favorite: !favoriteIds.has(id) }),
       setRating: (id, rating) => void persist(id, { rating: rating ?? null }),
     };
-  }, [preferences, persistedRevision, repository]);
+  }, [preferences, persistedRevision, repository, setMessage, t]);
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 }

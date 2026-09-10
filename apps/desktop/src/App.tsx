@@ -434,12 +434,12 @@ export default function App() {
 
         {message ? <UiToast closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 
-        <DesktopFavoritesProvider repository={repository}>
+        <DesktopFavoritesProvider repository={repository} setMessage={setMessage}>
         <Suspense fallback={<PageLoadingState />}>
         {!hasLibrarySource && page !== "settings" && page !== "about" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
-          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} />
+          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} filterWorks={filterWorks} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} />
         ) : page === "works" ? (
           detail?.kind === "work" ? (
           <DesktopWorkDetailPage
