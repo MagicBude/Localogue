@@ -1,5 +1,6 @@
 # Changelog
 
+- 完成 JavBus 两个 genre 索引页的只读审计：共发现 888 个来源标签、9 个来源分类，并补充中/英展示映射与 Provider 边界说明；结果不会自动写入 Canonical Genre/Tag，后续导入必须走 Preview → 人工审核 → 显式写入。
 - Desktop 分类浏览新增标签管理器：支持创建私人分类、调整分类顺序、给 Tag 分配分类，并区分 Shared / Private 标签；删除继续由 Native 引用检查保护。分类元数据只影响展示排序，不改变 Tag ID、WorkQuery 或 Genre 词表。
 - Desktop 作品编辑将演员、导演、类型、系列、题材和标签从需要 Ctrl / Cmd 的原生多选框改为“已选 Chip + 可搜索候选”；同一表单可新建每部作品的私人 Tag，保存时按 Tag 先、Work 后的引用安全顺序写入，不开放自由创建受控 Genre。
 - Desktop 封面墙演员 Chip 新增 Radix 悬停/键盘焦点预览，可在不离开当前作品列表的情况下快速查看人物状态、出生日期、身高和别名；预览仅使用已载入的 Canonical Person，不产生额外 Native I/O。
