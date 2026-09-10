@@ -2,6 +2,7 @@ import { DesktopAssetImage } from "./desktop-asset-image";
 import { DesktopFavoriteButton } from "./desktop-favorite-button";
 import { useDesktopI18n } from "./desktop-i18n";
 import type { DesktopWorkCardViewModel } from "./desktop-work-results";
+import { UiTooltip } from "./ui/tooltip";
 
 interface DesktopWorkCardProps {
   card: DesktopWorkCardViewModel;
@@ -80,7 +81,14 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
         {performers.length ? (
           <div className="desktop-work-card__people" aria-label={t("演员")}>
             {performers.map((performer) => onOpenPerson ? (
-              <button key={performer.id} onClick={() => onOpenPerson(performer.id)} type="button">{performer.name}</button>
+              <UiTooltip
+                key={performer.id}
+                rich
+                side="top"
+                label={<PersonPreview performer={performer} />}
+              >
+                <button onClick={() => onOpenPerson(performer.id)} type="button">{performer.name}</button>
+              </UiTooltip>
             ) : <span key={performer.id}>{performer.name}</span>)}
           </div>
         ) : makerName ? (
@@ -100,6 +108,34 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
       </div>
     </article>
   );
+}
+
+function PersonPreview({ performer }: { performer: DesktopWorkCardViewModel["performers"][number] }) {
+  const { t } = useDesktopI18n();
+  const aliases = performer.person.names
+    .filter((name) => name.value !== performer.name)
+    .map((name) => name.value)
+    .filter((name, index, values) => values.indexOf(name) === index)
+    .slice(0, 3);
+  return (
+    <span className="desktop-person-preview">
+      <strong>{performer.name}</strong>
+      <span>{personStatusLabel(performer.person.activityStatus, t)}</span>
+      {performer.person.birthDate?.value ? <span>{t("出生日期")} · {performer.person.birthDate.value}</span> : null}
+      {performer.person.heightCm ? <span>{t("身高")} · {performer.person.heightCm} cm</span> : null}
+      {aliases.length ? <small>{t("别名")} · {aliases.join(" / ")}</small> : null}
+    </span>
+  );
+}
+
+function personStatusLabel(status: DesktopWorkCardViewModel["performers"][number]["person"]["activityStatus"], t: (source: string) => string): string {
+  switch (status) {
+    case "active": return t("活跃");
+    case "retired": return t("已引退");
+    case "hiatus": return t("休业");
+    case "inactive": return t("非活跃");
+    default: return t("状态未知");
+  }
 }
 
 function PosterPlaceholder({ code }: { code: string }) {
