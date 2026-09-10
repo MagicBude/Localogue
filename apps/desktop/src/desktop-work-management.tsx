@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 
 import { normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import { WORK_TYPE_DEFINITIONS } from "@/application/importers/import-classification-normalizer";
@@ -6,6 +6,7 @@ import { getPreferredPersonName, localizeText } from "@/application/services/loc
 import { localizeGenre } from "@/application/services/genre-localization-service";
 import type { Organization } from "@/domain/entities/organization";
 import type { Person } from "@/domain/entities/person";
+import type { Tag } from "@/domain/entities/classification";
 import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 
 import { useDesktopI18n } from "./desktop-i18n";
@@ -141,6 +142,8 @@ export function WorkEditor({
   const [seriesIds, setSeriesIds] = useState(work.seriesIds);
   const [genreIds, setGenreIds] = useState(work.genreIds);
   const [tagIds, setTagIds] = useState(work.tagIds);
+  const [customTagName, setCustomTagName] = useState("");
+  const [pendingTags, setPendingTags] = useState<Tag[]>([]);
 
   useEffect(() => {
     let disposed = false;
@@ -165,6 +168,28 @@ export function WorkEditor({
 
   const makers = organizations.filter((item) => item.kind === "maker");
   const labels = organizations.filter((item) => item.kind === "label");
+
+  function addCustomTag(): void {
+    const name = customTagName.normalize("NFKC").trim();
+    if (!name) return;
+    const normalized = name.toLocaleLowerCase();
+    const existing = tagOptions.find((option) => option.label.normalize("NFKC").trim().toLocaleLowerCase() === normalized);
+    if (existing) {
+      setTagIds((current) => current.includes(existing.id) ? current : [...current, existing.id]);
+      setCustomTagName("");
+      return;
+    }
+    // 自定义 Tag 是用户的 Canonical 私人分类；先在表单内暂存，保存 Work 时再按引用安全顺序写入。
+    const tag: Tag = {
+      id: `tag_user_${crypto.randomUUID()}`,
+      names: { [metadataLanguage]: name },
+      builtIn: false,
+    };
+    setPendingTags((current) => [...current, tag]);
+    setTagOptions((current) => [...current, { id: tag.id, label: name }].sort((a, b) => a.label.localeCompare(b.label)));
+    setTagIds((current) => [...current, tag.id]);
+    setCustomTagName("");
+  }
 
   async function save(): Promise<void> {
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
@@ -214,7 +239,10 @@ export function WorkEditor({
       if (!duration.trim()) delete next.durationMinutes;
       if (!makerId) delete next.makerId;
       if (!labelId) delete next.labelId;
+      // JSON V1 不具有跨文件事务：先写被 Work 引用的新 Tag，避免任何时刻出现悬空引用。
+      for (const tag of pendingTags.filter((item) => tagIds.includes(item.id))) await repository.saveTag(tag);
       await repository.saveWork(next);
+      setPendingTags([]);
       setIsPrivate(true);
       setMessage(isPrivate ? t("已更新 {code}。", { code: next.code }) : t("已为 Shared Work {code} 创建 Private Override。", { code: next.code }));
       onSaved();
@@ -256,20 +284,45 @@ export function WorkEditor({
       <label>{t("时长（分钟）")}<input type="number" min="1" value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
       <label>{t("厂商")}<select value={makerId} onChange={(event) => setMakerId(event.target.value)}><option value="">{t("未设置")}</option>{makers.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
       <label>{t("厂牌")}<select value={labelId} onChange={(event) => setLabelId(event.target.value)}><option value="">{t("未设置")}</option>{labels.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
-      <MultiSelect label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
-      <MultiSelect label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
-      <MultiSelect label={t("作品类型")} values={workTypeIds} onChange={setWorkTypeIds} options={WORK_TYPE_DEFINITIONS.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id) }))} />
-      <MultiSelect label={t("系列")} values={seriesIds} onChange={setSeriesIds} options={seriesOptions} />
-      <MultiSelect label={t("题材")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
-      <MultiSelect label={t("标签")} values={tagIds} onChange={setTagIds} options={tagOptions} />
+      <ChoicePicker label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
+      <ChoicePicker label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
+      <ChoicePicker label={t("作品类型")} values={workTypeIds} onChange={setWorkTypeIds} options={WORK_TYPE_DEFINITIONS.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id) }))} />
+      <ChoicePicker label={t("系列")} values={seriesIds} onChange={setSeriesIds} options={seriesOptions} />
+      <ChoicePicker label={t("题材")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
+      <div className="work-tag-editor">
+        <ChoicePicker label={t("自定义标签")} values={tagIds} onChange={setTagIds} options={tagOptions} />
+        <div className="work-tag-editor__create">
+          <input value={customTagName} onChange={(event) => setCustomTagName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomTag(); } }} placeholder={t("输入新标签名称")} />
+          <button disabled={!customTagName.trim()} onClick={addCustomTag} type="button">{t("创建并选中")}</button>
+        </div>
+      </div>
       <div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
     </div> : null}
   </section>;
 }
 
-function MultiSelect({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string }>; values: string[]; onChange: (values: string[]) => void }) {
+function ChoicePicker({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string }>; values: string[]; onChange: (values: string[]) => void }) {
   const { t } = useDesktopI18n();
-  return <label>{label}<select multiple size={Math.min(7, Math.max(3, options.length))} value={values} onChange={(event: ChangeEvent<HTMLSelectElement>) => onChange([...event.currentTarget.selectedOptions].map((item) => item.value))}>{options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><small className="muted">{t("Ctrl / Cmd 可多选")}</small></label>;
+  const [search, setSearch] = useState("");
+  const optionById = new Map(options.map((option) => [option.id, option]));
+  const available = options
+    .filter((option) => !values.includes(option.id) && option.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
+    .slice(0, 40);
+  return <fieldset className="choice-picker">
+    <legend>{label}</legend>
+    <div className="choice-picker__selected">
+      {values.map((id) => <button aria-label={t("移除 {name}", { name: optionById.get(id)?.label ?? id })} key={id} onClick={() => onChange(values.filter((value) => value !== id))} type="button">{optionById.get(id)?.label ?? id}<span>×</span></button>)}
+      {!values.length ? <small>{t("尚未选择")}</small> : null}
+    </div>
+    <details className="choice-picker__menu">
+      <summary>{t("添加或搜索")}</summary>
+      <input aria-label={t("搜索 {label}", { label })} value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t("输入关键词…")} />
+      <div className="choice-picker__options">
+        {available.map((option) => <button key={option.id} onClick={() => onChange([...values, option.id])} type="button">+ {option.label}</button>)}
+        {!available.length ? <small>{t("没有可添加的匹配项")}</small> : null}
+      </div>
+    </details>
+  </fieldset>;
 }
 
 function dedupeRelations(values: WorkPersonRelation[]): WorkPersonRelation[] {

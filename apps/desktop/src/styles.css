@@ -438,6 +438,34 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .span-2 { grid-column: 1 / -1; }
 .form-actions { display: flex; justify-content: flex-end; align-items: end; }
 .compact-management-card { padding-top: 16px; padding-bottom: 16px; }
+.choice-picker { min-width: 0; margin: 0; padding: 0; border: 0; }
+.choice-picker legend { margin-bottom: 7px; color: var(--muted); font-size: 11px; font-weight: 720; }
+.choice-picker__selected { display: flex; flex-wrap: wrap; gap: 6px; min-height: 34px; align-items: center; }
+.choice-picker__selected > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d7c7ed;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #f6f0ff;
+  color: #66458f;
+  font-size: 12px;
+  cursor: pointer;
+}
+.choice-picker__selected > button span { opacity: .65; font-size: 14px; line-height: 1; }
+.choice-picker__selected > small { color: var(--muted); font-weight: 500; }
+.choice-picker__menu { margin-top: 7px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel-soft); }
+.choice-picker__menu summary { padding: 8px 10px; color: var(--muted); font-size: 12px; cursor: pointer; }
+.choice-picker__menu[open] summary { border-bottom: 1px solid var(--border); }
+.choice-picker__menu > input { width: calc(100% - 16px); margin: 8px; }
+.choice-picker__options { display: flex; flex-wrap: wrap; gap: 6px; max-height: 150px; overflow: auto; padding: 0 8px 9px; }
+.choice-picker__options button { border: 1px solid var(--border); border-radius: 7px; padding: 5px 8px; background: var(--panel); color: var(--text); font-size: 12px; cursor: pointer; }
+.choice-picker__options button:hover { border-color: #9ebfe5; background: #eef6ff; }
+.choice-picker__options small { padding: 7px 2px; color: var(--muted); font-weight: 500; }
+.work-tag-editor { display: grid; gap: 8px; }
+.work-tag-editor__create { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
+.work-tag-editor__create button { white-space: nowrap; }
 .pack-actions { display: flex !important; grid-auto-flow: column; gap: 5px !important; align-items: center; }
 .pack-actions button { padding: 5px 8px; font-size: 10px; }
 .binding-panel { scroll-margin-top: 90px; }

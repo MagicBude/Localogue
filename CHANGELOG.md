@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop 作品编辑将演员、导演、类型、系列、题材和标签从需要 Ctrl / Cmd 的原生多选框改为“已选 Chip + 可搜索候选”；同一表单可新建每部作品的私人 Tag，保存时按 Tag 先、Work 后的引用安全顺序写入，不开放自由创建受控 Genre。
 - Desktop 封面墙演员 Chip 新增 Radix 悬停/键盘焦点预览，可在不离开当前作品列表的情况下快速查看人物状态、出生日期、身高和别名；预览仅使用已载入的 Canonical Person，不产生额外 Native I/O。
 - Desktop 作品海报墙升级为高密度整卡布局：封面下集中展示番号、作品类型、标题、日期、时长、演员、题材与私人标签；演员可直接进入人物详情，题材/标签可直接收窄当前 WorkQuery，并用独立色彩保持 Genre / Tag 语义边界。
 - Desktop 作品瀑布流改为真正的连续浏览：接近页尾时由 `IntersectionObserver` 自动预取下一批，保留键盘可用的手动加载按钮，并不再显示传统分页；海报墙、列表和表格仍复用原 WorkQuery / Facet 语义。
