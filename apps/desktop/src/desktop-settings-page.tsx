@@ -20,6 +20,7 @@ import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
 import type { DesktopSettingsModule } from "./desktop-app-shell";
 import { UiButton } from "./ui/button";
+import { UiActionDialog } from "./ui/action-dialog";
 import { UiEmptyState, UiFeedback } from "./ui/feedback";
 import { UiTextField } from "./ui/form-control";
 
@@ -58,6 +59,10 @@ export function DesktopSettingsPage({
   const { t } = useDesktopI18n();
   const profiles = settings.libraryProfiles ?? [];
   const [ffprobeCheck, setFfprobeCheck] = useState<string>();
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameDraft, setRenameDraft] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteManagedData, setDeleteManagedData] = useState(false);
   const selectedProfile = activeLibraryProfile(settings);
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
@@ -140,34 +145,48 @@ export function DesktopSettingsPage({
     }
   }
 
-  async function renameProfile(): Promise<void> {
+  function openRenameProfile(): void {
     const profile = activeLibraryProfile(settings);
     if (!profile) return;
-    const name = window.prompt(t("资料库配置名称"), profile.name);
-    if (!name?.trim()) return;
+    setRenameDraft(profile.name);
+    setRenameOpen(true);
+  }
+
+  async function renameProfile(): Promise<void> {
+    const profile = activeLibraryProfile(settings);
+    const name = renameDraft.trim();
+    if (!profile || !name) return;
     try {
       const saved = await onPersistProfiles(
         renameLibraryProfile(settings, profile.id, name),
-        t("资料库已重命名为：{name}", { name: name.trim() }),
+        t("资料库已重命名为：{name}", { name }),
       );
       const renamed = (saved.libraryProfiles ?? []).find((item) => item.id === profile.id);
-      if (renamed?.name !== name.trim()) {
+      if (renamed?.name !== name) {
         setMessage(t("资料库重命名未能持久化，请重试。"));
+      } else {
+        setRenameOpen(false);
       }
     } catch {
       // 父级已经显示保存错误。
     }
   }
 
+  function openDeleteProfile(): void {
+    if (!activeLibraryProfile(settings)) return;
+    setDeleteManagedData(false);
+    setDeleteOpen(true);
+  }
+
   async function deleteProfile(): Promise<void> {
     const profile = activeLibraryProfile(settings);
     if (!profile) return;
-    if (!window.confirm(t("删除资料库配置“{name}”？只删除路径预设，不会删除磁盘上的资料。", { name: profile.name }))) return;
     const canDeleteManagedData = isManagedPrivateLibrary(profile.id, profile.libraryPath, runtime?.appLocalDataDir);
-    const deleteManagedData = canDeleteManagedData && window.confirm(t("是否同时删除“{name}”的 Localogue 管理数据？确定会永久删除作品、人物、图片副本和审计记录；影片内容根目录不会被删除。取消则只删除配置。", { name: profile.name }));
+    const shouldDeleteManagedData = canDeleteManagedData && deleteManagedData;
     try {
       await onPersistProfiles(removeLibraryProfile(settings, profile.id), t("资料库配置已删除：{name}", { name: profile.name }));
-      if (deleteManagedData && profile.libraryPath) {
+      setDeleteOpen(false);
+      if (shouldDeleteManagedData && profile.libraryPath) {
         try {
           await desktopBridge.deleteManagedPrivateLibrary(profile.id, profile.libraryPath);
           setMessage(t("资料库配置和 Localogue 管理数据已删除；影片原文件未删除。"));
@@ -286,12 +305,34 @@ export function DesktopSettingsPage({
               </select>
             </label>
             <div className="button-row">
-              <button disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={() => void renameProfile()}>{t("重命名")}</button>
-              <button className="danger-button" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={() => void deleteProfile()}>{t("删除资料库")}</button>
+              <UiButton disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openRenameProfile}>{t("重命名")}</UiButton>
+              <UiButton variant="danger" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openDeleteProfile}>{t("删除资料库")}</UiButton>
             </div>
           </div>
         ) : <UiEmptyState title={t("还没有资料库")} description={t("点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")} action={<UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</UiButton>} />}
       </section>
+
+      <UiActionDialog
+        actions={<><UiButton variant="ghost" onClick={() => setRenameOpen(false)}>{t("取消")}</UiButton><UiButton variant="primary" loading={busy} disabled={!renameDraft.trim()} onClick={() => void renameProfile()}>{t("保存修改")}</UiButton></>}
+        closeLabel={t("关闭")}
+        description={t("只修改 Localogue 中显示的资料库名称，不移动或重命名磁盘目录。")}
+        onOpenChange={setRenameOpen}
+        open={renameOpen}
+        title={t("重命名资料库")}
+      >
+        <UiTextField autoFocus label={t("资料库配置名称")} value={renameDraft} onChange={(event) => setRenameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && renameDraft.trim()) void renameProfile(); }} />
+      </UiActionDialog>
+
+      <UiActionDialog
+        actions={<><UiButton variant="ghost" onClick={() => setDeleteOpen(false)}>{t("取消")}</UiButton><UiButton variant="danger" loading={busy} onClick={() => void deleteProfile()}>{deleteManagedData ? t("删除配置和管理数据") : t("只删除配置")}</UiButton></>}
+        closeLabel={t("关闭")}
+        description={t("默认只删除路径预设，不会移动、重命名或删除影片内容目录。")}
+        onOpenChange={setDeleteOpen}
+        open={deleteOpen}
+        title={t("删除资料库“{name}”？", { name: selectedProfile?.name ?? "" })}
+      >
+        {selectedProfile && isManagedPrivateLibrary(selectedProfile.id, selectedProfile.libraryPath, runtime?.appLocalDataDir) ? <label className="ui-action-dialog__choice"><input type="checkbox" checked={deleteManagedData} onChange={(event) => setDeleteManagedData(event.target.checked)} /><span><strong>{t("同时删除 Localogue 管理数据")}</strong><small>{t("将永久删除该资料库中的作品、人物、图片副本和审计记录；影片内容根目录仍不会删除。")}</small></span></label> : null}
+      </UiActionDialog>
 
       <details className="settings-card advanced-source-settings source-model-card settings-module-library">
         <summary><span><span className="eyebrow">PATH GUIDE</span><strong>{t("了解各种目录的用途")}</strong></span><small>{t("需要时展开")}</small></summary>

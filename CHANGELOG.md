@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop 资料库重命名与删除不再调用浏览器原生 `prompt / confirm`：新增统一 Radix `UiActionDialog`，重命名可直接编辑并回车保存；删除在一个对话框中明确区分“只删除配置”和“同时删除受管数据”，默认保持非破坏性，影片内容根目录始终不删除。
 - Desktop 第二批基础控件迁移覆盖全局消息、页面懒加载、首次资料库引导、首页读写状态和媒体诊断：loading / error / empty 使用统一反馈语义，媒体扫描与 ffprobe 单文件检查使用一致的按钮忙碌状态和完成/取消/失败色调；Coordinator、取消信号与 MediaFile 规则保持不变。
 - 修复 `pnpm-workspace.yaml` 残留 `approve-builds` 占位值导致所有 pnpm 检查和 Desktop BAT 在真正执行前退出的问题；只显式批准锁文件中现有的 `esbuild` 与 `unrs-resolver` 构建脚本，不开放任意依赖脚本。
 - Desktop 建立渐进式基础控件层：新增 `UiButton`、`UiTextField` / `UiSelectField`、`UiFeedback` 与 `UiEmptyState`，统一按钮 loading/图标/尺寸、表单标签与错误关联、进度状态和空状态语义；首批迁移关于页、程序日志弹窗及设置页关键入口，业务动作、Native 日志安全边界和现有页面结构保持不变。

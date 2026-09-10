@@ -1033,6 +1033,14 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .ui-dialog-header > div { display: grid; gap: 5px; }
 .ui-dialog-header h2 { margin: 0; font-size: 20px; }
 .ui-dialog-header p { margin: 0; color: var(--muted); font-size: 11px; }
+.ui-action-dialog { inset: 50% auto auto 50%; width: min(520px, calc(100vw - 32px)); min-height: 0; transform: translate(-50%, -50%); grid-template-rows: auto auto auto; }
+.ui-action-dialog__body { display: grid; gap: 12px; }
+.ui-action-dialog__actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.ui-action-dialog .ui-field { width: 100%; }
+.ui-action-dialog__choice { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 9px; align-items: start; padding: 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); }
+.ui-action-dialog__choice input { width: auto; margin-top: 2px; }
+.ui-action-dialog__choice span { display: grid; gap: 3px; }
+.ui-action-dialog__choice small { color: var(--muted); line-height: 1.45; }
 .ui-icon-button { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border-color: transparent; background: transparent; }
 .ui-icon-button:hover { background: var(--panel); }
 .log-viewer-toolbar { display: grid; grid-template-columns: 150px minmax(240px, 1fr) auto auto; align-items: end; gap: 8px; }
