@@ -1,22 +1,80 @@
+import {
+  ArrowSync20Regular,
+  ArrowClockwise20Regular,
+  BookDatabase20Regular,
+  ChevronLeft20Regular,
+  ChevronRight20Regular,
+  Home20Regular,
+  Info20Regular,
+  AppsListDetail20Regular,
+  ArrowImport20Regular,
+  BookContacts20Regular,
+  BoxMultiple20Regular,
+  Clock20Regular,
+  Database20Regular,
+  Heart20Regular,
+  People20Regular,
+  SearchSquare20Regular,
+  Wrench20Regular,
+  Settings20Regular,
+  Toolbox20Regular,
+} from "@fluentui/react-icons";
+import type { ComponentType } from "react";
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import { activeLibraryProfile } from "./library-profiles";
 import localogueIcon from "./assets/localogue-icon.png";
+import { UiTooltip } from "./ui/tooltip";
+import { ContextTabBar, type ContextTabItem } from "./ui/context-tab-bar";
 
-export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings" | "favorites";
+export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings" | "favorites" | "about";
+export type DesktopSettingsModule = "library" | "sources" | "tools" | "about";
 
-const NAV_ITEMS: Array<{ id: DesktopPage; label: string; eyebrow: string; short: string }> = [
-  { id: "home", label: "首页", eyebrow: "HOME", short: "HM" },
-  { id: "works", label: "作品", eyebrow: "WORKS", short: "WK" },
-  { id: "people", label: "人物", eyebrow: "PEOPLE", short: "PP" },
-  { id: "browse", label: "浏览", eyebrow: "BROWSE", short: "BR" },
-  { id: "favorites", label: "收藏", eyebrow: "FAVORITES", short: "FA" },
-  { id: "review", label: "审核", eyebrow: "REVIEW", short: "RV" },
-  { id: "curation", label: "治理", eyebrow: "CURATION", short: "CU" },
-  { id: "history", label: "历史", eyebrow: "HISTORY", short: "HI" },
-  { id: "media", label: "媒体", eyebrow: "MEDIA", short: "MD" },
-  { id: "packs", label: "资料包", eyebrow: "PACKS", short: "PK" },
-  { id: "settings", label: "设置", eyebrow: "SETTINGS", short: "ST" },
+interface DesktopNavGroup {
+  id: string;
+  label: string;
+  icon: ComponentType;
+  landingPage: DesktopPage;
+  pages: DesktopPage[];
+}
+
+/**
+ * 一级导航按用户任务分组，而不是把领域实体和内部治理模块平铺成十一项菜单。
+ *
+ * pages 用来判断详情页所属的任务区；landingPage 则让一级按钮始终有明确落点。
+ * 现有 DesktopPage 和页面组件保持不变，因此本轮只调整信息架构，不触碰查询与写入链。
+ */
+const NAV_GROUPS: DesktopNavGroup[] = [
+  { id: "home", label: "首页", icon: Home20Regular, landingPage: "home", pages: ["home"] },
+  {
+    id: "library",
+    label: "资料库",
+    icon: BookDatabase20Regular,
+    landingPage: "works",
+    pages: ["works", "people", "browse", "favorites"],
+  },
+  {
+    id: "organize",
+    label: "导入与整理",
+    icon: ArrowSync20Regular,
+    landingPage: "media",
+    pages: ["media", "review"],
+  },
+  {
+    id: "maintenance",
+    label: "资料维护",
+    icon: Toolbox20Regular,
+    landingPage: "curation",
+    pages: ["curation", "history"],
+  },
+  {
+    id: "settings",
+    label: "设置",
+    icon: Settings20Regular,
+    landingPage: "settings",
+    pages: ["settings", "packs"],
+  },
+  { id: "about", label: "关于", icon: Info20Regular, landingPage: "about", pages: ["about"] },
 ];
 
 /**
@@ -41,16 +99,45 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
 
   return <aside className="sidebar">
     <button className="brand" onClick={() => onNavigate("home")}><img className="brand-mark" src={localogueIcon} alt="" aria-hidden="true" /><span className="brand-copy"><strong>Localogue</strong><small>{`Desktop · ${runtime?.version ?? "…"}`}</small></span></button>
-    <nav className="nav-list" aria-label="Desktop navigation">{NAV_ITEMS.map((item) => <button className={page === item.id ? "nav-item active" : "nav-item"} key={item.id} onClick={() => onNavigate(item.id)}><span className="nav-item-short" aria-hidden="true">{item.short}</span><span className="nav-item-label">{t(item.label)}</span><small>{item.eyebrow}</small></button>)}</nav>
-    <div className="sidebar-spacer" />
-    <div className="source-summary"><span className="eyebrow">{t("当前资料库")}</span>{settings.libraryProfiles?.length ? <><strong className="source-profile-name">{selectedProfile?.name ?? t("未绑定配置")}</strong><select className="source-profile-select" aria-label={t("快速切换资料库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择资料库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select></> : <strong className="source-profile-name">{t("尚未创建资料库")}</strong>}<small>{settings.libraryPath ? t("Private + {count} Shared", { count: validSharedCount }) : t("{count} Shared", { count: validSharedCount })}</small><button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t(settings.libraryProfiles?.length ? "管理资料库" : "+ 新建资料库")}</button></div>
-    <button className="sidebar-collapse-button" title={collapsed ? t("展开侧边栏") : t("收起侧边栏")} aria-label={collapsed ? t("展开侧边栏") : t("收起侧边栏")} onClick={onToggleCollapsed} type="button"><span aria-hidden="true">{collapsed ? "→" : "←"}</span><span className="sidebar-collapse-label">{collapsed ? t("展开侧边栏") : t("收起侧边栏")}</span></button>
+    <nav className="nav-list" aria-label={t("主导航")}>{NAV_GROUPS.map((group) => {
+      const active = group.pages.includes(page);
+      const Icon = group.icon;
+      return <div className={active ? "nav-group active" : "nav-group"} key={group.id}>
+        <UiTooltip label={t(group.label)}><button className={active ? "nav-item active" : "nav-item"} onClick={() => onNavigate(group.landingPage)} aria-current={active ? "page" : undefined}>
+          <Icon />
+          <span className="nav-item-label">{t(group.label)}</span>
+        </button></UiTooltip>
+      </div>;
+    })}</nav>
+    <div className="source-summary">{settings.libraryProfiles?.length ? <select className="source-profile-select" aria-label={t("快速切换资料库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择资料库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select> : <button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t("+ 新建资料库")}</button>}<small>{settings.libraryPath ? t("Private + {count} Shared", { count: validSharedCount }) : t("{count} Shared", { count: validSharedCount })}</small></div>
+    <button className="sidebar-collapse-button" title={collapsed ? t("展开侧边栏") : t("收起侧边栏")} aria-label={collapsed ? t("展开侧边栏") : t("收起侧边栏")} onClick={onToggleCollapsed} type="button">{collapsed ? <ChevronRight20Regular /> : <ChevronLeft20Regular />}<span className="sidebar-collapse-label">{collapsed ? t("展开侧边栏") : t("收起侧边栏")}</span></button>
     <div className="runtime-pill"><span className={runtime ? "runtime-dot online" : "runtime-dot"} /><span>{runtime ? `${runtime.environment} · ${runtime.version}` : "connecting"}</span></div>
   </aside>;
 }
 
 /** 顶栏只提供全局展示操作；刷新和导航仍由 App 决定。 */
-export function DesktopTopbar({ page, version, onRefresh, onOpenSettings }: { page: DesktopPage; version?: string; onRefresh: () => void; onOpenSettings: () => void }) {
+export function DesktopTopbar({ page, version, settingsModule, onNavigate, onSettingsModule, onRefresh, onOpenSettings }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void; onRefresh: () => void; onOpenSettings: () => void }) {
   const { t } = useDesktopI18n();
-  return <header className="topbar"><div><span className="eyebrow">{`LOCAL FIRST · DESKTOP · ${version ?? "…"}`}</span><strong>{t(NAV_ITEMS.find((item) => item.id === page)?.label ?? "首页")}</strong></div><div className="topbar-actions"><DesktopLanguageControls /><button className="ghost-button" onClick={onRefresh}>{t("刷新资料")}</button><button className="ghost-button" onClick={onOpenSettings}>{t("实例设置")}</button></div></header>;
+  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "favorites"
+    ? [
+      { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
+      { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
+      { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
+      { id: "favorites", label: t("我的收藏"), icon: Heart20Regular, active: page === "favorites", onSelect: () => onNavigate("favorites") },
+    ]
+    : page === "curation" || page === "history"
+      ? [
+        { id: "curation", label: t("资料问题"), icon: Wrench20Regular, active: page === "curation", onSelect: () => onNavigate("curation") },
+        { id: "history", label: t("变更历史"), icon: Clock20Regular, active: page === "history", onSelect: () => onNavigate("history") },
+      ]
+      : page === "settings" || page === "packs"
+        ? [
+          { id: "library", label: t("资料库与目录"), icon: Database20Regular, active: page === "settings" && settingsModule === "library", onSelect: () => onSettingsModule("library") },
+          { id: "sources", label: t("共享资料"), icon: BookContacts20Regular, active: page === "settings" && settingsModule === "sources", onSelect: () => onSettingsModule("sources") },
+          { id: "tools", label: t("扫描与工具"), icon: Wrench20Regular, active: page === "settings" && settingsModule === "tools", onSelect: () => onSettingsModule("tools") },
+          { id: "about", label: t("诊断"), icon: BoxMultiple20Regular, active: page === "settings" && settingsModule === "about", onSelect: () => onSettingsModule("about") },
+          { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },
+        ]
+        : [];
+  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><div className="topbar-actions"><DesktopLanguageControls /><button className="ghost-button" onClick={onRefresh}><ArrowClockwise20Regular />{t("刷新资料")}</button>{page !== "settings" && page !== "packs" ? <button className="ghost-button" onClick={onOpenSettings}><Settings20Regular />{t("设置")}</button> : null}</div></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
 }

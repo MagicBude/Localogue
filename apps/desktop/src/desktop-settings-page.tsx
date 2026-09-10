@@ -18,6 +18,7 @@ import {
 } from "./library-profiles";
 import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
+import type { DesktopSettingsModule } from "./desktop-app-shell";
 
 // revision 11 同时保证 Profile 隔离、受控删除和 ffprobe 引导命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
@@ -36,6 +37,8 @@ export function DesktopSettingsPage({
   packInfos,
   onSave,
   onPersistProfiles,
+  onOpenPacks,
+  settingsModule,
   setMessage,
 }: {
   runtime: DesktopRuntimeInfo | null;
@@ -45,6 +48,8 @@ export function DesktopSettingsPage({
   packInfos: DesktopSharedPackInfo[];
   onSave: () => void;
   onPersistProfiles: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
+  onOpenPacks: () => void;
+  settingsModule: DesktopSettingsModule;
   setMessage: (message: string) => void;
 }) {
   const { t } = useDesktopI18n();
@@ -175,25 +180,37 @@ export function DesktopSettingsPage({
   async function addSharedPack(): Promise<void> {
     const path = await fileDialog.pickDirectory(settings.sharedPackPaths.at(-1));
     if (!path) return;
-    setSettings((current) => ({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) }));
+    await persistPaths({ ...settings, sharedPackPaths: unique([...settings.sharedPackPaths, path]) }, t("共享资料目录已添加并保存。"));
   }
 
   async function addLibraryRoot(): Promise<void> {
     const path = await fileDialog.pickDirectory(settings.libraryRoots.at(-1));
     if (!path) return;
-    setSettings((current) => ({ ...current, libraryRoots: unique([...current.libraryRoots, path]) }));
+    await persistPaths({ ...settings, libraryRoots: unique([...settings.libraryRoots, path]) }, t("内容目录已添加并保存，可以直接开始同步。"));
   }
 
   async function addMediaRoot(): Promise<void> {
     const path = await fileDialog.pickDirectory(settings.mediaScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
     if (!path) return;
-    setSettings((current) => ({ ...current, mediaScanPaths: unique([...current.mediaScanPaths, path]) }));
+    await persistPaths({ ...settings, mediaScanPaths: unique([...settings.mediaScanPaths, path]) }, t("额外媒体目录已添加并保存。"));
   }
 
   async function addNfoRoot(): Promise<void> {
     const path = await fileDialog.pickDirectory(settings.nfoScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
     if (!path) return;
-    setSettings((current) => ({ ...current, nfoScanPaths: unique([...current.nfoScanPaths, path]) }));
+    await persistPaths({ ...settings, nfoScanPaths: unique([...settings.nfoScanPaths, path]) }, t("额外 NFO 目录已添加并保存。"));
+  }
+
+  async function persistPaths(next: DesktopBootstrapSettings, message: string): Promise<void> {
+    try {
+      await onPersistProfiles(syncActiveLibraryProfile(next), message);
+    } catch {
+      // 父级统一显示持久化错误，避免页面再弹出第二份错误。
+    }
+  }
+
+  async function removePath(key: "libraryRoots" | "sharedPackPaths" | "mediaScanPaths" | "nfoScanPaths", path: string): Promise<void> {
+    await persistPaths({ ...settings, [key]: settings[key].filter((item) => item !== path) }, t("目录已移除并保存。"));
   }
 
   async function openWeb(): Promise<void> {
@@ -238,7 +255,7 @@ export function DesktopSettingsPage({
   }
 
   return (
-    <div className="page-stack">
+    <div className={`page-stack settings-page settings-mode-${settingsModule}`}>
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
 
       {!profileNativeRuntimeReady ? (
@@ -247,7 +264,7 @@ export function DesktopSettingsPage({
         </div>
       ) : null}
 
-      <section className="settings-card library-profile-card">
+      <section className="settings-card library-profile-card settings-module-library">
         <div className="section-heading">
           <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("资料库")}</h2></div>
           <div className="button-row">
@@ -273,54 +290,55 @@ export function DesktopSettingsPage({
         ) : <p className="empty-profile-hint">{t("还没有资料库。点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")}</p>}
       </section>
 
-      <section className="settings-card source-model-card">
-        <span className="eyebrow">HOW SOURCES FIT TOGETHER</span>
-        <h2>{t("四种路径怎么理解")}</h2>
-        <div className="source-model-grid">
+      <details className="settings-card advanced-source-settings source-model-card settings-module-library">
+        <summary><span><span className="eyebrow">PATH GUIDE</span><strong>{t("了解各种目录的用途")}</strong></span><small>{t("需要时展开")}</small></summary>
+        <div className="source-model-grid advanced-settings-stack">
           <article><strong>1 · {t("私人资料库")}</strong><p>{t("Localogue 自己维护的可写 Canonical / Evidence / Asset / MediaFile。每个资料库配置通常只对应一个。")}</p></article>
           <article><strong>2 · {t("内容根目录")}</strong><p>{t("推荐入口。你的影片、NFO、poster、fanart 可以散在子目录里，Localogue 会递归发现并按番号汇聚。")}</p></article>
           <article><strong>3 · {t("只读共享资料")}</strong><p>{t("公共元数据基础层，例如 localogue-community-data。只读，且永远低于你的 Private Library。")}</p></article>
           <article><strong>4 · {t("高级兼容目录")}</strong><p>{t("只有媒体或 NFO / 图片完全放在内容根目录之外时才需要；普通用户可以不展开。")}</p></article>
         </div>
-      </section>
+      </details>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">PRIVATE LIBRARY</span><h2>{t("私人资料库（可写）")}</h2></div><button onClick={() => void chooseLibrary()}>{t("选择目录")}</button></div>
-        <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
-        <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
-        {settings.libraryPath ? <button className="danger-button" onClick={() => setSettings((current) => ({ ...current, libraryPath: undefined }))}>{t("清除 Private Library")}</button> : null}
-      </section>
+      <details className="settings-card advanced-source-settings settings-module-library">
+        <summary><span><span className="eyebrow">PRIVATE STORAGE</span><strong>{t("私人资料存储位置")}</strong></span><small>{t("通常无需修改")}</small></summary>
+        <div className="advanced-settings-stack">
+          <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
+          <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
+          <div className="button-row"><button onClick={() => void chooseLibrary()}>{t("选择目录")}</button>{settings.libraryPath ? <button className="danger-button" onClick={() => setSettings((current) => ({ ...current, libraryPath: undefined }))}>{t("清除 Private Library")}</button> : null}</div>
+        </div>
+      </details>
 
-      <section className="settings-card featured-card">
+      <section className="settings-card featured-card settings-module-library">
         <div className="section-heading"><div><span className="eyebrow">CONTENT ROOTS</span><h2>{t("内容根目录（推荐）")}</h2></div><button className="primary-button" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</button></div>
         <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
-        <PathList values={settings.libraryRoots} onRemove={(path) => setSettings((current) => ({ ...current, libraryRoots: current.libraryRoots.filter((item) => item !== path) }))} />
+        <PathList values={settings.libraryRoots} onRemove={(path) => void removePath("libraryRoots", path)} />
       </section>
 
-      <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><button onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</button></div>
+      <section className="settings-card settings-module-sources">
+        <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><div className="button-row"><button onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</button><button className="primary-button" onClick={onOpenPacks}>{t("导入、导出与备份")}</button></div></div>
         <p className="muted">{t("适合社区公共元数据。推荐继续把 localogue-community-data 作为独立 Shared Pack 维护，而不是复制进每个私人资料库。")}</p>
-        <PathList values={settings.sharedPackPaths} onRemove={(path) => setSettings((current) => ({ ...current, sharedPackPaths: current.sharedPackPaths.filter((item) => item !== path) }))} />
+        <PathList values={settings.sharedPackPaths} onRemove={(path) => void removePath("sharedPackPaths", path)} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
       </section>
 
-      <details className="settings-card advanced-source-settings">
+      <details className="settings-card advanced-source-settings settings-module-tools">
         <summary><span><span className="eyebrow">ADVANCED COMPATIBILITY</span><strong>{t("高级兼容目录")}</strong></span><small>{t("大多数用户不需要配置")}</small></summary>
         <div className="advanced-settings-stack">
           <div>
             <div className="section-heading"><div><h3>{t("额外媒体目录")}</h3></div><button onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</button></div>
             <p className="muted">{t("只在影片不位于上面的内容根目录中时添加；多个目录会全部参与同步和媒体扫描。")}</p>
-            <PathList values={settings.mediaScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, mediaScanPaths: current.mediaScanPaths.filter((item) => item !== path) }))} />
+            <PathList values={settings.mediaScanPaths} onRemove={(path) => void removePath("mediaScanPaths", path)} />
           </div>
           <div>
             <div className="section-heading"><div><h3>{t("额外 NFO / 图片目录")}</h3></div><button onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</button></div>
             <p className="muted">{t("只在 NFO / 海报完全放在另一处时添加；这里也会参与 poster / fanart / thumb 发现。")}</p>
-            <PathList values={settings.nfoScanPaths} onRemove={(path) => setSettings((current) => ({ ...current, nfoScanPaths: current.nfoScanPaths.filter((item) => item !== path) }))} />
+            <PathList values={settings.nfoScanPaths} onRemove={(path) => void removePath("nfoScanPaths", path)} />
           </div>
         </div>
       </details>
 
-      <section className="settings-card form-card">
+      <section className="settings-card form-card settings-module-tools">
         <div>
           <div className="section-heading"><div><h3>ffprobe</h3><p className="muted">{t("用于读取视频清晰度、时长和编码。留空会依次查找安装包资源和系统 PATH；找不到时仍能扫描作品文件。")}</p></div><div className="button-row"><button onClick={() => void chooseFfprobe()}>{t("选择 ffprobe.exe")}</button><button onClick={() => void checkFfprobe()}>{t("检测可用性")}</button></div></div>
           <label>
@@ -333,7 +351,7 @@ export function DesktopSettingsPage({
         <div className="button-row"><button onClick={() => void openWeb()}>{t("浏览器打开 Web")}</button><button className="primary-button" disabled={busy} onClick={onSave}>{busy ? t("保存中…") : t("保存桌面设置")}</button></div>
       </section>
 
-      <section className="settings-card soft-card">
+      <section className="settings-card soft-card settings-module-about">
         <span className="eyebrow">RUNTIME</span>
         <h2>Tauri Runtime</h2>
         <div className="runtime-info-grid">

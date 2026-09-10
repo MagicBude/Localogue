@@ -18,7 +18,7 @@ import type { WorkQuery } from "@/domain/queries/work-query";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useDesktopI18n } from "./desktop-i18n";
-import { DesktopSidebar, DesktopTopbar, type DesktopPage } from "./desktop-app-shell";
+import { DesktopSidebar, DesktopTopbar, type DesktopPage, type DesktopSettingsModule } from "./desktop-app-shell";
 import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import {
   activeLibraryProfile,
@@ -50,6 +50,7 @@ const DesktopGovernance = lazy(() => import("./desktop-governance").then((module
 const DesktopMediaPage = lazy(() => import("./desktop-media-page").then((module) => ({ default: module.DesktopMediaPage })));
 const DesktopPacksPage = lazy(() => import("./desktop-packs-page").then((module) => ({ default: module.DesktopPacksPage })));
 const DesktopSettingsPage = lazy(() => import("./desktop-settings-page").then((module) => ({ default: module.DesktopSettingsPage })));
+const DesktopAboutPage = lazy(() => import("./desktop-about-page").then((module) => ({ default: module.DesktopAboutPage })));
 
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
   schemaVersion: 1,
@@ -64,7 +65,8 @@ type DetailTarget = { kind: "work" | "person"; id: string } | null;
 
 export default function App() {
   const { t } = useDesktopI18n();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.localStorage.getItem("localogue.desktop.sidebar-collapsed") === "true");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.localStorage.getItem("localogue.desktop.sidebar-collapsed-v2") !== "false");
+  const [settingsModule, setSettingsModule] = useState<DesktopSettingsModule>("library");
   const [runtime, setRuntime] = useState<DesktopRuntimeInfo | null>(null);
   const [settings, setSettings] = useState<DesktopBootstrapSettings>(DEFAULT_SETTINGS);
   const [savedSettings, setSavedSettings] = useState<DesktopBootstrapSettings>(DEFAULT_SETTINGS);
@@ -340,7 +342,7 @@ export default function App() {
         onSwitchProfile={(profileId) => void switchLibraryProfile(profileId)}
         onToggleCollapsed={() => setSidebarCollapsed((value) => {
           const next = !value;
-          window.localStorage.setItem("localogue.desktop.sidebar-collapsed", String(next));
+          window.localStorage.setItem("localogue.desktop.sidebar-collapsed-v2", String(next));
           return next;
         })}
       />
@@ -349,6 +351,9 @@ export default function App() {
         <DesktopTopbar
           page={page}
           version={runtime?.version}
+          settingsModule={settingsModule}
+          onNavigate={navigate}
+          onSettingsModule={(module) => { setSettingsModule(module); navigate("settings"); }}
           onRefresh={refreshLibrary}
           onOpenSettings={() => navigate("settings")}
         />
@@ -357,7 +362,7 @@ export default function App() {
 
         <DesktopFavoritesProvider repository={repository}>
         <Suspense fallback={<PageLoadingState />}>
-        {!hasLibrarySource && page !== "settings" ? (
+        {!hasLibrarySource && page !== "settings" && page !== "about" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
           <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} />
@@ -411,7 +416,12 @@ export default function App() {
             onLibraryChanged={refreshLibrary}
             runtimeContractRevision={runtime?.contractRevision ?? 0}
             autoSyncRequest={mediaSyncRequest}
+            onOpenSettings={() => navigate("settings")}
+            onOpenLibrary={() => navigate("works")}
+            openWork={openWork}
           />
+        ) : page === "about" ? (
+          <DesktopAboutPage runtime={runtime} setMessage={setMessage} />
         ) : page === "packs" ? (
           <DesktopPacksPage
             settings={settings}
@@ -436,6 +446,8 @@ export default function App() {
             packInfos={packInfos}
             onSave={() => void saveSettings()}
             onPersistProfiles={persistProfileMutation}
+            onOpenPacks={() => navigate("packs")}
+            settingsModule={settingsModule}
             setMessage={setMessage}
           />
         )}

@@ -252,7 +252,7 @@ if (!errors.length) {
   for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
     if (!desktopCatalogBrowser.includes(token)) errors.push(`V1-19 Desktop 分类浏览缺少目录维度：${token}`);
   }
-  if (!desktopAppShell.includes('{ id: "browse", label: "浏览"')) {
+  if (!desktopAppShell.includes('id: "browse"') || !desktopAppShell.includes('onNavigate("browse")')) {
     errors.push("V1-19 Desktop 主导航必须提供分类浏览入口。");
   }
   if (!desktopI18n.includes("DesktopI18nProvider") || !desktopI18n.includes("DesktopLanguageControls") || !desktopI18n.includes("useDesktopI18n")) {
@@ -282,7 +282,7 @@ if (!errors.length) {
   if (!desktopApp.includes("localogue.desktop.sidebar-collapsed") || !desktopApp.includes("is-sidebar-collapsed")) {
     errors.push("V1-20 Desktop Sidebar 必须支持显式折叠并本机持久化，不允许只能依赖屏宽隐式收起。");
   }
-  if (!desktopStyles.includes("grid-template-columns: 188px") || !desktopStyles.includes("grid-template-columns: 72px")) {
+  if (!desktopStyles.includes("grid-template-columns: 176px") || !desktopStyles.includes("grid-template-columns: 68px")) {
     errors.push("V1-20 Desktop Sidebar 必须保持默认窄栏与折叠窄条两种明确宽度。");
   }
   // V1-25 把旧左侧 Facet Rail 改成顶部栏 + 抽屉。校验产品约束，而不是绑定旧布局：

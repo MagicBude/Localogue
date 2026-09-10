@@ -43,6 +43,7 @@ interface ExplorerData {
   workTypes: FilterOption[];
   years: FilterOption[];
   resolutions: FilterOption[];
+  mediaScanRoots: FilterOption[];
 }
 
 export function DesktopWorkExplorer({
@@ -174,6 +175,7 @@ export function DesktopWorkExplorer({
     }));
     const resolutionLabels: Record<string, string> = { "4k": "4K", "1080p": "1080P", "720p": "720P", sd: "SD" };
     const resolutions = result.facets.resolutions.map((facet) => ({ id: facet.id, label: resolutionLabels[facet.id] ?? facet.id, count: facet.count }));
+    const mediaScanRoots = result.facets.mediaScanRoots.map((facet) => ({ id: facet.id, label: directoryLabel(facet.id), count: facet.count }));
 
     return {
       result,
@@ -188,6 +190,7 @@ export function DesktopWorkExplorer({
       workTypes,
       years,
       resolutions,
+      mediaScanRoots,
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
@@ -356,6 +359,7 @@ function WorkFacetPanel({
             <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
             <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
             <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
+            <FilterGroup label={t("内容目录")} values={query.mediaScanRoots} options={data.mediaScanRoots} onChange={(values) => patch({ mediaScanRoots: values.length ? values : undefined })} />
             <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
             <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
             <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
@@ -390,6 +394,7 @@ function DesktopWorkFilterChips({
     tagIds: toOptionMap(data.tags),
     releaseYears: toOptionMap(data.years),
     resolutionTiers: toOptionMap(data.resolutions),
+    mediaScanRoots: toOptionMap(data.mediaScanRoots),
   }), [data]);
 
   const chips: Array<{ key: keyof WorkQuery; value?: string; label: string }> = [];
@@ -404,6 +409,7 @@ function DesktopWorkFilterChips({
   pushArrayChips(chips, "tagIds", t("标签"), query.tagIds, maps.tagIds);
   pushArrayChips(chips, "releaseYears", t("年份"), query.releaseYears, maps.releaseYears);
   pushArrayChips(chips, "resolutionTiers", t("清晰度"), query.resolutionTiers, maps.resolutionTiers);
+  pushArrayChips(chips, "mediaScanRoots", t("内容目录"), query.mediaScanRoots, maps.mediaScanRoots);
   if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `${t("发行日期")} ≥ ${query.releaseFrom}` });
   if (query.releaseTo) chips.push({ key: "releaseTo", label: `${t("发行日期")} ≤ ${query.releaseTo}` });
   if (query.durationMin !== undefined) chips.push({ key: "durationMin", label: `${t("时长")} ≥ ${query.durationMin}` });
@@ -507,6 +513,11 @@ function friendlyId(value: string): string {
   return value.replace(/^work[-_]?type[-_:]?/i, "").replace(/[-_]/g, " ") || value;
 }
 
+function directoryLabel(value: string): string {
+  const normalized = value.replace(/[\\/]+$/, "");
+  return normalized.split(/[\\/]/).at(-1) || value;
+}
+
 function toOptionMap(options: FilterOption[]): Map<string, string> {
   return new Map(options.map((option) => [option.id, option.label]));
 }
@@ -543,7 +554,7 @@ function removeChip(query: WorkQuery, key: keyof WorkQuery, value?: string): Wor
  */
 function countAdvancedFilters(query: WorkQuery): number {
   const arrayKeys: Array<keyof WorkQuery> = [
-    "personIds", "directorIds", "releaseYears", "resolutionTiers",
+    "personIds", "directorIds", "releaseYears", "resolutionTiers", "mediaScanRoots",
     "workTypeIds", "makerIds", "labelIds", "seriesIds", "genreIds", "tagIds",
   ];
   let count = 0;

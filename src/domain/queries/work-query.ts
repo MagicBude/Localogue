@@ -30,6 +30,8 @@ export interface WorkQuery {
   workTypeIds?: string[];
   tagIds?: string[];
   resolutionTiers?: MediaResolutionTier[];
+  /** 按 MediaFile 记录的扫描根筛选；多选为并集，不改变 Canonical Work。 */
+  mediaScanRoots?: string[];
   releaseYears?: string[];
   releaseFrom?: string;
   releaseTo?: string;
@@ -62,6 +64,7 @@ export interface WorkFacets {
   workTypes: FacetCount[];
   tags: FacetCount[];
   resolutions: FacetCount[];
+  mediaScanRoots: FacetCount[];
 }
 
 export interface WorkSearchResult {
