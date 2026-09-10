@@ -27,6 +27,7 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
   const [privateIds, setPrivateIds] = useState<Set<string>>(new Set());
   const [newCategory, setNewCategory] = useState("");
   const [localCategories, setLocalCategories] = useState<string[]>([]);
+  const [pendingDelete, setPendingDelete] = useState<Tag | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -101,10 +102,11 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
   }
 
   async function removeTag(tag: Tag): Promise<void> {
-    if (!privateIds.has(tag.id) || !window.confirm(t("删除私人标签“{name}”？仍被作品使用时会自动阻止。", { name: tagLabel(tag, metadataLanguage) }))) return;
+    if (!privateIds.has(tag.id)) return;
     setBusyId(tag.id);
     try {
       await repository.deletePrivateTag(tag.id);
+      setPendingDelete(null);
       setMessage(t("已删除私人标签。"));
       onChanged();
     } catch (error) {
@@ -136,11 +138,19 @@ export function DesktopTagManager({ repository, tags, metadataLanguage, onChange
           {sortedTags.map((tag) => <div key={tag.id}>
             <span><strong>{tagLabel(tag, metadataLanguage)}</strong><small>{privateIds.has(tag.id) ? "Private" : "Shared / built-in"}</small></span>
             <select disabled={busyId === tag.id} value={tag.category ?? ""} onChange={(event) => void assignCategory(tag, event.target.value)}><option value="">{t("未分类")}</option>{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select>
-            <UiButton disabled={!privateIds.has(tag.id) || busyId === tag.id} onClick={() => void removeTag(tag)} variant="danger">{t("删除")}</UiButton>
+            <UiButton disabled={!privateIds.has(tag.id) || busyId === tag.id} onClick={() => setPendingDelete(tag)} variant="danger">{t("删除")}</UiButton>
           </div>)}
         </div>
       </div>
     </UiActionDialog>
+    <UiActionDialog
+      actions={<><UiButton onClick={() => setPendingDelete(null)} variant="ghost">{t("取消")}</UiButton><UiButton disabled={Boolean(busyId)} onClick={() => { if (pendingDelete) void removeTag(pendingDelete); }} variant="danger">{t("删除")}</UiButton></>}
+      closeLabel={t("关闭")}
+      description={pendingDelete ? t("删除私人标签“{name}”？仍被作品使用时会自动阻止。", { name: tagLabel(pendingDelete, metadataLanguage) }) : ""}
+      onOpenChange={(value) => { if (!value) setPendingDelete(null); }}
+      open={Boolean(pendingDelete)}
+      title={t("删除标签")}
+    />
   </>;
 }
 
