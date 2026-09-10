@@ -179,7 +179,7 @@ export function DesktopWorkDetailPage({
 
   return (
     <div className="page-stack desktop-work-detail-page">
-      <button className="back-button" onClick={onBack}>← {t("返回作品库")}</button>
+      <button className="back-button" onClick={onBack}>← {t("返回上一页")}</button>
       <DesktopWorkAssetGallery assets={assets} workCode={work.code} mediaCount={media.length} assetTypeLabel={assetTypeLabel} />
       <section className="desktop-work-record desktop-work-record--stacked">
         <div className="desktop-work-record__content">

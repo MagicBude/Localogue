@@ -65,6 +65,11 @@ const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
 };
 
 type DetailTarget = { kind: "work" | "person"; id: string } | null;
+type NavigationLocation = {
+  page: DesktopPage;
+  detail: DetailTarget;
+  worksInitialQuery: WorkQuery | undefined;
+};
 
 export default function App() {
   const { t } = useDesktopI18n();
@@ -87,6 +92,11 @@ export default function App() {
   const [mediaSyncRequest, setMediaSyncRequest] = useState(0);
   const ordinarySaveQueue = useRef<Promise<void>>(Promise.resolve());
   const ordinarySaveCount = useRef(0);
+  // Desktop 没有浏览器 URL 路由，因此显式保存用户真正访问过的位置。
+  // 这样 Work -> Person -> Work 的关系跳转仍能逐级返回，而不是按实体类型猜测返回哪个列表。
+  const navigationHistory = useRef<NavigationLocation[]>([]);
+  const currentLocation = useRef<NavigationLocation>({ page, detail, worksInitialQuery });
+  currentLocation.current = { page, detail, worksInitialQuery };
 
   /**
    * 所有页面状态消息从这里汇合，因此日志接入不需要让一百多个调用点分别理解文件 I/O。
@@ -201,25 +211,40 @@ export default function App() {
   const savedActiveProfile = activeLibraryProfile(savedSettings);
 
   const navigate = useCallback((next: DesktopPage) => {
+    navigationHistory.current = [];
     setPage(next);
     setDetail(null);
     if (next === "works") setWorksInitialQuery(undefined);
   }, []);
 
   const filterWorks = useCallback((query: WorkQuery) => {
+    navigationHistory.current = [];
     setWorksInitialQuery(query);
     setDetail(null);
     setPage("works");
   }, []);
 
   const openWork = useCallback((id: string) => {
+    navigationHistory.current.push(currentLocation.current);
     setPage("works");
     setDetail({ kind: "work", id });
   }, []);
 
   const openPerson = useCallback((id: string) => {
+    navigationHistory.current.push(currentLocation.current);
     setPage("people");
     setDetail({ kind: "person", id });
+  }, []);
+
+  const returnToPreviousLocation = useCallback(() => {
+    const previous = navigationHistory.current.pop();
+    if (!previous) {
+      setDetail(null);
+      return;
+    }
+    setPage(previous.page);
+    setDetail(previous.detail);
+    setWorksInitialQuery(previous.worksInitialQuery);
   }, []);
 
   const refreshLibrary = useCallback(() => {
@@ -227,6 +252,7 @@ export default function App() {
   }, []);
 
   const startUnifiedSync = useCallback(() => {
+    navigationHistory.current = [];
     setDetail(null);
     setPage("media");
     setMediaSyncRequest((value) => value + 1);
@@ -419,7 +445,7 @@ export default function App() {
           <DesktopWorkDetailPage
               repository={repository}
               id={detail.id}
-              onBack={() => setDetail(null)}
+              onBack={returnToPreviousLocation}
               openPerson={openPerson}
               filterWorks={filterWorks}
               onLibraryChanged={refreshLibrary}
@@ -438,7 +464,7 @@ export default function App() {
             <DesktopPersonDetailPage
               repository={repository}
               id={detail.id}
-              onBack={() => setDetail(null)}
+              onBack={returnToPreviousLocation}
               openWork={openWork}
               onLibraryChanged={refreshLibrary}
               setMessage={setMessage}

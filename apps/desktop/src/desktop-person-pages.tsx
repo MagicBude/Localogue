@@ -86,7 +86,7 @@ export function DesktopPersonDetailPage({
 
   return (
     <div className="page-stack">
-      <button className="back-button" onClick={onBack}>← {t("返回人物库")}</button>
+      <button className="back-button" onClick={onBack}>← {t("返回上一页")}</button>
       <section className="detail-hero person-detail-hero desktop-person-detail-hero">
         <div className="desktop-person-detail-portrait">
           <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />
