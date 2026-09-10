@@ -474,7 +474,7 @@ export default function App() {
             <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
           )
         ) : page === "browse" ? (
-          <DesktopCatalogBrowser repository={repository} openWork={openWork} />
+          <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} />
         ) : page === "review" ? (
           <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "curation" ? (

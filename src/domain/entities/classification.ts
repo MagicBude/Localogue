@@ -14,4 +14,9 @@ export interface Tag {
   id: string;
   names: LocalizedText;
   builtIn?: boolean;
+  /** 用户用来整理私人 Tag 的分类名；它不是 Canonical Genre。 */
+  category?: string;
+  /** 分类和分类内 Tag 的显示顺序，不参与 WorkQuery 语义。 */
+  categoryOrder?: number;
+  sortOrder?: number;
 }

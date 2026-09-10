@@ -19,20 +19,24 @@ import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { DesktopTagManager } from "./desktop-tag-manager";
 import { catalogCommunityDescription, catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetAriaLabel, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
 
 export function DesktopCatalogBrowser({
   repository,
   openWork,
+  setMessage,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
+  setMessage: (message: string) => void;
 }) {
   const { t, uiLanguage, metadataLanguage } = useDesktopI18n();
   const [selection, setSelection] = useState<CatalogSelection | null>(null);
   const [usageFilter, setUsageFilter] = useState<CatalogUsageFilter>("used");
   const [genreFacet, setGenreFacet] = useState<GenreFacetFilter>("all");
   const [search, setSearch] = useState("");
+  const [catalogRevision, setCatalogRevision] = useState(0);
   const usageLabels = catalogUsageLabels(uiLanguage);
   const data = useAsyncCatalogData(async () => {
     const [result, organizations, series, libraryGenres, tags, people] = await Promise.all([
@@ -83,6 +87,7 @@ export function DesktopCatalogBrowser({
     }));
 
     return {
+      rawTags: tags,
       makers: mergeCatalogItems(
         organizations
           .filter((item) => item.kind === "maker")
@@ -118,10 +123,11 @@ export function DesktopCatalogBrowser({
       })).sort(catalogSort),
       workTypes: mergeCatalogItems(controlledWorkTypes, facetWorkTypes),
     };
-  }, [repository, metadataLanguage, uiLanguage]);
+  }, [repository, metadataLanguage, uiLanguage, catalogRevision]);
 
   if (data.loading) return <BrowserState>{t("正在生成分类索引…")}</BrowserState>;
   if (data.error || !data.value) return <BrowserState error>{data.error ?? t("无法读取分类索引。")}</BrowserState>;
+  const rawTags = data.value.rawTags;
 
   if (selection) {
     const selectionLabel = data.value[selection.kind].find((item) => item.id === selection.id)?.label ?? selection.id;
@@ -263,9 +269,12 @@ export function DesktopCatalogBrowser({
             <section className="settings-card" key={section.kind}>
               <div className="section-heading">
                 <div><span className="eyebrow">{section.eyebrow}</span><h2>{section.title}</h2></div>
-                <small className="muted">
-                  {t("{count} 项", { count: usageVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
-                </small>
+                <div className="button-row">
+                  {section.kind === "tags" ? <DesktopTagManager repository={repository} tags={rawTags} metadataLanguage={metadataLanguage} onChanged={() => setCatalogRevision((value) => value + 1)} setMessage={setMessage} /> : null}
+                  <small className="muted">
+                    {t("{count} 项", { count: usageVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
+                  </small>
+                </div>
               </div>
               {usageVisibleItems.length ? (
                 <CatalogItemGrid

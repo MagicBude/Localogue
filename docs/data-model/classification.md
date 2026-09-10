@@ -34,3 +34,5 @@ Localogue 把分类拆成三种：Work Type、Genre、Tag。
 - 待观看。
 
 Tag 不等同于 Genre，不强制全部来自官方词表。
+
+Tag 还可以携带 `category`、`categoryOrder` 与 `sortOrder`，用于私人资料库的展示整理。它们只影响标签管理器中的分组和顺序，不进入 WorkQuery 的匹配语义，也不把来源分类变成 Canonical Genre。Shared Tag 被整理时仍通过同 ID Private Override 保存。
