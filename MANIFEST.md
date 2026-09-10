@@ -6,6 +6,12 @@
 
 当前产品版本继续为 `0.1.25`。V1-27A/B/C 已建立 Organization / Series Registry Evidence 与 Community Catalog；V1-27D 完善多语言显示和父级关系展示，不把 Browse 扩展成级联作品筛选器。
 
+Desktop Presentation Shell 开始按用户任务重组：一级入口收敛为首页、资料库、导入与整理、资料维护和设置，原有作品、人物、分类、收藏、治理、历史与资料包能力按任务归组。“导入与整理”使用单页连续工作台承载统一目录同步、媒体扫描、NFO / 图片导入和 Evidence 核对，减少日常流程中的页面跳转。该调整不改变 Domain Model、Repository、Query 或 Native 写入权限。
+
+设置页面使用四个任务模块，并让内容目录增删立即持久化；统一同步展示固定执行阶段。作品查询新增 `mediaScanRoots` 派生筛选与 self-excluding Facet，目录关系来自 Private `MediaFile.scanRoot`，支持查看单个目录或多个目录的作品并集，不修改 Canonical Work 数据结构。
+
+导入工作台新增只读目录状态卡片和单目录完整同步；目录增删统一由设置的“资料库与目录”模块负责。扫描核心现有 `successfulRoots` 范围约束保证单目录扫描只清理该根下确实不存在的 MediaFile，不影响未参与本轮扫描的其他目录。
+
 Desktop 页面模块化维护已完成第一批：Home、Works、People 及其详情使用独立模块，`App.tsx` 保留顶层 Runtime / Profile / Navigation；首页显示最多 12 条最近作品并提供完整作品库入口。
 
 维护修正：README 与 Series 模型文档已和当前实现对齐；`registry:audit` 默认审计 Community Catalog；作品详情画廊完整显示 poster / cover / gallery / fanart / screenshot，并根据真实图片比例切换舞台布局。

@@ -835,6 +835,20 @@ async fn append_app_log(app: AppHandle, level: String, message: String) -> Resul
     spawn_native_io("append_app_log", move || append_app_log_blocking(app, level, message)).await
 }
 
+/// 读取 Localogue 自己管理的当前日志，供应用内诊断窗口展示。
+///
+/// WebView 不能传路径，Rust 始终解析固定的 App Local Data 日志文件；读取放进
+/// blocking worker，避免日志 I/O 阻塞 Tauri 主线程。
+#[tauri::command]
+async fn read_app_log(app: AppHandle) -> Result<String, String> {
+    spawn_native_io("read_app_log", move || {
+        let path = app_log_path(&app)?;
+        if !path.exists() { append_app_log_blocking(app.clone(), "info".into(), "Localogue 日志已创建。".into())?; }
+        let bytes = fs::read(path).map_err(display_error)?;
+        Ok(String::from_utf8_lossy(&bytes).into_owned())
+    }).await
+}
+
 fn append_app_log_blocking(app: AppHandle, level: String, message: String) -> Result<(), String> {
     if !matches!(level.as_str(), "info" | "warn" | "error") { return Err("日志级别无效。".into()); }
     let sanitized = redact_log_message(&app, &message.chars().take(8_000).collect::<String>())?;
@@ -2515,6 +2529,7 @@ pub fn run() {
             open_path,
             reveal_in_folder,
             append_app_log,
+            read_app_log,
             reveal_app_log,
             open_web_url,
             probe_media,

@@ -55,6 +55,7 @@ export const desktopBridge = {
   openPath: (path: string) => invoke<void>("open_path", { path }),
   revealInFolder: (path: string) => invoke<void>("reveal_in_folder", { path }),
   appendAppLog: (level: "info" | "warn" | "error", message: string) => invoke<void>("append_app_log", { level, message }),
+  readAppLog: () => invoke<string>("read_app_log"),
   revealAppLog: () => invoke<void>("reveal_app_log"),
   openWebUrl: (url: string) => invoke<void>("open_web_url", { url }),
   probeMedia: (executable: string, filePath: string) =>

@@ -4,6 +4,10 @@
 
 **V1-27D：Entity Localization & Browse Relationship Presentation。**
 
+Desktop 产品流程优化已经从信息架构开始：原有十一项平铺菜单收敛为首页、资料库、导入与整理、资料维护、设置五个一级任务区，领域浏览与治理页面作为二级入口按需展开。“导入与整理”已经合并为单页连续工作台，统一目录同步、媒体扫描、NFO / 图片导入和 Evidence 核对可以从上到下完成；现有 Repository、Query、Evidence Review、Media Scan 与 Native 安全边界保持不变。桌面已实际启动并检查完整页面布局，仍待用户操作验收。
+
+多目录体验开始向 JavBoss 的 Directory Scope 靠拢：设置目录即时保存，工作台持续展示全部已添加目录并支持逐目录增量同步，作品页可按一个或多个 `MediaFile.scanRoot` 查看内容；设置页面按任务模块切换，统一同步显示可持续观察的阶段状态。当前目录筛选只覆盖已经扫描且成功关联 Work 的本地媒体，目录自定义名称、启停和离线状态留待下一阶段完善。
+
 Desktop 维护线开始页面模块化：Home、Works、People 及其详情已从应用入口拆出；首页最近作品扩展为 12 条并增加“查看全部作品”，同时消除一次重复 Works 全量读取。Media、Packs、Settings 将按 Native/Application 能力边界继续拆分。
 
 当前维护修正已统一文档、Community Catalog 审计口径与作品画廊行为：`registry:audit` 默认审计社区目录；作品详情画廊可完整浏览 poster / cover / gallery / fanart / screenshot，并按图片真实比例适配，不再固定为横版舞台。

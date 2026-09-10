@@ -4,10 +4,12 @@ import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator
 import { discoverDesktopMetadataFiles } from "./desktop-metadata-discovery";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
+import type { MediaFile } from "@/domain/entities/media-file";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
+import { DesktopReviewPage } from "./desktop-review-page";
 import { MediaBindingPanel } from "./desktop-media-binding-panel";
 import { MediaProbeSection, MediaScanHistorySection, MediaScanSection } from "./desktop-media-sections";
 import { MediaLibrarySection } from "./desktop-media-library-section";
@@ -70,6 +72,9 @@ export function DesktopMediaPage({
   onLibraryChanged,
   runtimeContractRevision,
   autoSyncRequest,
+  onOpenSettings,
+  onOpenLibrary,
+  openWork,
 }: {
   repository: TauriLibraryRepository;
   settings: DesktopBootstrapSettings;
@@ -78,6 +83,9 @@ export function DesktopMediaPage({
   onLibraryChanged: () => void;
   runtimeContractRevision: number;
   autoSyncRequest: number;
+  onOpenSettings: () => void;
+  onOpenLibrary: () => void;
+  openWork: (id: string) => void;
 }) {
   const { t } = useDesktopI18n();
   const [scan, setScan] = useState<MediaScanJobSnapshot | null>(null);
@@ -89,10 +97,12 @@ export function DesktopMediaPage({
   const [assetPreview, setAssetPreview] = useState<LocalAssetImportPreview | null>(null);
   const [assetResult, setAssetResult] = useState<LocalAssetImportResult | null>(null);
   const [metadataBusy, setMetadataBusy] = useState(false);
+  const [syncStage, setSyncStage] = useState<"idle" | "discover" | "metadata" | "media" | "complete" | "error">("idle");
   const [bindingMediaId, setBindingMediaId] = useState<string | null>(null);
   const [vocabularyPreview, setVocabularyPreview] = useState<VocabularyRepairPreview | null>(null);
   const [vocabularyResult, setVocabularyResult] = useState<VocabularyRepairResult | null>(null);
   const [vocabularyBusy, setVocabularyBusy] = useState(false);
+  const [evidenceEpoch, setEvidenceEpoch] = useState(0);
   const scanCoordinator = useRef<MediaScanCoordinator | null>(null);
   const scanTimer = useRef<number | null>(null);
   const handledAutoSyncRequest = useRef(0);
@@ -146,12 +156,13 @@ export function DesktopMediaPage({
     }
   }
 
-  async function startScan(options: { waitForCompletion?: boolean } = {}): Promise<MediaScanJobSnapshot | null> {
+  async function startScan(options: { waitForCompletion?: boolean; roots?: string[] } = {}): Promise<MediaScanJobSnapshot | null> {
     if (!settings.libraryPath) {
       setMessage(t("请先在设置页选择 Private Library。Shared Pack 不能保存 MediaFile。"));
       return null;
     }
-    if (!mediaRoots.length) {
+    const requestedRoots = options.roots ?? mediaRoots;
+    if (!requestedRoots.length) {
       setMessage(t("请先添加 Unified Library Root，或在高级设置里添加媒体扫描目录。"));
       return null;
     }
@@ -168,7 +179,7 @@ export function DesktopMediaPage({
       const coordinator = new MediaScanCoordinator(repository, platform);
       scanCoordinator.current = coordinator;
       const initial = coordinator.start({
-        roots: mediaRoots,
+        roots: requestedRoots,
         ffprobeExecutable: settings.ffprobePath?.trim() || "ffprobe",
         probeMedia: true,
         computeSha256: false,
@@ -177,7 +188,7 @@ export function DesktopMediaPage({
         observeImageSidecars: false,
       });
       setScan(initial);
-      setMessage(t("Desktop 增量媒体扫描已启动：将依次检查全部 {count} 个媒体根目录。", { count: mediaRoots.length }));
+      setMessage(t("Desktop 增量媒体扫描已启动：将依次检查全部 {count} 个媒体根目录。", { count: requestedRoots.length }));
 
       if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
 
@@ -241,16 +252,19 @@ export function DesktopMediaPage({
     }
 
     setMetadataBusy(true);
+    setSyncStage("discover");
     setNfoResult(null);
     setAssetResult(null);
     try {
       const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots);
+      setSyncStage("metadata");
       const nfo = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries);
       const assets = await previewLocalAssetImport(assetRoots, repository, nfo, discovery.assetEntries);
       setNfoPreview(nfo);
       setAssetPreview(assets);
       setMessage(t("资料源扫描完成：发现 {nfo} 个 NFO（{works} 个 Work 候选）和 {images} 张图片（{linkable} 张可关联）。", { nfo: nfo.discovered, works: nfo.importable, images: assets.discovered, linkable: assets.linkable }));
     } catch (error) {
+      setSyncStage("error");
       setMessage(t("资料源扫描失败：{error}", { error: toMessage(error) }));
     } finally {
       setMetadataBusy(false);
@@ -265,7 +279,8 @@ export function DesktopMediaPage({
     setMetadataBusy(true);
     try {
       const count = await saveNfoPreviewAsEvidence(nfoPreview);
-      setMessage(`已保存 ${count} 条不可变 NFO Evidence；可前往“审核”生成 Commit Plan。`);
+      setEvidenceEpoch((value) => value + 1);
+      setMessage(`已保存 ${count} 条不可变 NFO Evidence；可继续在下方核对并应用。`);
     } catch (error) {
       setMessage(`保存 Evidence 失败：${toMessage(error)}`);
     } finally {
@@ -297,12 +312,15 @@ export function DesktopMediaPage({
     }
   }
 
-  async function syncUnifiedLibrary(): Promise<void> {
+  async function syncUnifiedLibrary(onlyRoots?: string[]): Promise<void> {
+    const syncNfoRoots = onlyRoots ?? nfoRoots;
+    const syncAssetRoots = onlyRoots ?? assetRoots;
+    const syncMediaRoots = onlyRoots ?? mediaRoots;
     if (!settings.libraryPath) {
       setMessage(t("请先在设置页选择 Private Library；统一同步需要写入 Work / Asset / MediaFile。"));
       return;
     }
-    if (!unique([...nfoRoots, ...assetRoots, ...mediaRoots]).length) {
+    if (!unique([...syncNfoRoots, ...syncAssetRoots, ...syncMediaRoots]).length) {
       setMessage(t("请先添加 Unified Library Root，或配置高级扫描路径。"));
       return;
     }
@@ -313,8 +331,8 @@ export function DesktopMediaPage({
     setAssetResult(null);
     try {
       setMessage(t("统一资料库同步：正在发现 NFO 与本地图片…"));
-      const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots);
-      const nfoPreviewNext = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries);
+      const discovery = await discoverDesktopMetadataFiles(syncNfoRoots, syncAssetRoots);
+      const nfoPreviewNext = await previewNfoImport(syncNfoRoots, repository, discovery.nfoEntries);
       setNfoPreview(nfoPreviewNext);
 
       let nfo: NfoImportResult | null = null;
@@ -325,7 +343,7 @@ export function DesktopMediaPage({
 
       // NFO 可能刚创建 Work；因此图片 Preview 故意放在 NFO Import 之后重新计算，
       // 让同一次“一键同步”里的 poster / cover 直接看到最新 Canonical Work。
-      const assetPreviewNext = await previewLocalAssetImport(assetRoots, repository, nfoPreviewNext, discovery.assetEntries);
+      const assetPreviewNext = await previewLocalAssetImport(syncAssetRoots, repository, nfoPreviewNext, discovery.assetEntries);
       setAssetPreview(assetPreviewNext);
       let assets: LocalAssetImportResult | null = null;
       if (assetPreviewNext.linkable) {
@@ -342,8 +360,12 @@ export function DesktopMediaPage({
       setMetadataBusy(false);
     }
 
-    const media = await startScan({ waitForCompletion: true });
+    setSyncStage("media");
+    const media = onlyRoots
+      ? await startScan({ waitForCompletion: true, roots: syncMediaRoots })
+      : await startScan({ waitForCompletion: true });
     if (media?.status === "completed") {
+      setSyncStage("complete");
       setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
     }
   }
@@ -406,7 +428,8 @@ export function DesktopMediaPage({
 
   return (
     <div className="page-stack">
-      <PageTitle eyebrow="LOCAL · MEDIA · METADATA · ASSET" title={t("本地资料")} description={t("一个 Unified Library Root 可以同时发现视频、NFO、poster / fanart / thumb；它们最终按 Work 番号汇聚，而不依赖同目录。")} />
+      <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
+      <DirectoryScanPanel roots={unifiedRoots} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onManage={onOpenSettings} onSync={(root) => void syncUnifiedLibrary([root])} />
       <section className="settings-card unified-sync-card">
         <div className="section-heading">
           <div>
@@ -419,6 +442,17 @@ export function DesktopMediaPage({
           </button>
         </div>
         <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
+        {syncStage !== "idle" ? (
+          <div className={`unified-sync-progress is-${syncStage}`} role="status" aria-live="polite">
+            {["discover", "metadata", "media", "complete"].map((stage, index) => {
+              const labels = [t("发现文件"), t("导入资料与图片"), t("扫描视频"), t("完成")];
+              const current = ["discover", "metadata", "media", "complete"].indexOf(syncStage);
+              return <div className={index < current || syncStage === "complete" ? "is-done" : index === current ? "is-current" : ""} key={stage}><span>{index < current || syncStage === "complete" ? "✓" : index + 1}</span><strong>{labels[index]}</strong></div>;
+            })}
+            {syncStage === "error" ? <p>{t("同步失败，请查看上方错误信息后重试。")}</p> : null}
+            {syncStage === "media" && scan ? <p>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</p> : null}
+          </div>
+        ) : null}
       </section>
       <MediaScanSection
         roots={mediaRoots}
@@ -439,6 +473,11 @@ export function DesktopMediaPage({
         onSaveEvidence={() => void saveMetadataAsEvidence()}
         onImport={() => void importMetadataSource()}
       />
+
+      <section className="organize-review-section">
+        <div className="section-heading organize-section-heading"><div><span className="eyebrow">REVIEW</span><h2>{t("核对需要判断的资料")}</h2><p className="muted">{t("只有保存为 Evidence 的来源资料才会出现在这里；明确无冲突的本地导入不需要重复审核。")}</p></div><button className="ghost-button" type="button" onClick={onOpenLibrary}>{t("查看作品库")}</button></div>
+        <DesktopReviewPage repository={repository} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} embedded reloadSignal={evidenceEpoch} />
+      </section>
 
       <VocabularyAuditSection
         busy={vocabularyBusy}
@@ -483,6 +522,38 @@ export function DesktopMediaPage({
 
     </div>
   );
+}
+
+/**
+ * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
+ * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
+ */
+function DirectoryScanPanel({ roots, media, history, running, onManage, onSync }: {
+  roots: string[];
+  media: MediaFile[];
+  history: MediaScanHistoryEntry[];
+  running: boolean;
+  onManage: () => void;
+  onSync: (path: string) => void;
+}) {
+  const { t } = useDesktopI18n();
+  return <section className="settings-card directory-manager-card">
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录同步")}</h2><p className="muted">{t("选择已经配置的目录单独同步；目录的添加和移除统一在设置中管理。")}</p></div><button type="button" onClick={onManage}>{t("管理内容目录")}</button></div>
+    {roots.length ? <div className="directory-card-list">{roots.map((root) => {
+      const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
+      const linked = files.filter((item) => item.workId).length;
+      const last = history.find((entry) => entry.snapshot.result?.roots.some((item) => samePath(item, root)));
+      return <article key={root}>
+        <div className="directory-card-main"><strong title={root}>{root}</strong><div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span></div>{last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })}</small> : <small>{t("尚未扫描")}</small>}</div>
+        <button className="primary-button" disabled={running} type="button" onClick={() => onSync(root)}>{t("同步此目录")}</button>
+      </article>;
+    })}</div> : <p className="muted">{t("尚未添加内容目录。")}</p>}
+  </section>;
+}
+
+function samePath(left: string, right: string): boolean {
+  const normalize = (value: string) => value.replaceAll("\\", "/").replace(/\/+$/, "").toLocaleLowerCase();
+  return normalize(left) === normalize(right);
 }
 
 function effectiveMediaRoots(settings: DesktopBootstrapSettings): string[] {

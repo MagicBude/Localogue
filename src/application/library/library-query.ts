@@ -37,6 +37,7 @@ export function queryWorks(
     mediaFiles.flatMap((item) => (item.workId ? [item.workId] : [])),
   );
   const mediaResolutionsByWork = buildMediaResolutionIndex(mediaFiles);
+  const mediaScanRootsByWork = buildMediaScanRootIndex(mediaFiles);
   const subjectCoverWorkIds = new Set(
     assets
       .filter(
@@ -47,7 +48,7 @@ export function queryWorks(
   );
 
   const filtered = works.filter((work) =>
-    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, favoriteWorkIds, ratingById),
+    matchesWork(work, query, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, mediaScanRootsByWork, favoriteWorkIds, ratingById),
   );
   const sorted = [...filtered].sort(createWorkComparator(query.sort, ratingById));
   const pageSize = positiveInteger(query.pageSize, DEFAULT_PAGE_SIZE);
@@ -67,6 +68,7 @@ export function queryWorks(
       mediaWorkIds,
       subjectCoverWorkIds,
       mediaResolutionsByWork,
+      mediaScanRootsByWork,
       favoriteWorkIds,
       ratingById,
     ),
@@ -138,6 +140,7 @@ function matchesWork(
   mediaWorkIds: ReadonlySet<string> = new Set(),
   subjectCoverWorkIds: ReadonlySet<string> = new Set(),
   mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>> = new Map(),
+  mediaScanRootsByWork: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
   favoriteWorkIds: ReadonlySet<string> = new Set(),
   ratingById: ReadonlyMap<string, number> = new Map(),
 ): boolean {
@@ -166,6 +169,10 @@ function matchesWork(
   if (query.resolutionTiers?.length) {
     const tiers = mediaResolutionsByWork.get(work.id);
     if (!tiers || !query.resolutionTiers.some((tier) => tiers.has(tier))) return false;
+  }
+  if (query.mediaScanRoots?.length) {
+    const roots = mediaScanRootsByWork.get(work.id);
+    if (!roots || !query.mediaScanRoots.some((root) => roots.has(root))) return false;
   }
 
   const release = work.releaseDate?.value;
@@ -265,6 +272,7 @@ function buildWorkFacets(
   mediaWorkIds: ReadonlySet<string>,
   subjectCoverWorkIds: ReadonlySet<string>,
   mediaResolutionsByWork: ReadonlyMap<string, ReadonlySet<MediaResolutionTier>>,
+  mediaScanRootsByWork: ReadonlyMap<string, ReadonlySet<string>>,
   favoriteWorkIds: ReadonlySet<string> = new Set(),
   ratingById: ReadonlyMap<string, number> = new Map(),
 ): WorkFacets {
@@ -275,7 +283,7 @@ function buildWorkFacets(
     delete facetQuery.page;
     delete facetQuery.pageSize;
     return works.filter((work) =>
-      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, favoriteWorkIds, ratingById),
+      matchesWork(work, facetQuery, mediaWorkIds, subjectCoverWorkIds, mediaResolutionsByWork, mediaScanRootsByWork, favoriteWorkIds, ratingById),
     );
   };
 
@@ -320,7 +328,20 @@ function buildWorkFacets(
     ),
     tags: countFacet(facetWorks(["tagIds"]).flatMap((work) => work.tagIds)),
     resolutions: countFacet(facetWorks(["resolutionTiers"]).flatMap((work) => [...(mediaResolutionsByWork.get(work.id) ?? [])])),
+    mediaScanRoots: countFacet(facetWorks(["mediaScanRoots"]).flatMap((work) => [...(mediaScanRootsByWork.get(work.id) ?? [])])),
   };
+}
+
+/** 一个作品可在多个目录拥有不同版本，因此索引值是 Set；目录多选采用 OR 语义。 */
+function buildMediaScanRootIndex(mediaFiles: readonly MediaFile[]): Map<string, Set<string>> {
+  const index = new Map<string, Set<string>>();
+  for (const file of mediaFiles) {
+    if (!file.workId || !file.scanRoot) continue;
+    const roots = index.get(file.workId) ?? new Set<string>();
+    roots.add(file.scanRoot);
+    index.set(file.workId, roots);
+  }
+  return index;
 }
 
 /** 按实际视频像素归档；这是 MediaFile 的派生视图，不写回 Canonical Work。 */

@@ -16,19 +16,22 @@
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --lib"
   },
   "dependencies": {
+    "@fluentui/react-icons": "^2.0.339",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-tooltip": "^1.2.16",
     "@tauri-apps/api": "2.11.1",
+    "fast-xml-parser": "5.11.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "fast-xml-parser": "5.11.1"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.11.4",
+    "@types/node": "^24.0.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "6.1.1",
-    "typescript": "5.9.3",
-    "vite": "8.2.2",
     "esbuild": "0.28.2",
-    "@types/node": "^24.0.0"
+    "typescript": "5.9.3",
+    "vite": "8.2.2"
   }
 }

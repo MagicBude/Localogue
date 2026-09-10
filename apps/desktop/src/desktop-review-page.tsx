@@ -25,6 +25,8 @@ interface DesktopReviewPageProps {
   openWork: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
+  embedded?: boolean;
+  reloadSignal?: number;
 }
 
 /**
@@ -39,6 +41,8 @@ export function DesktopReviewPage({
   onLibraryChanged,
   setMessage,
   openWork,
+  embedded = false,
+  reloadSignal = 0,
 }: DesktopReviewPageProps) {
   const { t } = useDesktopI18n();
   // Inbox 原始证据与生命周期分开保存，因为 Evidence 是不可变来源，忽略/提交状态属于独立审计记录。
@@ -71,7 +75,7 @@ export function DesktopReviewPage({
   useEffect(() => {
     // 页面首次进入时加载 Inbox。写操作完成后会显式调用 reloadInbox，无需依赖轮询。
     void reloadInbox().catch((error) => setMessage(`Evidence 读取失败：${message(error)}`));
-  }, []);
+  }, [reloadSignal]);
 
   useEffect(() => {
     // 切换 Evidence 后，旧 Plan 立即失效。disposed 防止较慢的旧分析覆盖用户后来选择的新记录。
@@ -213,7 +217,7 @@ export function DesktopReviewPage({
 
   return (
     <div className="page-stack governance-page">
-      <GovernanceTitle eyebrow="EVIDENCE · REVIEW · COMMIT PLAN" title={t("审核工作台")} body={t("Evidence 保持不可变；先分析差异、明确决策、生成 Commit Plan，再显式提交到 Private Canonical Library。 ")} />
+      {!embedded ? <GovernanceTitle eyebrow="IMPORT · REVIEW" title={t("资料核对")} body={t("核对来源资料与当前资料库的差异，明确选择后再应用；原始 Evidence 和变更历史会继续保留。") } /> : null}
       <div className="governance-split">
         <section className="settings-card governance-inbox">
           <div className="section-heading"><div><span className="eyebrow">EVIDENCE INBOX</span><h2>{t("待审核证据")}</h2></div><strong>{records.length}</strong></div>

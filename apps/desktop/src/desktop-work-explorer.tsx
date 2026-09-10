@@ -1,7 +1,5 @@
 import {
-  useEffect,
   useMemo,
-  useRef,
   useState,
   type ChangeEvent,
   type ReactNode,
@@ -19,13 +17,11 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useFavorites } from "./desktop-favorites-provider";
 import { useStableAsyncData } from "./use-stable-async-data";
-import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
 import {
   buildDesktopWorkCards,
   DesktopWorkResults,
   DesktopWorkViewSwitcher,
   type DesktopWorkViewMode,
-  type DesktopWaterfallSize,
 } from "./desktop-work-results";
 
 interface FilterOption {
@@ -36,8 +32,6 @@ interface FilterOption {
 
 interface ExplorerData {
   result: WorkSearchResult;
-  /** 用于生成这份结果的请求页码；避免旧结果反向覆盖用户刚点击的新页码。 */
-  requestedPage: number;
   cards: ReturnType<typeof buildDesktopWorkCards>;
   people: FilterOption[];
   directors: FilterOption[];
@@ -49,6 +43,7 @@ interface ExplorerData {
   workTypes: FilterOption[];
   years: FilterOption[];
   resolutions: FilterOption[];
+  mediaScanRoots: FilterOption[];
 }
 
 export function DesktopWorkExplorer({
@@ -68,36 +63,18 @@ export function DesktopWorkExplorer({
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
-  const stateStorageKey = `${storageKey}.navigation-state`;
-  const restoredState = useMemo(() => readExplorerNavigationState(stateStorageKey), [stateStorageKey]);
-  const pendingScrollY = useRef(restoredState?.scrollY);
-  const [query, setQuery] = useState<WorkQuery>(() => ({
-    sort: "release_desc",
-    ...restoredState?.query,
-    // 来自收藏页、人物页或分类入口的固定初始条件优先，不能被旧浏览状态冲掉。
-    ...initialQuery,
-  }));
-  const [page, setPage] = useState(() => restoredState?.page ?? 1);
+  const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
+  const [page, setPage] = useState(1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
     const saved = window.localStorage.getItem(storageKey);
     return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
-  const [waterfallSize, setWaterfallSize] = useState<DesktopWaterfallSize>(() => {
-    const saved = window.localStorage.getItem(`${storageKey}.waterfall-size`);
-    return saved === "small" || saved === "large" ? saved : "medium";
-  });
-  const [waterfallPage, setWaterfallPage] = useState(1);
-  const [waterfallCards, setWaterfallCards] = useState<ReturnType<typeof buildDesktopWorkCards>>([]);
-  const [waterfallRequestPending, setWaterfallRequestPending] = useState(false);
 
   const data = useAsyncExplorerData(async () => {
-    // 瀑布流的“连续”只是一种交互表现，数据层仍按页读取。这样即使资料库有
-    // 数万部作品，首次打开也只创建一小批卡片，不会一次占满内存或阻塞 WebView。
-    const requestedPage = view === "waterfall" ? waterfallPage : page;
     const effectiveQuery: WorkQuery = {
       ...query,
       ...(fixedPersonId ? { personIds: [fixedPersonId] } : {}),
-      page: requestedPage,
+      page,
       pageSize,
     };
     const result = await repository.listWorks(effectiveQuery);
@@ -198,10 +175,10 @@ export function DesktopWorkExplorer({
     }));
     const resolutionLabels: Record<string, string> = { "4k": "4K", "1080p": "1080P", "720p": "720P", sd: "SD" };
     const resolutions = result.facets.resolutions.map((facet) => ({ id: facet.id, label: resolutionLabels[facet.id] ?? facet.id, count: facet.count }));
+    const mediaScanRoots = result.facets.mediaScanRoots.map((facet) => ({ id: facet.id, label: directoryLabel(facet.id), count: facet.count }));
 
     return {
       result,
-      requestedPage,
       cards: buildDesktopWorkCards(result.items, peopleResult.items, organizations, assets, metadataLanguage, preferences),
       people,
       directors,
@@ -213,99 +190,26 @@ export function DesktopWorkExplorer({
       workTypes,
       years,
       resolutions,
+      mediaScanRoots,
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view, waterfallPage]);
-
-  // 每批瀑布流结果完成后按作品 ID 追加。去重既能防住异步刷新，也允许未来
-  // Repository 在扫描期间总数发生变化，而不会让同一张卡片重复出现。
-  useEffect(() => {
-    if (view !== "waterfall" || !data.value || data.value.requestedPage !== waterfallPage) return;
-    setWaterfallCards((current) => data.value!.requestedPage === 1
-      ? data.value!.cards
-      : [...new Map([...current, ...data.value!.cards].map((card) => [card.work.id, card])).values()]);
-    setWaterfallRequestPending(false);
-  }, [data.value, view, waterfallPage]);
-
-  // 页码和筛选是“从详情返回后继续浏览”的导航上下文。使用 sessionStorage，
-  // 让它只在当前应用会话内生效；关闭应用后仍从干净的第一页开始。
-  useEffect(() => {
-    writeExplorerNavigationState(stateStorageKey, { query, page });
-  }, [page, query, stateStorageKey]);
-
-  // 资料库切换或筛选变化后，总页数可能缩小。共享 queryWorks 会返回已经夹紧的
-  // 实际页码，这里把组件 state 同步过去，避免 UI 继续拿“第 7 页”逐页往前翻。
-  useEffect(() => {
-    if (view === "waterfall") return;
-    const completed = data.value;
-    // requestedPage 必须仍等于当前 state；否则这是上一轮请求留下的旧结果。
-    if (completed && completed.requestedPage === page && completed.result.page !== page) {
-      setPage(completed.result.page);
-    }
-  }, [data.value, page, view]);
-
-  // 详情页返回时等待作品 DOM 恢复高度，再回到进入详情前的位置。该值只消费一次，
-  // 后续筛选刷新不会反复拉动滚动条。
-  useEffect(() => {
-    if (!data.value || pendingScrollY.current === undefined) return;
-    const scrollY = pendingScrollY.current;
-    const visibleCards = view === "waterfall" ? waterfallCards : data.value.cards;
-    const maxScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-
-    // 返回到瀑布流深处时，第一批卡片可能还不足以撑到原位置。先继续请求下一批，
-    // 等页面高度足够后再恢复滚动，避免浏览器把目标位置夹到当前页面底部。
-    if (view === "waterfall" && scrollY > maxScrollY + 24 && visibleCards.length < data.value.result.total) {
-      requestNextWaterfallPage();
-      return;
-    }
-    pendingScrollY.current = undefined;
-    clearExplorerReturnPosition(stateStorageKey);
-    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
-    return () => window.cancelAnimationFrame(frame);
-  }, [data.value, stateStorageKey, view, waterfallCards]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision]);
 
   function changeQuery(next: WorkQuery): void {
     setPage(1);
-    setWaterfallPage(1);
-    setWaterfallCards([]);
-    setWaterfallRequestPending(false);
     setQuery(next);
   }
 
   function changeView(next: DesktopWorkViewMode): void {
-    if (next === "waterfall" && view !== "waterfall") {
-      setWaterfallPage(1);
-      setWaterfallCards([]);
-      setWaterfallRequestPending(false);
-    }
     setView(next);
     window.localStorage.setItem(storageKey, next);
-  }
-
-  function requestNextWaterfallPage(): void {
-    if (waterfallRequestPending || data.refreshing) return;
-    setWaterfallRequestPending(true);
-    setWaterfallPage((current) => current + 1);
-  }
-
-  function changeWaterfallSize(next: DesktopWaterfallSize): void {
-    setWaterfallSize(next);
-    window.localStorage.setItem(`${storageKey}.waterfall-size`, next);
-  }
-
-  function openWork(workId: string): void {
-    // 在卸载 Explorer、进入详情页之前同步记录滚动位置；sessionStorage 是同步 API，
-    // 因此不会发生导航已经完成而位置尚未来得及保存的竞态。
-    writeExplorerNavigationState(stateStorageKey, { query, page, scrollY: window.scrollY });
-    onOpen(workId);
   }
 
   if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取作品。")}</ExplorerState>;
 
-  const { result } = data.value;
-  const cards = view === "waterfall" ? waterfallCards : data.value.cards;
+  const { result, cards } = data.value;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
 
   return (
@@ -315,8 +219,6 @@ export function DesktopWorkExplorer({
         onChange={changeQuery}
         view={view}
         onViewChange={changeView}
-        waterfallSize={waterfallSize}
-        onWaterfallSizeChange={changeWaterfallSize}
         fixedPersonId={fixedPersonId}
         data={data.value}
       />
@@ -325,26 +227,17 @@ export function DesktopWorkExplorer({
         <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
-            {view === "waterfall"
-              ? t("已显示 {shown} / {count} 项作品", { shown: cards.length, count: result.total })
-              : t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
+            {t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
-        <DesktopWorkResults cards={cards} view={view} waterfallSize={waterfallSize} onOpen={openWork} />
-        {view === "waterfall" && cards.length ? (
-          <DesktopInfiniteScrollSentinel
-            hasMore={cards.length < result.total}
-            loading={waterfallRequestPending || data.refreshing}
-            onLoadMore={requestNextWaterfallPage}
-          />
-        ) : null}
+        <DesktopWorkResults cards={cards} view={view} onOpen={onOpen} />
         {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
-        {view !== "waterfall" && result.total > pageSize ? (
+        {result.total > pageSize ? (
           <div className="desktop-pagination" aria-label={t("分页")}>
-            <button disabled={result.page <= 1} onClick={() => setPage(Math.max(1, result.page - 1))}>← {t("上一页")}</button>
-            <span>{result.page} / {pageCount}</span>
-            <button disabled={result.page >= pageCount} onClick={() => setPage(Math.min(pageCount, result.page + 1))}>{t("下一页")} →</button>
+            <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
+            <span>{page} / {pageCount}</span>
+            <button disabled={page >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
           </div>
         ) : null}
       </section>
@@ -357,8 +250,6 @@ function WorkFacetPanel({
   onChange,
   view,
   onViewChange,
-  waterfallSize,
-  onWaterfallSizeChange,
   fixedPersonId,
   data,
 }: {
@@ -366,8 +257,6 @@ function WorkFacetPanel({
   onChange: (query: WorkQuery) => void;
   view: DesktopWorkViewMode;
   onViewChange: (view: DesktopWorkViewMode) => void;
-  waterfallSize: DesktopWaterfallSize;
-  onWaterfallSizeChange: (size: DesktopWaterfallSize) => void;
   fixedPersonId?: string;
   data: ExplorerData;
 }) {
@@ -443,17 +332,6 @@ function WorkFacetPanel({
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
 
-        {view === "waterfall" ? (
-          <label className="field desktop-waterfall-size">
-            <span>{t("图片大小")}</span>
-            <select value={waterfallSize} onChange={(event) => onWaterfallSizeChange(event.target.value as DesktopWaterfallSize)}>
-              <option value="small">{t("小")}</option>
-              <option value="medium">{t("中")}</option>
-              <option value="large">{t("大")}</option>
-            </select>
-          </label>
-        ) : null}
-
         <button type="button" className="ghost-button desktop-facet-clear" onClick={() => onChange({ sort: "release_desc" })}>
           {t("清除")}
         </button>
@@ -481,6 +359,7 @@ function WorkFacetPanel({
             <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
             <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
             <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
+            <FilterGroup label={t("内容目录")} values={query.mediaScanRoots} options={data.mediaScanRoots} onChange={(values) => patch({ mediaScanRoots: values.length ? values : undefined })} />
             <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
             <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
             <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
@@ -515,6 +394,7 @@ function DesktopWorkFilterChips({
     tagIds: toOptionMap(data.tags),
     releaseYears: toOptionMap(data.years),
     resolutionTiers: toOptionMap(data.resolutions),
+    mediaScanRoots: toOptionMap(data.mediaScanRoots),
   }), [data]);
 
   const chips: Array<{ key: keyof WorkQuery; value?: string; label: string }> = [];
@@ -529,6 +409,7 @@ function DesktopWorkFilterChips({
   pushArrayChips(chips, "tagIds", t("标签"), query.tagIds, maps.tagIds);
   pushArrayChips(chips, "releaseYears", t("年份"), query.releaseYears, maps.releaseYears);
   pushArrayChips(chips, "resolutionTiers", t("清晰度"), query.resolutionTiers, maps.resolutionTiers);
+  pushArrayChips(chips, "mediaScanRoots", t("内容目录"), query.mediaScanRoots, maps.mediaScanRoots);
   if (query.releaseFrom) chips.push({ key: "releaseFrom", label: `${t("发行日期")} ≥ ${query.releaseFrom}` });
   if (query.releaseTo) chips.push({ key: "releaseTo", label: `${t("发行日期")} ≤ ${query.releaseTo}` });
   if (query.durationMin !== undefined) chips.push({ key: "durationMin", label: `${t("时长")} ≥ ${query.durationMin}` });
@@ -632,46 +513,9 @@ function friendlyId(value: string): string {
   return value.replace(/^work[-_]?type[-_:]?/i, "").replace(/[-_]/g, " ") || value;
 }
 
-interface ExplorerNavigationState {
-  query: WorkQuery;
-  page: number;
-  scrollY?: number;
-}
-
-/** 本机状态可能来自旧版本或手工修改，读取失败时安全回到默认浏览状态。 */
-function readExplorerNavigationState(key: string): ExplorerNavigationState | undefined {
-  try {
-    const parsed = JSON.parse(window.sessionStorage.getItem(key) ?? "null") as Partial<ExplorerNavigationState> | null;
-    if (!parsed || typeof parsed !== "object") return undefined;
-    return {
-      query: parsed.query && typeof parsed.query === "object" ? parsed.query : {},
-      page: typeof parsed.page === "number" && Number.isInteger(parsed.page) && parsed.page > 0 ? parsed.page : 1,
-      ...(typeof parsed.scrollY === "number" && Number.isFinite(parsed.scrollY) && parsed.scrollY >= 0
-        ? { scrollY: parsed.scrollY }
-        : {}),
-    };
-  } catch {
-    return undefined;
-  }
-}
-
-function writeExplorerNavigationState(
-  key: string,
-  state: Omit<ExplorerNavigationState, "scrollY"> & { scrollY?: number },
-): void {
-  const previous = readExplorerNavigationState(key);
-  window.sessionStorage.setItem(key, JSON.stringify({
-    query: state.query,
-    page: state.page,
-    // 普通筛选更新时保留尚未消费的返回位置；打开作品时传入新位置覆盖它。
-    ...(state.scrollY !== undefined ? { scrollY: state.scrollY } : previous?.scrollY !== undefined ? { scrollY: previous.scrollY } : {}),
-  }));
-}
-
-function clearExplorerReturnPosition(key: string): void {
-  const current = readExplorerNavigationState(key);
-  if (!current) return;
-  window.sessionStorage.setItem(key, JSON.stringify({ query: current.query, page: current.page }));
+function directoryLabel(value: string): string {
+  const normalized = value.replace(/[\\/]+$/, "");
+  return normalized.split(/[\\/]/).at(-1) || value;
 }
 
 function toOptionMap(options: FilterOption[]): Map<string, string> {
@@ -710,7 +554,7 @@ function removeChip(query: WorkQuery, key: keyof WorkQuery, value?: string): Wor
  */
 function countAdvancedFilters(query: WorkQuery): number {
   const arrayKeys: Array<keyof WorkQuery> = [
-    "personIds", "directorIds", "releaseYears", "resolutionTiers",
+    "personIds", "directorIds", "releaseYears", "resolutionTiers", "mediaScanRoots",
     "workTypeIds", "makerIds", "labelIds", "seriesIds", "genreIds", "tagIds",
   ];
   let count = 0;
