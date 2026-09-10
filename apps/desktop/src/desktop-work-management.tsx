@@ -284,8 +284,8 @@ export function WorkEditor({
       <label>{t("时长（分钟）")}<input type="number" min="1" value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
       <label>{t("厂商")}<select value={makerId} onChange={(event) => setMakerId(event.target.value)}><option value="">{t("未设置")}</option>{makers.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
       <label>{t("厂牌")}<select value={labelId} onChange={(event) => setLabelId(event.target.value)}><option value="">{t("未设置")}</option>{labels.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
-      <ChoicePicker label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
-      <ChoicePicker label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage) }))} />
+      <ChoicePicker label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage), searchNames: item.names.map((name) => name.value) }))} />
+      <ChoicePicker label={t("导演")} values={directorIds} onChange={setDirectorIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage), searchNames: item.names.map((name) => name.value) }))} />
       <ChoicePicker label={t("作品类型")} values={workTypeIds} onChange={setWorkTypeIds} options={WORK_TYPE_DEFINITIONS.map((item) => ({ id: item.id, label: localizeText(item.names, metadataLanguage, item.id) }))} />
       <ChoicePicker label={t("系列")} values={seriesIds} onChange={setSeriesIds} options={seriesOptions} />
       <ChoicePicker label={t("题材")} values={genreIds} onChange={setGenreIds} options={genreOptions} />
@@ -301,12 +301,14 @@ export function WorkEditor({
   </section>;
 }
 
-function ChoicePicker({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string }>; values: string[]; onChange: (values: string[]) => void }) {
+function ChoicePicker({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string; searchNames?: string[] }>; values: string[]; onChange: (values: string[]) => void }) {
   const { t } = useDesktopI18n();
   const [search, setSearch] = useState("");
   const optionById = new Map(options.map((option) => [option.id, option]));
+  // 搜索命中别名不改变显示主名，也不创建或合并人物；选中结果仍使用稳定 ID。
+  const keyword = search.normalize("NFKC").trim().toLocaleLowerCase();
   const available = options
-    .filter((option) => !values.includes(option.id) && option.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))
+    .filter((option) => !values.includes(option.id) && [option.label, ...(option.searchNames ?? [])].some((name) => name.normalize("NFKC").toLocaleLowerCase().includes(keyword)))
     .slice(0, 40);
   return <fieldset className="choice-picker">
     <legend>{label}</legend>
