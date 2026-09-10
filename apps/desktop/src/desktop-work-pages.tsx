@@ -22,6 +22,8 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { UiButton } from "./ui/button";
+import { UiEmptyState } from "./ui/feedback";
 
 // Adapter 没有 React 状态，可以在模块级复用；每次渲染重新 new 只会制造无意义对象。
 const fileOpener = new TauriFileOpenerAdapter();
@@ -110,8 +112,10 @@ export function DesktopWorkDetailPage({
     };
   }, [repository, id], toMessage);
 
-  if (data.loading) return <PageState>{t("正在读取资料库…")}</PageState>;
-  if (data.error || !data.value) return <PageState error>{data.value === null ? t("作品不存在。") : data.error}</PageState>;
+  // 读取中、失效链接和 I/O 失败也必须保留返回入口，不能把用户困在空页面。
+  const backAction = <UiButton variant="ghost" onClick={onBack}>{t("返回上一页")}</UiButton>;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} action={backAction} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("作品不存在。") : t("无法读取资料库。")} description={data.error} action={backAction} />;
   const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation, recycledAsset } = data.value;
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -256,10 +260,6 @@ function DensePersonLinks({ relations, people, language, onOpen }: { relations: 
     const label = person ? getPreferredPersonName(person, language) : relation.personId;
     return <button key={`${relation.role}:${relation.personId}`} onClick={() => onOpen(relation.personId)} type="button">{label}</button>;
   })}</span>;
-}
-
-function PageState({ children, error = false }: { children: ReactNode; error?: boolean }) {
-  return <div className={error ? "empty-state error-state" : "empty-state"}>{children}</div>;
 }
 
 function toMessage(error: unknown): string {

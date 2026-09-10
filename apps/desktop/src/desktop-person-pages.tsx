@@ -11,6 +11,9 @@ import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { UiButton } from "./ui/button";
+import { UiEmptyState } from "./ui/feedback";
+import { personActivityStatusLabel } from "./desktop-person-labels";
 
 /** 人物库入口与人物详情分离，筛选语义继续由共享 PersonQuery 实现。 */
 export function DesktopPeoplePage({
@@ -79,8 +82,9 @@ export function DesktopPersonDetailPage({
     };
   }, [repository, id], toMessage);
 
-  if (data.loading) return <PageState>{t("正在读取资料库…")}</PageState>;
-  if (data.error || !data.value) return <PageState error>{data.value === null ? t("人物不存在。") : data.error}</PageState>;
+  const backAction = <UiButton variant="ghost" onClick={onBack}>{t("返回上一页")}</UiButton>;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} action={backAction} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("人物不存在。") : t("无法读取资料库。")} description={data.error} action={backAction} />;
   const { person, workCount, portrait, presentationPreference, presentation, personAssets } = data.value;
   const displayName = getPreferredPersonName(person, metadataLanguage);
 
@@ -92,7 +96,7 @@ export function DesktopPersonDetailPage({
           <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />
         </div>
         <div className="desktop-person-detail-copy">
-          <span className="status-chip">{person.activityStatus}</span>
+          <span className="status-chip">{personActivityStatusLabel(person.activityStatus, t)}</span>
           <h1>{displayName}</h1>
           <p>{localizeText(person.biographies, metadataLanguage, t("暂无人物简介"))}</p>
         </div>
@@ -121,11 +125,6 @@ export function DesktopPersonDetailPage({
   );
 }
 
-function PageState({ children, error = false }: { children: ReactNode; error?: boolean }) {
-  return <div className={error ? "empty-state error-state" : "empty-state"}>{children}</div>;
-}
-
 function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error ?? "Unknown error");
 }
-import type { ReactNode } from "react";

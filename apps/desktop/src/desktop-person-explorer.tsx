@@ -11,6 +11,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { resolvePersonPresentation } from "./desktop-presentation";
+import { personActivityStatusLabel } from "./desktop-person-labels";
 
 const PAGE_SIZE = 24;
 
@@ -179,17 +180,6 @@ function PersonFilterPanel({
 function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {
   const { t } = useDesktopI18n();
   return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{getOptionLabel ? getOptionLabel(option) : option}</option>)}</select></label>;
-}
-
-function personActivityStatusLabel(value: string, t: (source: string) => string): string {
-  switch (value) {
-    case "active": return t("活动中");
-    case "retired": return t("已引退");
-    case "hiatus": return t("暂停活动");
-    case "inactive": return t("不活跃");
-    case "unknown": return t("未知");
-    default: return value;
-  }
 }
 
 function buildPortraitMap(assets: Asset[], people: Person[], preferences: PresentationPreference[]): Map<string, Asset> {
