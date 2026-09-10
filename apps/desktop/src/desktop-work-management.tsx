@@ -102,19 +102,28 @@ export function CreateWorkPanel({
   </section>;
 }
 
-export function WorkEditor({
-  repository,
-  work,
-  onSaved,
-  onDeleted,
-  setMessage,
-}: {
+interface WorkEditorProps {
   repository: TauriLibraryRepository;
   work: Work;
   onSaved: () => void;
   onDeleted: () => void;
   setMessage: (message: string) => void;
-}) {
+}
+
+/** 取消意味着丢弃未保存草稿。重新挂载编辑会话同时清理关系选择和暂存 Tag，且不写磁盘。 */
+export function WorkEditor(props: WorkEditorProps) {
+  const [session, setSession] = useState(0);
+  return <WorkEditorSession key={session} {...props} onCancel={() => setSession((value) => value + 1)} />;
+}
+
+function WorkEditorSession({
+  repository,
+  work,
+  onSaved,
+  onDeleted,
+  setMessage,
+  onCancel,
+}: WorkEditorProps & { onCancel: () => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -296,7 +305,7 @@ export function WorkEditor({
           <button disabled={!customTagName.trim()} onClick={addCustomTag} type="button">{t("创建并选中")}</button>
         </div>
       </div>
-      <div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
+      <div className="span-2 form-actions"><button disabled={busy} onClick={onCancel}>{t("取消")}</button><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
     </div> : null}
   </section>;
 }
