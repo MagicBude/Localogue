@@ -24,10 +24,11 @@ export function DesktopWorkMediaSection({ media, onPlay, onReveal }: DesktopWork
       <small className="muted">{t("{count} 个文件", { count: media.length })}</small>
     </div>
     {media.length ? <div className="desktop-work-media-list">
-      {media.map((file) => <article className="desktop-work-media-row" key={file.id}>
+      {[...media].sort(compareMediaOrder).map((file) => <article className="desktop-work-media-row" key={file.id}>
         <div>
           <strong>{file.fileName}</strong>
           <span>{mediaSummary(file)}</span>
+          {file.recognition?.reasons.length ? <small className="warning-text">{file.recognition.reasons.join("；")}</small> : null}
           <code>{file.path}</code>
         </div>
         <div className="row-actions">
@@ -39,8 +40,18 @@ export function DesktopWorkMediaSection({ media, onPlay, onReveal }: DesktopWork
   </section>;
 }
 
+function compareMediaOrder(a: MediaFile, b: MediaFile): number {
+  const editionA = a.recognition?.editionTags.join("+") ?? "";
+  const editionB = b.recognition?.editionTags.join("+") ?? "";
+  return editionA.localeCompare(editionB, "en")
+    || (a.recognition?.part?.index ?? 0) - (b.recognition?.part?.index ?? 0)
+    || a.fileName.localeCompare(b.fileName, "en", { numeric: true });
+}
+
 /** 技术摘要只帮助区分多版本文件；真实可播放性仍交给操作系统的默认播放器判断。 */
 function mediaSummary(file: MediaFile): string {
   const resolution = file.width && file.height ? `${file.width}×${file.height}` : undefined;
-  return [resolution, file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ") || "—";
+  const part = file.recognition?.part ? `CD${file.recognition.part.index}` : undefined;
+  const editions = file.recognition?.editionTags.map((item) => item.toUpperCase()).join(" + ");
+  return [part, editions, resolution, file.container, file.videoCodec, file.audioCodec].filter(Boolean).join(" · ") || "—";
 }

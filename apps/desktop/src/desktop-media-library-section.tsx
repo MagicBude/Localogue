@@ -44,7 +44,7 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
           <tbody>{media.map((file) => {
             const work = file.workId ? works.get(file.workId) : undefined;
             return <tr key={file.id}>
-              <td><strong>{file.fileName}</strong><small className="path-text">{file.path}</small></td>
+              <td><strong>{file.fileName}</strong>{recognitionSummary(file, t)}<small className="path-text">{file.path}</small></td>
               <td>{work ? <><strong>{work.code}</strong><small>{localizeText(work.titles, metadataLanguage)}</small></> : <span className="status-chip warn">{t("未绑定")}</span>}</td>
               <td>{formatBytes(file.fileSize ?? 0)}</td>
               <td>{mediaSummary(file, t)}</td>
@@ -59,6 +59,24 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
       </div> : <UiEmptyState title={t("尚未扫描到本地媒体。")} />}
     </section>
   );
+}
+
+function recognitionSummary(file: MediaFile, t: (source: string) => string): ReactNode {
+  const recognition = file.recognition;
+  if (!recognition) return null;
+  const details = [
+    recognition.part ? `CD${recognition.part.index}` : null,
+    ...recognition.editionTags.map((tag) => tag === "subtitled" ? t("中文字幕") : tag === "uncensored" ? t("无码版本") : tag.toUpperCase()),
+    recognition.role !== "main" ? recognition.role : null,
+  ].filter(Boolean).join(" · ");
+  const label = recognition.status === "identity_conflict"
+    ? t("番号冲突")
+    : recognition.status === "unrecognized"
+      ? t("未识别")
+      : recognition.status === "needs_review"
+        ? t("待确认")
+        : details || t("已识别");
+  return <small title={recognition.reasons.join("；")}><span className={`status-chip ${recognition.status === "recognized" ? "" : "warn"}`}>{label}</span>{details && label !== details ? ` ${details}` : null}</small>;
 }
 
 function mediaSummary(file: MediaFile, t: (source: string) => string): ReactNode {

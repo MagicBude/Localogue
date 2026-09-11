@@ -214,6 +214,18 @@ function validateMediaFiles() {
     if (media.analysisStale !== undefined && typeof media.analysisStale !== "boolean") {
       errors.push(`${prefix}: analysisStale 必须是 boolean`);
     }
+    if (media.recognition !== undefined) {
+      const recognition = media.recognition;
+      if (!recognition || typeof recognition !== "object" || Array.isArray(recognition)) {
+        errors.push(`${prefix}: recognition 必须是对象`);
+      } else {
+        if (!["main", "trailer", "sample", "extra", "unknown"].includes(recognition.role)) errors.push(`${prefix}: recognition.role 非法`);
+        if (!["recognized", "needs_review", "identity_conflict", "unrecognized"].includes(recognition.status)) errors.push(`${prefix}: recognition.status 非法`);
+        if (!Array.isArray(recognition.editionTags) || recognition.editionTags.some((item) => typeof item !== "string")) errors.push(`${prefix}: recognition.editionTags 必须是字符串数组`);
+        if (!Array.isArray(recognition.reasons) || recognition.reasons.some((item) => typeof item !== "string")) errors.push(`${prefix}: recognition.reasons 必须是字符串数组`);
+        if (recognition.part && (!Number.isInteger(recognition.part.index) || recognition.part.index < 1 || !["explicit", "contextual"].includes(recognition.part.kind))) errors.push(`${prefix}: recognition.part 非法`);
+      }
+    }
     if (media.sidecars !== undefined) {
       if (!media.sidecars || typeof media.sidecars !== "object" || Array.isArray(media.sidecars)) {
         errors.push(`${prefix}: sidecars 必须是对象`);

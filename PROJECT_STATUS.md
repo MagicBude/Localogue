@@ -355,6 +355,14 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - V1-16 当时仅允许删除 Private `media-files`；V1-17 已扩展为受引用保护的 Work / Person / Asset / MediaFile 删除。
 - `findWorkByCode` 兼容带 / 不带连字符番号。
 
+### V1-28 Explainable Media Recognition
+
+- MediaFile 新增可重算 `recognition` 快照；
+- 支持普通单文件、CD/Part 1/2/10、常见版本与辅助媒体线索；
+- Unified Sync 比较文件名和同 stem NFO 番号，冲突停止自动绑定；
+- 损坏 NFO 继续由 NFO Preview 报错，未知视频继续作为未识别 MediaFile 保留；
+- 新增匿名字符串验收脚本，不读取用户真实资料。
+
 ## 下一阶段建议
 
 **下一阶段建议：Community Catalog Coverage Round 2 + Works 多维筛选规划。**

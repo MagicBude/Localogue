@@ -774,6 +774,12 @@ export const desktopTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Re
 
 export const desktopSupplementalTranslations: Record<Exclude<SupportedLanguage, "zh-CN">, Record<string, string>> = {
   ja: {
+    "中文字幕": "中国語字幕",
+    "无码版本": "無修正版",
+    "番号冲突": "品番競合",
+    "未识别": "未識別",
+    "待确认": "要確認",
+    "已识别": "識別済み",
     "当前资料库": "現在のライブラリ",
     "未绑定配置": "プロファイル未選択",
     "快速切换资料库": "ライブラリをすばやく切り替え",
@@ -1237,6 +1243,12 @@ export const desktopSupplementalTranslations: Record<Exclude<SupportedLanguage, 
     "请先在设置页选择 Private Library。": "設定ページで Private Library を選択してください。",
   },
   en: {
+    "中文字幕": "Chinese subtitles",
+    "无码版本": "Uncensored edition",
+    "番号冲突": "Code conflict",
+    "未识别": "Unrecognized",
+    "待确认": "Needs review",
+    "已识别": "Recognized",
     "当前资料库": "Current Library",
     "未绑定配置": "No profile selected",
     "快速切换资料库": "Quick switch library",

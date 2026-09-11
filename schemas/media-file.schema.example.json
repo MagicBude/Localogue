@@ -17,6 +17,14 @@
   "matchMethod": "code",
   "fileModifiedAt": "2026-09-02T00:00:00.000Z",
   "analysisStale": false,
+  "recognition": {
+    "filenameCode": "ABC-123",
+    "role": "main",
+    "part": { "index": 1, "token": "CD1", "kind": "explicit" },
+    "editionTags": ["subtitled", "4k"],
+    "status": "needs_review",
+    "reasons": ["检测到版本线索，需要按版本检查媒体"]
+  },
   "sidecars": {
     "nfoPaths": ["D:\\Media\\ABC-123.nfo"],
     "posterPaths": ["D:\\Media\\ABC-123-poster.jpg"],

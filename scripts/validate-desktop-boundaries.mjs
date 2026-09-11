@@ -660,7 +660,7 @@ if (!errors.length) {
   if (/影视库|成人库/.test(desktopApp + libraryProfiles)) {
     errors.push("V1-24 Desktop 不允许把具体内容分类名称硬编码为默认 Library Profile。 ");
   }
-  if (!mediaCoordinator.includes("waitForCompletion") || !desktopMediaPage.includes("startScan({ waitForCompletion: true })")) {
+  if (!mediaCoordinator.includes("waitForCompletion") || !/startScan\(\{[^}]*waitForCompletion:\s*true/.test(desktopMediaPage)) {
     errors.push("V1-24 一键同步必须等待完整 MediaScanCoordinator 结束，不能在多媒体根目录尚未全部扫描时提前返回。");
   }
   if (!desktopMediaSurface.includes("本轮实际扫描的 {count} 个目录") || !desktopMediaSurface.includes("scan.result.roots")) {

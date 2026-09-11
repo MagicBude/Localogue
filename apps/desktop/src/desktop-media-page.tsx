@@ -158,7 +158,7 @@ export function DesktopMediaPage({
     }
   }
 
-  async function startScan(options: { waitForCompletion?: boolean; roots?: string[] } = {}): Promise<MediaScanJobSnapshot | null> {
+  async function startScan(options: { waitForCompletion?: boolean; roots?: string[]; nfoIdentityHints?: Array<{ path: string; code: string }> } = {}): Promise<MediaScanJobSnapshot | null> {
     if (!settings.libraryPath) {
       setMessage(t("请先在设置页选择 Private Library。Shared Pack 不能保存 MediaFile。"));
       return null;
@@ -188,6 +188,7 @@ export function DesktopMediaPage({
         pruneMissing: true,
         // Unified Root 按文件扩展名分流：任何子目录中的视频都会被发现；图片由 Local Asset Ingest 单独处理，避免图片文件占用媒体发现上限。
         observeImageSidecars: false,
+        ...(options.nfoIdentityHints?.length ? { nfoIdentityHints: options.nfoIdentityHints } : {}),
       });
       setScan(initial);
       setMessage(t("Desktop 增量媒体扫描已启动：将依次检查全部 {count} 个媒体根目录。", { count: requestedRoots.length }));
@@ -331,10 +332,12 @@ export function DesktopMediaPage({
     setMetadataBusy(true);
     setNfoResult(null);
     setAssetResult(null);
+    let nfoIdentityHints: Array<{ path: string; code: string }> = [];
     try {
       setMessage(t("统一资料库同步：正在发现 NFO 与本地图片…"));
       const discovery = await discoverDesktopMetadataFiles(syncNfoRoots, syncAssetRoots);
       const nfoPreviewNext = await previewNfoImport(syncNfoRoots, repository, discovery.nfoEntries);
+      nfoIdentityHints = buildNfoIdentityHints(nfoPreviewNext);
       setNfoPreview(nfoPreviewNext);
 
       let nfo: NfoImportResult | null = null;
@@ -364,8 +367,8 @@ export function DesktopMediaPage({
 
     setSyncStage("media");
     const media = onlyRoots
-      ? await startScan({ waitForCompletion: true, roots: syncMediaRoots })
-      : await startScan({ waitForCompletion: true });
+      ? await startScan({ waitForCompletion: true, roots: syncMediaRoots, nfoIdentityHints })
+      : await startScan({ waitForCompletion: true, nfoIdentityHints });
     if (media?.status === "completed") {
       setSyncStage("complete");
       setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
@@ -524,6 +527,10 @@ export function DesktopMediaPage({
 
     </div>
   );
+}
+
+function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string; code: string }> {
+  return preview.items.flatMap((item) => item.code ? [{ path: item.path, code: item.code }] : []);
 }
 
 /**

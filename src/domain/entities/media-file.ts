@@ -7,6 +7,16 @@ export interface MediaSidecarObservation {
   fanartPaths: string[];
 }
 
+export interface MediaRecognitionSnapshot {
+  filenameCode?: string;
+  nfoCode?: string;
+  role: "main" | "trailer" | "sample" | "extra" | "unknown";
+  part?: { index: number; token: string; kind: "explicit" | "contextual" };
+  editionTags: string[];
+  status: "recognized" | "needs_review" | "identity_conflict" | "unrecognized";
+  reasons: string[];
+}
+
 /**
  * MediaFile 表示“这台 Localogue 能访问到的本地媒体文件”。
  *
@@ -38,6 +48,8 @@ export interface MediaFile {
   analysisStale?: boolean;
   /** 本地同目录伴随文件观察，不会自动写入 Work / Person。 */
   sidecars?: MediaSidecarObservation;
+  /** 从文件名与可用 NFO 证据派生的识别快照；重扫时可以安全重算。 */
+  recognition?: MediaRecognitionSnapshot;
   analyzedAt?: string;
   createdAt?: string;
   updatedAt?: string;

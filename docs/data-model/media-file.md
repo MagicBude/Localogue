@@ -50,6 +50,18 @@ V1 可先只记录路径、存在状态、大小、可选的基础信息。Media
 
 MediaFile 只属于 Private Layer，Shared Pack 中的 `media-files/` 不参与读取。
 
+## V1-28 媒体身份识别快照
+
+`recognition` 保存从文件名与本轮已解析 NFO 得出的可重算观察：
+
+- `filenameCode / nfoCode`：分别保留两种证据，禁止互相覆盖；
+- `part.index`：识别 `CD1 / CD2 / CD10` 等显式分段并按数字排序；
+- `editionTags`：当前识别字幕、无码、4K、1080P 等版本线索；
+- `role`：区分正片、预告、试看和花絮；
+- `status / reasons`：说明已识别、待确认、身份冲突或未识别。
+
+这不是 Canonical Work 字段。同番号多个版本、多个分段继续是一个 Work 下的多个 MediaFile。版本线索会要求检查，不会自动移动或重命名文件；文件名与 NFO 番号冲突时停止自动绑定，人工绑定仍拥有最高优先级。
+
 ## V1-12 增量扫描字段
 
 新增：

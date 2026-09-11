@@ -4,6 +4,7 @@ import type { MediaFile, MediaSidecarObservation } from "@/domain/entities/media
 import type { MediaScanProgress, MediaScanResult } from "@/domain/entities/media-scan";
 import type { Work } from "@/domain/entities/work";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
+import { analyzeMediaIdentity } from "@/application/media/media-identity-analysis";
 
 const videoExtensions = new Set([
   ".mp4", ".mkv", ".avi", ".mov", ".wmv", ".m4v", ".ts", ".mts", ".m2ts", ".webm", ".flv",
@@ -24,6 +25,8 @@ export interface MediaScanOptions {
 export interface MediaScanRequest extends MediaScanOptions {
   roots: string[];
   ffprobeExecutable: string;
+  /** Unified Sync 已解析出的 NFO 身份提示；仅作证据比较，不直接写 Canonical。 */
+  nfoIdentityHints?: Array<{ path: string; code: string }>;
 }
 
 export interface MediaScanHooks {
@@ -138,6 +141,7 @@ export async function scanMediaLibrary(
   // 全部 Works，大资料库会把相同 CPU 工作重复数千次。
   const matchWorkByPath = createWorkCodeMatcher(works, platform);
   const existingById = new Map(existing.map((item) => [item.id, item]));
+  const nfoHintsByStem = buildNfoHintsByStem(request.nfoIdentityHints ?? [], platform);
   const scannedIds = new Set<string>();
   const pendingWrites: Array<{ media: MediaFile; isNew: boolean }> = [];
   let matched = 0;
@@ -146,6 +150,7 @@ export async function scanMediaLibrary(
   let probed = 0;
   let hashed = 0;
   let sidecarUpdated = 0;
+  let identityConflicts = 0;
   let ffprobeUnavailable = false;
 
   emit(hooks, {
@@ -167,8 +172,18 @@ export async function scanMediaLibrary(
       || previous.fileModifiedAt !== entry.modifiedAt;
     const sidecars = observeSidecars(entry, sidecarIndex, platform);
     const sidecarChanged = !sameSidecars(previous?.sidecars, sidecars);
+    const recognition = analyzeMediaIdentity({
+      fileName: entry.name,
+      nfoCode: findNfoHint(entry, nfoHintsByStem, platform),
+    });
+    if (recognition.status === "identity_conflict") {
+      identityConflicts += 1;
+      if (identityConflicts <= 20) warnings.push(`${entry.name}: ${recognition.reasons.join("；")}`);
+    }
+    const recognitionChanged = JSON.stringify(previous?.recognition) !== JSON.stringify(recognition);
 
-    const codeMatch = matchWorkByPath(entry.path);
+    // 身份冲突时宁可保留未绑定状态，也不能静默选择文件名或 NFO 的其中一个。
+    const codeMatch = recognition.status === "identity_conflict" ? undefined : matchWorkByPath(entry.path);
     const binding = resolveBinding(previous, codeMatch);
     if (binding.workId) matched += 1;
     else unmatched += 1;
@@ -211,7 +226,7 @@ export async function scanMediaLibrary(
     }
 
     const technicalStateChanged = videoChanged || probeSucceeded || needsHash;
-    const needsSave = !previous || bindingChanged || sidecarChanged || technicalStateChanged;
+    const needsSave = !previous || bindingChanged || sidecarChanged || recognitionChanged || technicalStateChanged;
     if (!needsSave) {
       unchanged += 1;
       emit(hooks, {
@@ -243,6 +258,7 @@ export async function scanMediaLibrary(
       ...(sha256 ? { sha256 } : {}),
       ...(analysisStale ? { analysisStale: true } : {}),
       ...(hasSidecars(sidecars) ? { sidecars } : {}),
+      recognition,
       ...(probeSucceeded ? { analyzedAt: now } : previous?.analyzedAt ? { analyzedAt: previous.analyzedAt } : {}),
       createdAt: previous?.createdAt ?? now,
       updatedAt: now,
@@ -322,6 +338,7 @@ export async function scanMediaLibrary(
     sidecarUpdated,
     warnings,
   };
+  if (identityConflicts > 20) warnings.push(`另有 ${identityConflicts - 20} 个媒体存在番号冲突；请在本地资料列表中检查。`);
   emit(hooks, {
     phase: "completed",
     current: processedVideos.length,
@@ -461,6 +478,38 @@ function createWorkCodeMatcher(works: readonly Work[], platform: PlatformService
 
 function compactCode(value: string): string {
   return value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function buildNfoHintsByStem(
+  hints: ReadonlyArray<{ path: string; code: string }>,
+  platform: PlatformServices,
+): Map<string, string[]> {
+  const result = new Map<string, string[]>();
+  for (const hint of hints) {
+    const stem = metadataStem(platform.fileSystem.basename(hint.path, platform.fileSystem.extname(hint.path)));
+    const values = result.get(stem) ?? [];
+    if (!values.includes(hint.code)) values.push(hint.code);
+    result.set(stem, values);
+  }
+  return result;
+}
+
+function findNfoHint(
+  entry: PlatformFileEntry,
+  hintsByStem: ReadonlyMap<string, string[]>,
+  platform: PlatformServices,
+): string | undefined {
+  const stem = metadataStem(platform.fileSystem.basename(entry.path, entry.extension));
+  const values = hintsByStem.get(stem) ?? [];
+  // 一个 stem 对应多个 NFO 番号本身也是歧义，不能任选其一制造确定性。
+  return values.length === 1 ? values[0] : undefined;
+}
+
+function metadataStem(value: string): string {
+  return value.normalize("NFKC").toLowerCase()
+    .replace(/(?:[-_.\s])(fanart|background|backdrop|poster|cover|thumb|thumbnail|screenshot)(?:[-_.\s]?\d+)?$/u, "")
+    .replace(/(?:[-_.\s])(part|cd|disc|disk|dvd|pt)[-_.\s]?\d+$/u, "")
+    .replace(/[\s._-]+/g, "");
 }
 
 function normalizeStem(value: string): string {
