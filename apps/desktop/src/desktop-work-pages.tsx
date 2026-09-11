@@ -51,12 +51,13 @@ export function DesktopWorksPage({
   const { t } = useDesktopI18n();
   return (
     <div className="page-stack">
-      <section className="page-title">
-        <span className="eyebrow">CANONICAL WORKS · FACETED SEARCH · PRESENTATION PARITY</span>
-        <h1>{t("作品库")}</h1>
-        <p>{t("对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。")}</p>
-      </section>
-      <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
+      <div className="desktop-page-heading-row">
+        <section className="page-title">
+          <h1>{t("作品库")}</h1>
+          <p>{t("浏览、筛选和整理全部作品。")}</p>
+        </section>
+        <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
+      </div>
       <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} onStateChange={onExplorerStateChange} />
     </div>
   );

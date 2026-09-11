@@ -83,17 +83,25 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .danger-button { color: #a13b32; background: #fff9f8; }
 .back-button { width: max-content; background: transparent; }
 .status-line { margin: 18px 0; border: 1px solid var(--border); background: rgba(255,255,255,.72); border-radius: 12px; padding: 10px 13px; color: #66665f; font-size: 12px; }
-.page-stack { display: grid; gap: 20px; }
+.page-stack { display: grid; gap: 14px; }
 .eyebrow { font-size: 10px; letter-spacing: .16em; font-weight: 850; opacity: .53; }
 .muted { color: var(--muted); }
-.page-title, .hero-panel { padding: 17px 2px 5px; }
-.page-title h1 { margin: 4px 0 5px; font-size: 28px; line-height: 1.15; letter-spacing: -.025em; }
-.page-title p, .hero-panel p { color: var(--muted); max-width: 850px; margin-bottom: 0; font-size: 12px; line-height: 1.55; }
-.desktop-hero { margin-top: 2px; padding: 34px; border-radius: 24px; background: #1a1a18; color: white; overflow: hidden; position: relative; }
-.desktop-hero::after { content: "L"; position: absolute; right: 28px; top: -42px; font-size: 210px; line-height: 1; font-weight: 900; opacity: .045; }
-.desktop-hero h1 { max-width: 820px; margin: 10px 0 16px; }
+.page-title, .hero-panel { padding: 8px 2px 2px; }
+.page-title > .eyebrow { display: none; }
+.page-title h1 { margin: 0 0 3px; font-size: 22px; line-height: 1.18; letter-spacing: -.02em; }
+.page-title p, .hero-panel p { color: var(--muted); max-width: 920px; margin-bottom: 0; font-size: 11px; line-height: 1.45; }
+.desktop-page-heading-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+.desktop-page-heading-row .page-title { min-width: 0; }
+.desktop-page-heading-row .desktop-create-work-trigger-row { flex: 0 0 auto; margin: 0 0 2px; }
+.desktop-hero { margin-top: 2px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 18px 22px; border-radius: 16px; background: #1a1a18; color: white; overflow: hidden; position: relative; }
+.desktop-hero::after { display: none; }
+.desktop-hero h1 { max-width: 820px; margin: 0 0 4px; font-size: 25px; line-height: 1.15; letter-spacing: -.025em; }
 .desktop-hero p { color: #b9b9b1; }
-.desktop-home-primary-actions { margin-top: 16px; position: relative; z-index: 1; }
+.desktop-home-primary-actions { flex: 0 0 auto; margin-top: 0; position: relative; z-index: 1; }
+@media (max-width: 1100px) {
+  .desktop-hero { flex-wrap: wrap; gap: 12px; }
+  .desktop-home-primary-actions { width: 100%; }
+}
 .section-title { display: flex; align-items: baseline; justify-content: space-between; padding-top: 10px; }
 .section-title h2 { margin: 0; }
 .section-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
@@ -1570,9 +1578,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
 
 /* V1-23 Governance Parity -------------------------------------------------- */
 .governance-page { gap: 18px; }
-.governance-title { padding: 4px 2px 8px; }
-.governance-title h1 { margin: 6px 0 8px; font-size: clamp(28px, 3vw, 44px); line-height: 1.06; }
-.governance-title p { margin: 0; max-width: 980px; color: var(--muted, #6c6a63); }
+.governance-title { padding: 8px 2px 2px; }
+.governance-title > .eyebrow { display: none; }
+.governance-title h1 { margin: 0 0 3px; font-size: 22px; line-height: 1.18; letter-spacing: -.02em; }
+.governance-title p { margin: 0; max-width: 980px; color: var(--muted, #6c6a63); font-size: 11px; line-height: 1.45; }
 .governance-split { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
 .governance-inbox { position: sticky; top: 84px; max-height: calc(100vh - 112px); overflow: hidden; display: flex; flex-direction: column; }
 .governance-inbox-list { display: grid; gap: 8px; overflow: auto; padding-right: 4px; }

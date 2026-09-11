@@ -6,16 +6,16 @@
  * 不会把不同页面的查询和写入流程意外耦合到一个“万能组件”里。
  */
 
-export function PageTitle({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return <section className="page-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{description}</p></section>;
+export function PageTitle({ title, description }: { eyebrow: string; title: string; description: string }) {
+  return <section className="page-title"><h1>{title}</h1><p>{description}</p></section>;
 }
 
 export function InfoCard({ label, value }: { label: string; value?: string }) {
   return <article className="info-card"><span>{label}</span><strong>{value && value !== "—" ? value : "—"}</strong></article>;
 }
 
-export function GovernanceTitle({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return <header className="governance-title"><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p>{body}</p></header>;
+export function GovernanceTitle({ title, body }: { eyebrow: string; title: string; body: string }) {
+  return <header className="governance-title"><h1>{title}</h1><p>{body}</p></header>;
 }
 
 export function GovernanceEmpty({ title, body }: { title: string; body: string }) {

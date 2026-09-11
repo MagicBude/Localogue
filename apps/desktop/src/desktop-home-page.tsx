@@ -82,9 +82,10 @@ export function DesktopHomePage({
   return (
     <div className="page-stack">
       <section className="hero-panel desktop-hero">
-        <span className="eyebrow">LOCAL-FIRST · CURATION · EXPLORATION</span>
-        <h1>{t("你的 Localogue，现在就在桌面端。")}</h1>
-        <p>{t("V1-24 把 Private Presentation Preference 接入 Desktop；封面与头像选择不再改写 Canonical / Shared Pack。")}</p>
+        <div className="desktop-home-hero-copy">
+          <h1>{t("我的资料库")}</h1>
+          <p>{t("浏览本地作品与人物，或同步内容目录中的新增文件。")}</p>
+        </div>
         <div className="button-row desktop-home-primary-actions">
           <UiButton variant="primary" onClick={startUnifiedSync}>{t("一键同步资料库")}</UiButton>
           {unlinkedMediaCount ? <UiButton variant="ghost" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
