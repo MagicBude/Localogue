@@ -1,5 +1,6 @@
 # Changelog
 
+- 修正 Desktop 将封面墙误替换海报墙的问题：`海报墙` 恢复为 `poster` 竖版海报，另增使用完整 `fanart` 的独立 `封面墙`，与瀑布流、列表、表格组成五种展示方式；五种视图继续复用同一 WorkQuery、分页和返回状态。
 - 新增私人 `local.db` Schema、非破坏性 JSON 迁移器、逐集合/Receipt/完整性对账和 SQLite → JSON 原子导出工具；私人 Canonical Override、媒体、展示偏好、Evidence 与审计记录分表保存，Asset 二进制和视频继续留在文件系统。
 - Community Catalog 的 `初体験`、`性感開発` 补入稳定 Canonical Genre 与 Crosswalk，公共分类达到 325 / 325 全映射；SQLite 构建时将旧 `genre_000xxx` 分别归入 Genre、Work Type 和 Source-only 关系，不把旧混合分类 ID 带入运行时关系表。
 - 启动 V2 SQLite 存储迁移：以 ADR-046 将数据收敛为 Source Evidence、Curated Catalog 与 Personal Library，明确 Shared Pack 只是 Catalog 发布包；新增标准 SQLite 3 `catalog.db` Schema、原子 JSON 构建器和逐集合/完整性/外键对账脚本。现阶段不切换运行时默认 Repository，JSON 继续作为可回滚来源。
@@ -8,7 +9,7 @@
 - 新增 JavBus 分类人工审核表：12 个 review-required、1 个运行时歧义和 588 个未映射来源词集中到可填写 CSV；重建时保留审核决定、目标 ID 与备注。明确 `手淫` 是 JavDB Provider 别名同时命中 masturbation / handjob，而未映射不等同于应批量新增 Genre。
 - 保存完整 JavBus Genre Provider Evidence：888 条来源记录、839 个名称/页面分类组合和 807 个唯一名称；新增可重复联网刷新、离线路由审计和结构校验脚本。分类沿用 JavBoss 的 `genre-box + h4` 思路，但不直接修改 Canonical；来源 ID 冲突和 588 个未映射词均保留待审。
 - 媒体扫描新增可解释身份识别：保存文件名/NFO 双证据、CD/Part 数字分段、字幕/无码/4K/1080P 版本线索和预告/试看/花絮角色；番号冲突停止自动绑定，未识别文件继续保留。统一同步将已解析 NFO 作为只读提示传给扫描器，本地资料列表和作品详情可查看识别状态并按版本、分段自然排序。
-- Desktop 作品海报墙对照 JavBoss 重做为高密度横向封面卡片：用户指定首图优先，否则优先合法 `cover`，再回退现有首图；卡片标题限制两行，人物和分类限量显示并用 `+N` 收口，厂商并入紧凑事实行。展示层移除标题开头重复番号，不修改 Canonical 标题。瀑布流继续使用独立的竖版首图布局。
+- Desktop 新增 JavBoss 式高密度封面卡片：按 Asset 角色优先使用 `fanart` 并完整显示，缺失时再回退 `cover` / `poster`；卡片标题限制两行，人物和分类限量显示并用 `+N` 收口，厂商并入紧凑事实行。展示层移除标题开头重复番号，不修改 Canonical 标题。
 - Desktop 将收藏从资料库顶部分类和“更多筛选”提升为左侧独立入口，日常查看收藏不再先进入作品库再筛选；作品筛选同步收敛为目录、人物、作品类型/题材/标签，以及年份、时长、评分、本地媒体和清晰度。厂商、厂牌、系列及精确日期等低频查询字段继续兼容既有反向导航和查询状态，但不再占用普通筛选菜单。
 - Desktop 页面顶部统一压缩：共享 PageTitle / GovernanceTitle 不再显示面向开发阶段的英文口号，标题收至 22px、说明收为单行短文；作品库把标题与新建入口合并为同一行，首页大幅 Hero 改为紧凑横向欢迎条，保留同步与未关联媒体操作。
 - Desktop 作品筛选采用 Plex / Lightroom / JavBoss 共通的渐进展开思路：常驻工具栏拆为目录、人物、分类、更多四个入口，每次只打开一个 320px 锚点菜单；已选条件压缩为单行横向 Chips。过渡性的汇总侧板及拖动实现退出主流程，WorkQuery 与 self-excluding Facet 语义不变。

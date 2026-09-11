@@ -221,8 +221,9 @@ if (!errors.length) {
   }
   const desktopAssetImage = readFileSync(path.join(root, "apps/desktop/src/desktop-asset-image.tsx"), "utf8");
   const desktopWorkResults = readFileSync(path.join(root, "apps/desktop/src/desktop-work-results.tsx"), "utf8");
-  if (!desktopWorkResults.includes('"grid" | "list" | "table"') || !desktopWorkResults.includes("DesktopWorkViewSwitcher")) {
-    errors.push("V1-18 Desktop Works 必须对齐 Web 的海报墙 / 列表 / 表格三种表现视图。");
+  const requiredWorkViews = ['"grid"', '"cover"', '"waterfall"', '"list"', '"table"'];
+  if (!requiredWorkViews.every((view) => desktopWorkResults.includes(view)) || !desktopWorkResults.includes("DesktopWorkViewSwitcher")) {
+    errors.push("Desktop Works 必须保留海报墙 / 封面墙 / 瀑布流 / 列表 / 表格五种表现视图。");
   }
   const desktopWorkExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-work-explorer.tsx"), "utf8");
   const desktopPersonExplorer = readFileSync(path.join(root, "apps/desktop/src/desktop-person-explorer.tsx"), "utf8");

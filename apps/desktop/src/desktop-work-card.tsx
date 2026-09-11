@@ -6,7 +6,7 @@ import { UiTooltip } from "./ui/tooltip";
 
 interface DesktopWorkCardProps {
   card: DesktopWorkCardViewModel;
-  layout?: "grid" | "waterfall";
+  layout?: "grid" | "cover" | "waterfall";
   onOpen: (id: string) => void;
   onOpenPerson?: (id: string) => void;
   onSelectGenre?: (id: string) => void;
@@ -14,7 +14,7 @@ interface DesktopWorkCardProps {
 }
 
 /**
- * 桌面端作品卡片（海报墙 / 瀑布流共用）。
+ * 桌面端作品卡片（海报墙 / 封面墙 / 瀑布流共用）。
  *
  * 设计对齐网页端 WorkCard：圆角海报、悬浮时右上角浮出“查看”快捷按钮、
  * 标题/番号/演员/类型 chip 的信息层级；收藏按钮作为卡片级别的 Presentation
@@ -22,13 +22,14 @@ interface DesktopWorkCardProps {
  */
 export function DesktopWorkCard({ card, layout = "grid", onOpen, onOpenPerson, onSelectGenre, onSelectTag }: DesktopWorkCardProps) {
   const { t } = useDesktopI18n();
-  const { work, title, releaseDate, performers, makerName, workTypeNames, genres, tags, poster, landscapeCover } = card;
+  const { work, title, releaseDate, performers, makerName, workTypeNames, genres, tags, poster, fanart } = card;
   const visiblePerformers = performers.slice(0, 3);
   const hiddenPerformerCount = performers.length - visiblePerformers.length;
   const visibleGenres = genres.slice(0, 4);
   const visibleTags = tags.slice(0, Math.max(0, 6 - visibleGenres.length));
   const hiddenClassificationCount = genres.length + tags.length - visibleGenres.length - visibleTags.length;
-  const displayAsset = layout === "grid" ? landscapeCover : poster;
+  // 海报墙和瀑布流使用 poster；独立封面墙使用 fanart。
+  const displayAsset = layout === "cover" ? fanart : poster;
 
   return (
     <article className={`desktop-work-card is-${layout}`}>

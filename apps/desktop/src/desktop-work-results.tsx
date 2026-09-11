@@ -15,7 +15,7 @@ import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopFavoriteButton } from "./desktop-favorite-button";
 import { DesktopWorkCard } from "./desktop-work-card";
 
-export type DesktopWorkViewMode = "grid" | "list" | "table" | "waterfall";
+export type DesktopWorkViewMode = "grid" | "cover" | "list" | "table" | "waterfall";
 export type DesktopWaterfallSize = "small" | "medium" | "large";
 
 export interface DesktopWorkCardViewModel {
@@ -29,7 +29,7 @@ export interface DesktopWorkCardViewModel {
   genres: Array<{ id: string; label: string }>;
   tags: Array<{ id: string; label: string }>;
   poster?: Asset;
-  landscapeCover?: Asset;
+  fanart?: Asset;
 }
 
 export function buildDesktopWorkCards(
@@ -60,12 +60,13 @@ export function buildDesktopWorkCards(
     const referenced = work.assetIds.map((id) => assetsById.get(id)).filter((item): item is Asset => Boolean(item));
     const candidates = uniqueAssets([...referenced, ...(subjectAssets.get(work.id) ?? [])]);
     const presentation = resolveWorkPresentation(work, candidates, preferenceByWorkId.get(work.id));
-    const poster = presentation.resolved;
-    // 横向封面墙优先使用来源提供的 cover；用户显式选择的首图继续拥有最高优先级。
-    // 瀑布流仍使用 resolved poster，避免为了一个展示模式改写 Presentation Preference。
-    const landscapeCover = presentation.preferred
-      ?? presentation.candidates.find((asset) => asset.type === "cover")
+    // 两种墙按 Asset 的真实角色取图：海报墙使用 poster，封面墙使用 fanart。
+    // 缺少目标角色时才回退，保证旧资料仍可浏览，但绝不靠 CSS 把 poster 裁成 fanart。
+    const poster = presentation.candidates.find((asset) => asset.type === "poster")
       ?? presentation.resolved;
+    const fanart = presentation.candidates.find((asset) => asset.type === "fanart")
+      ?? presentation.candidates.find((asset) => asset.type === "cover")
+      ?? poster;
     const performers = work.personRelations
       .filter((relation) => relation.role === "performer")
       .sort((a, b) => (a.billingOrder ?? 999) - (b.billingOrder ?? 999))
@@ -85,7 +86,7 @@ export function buildDesktopWorkCards(
       genres: work.genreIds.map((id) => ({ id, label: localizeGenre(genresById.get(id), metadataLanguage, id) })),
       tags: work.tagIds.map((id) => ({ id, label: localizeText(tagsById.get(id)?.names, metadataLanguage, id) })),
       poster,
-      landscapeCover,
+      fanart,
     };
   });
 }
@@ -100,6 +101,7 @@ export function DesktopWorkViewSwitcher({
   const { t } = useDesktopI18n();
   const views: Array<{ id: DesktopWorkViewMode; label: string }> = [
     { id: "grid", label: t("海报墙") },
+    { id: "cover", label: t("封面墙") },
     { id: "waterfall", label: t("瀑布流") },
     { id: "list", label: t("列表") },
     { id: "table", label: t("表格") },
@@ -211,6 +213,16 @@ export function DesktopWorkResults({
       <div className={`desktop-work-waterfall is-${waterfallSize}`}>
         {cards.map((card) => (
           <DesktopWorkCard key={card.work.id} card={card} layout="waterfall" onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
+        ))}
+      </div>
+    );
+  }
+
+  if (view === "cover") {
+    return (
+      <div className="desktop-work-cover-grid">
+        {cards.map((card) => (
+          <DesktopWorkCard key={card.work.id} card={card} layout="cover" onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
         ))}
       </div>
     );

@@ -2,13 +2,15 @@
 
 ## 当前阶段
 
+2026-09-11 根据实机反馈修正作品展示语义：原 `海报墙` 恢复为 `poster` 竖版海报，JavBoss 式 `fanart` 卡片作为新增的独立 `封面墙`，并以 contain 方式完整展示图片；视图切换扩展为海报墙 / 封面墙 / 瀑布流 / 列表 / 表格五项。自动检查已通过，等待用户实机验收图片比例与信息密度。
+
 2026-09-11 V2 Storage Migration 第二节点建立 `local.db`：迁移器只读现有 Private Library JSON，以临时数据库和 Migration Receipt 完成复制；可重新导出一实体一 JSON。当前开发库已对账 2 个 Presentation Preference 与 2 个 Evidence，原文件保持不变。下一节点开始 Repository Contract 与 Desktop Native SQLite Adapter。
 
 2026-09-11 启动 V2 Storage Migration。第一节点建立 ADR-046、`catalog.db` Schema 和 Community JSON → SQLite 原子构建/对账工具；公共 Catalog 与私人 Library 将分别进入只读 `catalog.db` 和可写 `local.db`。当前运行时仍读 JSON，待 SQLite Repository 查询对账后再切换，避免一次性替换造成数据风险。
 
 2026-09-11 用户确认 JavBus 分类分流原则后，已用 OpenCC 香港繁体转简体执行第一批保守精确归并：60 个来源词唯一命中既有 Genre / Work Type / Source-only，未新建 Canonical Genre。当前为 239 Genre / 16 Work Type / 11 Source-only / 12 Review / 1 Ambiguous / 528 Unmapped；541 项审核 CSV 继续保留来源证据和人工结论列。
 
-2026-09-11 Desktop 作品海报墙开始按 JavBoss 的横向封面卡片范式收敛：封面墙与瀑布流不再只是同一卡片的排列差异，前者优先横向 `cover`、固定信息密度并限制标题/人物/分类行数，后者保留连续浏览和竖版首图。当前开发资料库实测 46 个 Work、0 个 Asset，因此现有番号占位图属于没有封面数据，不是图片组件渲染失败；需要通过本地图片同步、手工图片导入、来源封面接入或显式视频抽帧补齐。界面布局等待用户实机验收。
+2026-09-11 Desktop 新增独立的 JavBoss 式封面墙：它优先完整显示 `fanart`，缺失时再回退 `cover` / `poster`，并限制标题/人物/分类行数；原海报墙与瀑布流继续使用 `poster`。当前开发资料库实测 46 个 Work、0 个 Asset，因此现有番号占位图属于没有封面数据，不是图片组件渲染失败；需要通过本地图片同步、手工图片导入、来源封面接入或显式视频抽帧补齐。界面布局等待用户实机验收。
 
 2026-09-11 Desktop 作品发现入口继续简化：收藏成为左侧一级入口，并从资料库顶部分类和“更多筛选”移除重复入口；常用筛选只呈现目录、人物、作品类型、题材、标签、年份、时长、评分、本地媒体和清晰度。厂商、厂牌、系列、精确日期与封面状态仍保留在 `WorkQuery`，供分类浏览、详情反向导航和既有查询状态使用。当前等待用户实机验收入口是否更直观、筛选菜单是否足够轻量。
 

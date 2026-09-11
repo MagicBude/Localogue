@@ -93,7 +93,7 @@ export function DesktopWorkExplorer({
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
     if (initialState) return initialState.view;
     const saved = window.localStorage.getItem(storageKey);
-    return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
+    return saved === "cover" || saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
   const scrollRestored = useRef(false);
   const resultsPanelRef = useRef<HTMLElement>(null);

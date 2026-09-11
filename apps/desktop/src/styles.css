@@ -116,7 +116,8 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .detail-grid, .runtime-info-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
 .compact-grid { margin-top: 14px; }
 
-.desktop-work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; align-items: stretch; }
+.desktop-work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; align-items: stretch; }
+.desktop-work-cover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; align-items: stretch; }
 .desktop-work-waterfall { column-gap: 20px; }
 /* column-width 是期望宽度，浏览器会按可用空间自动决定列数。 */
 .desktop-work-waterfall.is-small { column-width: 150px; }
@@ -125,7 +126,8 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .desktop-work-waterfall > .desktop-work-card { break-inside: avoid; margin-bottom: 20px; }
 
 .desktop-work-card { min-width: 0; }
-.desktop-work-grid > .desktop-work-card {
+.desktop-work-grid > .desktop-work-card,
+.desktop-work-cover-grid > .desktop-work-card {
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -136,9 +138,13 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
   box-shadow: 0 4px 14px rgba(0,0,0,.045);
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
-.desktop-work-grid > .desktop-work-card:hover { border-color: #b8c9df; box-shadow: 0 10px 24px rgba(35,74,120,.1); transform: translateY(-1px); }
-.desktop-work-grid .desktop-work-card__poster { aspect-ratio: 800 / 538; border: 0; border-radius: 0; box-shadow: none; }
-.desktop-work-grid .desktop-work-card__body { flex: 1; padding: 11px 12px 13px; }
+.desktop-work-grid > .desktop-work-card:hover,
+.desktop-work-cover-grid > .desktop-work-card:hover { border-color: #b8c9df; box-shadow: 0 10px 24px rgba(35,74,120,.1); transform: translateY(-1px); }
+.desktop-work-grid .desktop-work-card__poster { aspect-ratio: 640 / 900; border: 0; border-radius: 0; box-shadow: none; }
+.desktop-work-cover-grid .desktop-work-card__poster { aspect-ratio: 800 / 538; border: 0; border-radius: 0; box-shadow: none; }
+.desktop-work-cover-grid .desktop-work-card__poster img { object-fit: contain; background: #111; }
+.desktop-work-grid .desktop-work-card__body,
+.desktop-work-cover-grid .desktop-work-card__body { flex: 1; padding: 11px 12px 13px; }
 .desktop-work-card__media { position: relative; }
 .desktop-work-card__overlay {
   position: absolute;
@@ -227,7 +233,8 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
   gap: 6px;
 }
 .desktop-work-card__body h3 { margin: 5px 0 7px; min-height: 2.7em; font-size: .9rem; line-height: 1.35; }
-.desktop-work-grid .desktop-work-card__body h3 {
+.desktop-work-grid .desktop-work-card__body h3,
+.desktop-work-cover-grid .desktop-work-card__body h3 {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
