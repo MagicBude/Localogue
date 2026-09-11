@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-11 V2 Storage Migration 第六节点完成 Profile 自动迁移与读取门控：Desktop 启动或切换资料库时，在当前 Private Library 缺少数据库的情况下通过临时文件构建 `local.db`，合并 WAL 后原子发布，并以 JSON/SQLite ID 与内容零差异作为启用条件。Canonical 浏览与 MediaFile 读取可使用 SQLite；失败或差异状态继续使用 JSON。Shared Pack 暂时保留 JSON 回退，下一节点完成只读 `catalog.db` 的发布包交付与安装校验。
+
 2026-09-11 V2 Storage Migration 第五节点完成 Desktop 私人数据双写和可见对账：现有 Native 写入口在 Private 根存在 `local.db` 时同步更新数据库，镜像失败恢复 JSON before-image；Personal Pack 与 Governance Restore 同样进入该链。设置 → 工具可查看 JSON/SQLite 总数、缺失和内容差异。Rust 7 项测试覆盖读取、双写、失败补偿与差异检测；下一节点自动 provision/migrate 每个 Profile 的 local.db，并以差异为零作为 SQLite 读取门槛。
 
 2026-09-11 V2 Storage Migration 第四节点建立 Desktop SQLite 只读 Native Adapter：Rust 使用 bundled SQLite，只允许从当前配置推导数据库并以只读方式打开；WebView 不能提供任意路径。Catalog Work/Genre JSON payload 已标准化，Rust 单元测试覆盖 Catalog、Private 与 Media 三类读取。该 Bridge 尚未替换现有 JSON Repository，下一节点先实现双写和双读差异报告。

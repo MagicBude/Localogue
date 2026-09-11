@@ -48,11 +48,21 @@ pnpm sqlite:repository:validate
 
 Contract 会复制 `local.db` 到临时文件，在副本中验证作品/人物查询、番号规范化和 Private Override，结束后删除副本。它不会修改真实私人数据库。
 
-Web 可用 `LOCALOGUE_STORAGE=sqlite` 显式试运行；未设置时继续使用 JSON Repository。当前 Desktop 仍通过 Tauri Native JSON Adapter 读取资料，下一阶段才实现 Native SQLite Adapter，因此不能把 Web Contract 通过描述为 Desktop 已完成切换。
+Web 可用 `LOCALOGUE_STORAGE=sqlite` 显式试运行；未设置时继续使用 JSON Repository。Desktop 通过受限 Native SQLite Adapter 读取当前 Profile 的 `local.db` 和已挂载 Shared Pack 的 `catalog.db`；WebView 只能指定集合，不能指定数据库路径。
 
 Desktop 已增加 `read_sqlite_library_collection` 原生命令作为迁移边界。调用方只能提供集合名；Rust 从当前设置推导 Private `local.db`、Shared Pack `catalog.db` 和应用数据目录，使用 SQLite read-only flags 打开。
 
-当 Private 根目录存在 `local.db` 时，Native Writer 会先保存 JSON，再同步镜像数据库；数据库失败会恢复 JSON 写前内容并向 UI 返回失败。设置 → 工具 → JSON / SQLite 对账会逐集合比较稳定 ID 和解析后的 JSON 内容。当前仍不替换默认 JSON 读取，因为每个 Library Profile 尚未自动创建数据库；切换条件是当前 Profile 已迁移且对账差异为零。
+当 Private 根目录存在 `local.db` 时，Native Writer 会先保存 JSON，再同步镜像数据库；数据库失败会恢复 JSON 写前内容并向 UI 返回失败。设置 → 工具 → JSON / SQLite 对账会逐集合比较稳定 ID 和解析后的 JSON 内容。
+
+Desktop 启动或切换 Library Profile 时会检查 `<Private Library>/local.db`。若文件不存在，Native Runtime 在同一目录创建临时数据库，导入所有受支持的私人 JSON，记录 Migration Receipt，将 WAL 合并回主文件，再原子重命名为 `local.db`。原 JSON 不移动、不删除。
+
+数据库只有在下列条件全部成立时才进入读取路径：
+
+- JSON 与 SQLite 实体总数一致；
+- 双方没有缺失的 `collection/id`；
+- 对应实体解析后的 JSON 内容一致。
+
+任何创建错误或对账差异都会让当前 Profile 继续使用 JSON。这样迁移是可逐库回退的，不会因为存在一个残缺数据库就静默切换。Shared Pack 如果尚未发布 `catalog.db`，仍从只读 `library/*.json` 补齐；下一节点将把 `catalog.db` 纳入 Shared Pack 发布和安装验证。
 
 ## 私人 local.db
 

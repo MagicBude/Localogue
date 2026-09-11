@@ -2,7 +2,7 @@
 
 ## 阶段名称
 
-**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite。** 已建立标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具、Web Repository Contract、Desktop 受限只读 Adapter，以及带 JSON before-image 补偿的私人数据双写。设置 → 工具提供 JSON/SQLite 差异报告；默认运行时仍用 JSON，完成每个 Profile 的数据库 provision 与零差异门控后再切换 Desktop 读取。
+**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite。** 已建立标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具、Web Repository Contract、Desktop 受限只读 Adapter，以及带 JSON before-image 补偿的私人数据双写。Desktop 会按当前 Library Profile 自动原子创建 `local.db`，并仅在逐集合零差异时让 Canonical 浏览和 MediaFile 读取切换到 SQLite；失败或差异状态继续使用 JSON。Shared Pack 的 JSON 读取仍作为 `catalog.db` 发布完成前的兼容路径。
 
 Desktop 全流程审核持续进行：页面顶部移除面向开发阶段的英文口号，标题、说明和主要操作使用紧凑层级，首页欢迎区也收为横向短条。作品详情返回会保留完整浏览现场，详情使用独立悬浮返回，作品与人物分页只在吸顶筛选区显示；顶部应用框架提供全局作品搜索与紧凑语言菜单。作品编辑入口位于详情首屏，并通过宽弹窗集中编辑；收藏成为左侧独立入口，作品筛选只在目录、人物、分类、更多四个小型锚点菜单中展示常用条件。作品海报墙显示 `poster` 竖版海报，独立封面墙按自然比例完整显示 `fanart`，另有瀑布流、列表和表格。低频关系继续通过分类浏览和详情反向导航进入，已选条件以单行 Chips 呈现。作品新建同样使用紧凑按钮和弹窗，不再用大卡片推迟首屏结果。人物与作品编辑支持取消草稿、保存期完整锁定和重复提交防护；所有高影响操作使用统一应用内确认框；收藏、评分与首图偏好使用同一串行字段合并入口。已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
 

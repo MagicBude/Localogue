@@ -91,6 +91,7 @@ export default function App() {
   const messageTone = classifyMessageTone(message);
   const [busy, setBusy] = useState(false);
   const [libraryEpoch, setLibraryEpoch] = useState(0);
+  const [sqliteReady, setSqliteReady] = useState(false);
   const [progress, setProgress] = useState<DesktopTaskProgress | null>(null);
   // 递增令牌表达一次新的同步意图；Media 页面负责真正编排，避免 App 复制扫描业务。
   const [mediaSyncRequest, setMediaSyncRequest] = useState(0);
@@ -132,6 +133,17 @@ export default function App() {
       }),
     );
     setPackInfos(inspected);
+    if (next.libraryPath) {
+      try {
+        const report = await desktopBridge.provisionLocalSqlite();
+        setSqliteReady(report.available && report.missingInSqlite.length === 0 && report.missingInJson.length === 0 && report.contentMismatches.length === 0);
+      } catch {
+        // 自动迁移失败时继续使用 JSON；设置 → 工具中的对账入口会显示详细原因。
+        setSqliteReady(false);
+      }
+    } else {
+      setSqliteReady(false);
+    }
     setLibraryEpoch((value) => value + 1);
   }, []);
 
@@ -209,8 +221,8 @@ export default function App() {
   );
 
   const repository = useMemo(
-    () => new TauriLibraryRepository(readRoots, savedSettings.libraryPath ?? null),
-    [readRoots, savedSettings.libraryPath, libraryEpoch],
+    () => new TauriLibraryRepository(readRoots, savedSettings.libraryPath ?? null, sqliteReady),
+    [readRoots, savedSettings.libraryPath, sqliteReady, libraryEpoch],
   );
 
   const savedActiveProfile = activeLibraryProfile(savedSettings);

@@ -81,6 +81,7 @@ export const desktopBridge = {
   readSqliteLibraryCollection: <T>(collection: DesktopLibraryCollection) =>
     invoke<DesktopSqliteCollection<T>>("read_sqlite_library_collection", { collection }),
   inspectLocalSqliteSync: () => invoke<DesktopStorageSyncReport>("inspect_local_sqlite_sync"),
+  provisionLocalSqlite: () => invoke<DesktopStorageSyncReport>("provision_local_sqlite"),
   writeLibraryEntity: (collection: DesktopWritableLibraryCollection, entity: unknown) =>
     invoke<void>("write_library_entity", { collection, entity }),
   readPrivateAuditCollection: <T>(collection: DesktopPrivateAuditCollection) =>

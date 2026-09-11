@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop 会为当前 Library Profile 原子创建 `<Private Library>/local.db`，完整导入既有 JSON 后执行逐集合零差异对账；只有对账通过才让 Canonical 浏览与 MediaFile 读取切换到 SQLite。创建失败或已有库出现差异时自动保留 JSON 读取，Shared Pack 在尚未携带 `catalog.db` 时继续使用只读 JSON 回退。
 - Desktop 私人写入进入 JSON / `local.db` 双写迁移：Canonical Override、MediaFile、Presentation Preference、Evidence、审计、Snapshot / Restore、删除与 Personal Pack 新增文件均同步镜像；SQLite 失败会恢复 JSON 写前内容。设置 → 工具新增逐集合对账入口，只有缺失和内容差异均为零才具备切换读取条件。
 - Desktop Native Boundary 新增 SQLite 只读 Adapter：WebView 只传集合名，Rust 从当前 Private Library、已挂载 Catalog 与应用数据目录推导 `local.db / catalog.db`，不开放任意数据库路径。Catalog 构建产物中的 Work JSON 同步改为规范化 Domain 投影，Genre JSON 改为标准 `names` 结构，使 Web 与 Tauri 可读取同一 payload。
 - 新增 `SqliteLibraryRepository` 与可重复 Repository Contract：Web 可通过 `LOCALOGUE_STORAGE=sqlite` 显式启用 `catalog.db + local.db`，作品/人物查询继续复用共享 Query Service，私人实体以完整 Override 覆盖只读 Catalog。Contract 在临时 `local.db` 副本中验证查询、番号查找与覆盖写入，不触碰真实数据库；Desktop Native Adapter 尚未切换。

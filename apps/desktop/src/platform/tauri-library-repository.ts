@@ -35,6 +35,7 @@ export class TauriLibraryRepository implements LibraryRepository {
   constructor(
     private readonly readRoots: readonly string[],
     private readonly privateRoot: string | null,
+    private readonly preferSqlite = false,
   ) {}
 
   async findWorkById(id: string): Promise<Work | null> {
@@ -139,10 +140,10 @@ export class TauriLibraryRepository implements LibraryRepository {
 
   async listMediaFiles(workId?: string): Promise<MediaFile[]> {
     if (!this.privateRoot) return [];
-    const values = await desktopBridge.readLibraryCollection<MediaFile>(
-      this.privateRoot,
-      "media-files",
-    );
+    const sqlite = this.preferSqlite ? await desktopBridge.readSqliteLibraryCollection<MediaFile>("media-files") : null;
+    const values = sqlite?.available
+      ? sqlite.items
+      : await desktopBridge.readLibraryCollection<MediaFile>(this.privateRoot, "media-files");
     const filtered = workId ? values.filter((item) => item.workId === workId) : values;
     return [...filtered].sort((a, b) => a.path.localeCompare(b.path, "en"));
   }
@@ -297,7 +298,14 @@ export class TauriLibraryRepository implements LibraryRepository {
     collection: Exclude<DesktopLibraryCollection, "media-files">,
   ): Promise<T[]> {
     const merged = new Map<string, T>();
+    if (this.preferSqlite) {
+      const sqlite = await desktopBridge.readSqliteLibraryCollection<T>(collection);
+      if (sqlite.available) for (const entity of sqlite.items) if (entity.id) merged.set(entity.id, entity);
+    }
     for (const root of this.readRoots) {
+      // 对账通过后 Private 已由 local.db 提供；Shared JSON 继续作为尚未发布
+      // catalog.db 的兼容回退，并且只填补 SQLite 中不存在的稳定 ID。
+      if (this.preferSqlite && root === this.privateRoot) continue;
       const values = await desktopBridge.readLibraryCollection<T>(root, collection);
       for (const entity of values) {
         if (entity.id && !merged.has(entity.id)) merged.set(entity.id, entity);

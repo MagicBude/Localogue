@@ -327,7 +327,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 12,
+        contract_revision: 13,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -1677,6 +1677,68 @@ async fn inspect_local_sqlite_sync(app: AppHandle) -> Result<DesktopStorageSyncR
     spawn_native_io("inspect_local_sqlite_sync", move || inspect_local_sqlite_sync_blocking(app)).await
 }
 
+#[tauri::command]
+async fn provision_local_sqlite(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
+    spawn_native_io("provision_local_sqlite", move || provision_local_sqlite_blocking(app)).await
+}
+
+fn provision_local_sqlite_blocking(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
+    let root = PathBuf::from(configured_private_library_path(&app)?);
+    provision_local_sqlite_at(&root)
+}
+
+fn provision_local_sqlite_at(root: &Path) -> Result<DesktopStorageSyncReport, String> {
+    let output = root.join("local.db");
+    if output.is_file() { return inspect_local_sqlite_sync_at(root); }
+    fs::create_dir_all(root).map_err(display_error)?;
+    let temporary = root.join(format!("local.db.tmp-{}", now_marker()));
+    let result: Result<(), String> = (|| {
+        let connection = Connection::open(&temporary).map_err(display_error)?;
+        connection.execute_batch(include_str!("../../../../resources/sqlite/local-schema.sql")).map_err(display_error)?;
+        drop(connection);
+        let collections = ["works", "people", "organizations", "series", "genres", "tags", "assets", "media-files", "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts", "asset-deletion-receipts", "media-scan-history"];
+        let mut digest = Sha256::new();
+        let mut counts = [0_i64; 5];
+        for collection in collections {
+            let mut entities = read_json_objects(&root.join(collection))?;
+            entities.sort_by(|left, right| left.get("id").and_then(Value::as_str).cmp(&right.get("id").and_then(Value::as_str)));
+            for entity in entities {
+                let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| format!("{collection} 实体缺少 id。"))?;
+                digest.update(format!("{collection}/{id}\n").as_bytes());
+                digest.update(serde_json::to_vec(&entity).map_err(display_error)?);
+                mirror_local_entity_at(&temporary, collection, &entity)?;
+                if collection == "media-files" { counts[1] += 1; }
+                else if collection == "presentation-preferences" { counts[2] += 1; }
+                else if collection == "evidence" { counts[3] += 1; }
+                else if is_private_audit_collection(collection) { counts[4] += 1; }
+                else { counts[0] += 1; }
+            }
+        }
+        let connection = Connection::open(&temporary).map_err(display_error)?;
+        connection.execute("INSERT OR REPLACE INTO local_meta VALUES ('schema_version','1')", []).map_err(display_error)?;
+        connection.execute("INSERT OR REPLACE INTO local_meta VALUES ('source_path',?1)", [path_to_string(root)]).map_err(display_error)?;
+        connection.execute("INSERT INTO migration_receipts (migrated_at,source_path,source_digest,entity_count,media_count,preference_count,evidence_count,audit_count) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)", params![now_marker(),path_to_string(root),format!("{:x}",digest.finalize()),counts[0],counts[1],counts[2],counts[3],counts[4]]).map_err(display_error)?;
+        // Schema 在正常运行时使用 WAL；原子发布临时库前切回 DELETE，强制把 WAL
+        // 合并进主文件。这样 rename 的单个 local.db 就是完整、可移植的数据库。
+        connection.execute_batch("PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode = DELETE;").map_err(display_error)?;
+        drop(connection);
+        fs::rename(&temporary, &output).map_err(display_error)?;
+        Ok(())
+    })();
+    if let Err(error) = result {
+        let _ = fs::remove_file(&temporary);
+        let _ = fs::remove_file(sqlite_sidecar_path(&temporary, "-wal"));
+        let _ = fs::remove_file(sqlite_sidecar_path(&temporary, "-shm"));
+        return Err(format!("创建 local.db 失败，未替换现有资料：{error}"));
+    }
+    let report = inspect_local_sqlite_sync_at(root)?;
+    if !report.missing_in_sqlite.is_empty() || !report.missing_in_json.is_empty() || !report.content_mismatches.is_empty() {
+        let _ = fs::remove_file(&output);
+        return Err("local.db 初始对账存在差异，数据库已移除，Desktop 继续使用 JSON。".into());
+    }
+    Ok(report)
+}
+
 fn inspect_local_sqlite_sync_blocking(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
     let root = PathBuf::from(configured_private_library_path(&app)?);
     inspect_local_sqlite_sync_at(&root)
@@ -1718,13 +1780,9 @@ fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -
         sources.push((root.join("catalog.db"), false));
     }
     if let Ok(app_data) = app.path().app_local_data_dir() {
-        sources.push((app_data.join("local.db"), true));
+        // local.db 永远属于当前 Profile 的 Private Library。应用级目录只允许放
+        // 发布的只读 Catalog，避免切换资料库后混入另一份私人数据。
         sources.push((app_data.join("catalog.db"), false));
-    }
-    #[cfg(debug_assertions)]
-    if let Some(root) = find_workspace_root() {
-        sources.push((root.join(".localogue/local.db"), true));
-        sources.push((root.join(".localogue/catalog.db"), false));
     }
 
     let mut available = false;
@@ -1738,6 +1796,10 @@ fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -
         }
     }
     Ok(DesktopSqliteCollection { available, items: merged.into_values().collect() })
+}
+
+fn sqlite_sidecar_path(database_path: &Path, suffix: &str) -> PathBuf {
+    PathBuf::from(format!("{}{}", database_path.display(), suffix))
 }
 
 fn read_sqlite_json_collection(database_path: &Path, local: bool, collection: &str) -> Result<Vec<Value>, String> {
@@ -1777,11 +1839,6 @@ fn read_sqlite_json_cell(row: &rusqlite::Row<'_>) -> rusqlite::Result<String> {
     row.get(0)
 }
 
-#[cfg(debug_assertions)]
-fn find_workspace_root() -> Option<PathBuf> {
-    let current = std::env::current_dir().ok()?;
-    current.ancestors().take(8).find(|path| path.join("pnpm-workspace.yaml").is_file()).map(Path::to_path_buf)
-}
 
 fn read_library_collection_blocking(library_path: String, collection: String) -> Result<Vec<Value>, String> {
     let directory = safe_collection_directory(&library_path, &collection)?;
@@ -2002,7 +2059,11 @@ fn restore_json_before_image(target: &Path, before: Option<&[u8]>) -> Result<(),
 fn mirror_local_entity(root: &Path, collection: &str, entity: &Value) -> Result<(), String> {
     let database_path = root.join("local.db");
     if !database_path.is_file() { return Ok(()); }
-    let connection = Connection::open(&database_path).map_err(display_error)?;
+    mirror_local_entity_at(&database_path, collection, entity)
+}
+
+fn mirror_local_entity_at(database_path: &Path, collection: &str, entity: &Value) -> Result<(), String> {
+    let connection = Connection::open(database_path).map_err(display_error)?;
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "SQLite 镜像实体缺少 id。".to_string())?;
     let json = serde_json::to_string(entity).map_err(display_error)?;
     if collection == "media-files" {
@@ -2690,6 +2751,29 @@ mod tests {
     }
 
     #[test]
+    fn sqlite_provision_imports_existing_private_json_atomically() {
+        let root = std::env::temp_dir().join(format!("localogue-sqlite-provision-{}", now_marker()));
+        fs::create_dir_all(root.join("works")).expect("create works");
+        fs::create_dir_all(root.join("presentation-preferences")).expect("create preferences");
+        fs::write(root.join("works/work_1.json"), r#"{"id":"work_1","code":"ABC-1","titles":{"ja":"作品"},"updatedAt":"2026-09-11T00:00:00Z"}"#).expect("write work");
+        fs::write(root.join("presentation-preferences/pref_1.json"), r#"{"id":"pref_1","entityType":"work","entityId":"work_1","favorite":true,"updatedAt":"2026-09-11T00:00:00Z"}"#).expect("write preference");
+
+        let report = provision_local_sqlite_at(&root).expect("provision local db");
+        assert!(root.join("local.db").is_file());
+        assert_eq!(report.json_count, 2);
+        assert_eq!(report.sqlite_count, 2);
+        assert!(report.missing_in_sqlite.is_empty());
+        assert!(report.missing_in_json.is_empty());
+        assert!(report.content_mismatches.is_empty());
+        assert!(fs::read_dir(&root).expect("read provision root").all(|entry| {
+            !entry.expect("read provision entry").file_name().to_string_lossy().starts_with("local.db.tmp-")
+        }));
+        let works = read_sqlite_json_collection(&root.join("local.db"), true, "works").expect("read provisioned works");
+        assert_eq!(works[0]["code"], "ABC-1");
+        fs::remove_dir_all(root).expect("cleanup provision temp");
+    }
+
+    #[test]
     fn walk_files_skips_localogueignore_subtree() {
         let root = std::env::temp_dir().join(format!("localogue-ignore-{}", now_marker()));
         let included = root.join("included");
@@ -2859,6 +2943,7 @@ pub fn run() {
             read_library_collection,
             read_sqlite_library_collection,
             inspect_local_sqlite_sync,
+            provision_local_sqlite,
             write_library_entity,
             read_private_audit_collection,
             write_private_audit_entity,
