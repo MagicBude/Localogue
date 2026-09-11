@@ -33,8 +33,13 @@ Localogue 复用其产品语义，但不照搬数据库副作用：
 - `resources/provider-evidence/javbus/genre-category-map.json`：839 个名称/分类组合及冲突；
 - `resources/provider-evidence/javbus/genre-category-map.csv`：便于人工筛选的镜像；
 - `resources/provider-evidence/javbus/genre-routing-audit.json`：对当前 Localogue 词表的路由结果。
+- `resources/provider-evidence/javbus/genre-manual-review.csv`：601 项待处理审核表，12 项人工审核和 1 项歧义排在最前；可填写“审核决定 / 目标 ID / 审核备注”。
 
 V1-28 路由结果：184 Genre、12 Work Type、10 Source-only、12 Review、1 Ambiguous、588 Unmapped。
+
+这里的 `Unmapped` 只表示“当前受控词表尚无可解释的精确路由”，不等于 588 个都应该新建 Genre。审核时应分别判断为：现有 Genre 的来源别名、新 Canonical Genre、Work Type、Source-only 分类、私人 Tag，或不应收录的来源噪声。复合词不能直接一对多自动写入。
+
+`手淫` 的运行时歧义来自现有 JavDB Provider 别名：同一中文词同时出现在 `genre:masturbation` 与 `genre:handjob` 上。JavBus 自身有独立来源 ID，但只看名称无法安全选定目标，因此必须结合 Provider ID 修正来源映射，不能按中文显示词猜测。
 
 ## 后续调用
 
@@ -48,6 +53,12 @@ pnpm vocabulary:javbus:refresh
 
 ```bash
 pnpm vocabulary:javbus:routing
+```
+
+只重建人工审核表（会按来源名称保留已填写的三列审核结论）：
+
+```bash
+pnpm vocabulary:javbus:review
 ```
 
 离线校验来源证据：
