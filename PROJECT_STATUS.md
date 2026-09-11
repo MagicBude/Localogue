@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-11 V2 Storage Migration 第二节点建立 `local.db`：迁移器只读现有 Private Library JSON，以临时数据库和 Migration Receipt 完成复制；可重新导出一实体一 JSON。当前开发库已对账 2 个 Presentation Preference 与 2 个 Evidence，原文件保持不变。下一节点开始 Repository Contract 与 Desktop Native SQLite Adapter。
+
 2026-09-11 启动 V2 Storage Migration。第一节点建立 ADR-046、`catalog.db` Schema 和 Community JSON → SQLite 原子构建/对账工具；公共 Catalog 与私人 Library 将分别进入只读 `catalog.db` 和可写 `local.db`。当前运行时仍读 JSON，待 SQLite Repository 查询对账后再切换，避免一次性替换造成数据风险。
 
 2026-09-11 用户确认 JavBus 分类分流原则后，已用 OpenCC 香港繁体转简体执行第一批保守精确归并：60 个来源词唯一命中既有 Genre / Work Type / Source-only，未新建 Canonical Genre。当前为 239 Genre / 16 Work Type / 11 Source-only / 12 Review / 1 Ambiguous / 528 Unmapped；541 项审核 CSV 继续保留来源证据和人工结论列。

@@ -38,3 +38,19 @@ node scripts/validate-catalog-sqlite.mjs D:\path\to\catalog.db D:\path\to\shared
 
 当前阶段只完成 `catalog.db` 构建与对账，默认 Repository 尚未切换。下一阶段会增加 SQLite Repository Contract Test，通过后再让 Desktop 优先读取数据库。
 
+## 私人 local.db
+
+私人 JSON 可以无损复制进可写 `local.db`，来源文件不会被移动或删除：
+
+```bash
+pnpm local:sqlite:build
+pnpm local:sqlite:validate
+```
+
+需要恢复为可读 JSON 时：
+
+```bash
+pnpm local:sqlite:export
+```
+
+默认导出到 `var/local-sqlite-export`。`private_entities` 保存私人 Work / Person / Organization / Series / Genre / Tag / Asset；媒体、展示偏好、Evidence 和审计记录拥有独立表。图片二进制与视频仍保留在文件系统，数据库只保存受控路径和元数据。
