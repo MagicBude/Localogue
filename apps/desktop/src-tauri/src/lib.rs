@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use rusqlite::{Connection, OpenFlags};
+use rusqlite::{params, Connection, OpenFlags};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet, VecDeque},
@@ -156,6 +156,17 @@ struct DesktopSharedPackInfo {
 struct DesktopSqliteCollection {
     available: bool,
     items: Vec<Value>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopStorageSyncReport {
+    available: bool,
+    json_count: usize,
+    sqlite_count: usize,
+    missing_in_sqlite: Vec<String>,
+    missing_in_json: Vec<String>,
+    content_mismatches: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -316,7 +327,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 11,
+        contract_revision: 12,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -589,6 +600,7 @@ async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortabl
         let mut imported_by_category: BTreeMap<String, u64> = BTreeMap::new();
         let mut skipped_by_category: BTreeMap<String, u64> = BTreeMap::new();
         let mut created: Vec<PathBuf> = Vec::new();
+        let mut mirrored: Vec<(String, String)> = Vec::new();
         let result: Result<(), String> = (|| {
             for file in files {
                 let target = safe_portable_relative_path(&root, &file.path, PERSONAL_PORTABLE_DIRECTORIES)?;
@@ -606,12 +618,19 @@ async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortabl
                 if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
                 fs::write(&target, file.bytes).map_err(display_error)?;
                 created.push(target);
+                if let Some((collection, id, entity)) = portable_json_entity(&root, &file.path)? {
+                    mirror_local_entity(&root, &collection, &entity)?;
+                    mirrored.push((collection, id));
+                }
                 imported += 1;
                 *imported_by_category.entry(category).or_default() += 1;
             }
             Ok(())
         })();
         if let Err(error) = result {
+            for (collection, id) in mirrored.iter().rev() {
+                let _ = delete_local_entity(&root, collection, id);
+            }
             for path in created.iter().rev() {
                 let _ = fs::remove_file(path);
             }
@@ -626,6 +645,20 @@ async fn import_private_portable_files(app: AppHandle, files: Vec<DesktopPortabl
             "skippedByCategory": skipped_by_category
         }))
     }).await
+}
+
+fn portable_json_entity(root: &Path, relative: &str) -> Result<Option<(String, String, Value)>, String> {
+    let normalized = relative.replace('\\', "/");
+    let mut parts = normalized.split('/');
+    let collection = parts.next().unwrap_or("");
+    let file = parts.next().unwrap_or("");
+    if parts.next().is_some() || !file.ends_with(".json") { return Ok(None); }
+    if !matches!(collection, "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files" | "presentation-preferences" | "evidence" | "evidence-lifecycle" | "review-commits" | "snapshots" | "restore-receipts" | "provenance" | "media-binding-receipts" | "asset-deletion-receipts" | "media-scan-history") { return Ok(None); }
+    let id = file.trim_end_matches(".json").to_string();
+    if !is_safe_id(&id) { return Err(format!("Portable JSON id 不安全：{relative}")); }
+    let target = safe_portable_relative_path(root, relative, PERSONAL_PORTABLE_DIRECTORIES)?;
+    let entity = serde_json::from_str(&fs::read_to_string(target).map_err(display_error)?).map_err(display_error)?;
+    Ok(Some((collection.to_string(), id, entity)))
 }
 
 #[tauri::command]
@@ -1639,6 +1672,38 @@ async fn read_sqlite_library_collection(app: AppHandle, collection: String) -> R
     spawn_native_io("read_sqlite_library_collection", move || read_sqlite_library_collection_blocking(app, collection)).await
 }
 
+#[tauri::command]
+async fn inspect_local_sqlite_sync(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
+    spawn_native_io("inspect_local_sqlite_sync", move || inspect_local_sqlite_sync_blocking(app)).await
+}
+
+fn inspect_local_sqlite_sync_blocking(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
+    let root = PathBuf::from(configured_private_library_path(&app)?);
+    inspect_local_sqlite_sync_at(&root)
+}
+
+fn inspect_local_sqlite_sync_at(root: &Path) -> Result<DesktopStorageSyncReport, String> {
+    let database_path = root.join("local.db");
+    if !database_path.is_file() {
+        return Ok(DesktopStorageSyncReport { available: false, json_count: 0, sqlite_count: 0, missing_in_sqlite: Vec::new(), missing_in_json: Vec::new(), content_mismatches: Vec::new() });
+    }
+    let collections = ["works", "people", "organizations", "series", "genres", "tags", "assets", "media-files", "presentation-preferences", "evidence", "evidence-lifecycle", "review-commits", "snapshots", "restore-receipts", "provenance", "media-binding-receipts", "asset-deletion-receipts", "media-scan-history"];
+    let mut json_items = BTreeMap::<String, Value>::new();
+    let mut sqlite_items = BTreeMap::<String, Value>::new();
+    for collection in collections {
+        for entity in read_json_objects(&root.join(collection))? {
+            if let Some(id) = entity.get("id").and_then(Value::as_str) { json_items.insert(format!("{collection}/{id}"), entity); }
+        }
+        for entity in read_sqlite_json_collection(&database_path, true, collection)? {
+            if let Some(id) = entity.get("id").and_then(Value::as_str) { sqlite_items.insert(format!("{collection}/{id}"), entity); }
+        }
+    }
+    let missing_in_sqlite = json_items.keys().filter(|key| !sqlite_items.contains_key(*key)).cloned().collect();
+    let missing_in_json = sqlite_items.keys().filter(|key| !json_items.contains_key(*key)).cloned().collect();
+    let content_mismatches = json_items.iter().filter_map(|(key, value)| sqlite_items.get(key).filter(|other| *other != value).map(|_| key.clone())).collect();
+    Ok(DesktopStorageSyncReport { available: true, json_count: json_items.len(), sqlite_count: sqlite_items.len(), missing_in_sqlite, missing_in_json, content_mismatches })
+}
+
 fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -> Result<DesktopSqliteCollection, String> {
     if !matches!(collection.as_str(), "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files") {
         return Err(format!("SQLite 不允许读取集合：{collection}"));
@@ -1680,6 +1745,9 @@ fn read_sqlite_json_collection(database_path: &Path, local: bool, collection: &s
         .map_err(|error| format!("无法只读打开 SQLite {}：{error}", database_path.display()))?;
     let (sql, parameter) = if local {
         if collection == "media-files" { ("SELECT json FROM media_files ORDER BY id", None) }
+        else if collection == "presentation-preferences" { ("SELECT json FROM presentation_preferences ORDER BY id", None) }
+        else if collection == "evidence" { ("SELECT json FROM evidence ORDER BY id", None) }
+        else if is_private_audit_collection(collection) { ("SELECT json FROM audit_records WHERE collection = ?1 ORDER BY id", Some(collection)) }
         else { ("SELECT json FROM private_entities WHERE collection = ?1 ORDER BY id", Some(collection)) }
     } else {
         (match collection {
@@ -1741,14 +1809,8 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
     // 写根目录不接受 Webview 传参。Native Boundary 永远从当前 Desktop Settings
     // 解析 Private Library，因而 Shared Pack 即使被挂载，也不能借用此命令写入。
     let library_path = configured_private_library_path(&app)?;
-    let directory = safe_writable_collection_directory(&library_path, &collection)?;
-    fs::create_dir_all(&directory).map_err(display_error)?;
-    let target = directory.join(format!("{id}.json"));
-    let temporary = directory.join(format!("{id}.json.tmp"));
-    let body = serde_json::to_string_pretty(&entity).map_err(display_error)? + "\n";
-    fs::write(&temporary, body).map_err(display_error)?;
-    if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
-    fs::rename(temporary, target).map_err(display_error)
+    safe_writable_collection_directory(&library_path, &collection)?;
+    write_json_with_sqlite_mirror(Path::new(&library_path), &collection, id, &entity)
 }
 
 #[tauri::command]
@@ -1775,7 +1837,7 @@ fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entit
     let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "审计实体缺少稳定 id。".to_string())?;
     if !is_safe_id(id) { return Err("审计实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
-    atomic_write_json(&PathBuf::from(library_path).join(&collection), id, &entity)
+    write_json_with_sqlite_mirror(Path::new(&library_path), &collection, id, &entity)
 }
 
 #[tauri::command]
@@ -1793,7 +1855,7 @@ async fn write_private_presentation_preference(app: AppHandle, entity: Value) ->
         let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "Presentation Preference 缺少稳定 id。".to_string())?;
         if !is_safe_id(id) { return Err("Presentation Preference id 包含不安全字符。".into()); }
         let library_path = configured_private_library_path(&app)?;
-        atomic_write_json(&PathBuf::from(library_path).join("presentation-preferences"), id, &entity)
+        write_json_with_sqlite_mirror(Path::new(&library_path), "presentation-preferences", id, &entity)
     }).await
 }
 
@@ -1853,7 +1915,7 @@ fn create_governance_snapshot_blocking(app: AppHandle, plan: Value) -> Result<Va
         "fingerprint": fingerprint,
         "entries": entries,
     });
-    atomic_write_json(&root.join("snapshots"), snapshot.get("id").and_then(Value::as_str).unwrap_or("snapshot"), &snapshot)?;
+    write_json_with_sqlite_mirror(&root, "snapshots", snapshot.get("id").and_then(Value::as_str).unwrap_or("snapshot"), &snapshot)?;
     Ok(snapshot)
 }
 
@@ -1872,16 +1934,15 @@ fn restore_governance_snapshot_blocking(app: AppHandle, snapshot_id: String) -> 
         let relative = entry.get("relativePath").and_then(Value::as_str).ok_or_else(|| "Snapshot entry 缺少 relativePath。".to_string())?;
         let target = safe_governance_relative_path(&root, relative)?;
         let existed = entry.get("existed").and_then(Value::as_bool).unwrap_or(false);
+        let collection = relative.split('/').next().unwrap_or("");
+        let id = target.file_stem().and_then(|value| value.to_str()).ok_or_else(|| "Snapshot 文件名无效。".to_string())?;
         if !existed {
-            if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+            delete_json_with_sqlite_mirror(&root, collection, id)?;
             continue;
         }
         let content = entry.get("content").and_then(Value::as_str).ok_or_else(|| "Snapshot entry 缺少 content。".to_string())?;
-        if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
-        let temporary = target.with_extension("json.restore.tmp");
-        fs::write(&temporary, content).map_err(display_error)?;
-        if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
-        fs::rename(temporary, target).map_err(display_error)?;
+        let entity: Value = serde_json::from_str(content).map_err(display_error)?;
+        write_json_with_sqlite_mirror(&root, collection, id, &entity)?;
     }
     Ok(entries.len())
 }
@@ -1898,6 +1959,99 @@ fn atomic_write_json(directory: &Path, id: &str, entity: &Value) -> Result<(), S
     fs::write(&temporary, body).map_err(display_error)?;
     if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
     fs::rename(temporary, target).map_err(display_error)
+}
+
+/// 迁移期双写：JSON 仍是可审核、可回滚交换格式，local.db 是同步运行时投影。
+/// 若数据库镜像失败，立即恢复写入前的 JSON，避免两个载体静默分叉。
+fn write_json_with_sqlite_mirror(root: &Path, collection: &str, id: &str, entity: &Value) -> Result<(), String> {
+    let directory = root.join(collection);
+    let target = directory.join(format!("{id}.json"));
+    let before = fs::read(&target).ok();
+    atomic_write_json(&directory, id, entity)?;
+    if let Err(error) = mirror_local_entity(root, collection, entity) {
+        restore_json_before_image(&target, before.as_deref())?;
+        return Err(format!("local.db 镜像失败，JSON 已恢复：{error}"));
+    }
+    Ok(())
+}
+
+fn delete_json_with_sqlite_mirror(root: &Path, collection: &str, id: &str) -> Result<(), String> {
+    let target = root.join(collection).join(format!("{id}.json"));
+    let before = fs::read(&target).ok();
+    if target.exists() { fs::remove_file(&target).map_err(display_error)?; }
+    if let Err(error) = delete_local_entity(root, collection, id) {
+        restore_json_before_image(&target, before.as_deref())?;
+        return Err(format!("local.db 删除镜像失败，JSON 已恢复：{error}"));
+    }
+    Ok(())
+}
+
+fn restore_json_before_image(target: &Path, before: Option<&[u8]>) -> Result<(), String> {
+    match before {
+        Some(bytes) => {
+            if let Some(parent) = target.parent() { fs::create_dir_all(parent).map_err(display_error)?; }
+            fs::write(target, bytes).map_err(display_error)
+        },
+        None => {
+            if target.exists() { fs::remove_file(target).map_err(display_error)?; }
+            Ok(())
+        },
+    }
+}
+
+fn mirror_local_entity(root: &Path, collection: &str, entity: &Value) -> Result<(), String> {
+    let database_path = root.join("local.db");
+    if !database_path.is_file() { return Ok(()); }
+    let connection = Connection::open(&database_path).map_err(display_error)?;
+    let id = entity.get("id").and_then(Value::as_str).ok_or_else(|| "SQLite 镜像实体缺少 id。".to_string())?;
+    let json = serde_json::to_string(entity).map_err(display_error)?;
+    if collection == "media-files" {
+        let path = json_string(entity,"path")?;
+        let file_name = json_string(entity,"fileName")?;
+        connection.execute("INSERT INTO media_files (id,path,file_name,work_id,scan_root,match_method,modified_at,json) VALUES (?1,?2,?3,?4,?5,?6,?7,?8) ON CONFLICT(id) DO UPDATE SET path=excluded.path,file_name=excluded.file_name,work_id=excluded.work_id,scan_root=excluded.scan_root,match_method=excluded.match_method,modified_at=excluded.modified_at,json=excluded.json", params![id, path, file_name, json_optional_string(entity,"workId"), json_optional_string(entity,"scanRoot"), json_optional_string(entity,"matchMethod"), json_optional_string(entity,"fileModifiedAt").or_else(|| json_optional_string(entity,"updatedAt")), json]).map_err(display_error)?;
+    } else if collection == "presentation-preferences" {
+        let entity_type = json_string(entity,"entityType")?;
+        let entity_id = json_string(entity,"entityId")?;
+        let updated_at = json_string(entity,"updatedAt")?;
+        connection.execute("INSERT INTO presentation_preferences (id,entity_type,entity_id,favorite,rating,preferred_asset_id,updated_at,json) VALUES (?1,?2,?3,?4,?5,?6,?7,?8) ON CONFLICT(id) DO UPDATE SET entity_type=excluded.entity_type,entity_id=excluded.entity_id,favorite=excluded.favorite,rating=excluded.rating,preferred_asset_id=excluded.preferred_asset_id,updated_at=excluded.updated_at,json=excluded.json", params![id, entity_type, entity_id, entity.get("favorite").and_then(Value::as_bool).map(i64::from), entity.get("rating").and_then(Value::as_i64), json_optional_string(entity,"preferredCoverAssetId").or_else(|| json_optional_string(entity,"preferredPortraitAssetId")), updated_at, json]).map_err(display_error)?;
+    } else if collection == "evidence" {
+        let source_type = json_string(entity,"sourceType")?;
+        let source_name = json_string(entity,"sourceName")?;
+        let imported_at = json_string(entity,"importedAt")?;
+        connection.execute("INSERT INTO evidence (id,source_type,source_name,imported_at,target_hint,json) VALUES (?1,?2,?3,?4,?5,?6) ON CONFLICT(id) DO UPDATE SET source_type=excluded.source_type,source_name=excluded.source_name,imported_at=excluded.imported_at,target_hint=excluded.target_hint,json=excluded.json", params![id, source_type, source_name, imported_at, entity.pointer("/normalized/code").and_then(Value::as_str).or_else(|| entity.pointer("/raw/code").and_then(Value::as_str)), json]).map_err(display_error)?;
+    } else if is_private_audit_collection(collection) {
+        let subject = ["workId", "personId", "entityId", "evidenceId", "targetWorkId"].iter().find_map(|key| entity.get(*key).and_then(Value::as_str));
+        let occurred = ["createdAt", "committedAt", "restoredAt", "updatedAt", "scannedAt"].iter().find_map(|key| entity.get(*key).and_then(Value::as_str));
+        connection.execute("INSERT INTO audit_records (collection,id,subject_id,occurred_at,json) VALUES (?1,?2,?3,?4,?5) ON CONFLICT(collection,id) DO UPDATE SET subject_id=excluded.subject_id,occurred_at=excluded.occurred_at,json=excluded.json", params![collection,id,subject,occurred,json]).map_err(display_error)?;
+    } else {
+        connection.execute("INSERT INTO private_entities (collection,id,display_key,updated_at,json) VALUES (?1,?2,?3,?4,?5) ON CONFLICT(collection,id) DO UPDATE SET display_key=excluded.display_key,updated_at=excluded.updated_at,json=excluded.json", params![collection,id,local_display_key(collection, entity),json_optional_string(entity,"updatedAt"),json]).map_err(display_error)?;
+    }
+    Ok(())
+}
+
+fn delete_local_entity(root: &Path, collection: &str, id: &str) -> Result<(), String> {
+    let database_path = root.join("local.db");
+    if !database_path.is_file() { return Ok(()); }
+    let connection = Connection::open(&database_path).map_err(display_error)?;
+    if collection == "media-files" { connection.execute("DELETE FROM media_files WHERE id = ?1", [id]).map_err(display_error)?; }
+    else if collection == "presentation-preferences" { connection.execute("DELETE FROM presentation_preferences WHERE id = ?1", [id]).map_err(display_error)?; }
+    else if collection == "evidence" { connection.execute("DELETE FROM evidence WHERE id = ?1", [id]).map_err(display_error)?; }
+    else if is_private_audit_collection(collection) { connection.execute("DELETE FROM audit_records WHERE collection = ?1 AND id = ?2", [collection,id]).map_err(display_error)?; }
+    else { connection.execute("DELETE FROM private_entities WHERE collection = ?1 AND id = ?2", [collection,id]).map_err(display_error)?; }
+    Ok(())
+}
+
+fn json_string<'a>(entity: &'a Value, key: &str) -> Result<&'a str, String> {
+    entity.get(key).and_then(Value::as_str).ok_or_else(|| format!("SQLite 镜像缺少字符串字段 {key}。"))
+}
+fn json_optional_string<'a>(entity: &'a Value, key: &str) -> Option<&'a str> { entity.get(key).and_then(Value::as_str) }
+fn local_display_key<'a>(collection: &str, entity: &'a Value) -> Option<&'a str> {
+    match collection {
+        "works" => json_optional_string(entity, "code"),
+        "assets" => json_optional_string(entity, "storagePath"),
+        "people" => entity.get("names").and_then(Value::as_array).and_then(|names| names.iter().find(|name| name.get("type").and_then(Value::as_str) == Some("primary")).or_else(|| names.first())).and_then(|name| name.get("value")).and_then(Value::as_str),
+        _ => entity.get("names").and_then(|names| names.get("zh-CN").or_else(|| names.get("ja")).or_else(|| names.get("en"))).and_then(Value::as_str),
+    }
 }
 
 fn safe_governance_relative_path(root: &Path, relative: &str) -> Result<PathBuf, String> {
@@ -1926,9 +2080,8 @@ fn delete_library_entity_blocking(app: AppHandle, collection: String, id: String
     if !is_safe_id(&id) { return Err("实体 id 包含不安全字符。".into()); }
     let library_path = configured_private_library_path(&app)?;
     ensure_private_delete_is_unreferenced(&library_path, &collection, &id)?;
-    let target = safe_writable_collection_directory(&library_path, &collection)?.join(format!("{id}.json"));
-    if target.exists() { fs::remove_file(target).map_err(display_error)?; }
-    Ok(())
+    safe_writable_collection_directory(&library_path, &collection)?;
+    delete_json_with_sqlite_mirror(Path::new(&library_path), &collection, &id)
 }
 
 fn ensure_private_delete_is_unreferenced(library_path: &str, collection: &str, id: &str) -> Result<(), String> {
@@ -2495,6 +2648,48 @@ mod tests {
     }
 
     #[test]
+    fn sqlite_mirror_dual_write_restores_json_when_database_fails() {
+        let root = std::env::temp_dir().join(format!("localogue-sqlite-mirror-{}", now_marker()));
+        fs::create_dir_all(root.join("works")).expect("create mirror temp");
+        let database_path = root.join("local.db");
+        {
+            let database = Connection::open(&database_path).expect("create local db");
+            database.execute_batch("CREATE TABLE private_entities(collection TEXT NOT NULL,id TEXT NOT NULL,display_key TEXT,updated_at TEXT,json TEXT NOT NULL,PRIMARY KEY(collection,id));").expect("schema");
+        }
+        let original = serde_json::json!({"id":"work_1","code":"ABC-1","titles":{"ja":"original"},"updatedAt":"2026-09-11T00:00:00Z"});
+        write_json_with_sqlite_mirror(&root, "works", "work_1", &original).expect("dual write");
+        let rows = read_sqlite_json_collection(&database_path, true, "works").expect("read mirrored work");
+        assert_eq!(rows[0]["code"], "ABC-1");
+
+        Connection::open(&database_path).expect("open local db").execute("DROP TABLE private_entities", []).expect("break mirror schema");
+        let changed = serde_json::json!({"id":"work_1","code":"CHANGED-1","titles":{"ja":"changed"},"updatedAt":"2026-09-11T00:01:00Z"});
+        let error = write_json_with_sqlite_mirror(&root, "works", "work_1", &changed).expect_err("broken mirror must fail");
+        assert!(error.contains("JSON 已恢复"));
+        let restored: Value = serde_json::from_str(&fs::read_to_string(root.join("works/work_1.json")).expect("restored json")).expect("parse restored");
+        assert_eq!(restored["code"], "ABC-1");
+        fs::remove_dir_all(root).expect("cleanup mirror temp");
+    }
+
+    #[test]
+    fn sqlite_sync_report_detects_content_drift() {
+        let root = std::env::temp_dir().join(format!("localogue-sqlite-report-{}", now_marker()));
+        fs::create_dir_all(&root).expect("create report temp");
+        Connection::open(root.join("local.db")).expect("create report db")
+            .execute_batch(include_str!("../../../../resources/sqlite/local-schema.sql")).expect("full local schema");
+        let entity = serde_json::json!({"id":"work_1","code":"ABC-1","titles":{"ja":"original"},"updatedAt":"2026-09-11T00:00:00Z"});
+        write_json_with_sqlite_mirror(&root, "works", "work_1", &entity).expect("seed synchronized work");
+        let synchronized = inspect_local_sqlite_sync_at(&root).expect("inspect synchronized");
+        assert_eq!(synchronized.json_count, 1);
+        assert!(synchronized.missing_in_sqlite.is_empty());
+        assert!(synchronized.content_mismatches.is_empty());
+
+        fs::write(root.join("works/work_1.json"), r#"{"id":"work_1","code":"DRIFT-1"}"#).expect("create drift");
+        let drifted = inspect_local_sqlite_sync_at(&root).expect("inspect drifted");
+        assert_eq!(drifted.content_mismatches, vec!["works/work_1"]);
+        fs::remove_dir_all(root).expect("cleanup report temp");
+    }
+
+    #[test]
     fn walk_files_skips_localogueignore_subtree() {
         let root = std::env::temp_dir().join(format!("localogue-ignore-{}", now_marker()));
         let included = root.join("included");
@@ -2663,6 +2858,7 @@ pub fn run() {
             inspect_shared_pack,
             read_library_collection,
             read_sqlite_library_collection,
+            inspect_local_sqlite_sync,
             write_library_entity,
             read_private_audit_collection,
             write_private_audit_entity,

@@ -50,7 +50,9 @@ Contract 会复制 `local.db` 到临时文件，在副本中验证作品/人物�
 
 Web 可用 `LOCALOGUE_STORAGE=sqlite` 显式试运行；未设置时继续使用 JSON Repository。当前 Desktop 仍通过 Tauri Native JSON Adapter 读取资料，下一阶段才实现 Native SQLite Adapter，因此不能把 Web Contract 通过描述为 Desktop 已完成切换。
 
-Desktop 已增加 `read_sqlite_library_collection` 原生命令作为迁移边界。调用方只能提供集合名；Rust 从当前设置推导 Private `local.db`、Shared Pack `catalog.db` 和应用数据目录，使用 SQLite read-only flags 打开。当前 Bridge 只用于下一阶段双读对账，尚未替换 JSON Repository；否则编辑仍写 JSON 时会造成数据库内容过期。
+Desktop 已增加 `read_sqlite_library_collection` 原生命令作为迁移边界。调用方只能提供集合名；Rust 从当前设置推导 Private `local.db`、Shared Pack `catalog.db` 和应用数据目录，使用 SQLite read-only flags 打开。
+
+当 Private 根目录存在 `local.db` 时，Native Writer 会先保存 JSON，再同步镜像数据库；数据库失败会恢复 JSON 写前内容并向 UI 返回失败。设置 → 工具 → JSON / SQLite 对账会逐集合比较稳定 ID 和解析后的 JSON 内容。当前仍不替换默认 JSON 读取，因为每个 Library Profile 尚未自动创建数据库；切换条件是当前 Profile 已迁移且对账差异为零。
 
 ## 私人 local.db
 
@@ -60,6 +62,14 @@ Desktop 已增加 `read_sqlite_library_collection` 原生命令作为迁移边�
 pnpm local:sqlite:build
 pnpm local:sqlite:validate
 ```
+
+Desktop 按约定读取当前 Private Library 根目录下的 `local.db`。为现有资料库启用双写前，可显式原地迁移：
+
+```powershell
+node scripts/build-local-sqlite.mjs --source D:\path\to\private-library --output D:\path\to\private-library\local.db
+```
+
+脚本只允许根目录这个固定文件名，不允许把数据库写入 `works/`、`assets/` 等集合目录。原 JSON 保留，用于交换、审核和 Snapshot / Restore。
 
 需要恢复为可读 JSON 时：
 

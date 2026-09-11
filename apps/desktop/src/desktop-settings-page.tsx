@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
-import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard, PageTitle } from "./desktop-page-primitives";
 import {
@@ -25,7 +25,7 @@ import { UiSelectField, UiTextField } from "./ui/form-control";
 
 // revision 11 同时保证 Profile 隔离、受控删除和 ffprobe 引导命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
-const PROFILE_NATIVE_CONTRACT_REVISION = 11;
+const PROFILE_NATIVE_CONTRACT_REVISION = 12;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**
@@ -62,6 +62,8 @@ export function DesktopSettingsPage({
   const [renameDraft, setRenameDraft] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteManagedData, setDeleteManagedData] = useState(false);
+  const [storageReport, setStorageReport] = useState<DesktopStorageSyncReport>();
+  const [checkingStorage, setCheckingStorage] = useState(false);
   const selectedProfile = activeLibraryProfile(settings);
   const selectedProfileIsManaged = Boolean(selectedProfile && isManagedPrivateLibrary(selectedProfile.id, selectedProfile.libraryPath, runtime?.appLocalDataDir));
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
@@ -280,6 +282,17 @@ export function DesktopSettingsPage({
     }
   }
 
+  async function inspectStorageSync(): Promise<void> {
+    setCheckingStorage(true);
+    try {
+      setStorageReport(await desktopBridge.inspectLocalSqliteSync());
+    } catch (error) {
+      setMessage(t("数据库对账失败：{error}", { error: toMessage(error) }));
+    } finally {
+      setCheckingStorage(false);
+    }
+  }
+
   return (
     <div className={`page-stack settings-page settings-mode-${settingsModule}`}>
       <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
@@ -391,6 +404,21 @@ export function DesktopSettingsPage({
         </div>
         <UiTextField label="Localogue Web URL" description={t("修改后离开输入框即自动保存。") } value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} onBlur={(event) => void saveOrdinarySettings({ ...settings, webUrl: event.currentTarget.value }, t("Web URL 已自动保存。"))} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
         <div className="button-row"><UiButton disabled={busy} onClick={() => void openWeb()}>{t("浏览器打开 Web")}</UiButton><span className="muted">{busy ? t("正在自动保存…") : t("设置会自动保存")}</span></div>
+      </section>
+
+      <section className="settings-card settings-module-tools">
+        <div className="section-heading">
+          <div><span className="eyebrow">STORAGE MIGRATION</span><h2>{t("JSON / SQLite 对账")}</h2></div>
+          <UiButton disabled={!settings.libraryPath || checkingStorage || !profileNativeRuntimeReady} loading={checkingStorage} onClick={() => void inspectStorageSync()}>{t("检查同步状态")}</UiButton>
+        </div>
+        <p className="muted">{t("迁移期间 JSON 保留为交换、审核和回滚格式；local.db 是同步的运行时投影。只有差异为零才可切换数据库读取。")}</p>
+        {storageReport ? !storageReport.available ? (
+          <UiFeedback tone="info">{t("当前私人资料库还没有 local.db，请先执行迁移构建。")}</UiFeedback>
+        ) : (
+          <UiFeedback tone={storageReport.missingInSqlite.length || storageReport.missingInJson.length || storageReport.contentMismatches.length ? "warning" : "success"}>
+            {t("JSON {json} 项，SQLite {sqlite} 项；缺少 {missing} 项，内容差异 {mismatch} 项。", { json: storageReport.jsonCount, sqlite: storageReport.sqliteCount, missing: storageReport.missingInSqlite.length + storageReport.missingInJson.length, mismatch: storageReport.contentMismatches.length })}
+          </UiFeedback>
+        ) : null}
       </section>
 
       <section className="settings-card soft-card settings-module-about">

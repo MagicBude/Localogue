@@ -425,3 +425,12 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - “示例库”是唯一允许产品自动挂 Starter Shared Pack 的内置 Profile；普通“资料库 N”默认始终 `Private + 0 Shared`，不得推断用户内容类型或自动加入社区资料。
 - 示例库的 Private Fixture 与 Starter Shared Pack 都应 provision 到 App Local Data 的稳定运行副本，不让 Profile 长期依赖开发仓库或安装资源目录。
 - V1-24C 文档继续更新固定 `MANIFEST.md / PROJECT_STATUS.md / CHANGELOG.md`，不得新增版本 MANIFEST。
+
+## V2 Storage Migration 约束
+
+- 数据语义固定为 Source Evidence、Curated Catalog、Personal Library 三层；Shared Pack 是 Catalog 发布载体，不再命名为另一套 Canonical 真相源。
+- `catalog.db` 只读并可整体替换，`local.db` 只保存私人覆盖、本机媒体、展示偏好、Evidence 与审计；Asset 二进制和视频不进入 SQLite。
+- JSON / CSV 继续作为交换、人工审核和回滚格式。迁移期双写失败必须显式失败并补偿，禁止静默形成 JSON/SQLite 分叉。
+- Desktop SQLite Command 的数据库路径必须由 Rust 根据当前 Profile 和受信 Catalog 推导，WebView 不得提交任意数据库路径。
+- 切换 SQLite 读取前必须完成当前 Profile 的迁移并通过逐集合 ID/内容零差异对账；没有数据库或存在差异时必须保留 JSON 回退。
+- Snapshot / Restore、Personal Pack、删除与普通 CRUD 都必须同步维护 `local.db`，不能只覆盖日常编辑入口。

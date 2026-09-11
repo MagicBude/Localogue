@@ -35,6 +35,15 @@ export interface DesktopSqliteCollection<T = unknown> {
   items: T[];
 }
 
+export interface DesktopStorageSyncReport {
+  available: boolean;
+  jsonCount: number;
+  sqliteCount: number;
+  missingInSqlite: string[];
+  missingInJson: string[];
+  contentMismatches: string[];
+}
+
 
 export interface DesktopImportedAssetFile {
   storagePath: string;

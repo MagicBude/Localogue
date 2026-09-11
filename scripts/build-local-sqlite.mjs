@@ -14,7 +14,10 @@ const root = process.cwd();
 const args = parseArgs(process.argv.slice(2));
 const sourceRoot = path.resolve(args.source ?? path.join(root, "data", "library"));
 const output = path.resolve(args.output ?? path.join(root, ".localogue", "local.db"));
-if (samePath(sourceRoot, output) || output.startsWith(`${sourceRoot}${path.sep}`)) throw new Error("local.db 输出不能位于 Private Library 来源目录内，避免备份边界混淆。");
+const inPlaceDatabase = path.join(sourceRoot, "local.db");
+if (samePath(sourceRoot, output) || (output.startsWith(`${sourceRoot}${path.sep}`) && !samePath(output, inPlaceDatabase))) {
+  throw new Error("Private Library 内只允许将 SQLite 输出为根目录 local.db，避免混入实体集合或 Asset 目录。");
+}
 const temporary = `${output}.tmp`;
 const schema = await readFile(path.join(root, "resources", "sqlite", "local-schema.sql"), "utf8");
 const canonicalCollections = ["works", "people", "organizations", "series", "genres", "tags", "assets"];
@@ -123,4 +126,3 @@ function parseArgs(values) {
   }
   return result;
 }
-
