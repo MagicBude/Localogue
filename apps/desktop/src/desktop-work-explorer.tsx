@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -50,6 +51,18 @@ interface ExplorerData {
   mediaScanRoots: FilterOption[];
 }
 
+/**
+ * Desktop 没有 URL Router，因此作品列表返回状态由应用壳保存这一份轻量快照。
+ * 快照只包含 Presentation / Query 状态，不复制查询结果；返回时仍由 Repository
+ * 用同一 WorkQuery 重新读取数据，避免缓存实体与磁盘真相发生漂移。
+ */
+export interface DesktopWorkExplorerState {
+  query: WorkQuery;
+  page: number;
+  view: DesktopWorkViewMode;
+  scrollY: number;
+}
+
 export function DesktopWorkExplorer({
   repository,
   onOpen,
@@ -58,6 +71,8 @@ export function DesktopWorkExplorer({
   pageSize = 24,
   storageKey = "localogue.desktop.work-view",
   initialQuery,
+  initialState,
+  onStateChange,
 }: {
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
@@ -66,16 +81,32 @@ export function DesktopWorkExplorer({
   pageSize?: number;
   storageKey?: string;
   initialQuery?: WorkQuery;
+  initialState?: DesktopWorkExplorerState;
+  onStateChange?: (state: DesktopWorkExplorerState) => void;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
   const loadMorePending = useRef(false);
-  const [query, setQuery] = useState<WorkQuery>(() => ({ sort: "release_desc", ...initialQuery }));
-  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState<WorkQuery>(() => initialState?.query ?? ({ sort: "release_desc", ...initialQuery }));
+  const [page, setPage] = useState(() => initialState?.page ?? 1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
+    if (initialState) return initialState.view;
     const saved = window.localStorage.getItem(storageKey);
     return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
+  const scrollRestored = useRef(false);
+
+  const publishState = useCallback((scrollY = window.scrollY) => {
+    onStateChange?.({ query, page, view, scrollY });
+  }, [onStateChange, page, query, view]);
+
+  // 查询、分页和视图变化后立即更新壳层快照；滚动单独监听，避免把滚动位置放进 React state。
+  useEffect(() => publishState(), [publishState]);
+  useEffect(() => {
+    const handleScroll = () => publishState(window.scrollY);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [publishState]);
 
   const data = useAsyncExplorerData(async () => {
     // 瀑布流的 page 表示“已加载批次”。Repository 仍执行同一个 WorkQuery，
@@ -212,6 +243,14 @@ export function DesktopWorkExplorer({
     if (!data.refreshing) loadMorePending.current = false;
   }, [data.refreshing, data.value]);
 
+  // 等结果重新渲染、页面重新获得足够高度后再还原位置，防止浏览器先把 scrollY 截断为 0。
+  useLayoutEffect(() => {
+    if (scrollRestored.current || data.loading || !data.value || initialState === undefined) return;
+    scrollRestored.current = true;
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: initialState.scrollY, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [data.loading, data.value, initialState]);
+
   function changeQuery(next: WorkQuery): void {
     setPage(1);
     setQuery(next);
@@ -232,6 +271,16 @@ export function DesktopWorkExplorer({
     loadMorePending.current = true;
     setPage((value) => value + 1);
   }, [data.refreshing, hasMoreWaterfallItems]);
+
+  function openWork(id: string): void {
+    publishState(window.scrollY);
+    onOpen(id);
+  }
+
+  function openPerson(id: string): void {
+    publishState(window.scrollY);
+    onOpenPerson?.(id);
+  }
 
   if (data.loading) return <ExplorerState>{t("正在读取作品与 Facet…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取作品。")}</ExplorerState>;
@@ -263,8 +312,8 @@ export function DesktopWorkExplorer({
         <DesktopWorkResults
           cards={cards}
           view={view}
-          onOpen={onOpen}
-          onOpenPerson={onOpenPerson}
+          onOpen={openWork}
+          onOpenPerson={onOpenPerson ? openPerson : undefined}
           onSelectGenre={(id) => changeQuery({ ...query, genreIds: [id] })}
           onSelectTag={(id) => changeQuery({ ...query, tagIds: [id] })}
         />

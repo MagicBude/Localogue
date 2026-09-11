@@ -14,7 +14,7 @@ import { sortWorkAssetsForManagement } from "./desktop-asset-order";
 import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { resolveWorkPresentation } from "./desktop-presentation";
 import { DesktopWorkAssetGallery } from "./desktop-work-asset-gallery";
-import { DesktopWorkExplorer } from "./desktop-work-explorer";
+import { DesktopWorkExplorer, type DesktopWorkExplorerState } from "./desktop-work-explorer";
 import { DesktopWorkMediaSection } from "./desktop-work-media-section";
 import { DesktopFavoriteButton } from "./desktop-favorite-button";
 import { DesktopRatingControl } from "./desktop-rating-control";
@@ -36,6 +36,8 @@ export function DesktopWorksPage({
   onLibraryChanged,
   setMessage,
   initialQuery,
+  initialState,
+  onExplorerStateChange,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
@@ -43,6 +45,8 @@ export function DesktopWorksPage({
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
   initialQuery?: WorkQuery;
+  initialState?: DesktopWorkExplorerState;
+  onExplorerStateChange?: (state: DesktopWorkExplorerState) => void;
 }) {
   const { t } = useDesktopI18n();
   return (
@@ -53,7 +57,7 @@ export function DesktopWorksPage({
         <p>{t("对齐 Web 的多维筛选：演员、导演、年份、作品类型、厂商、厂牌、系列、Genre、Tag、日期、时长、封面与本地媒体，并保留海报墙 / 列表 / 表格三种视图。")}</p>
       </section>
       <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} />
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} onStateChange={onExplorerStateChange} />
     </div>
   );
 }

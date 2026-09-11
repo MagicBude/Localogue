@@ -24,6 +24,7 @@ import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 import { UiToast, type ToastTone } from "./ui/toast";
+import type { DesktopWorkExplorerState } from "./desktop-work-explorer";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -69,6 +70,7 @@ type NavigationLocation = {
   page: DesktopPage;
   detail: DetailTarget;
   worksInitialQuery: WorkQuery | undefined;
+  worksExplorerState: DesktopWorkExplorerState | undefined;
 };
 
 export default function App() {
@@ -95,8 +97,9 @@ export default function App() {
   // Desktop 没有浏览器 URL 路由，因此显式保存用户真正访问过的位置。
   // 这样 Work -> Person -> Work 的关系跳转仍能逐级返回，而不是按实体类型猜测返回哪个列表。
   const navigationHistory = useRef<NavigationLocation[]>([]);
-  const currentLocation = useRef<NavigationLocation>({ page, detail, worksInitialQuery });
-  currentLocation.current = { page, detail, worksInitialQuery };
+  const worksExplorerState = useRef<DesktopWorkExplorerState | undefined>(undefined);
+  const currentLocation = useRef<NavigationLocation>({ page, detail, worksInitialQuery, worksExplorerState: undefined });
+  currentLocation.current = { page, detail, worksInitialQuery, worksExplorerState: worksExplorerState.current };
 
   /**
    * 所有页面状态消息从这里汇合，因此日志接入不需要让一百多个调用点分别理解文件 I/O。
@@ -214,26 +217,32 @@ export default function App() {
     navigationHistory.current = [];
     setPage(next);
     setDetail(null);
-    if (next === "works") setWorksInitialQuery(undefined);
+    if (next === "works") {
+      worksExplorerState.current = undefined;
+      setWorksInitialQuery(undefined);
+    }
   }, []);
 
   const filterWorks = useCallback((query: WorkQuery) => {
     navigationHistory.current = [];
+    worksExplorerState.current = undefined;
     setWorksInitialQuery(query);
     setDetail(null);
     setPage("works");
   }, []);
 
   const openWork = useCallback((id: string) => {
-    navigationHistory.current.push(currentLocation.current);
+    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current });
     setPage("works");
     setDetail({ kind: "work", id });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   const openPerson = useCallback((id: string) => {
-    navigationHistory.current.push(currentLocation.current);
+    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current });
     setPage("people");
     setDetail({ kind: "person", id });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   const returnToPreviousLocation = useCallback(() => {
@@ -245,10 +254,15 @@ export default function App() {
     setPage(previous.page);
     setDetail(previous.detail);
     setWorksInitialQuery(previous.worksInitialQuery);
+    worksExplorerState.current = previous.worksExplorerState;
   }, []);
 
   const refreshLibrary = useCallback(() => {
     setLibraryEpoch((value) => value + 1);
+  }, []);
+
+  const updateWorksExplorerState = useCallback((state: DesktopWorkExplorerState) => {
+    worksExplorerState.current = state;
   }, []);
 
   const startUnifiedSync = useCallback(() => {
@@ -453,7 +467,7 @@ export default function App() {
               setMessage={setMessage}
             />
           ) : (
-            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} />
+            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
           )
         ) : page === "favorites" ? (
           <DesktopFavoritesPage
