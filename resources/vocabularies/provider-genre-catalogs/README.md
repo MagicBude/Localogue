@@ -2,6 +2,8 @@
 
 这里保存的是 **Provider Coverage 的输入快照**，不是 Localogue Canonical Genre 本身。
 
+包含大量未映射词的完整抓取证据放在 `resources/provider-evidence/`；本目录继续只保存达到 Runtime Coverage 门槛的受控 Catalog，避免把“抓到了”误报成“已经安全映射”。
+
 ## 状态语义
 
 - `label-snapshot`：已经确认来源标签，但没有为了凑数据伪造 Provider ID；

@@ -363,6 +363,14 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - 损坏 NFO 继续由 NFO Preview 报错，未知视频继续作为未识别 MediaFile 保留；
 - 新增匿名字符串验收脚本，不读取用户真实资料。
 
+### V1-28 JavBus Genre Provider Evidence
+
+- 完整保存 888 条 JavBus Genre 来源记录、839 个名称/页面分类组合与 807 个唯一名称；
+- 保存原文、来源分区、页面分类、Provider ID、URL、采集时间与响应/提取摘要；
+- 新增显式联网刷新、离线路由重算和来源证据校验命令；
+- 当前路由为 184 Genre / 12 Work Type / 10 Source-only / 12 Review / 1 Ambiguous / 588 Unmapped；
+- `censored:hd` 来源 ID 冲突保持待审，不覆盖 Canonical。
+
 ## 下一阶段建议
 
 **下一阶段建议：Community Catalog Coverage Round 2 + Works 多维筛选规划。**

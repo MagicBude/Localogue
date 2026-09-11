@@ -45,6 +45,7 @@
 - [词表总览](vocabulary/README.md)
 - [作品类型](vocabulary/work-types.md)
 - [Genre](vocabulary/genres.md)
+- [JavBus Genre 来源快照与分类](vocabulary/javbus-genre-audit.md)
 - [人物状态](vocabulary/person-statuses.md)
 - [职业事件](vocabulary/career-events.md)
 - [人物姓名类型](vocabulary/person-name-types.md)

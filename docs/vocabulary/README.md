@@ -65,4 +65,6 @@ pnpm validate:provider-coverage
 
 Provider 快照与覆盖率规则见 [Provider Genre Coverage](./provider-coverage.md)。覆盖率报告用于发现未识别词，不会自动把未识别词创建成 Genre。
 
+JavBus 完整来源快照、分类方法与刷新命令见 [JavBus Genre 索引审计](./javbus-genre-audit.md)。
+
 V1-25C 起，Provider ID 与名称 Evidence 分离：`genre-source-aliases.*` 的 `idSource` 才表示 `sourceId` 属于哪个 Provider；`sources` 只表示名称曾在哪些来源出现，不能据此复制 ID。
