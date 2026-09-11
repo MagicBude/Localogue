@@ -14,9 +14,11 @@
 
 用于批量交换，不作为唯一真相源。
 
-## V2：SQLite
+## V2：SQLite（已开始）
 
 当需要更大规模、高频组合筛选、聚合 Facet、FTS 和事务时迁移。
+
+V2 采用两个数据库：公共只读 `catalog.db` 与私人可写 `local.db`。Shared Pack 是 Curated Catalog 的发布包，不再被描述为另一套 Canonical 数据库。详细决策见 ADR-046。
 
 ## 迁移要求
 

@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-11 启动 V2 Storage Migration。第一节点建立 ADR-046、`catalog.db` Schema 和 Community JSON → SQLite 原子构建/对账工具；公共 Catalog 与私人 Library 将分别进入只读 `catalog.db` 和可写 `local.db`。当前运行时仍读 JSON，待 SQLite Repository 查询对账后再切换，避免一次性替换造成数据风险。
+
 2026-09-11 用户确认 JavBus 分类分流原则后，已用 OpenCC 香港繁体转简体执行第一批保守精确归并：60 个来源词唯一命中既有 Genre / Work Type / Source-only，未新建 Canonical Genre。当前为 239 Genre / 16 Work Type / 11 Source-only / 12 Review / 1 Ambiguous / 528 Unmapped；541 项审核 CSV 继续保留来源证据和人工结论列。
 
 2026-09-11 Desktop 作品海报墙开始按 JavBoss 的横向封面卡片范式收敛：封面墙与瀑布流不再只是同一卡片的排列差异，前者优先横向 `cover`、固定信息密度并限制标题/人物/分类行数，后者保留连续浏览和竖版首图。当前开发资料库实测 46 个 Work、0 个 Asset，因此现有番号占位图属于没有封面数据，不是图片组件渲染失败；需要通过本地图片同步、手工图片导入、来源封面接入或显式视频抽帧补齐。界面布局等待用户实机验收。

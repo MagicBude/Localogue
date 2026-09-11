@@ -4847,6 +4847,36 @@
         "id": "rating_adults_only"
       },
       "decision": "recognized-source-only"
+    },
+    {
+      "communityId": "genre_000324",
+      "facet": "theme",
+      "assignmentTarget": "genreIds",
+      "names": {
+        "ja": "初体験",
+        "zh-CN": "初次体验",
+        "en": "First Experience"
+      },
+      "target": {
+        "kind": "genre",
+        "id": "first_experience"
+      },
+      "decision": "community-canonical-genre"
+    },
+    {
+      "communityId": "genre_000325",
+      "facet": "practice",
+      "assignmentTarget": "genreIds",
+      "names": {
+        "ja": "性感開発",
+        "zh-CN": "性感开发",
+        "en": "Sensuality Development"
+      },
+      "target": {
+        "kind": "genre",
+        "id": "sensuality_development"
+      },
+      "decision": "community-canonical-genre"
     }
   ]
 }

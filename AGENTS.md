@@ -4,11 +4,11 @@
 
 ## 一、当前阶段
 
-当前阶段：**V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。
+当前阶段：**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite**。
 
 V1 当前约束：
 
-- 使用 JSON Repository，不引入 SQLite / ORM；
+- 保留 JSON Repository 作为交换与回退 Adapter，通过 Repository 分阶段引入 SQLite；
 - 不接入在线爬虫或必须联网的数据源；
 - 不实现播放器、转码和复杂微服务；
 - 不用临时代码绕开既有 Domain Model；

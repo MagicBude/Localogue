@@ -4123,6 +4123,30 @@
         "wardrobe"
       ],
       "communityGenreIds": []
+    },
+    {
+      "id": "first_experience",
+      "ja": "初体験",
+      "zh-CN": "初次体验",
+      "en": "First Experience",
+      "facets": [
+        "theme"
+      ],
+      "communityGenreIds": [
+        "genre_000324"
+      ]
+    },
+    {
+      "id": "sensuality_development",
+      "ja": "性感開発",
+      "zh-CN": "性感开发",
+      "en": "Sensuality Development",
+      "facets": [
+        "practice"
+      ],
+      "communityGenreIds": [
+        "genre_000325"
+      ]
     }
   ]
 }

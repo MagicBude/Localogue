@@ -47,6 +47,8 @@
     "vocabulary:provider-coverage": "node scripts/report-provider-coverage.mjs",
     "validate:registry": "node scripts/validate-entity-registry.mjs",
     "validate:catalog": "node scripts/validate-community-catalog.mjs",
+    "catalog:sqlite:build": "node scripts/build-catalog-sqlite.mjs",
+    "catalog:sqlite:validate": "node scripts/validate-catalog-sqlite.mjs",
     "registry:audit": "node scripts/audit-organization-series.mjs",
     "registry:coverage": "node scripts/report-entity-registry-coverage.mjs"
   },

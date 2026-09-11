@@ -2,7 +2,7 @@
 
 Genre 是 Localogue 的**内容题材 / 角色 / 服装 / 体型 / 行为 / 玩法等可复用内容分类**，不等于来源网站所有名为 `genre` / `tag` 的分类桶。
 
-V1-25A 将主仓库原有 33 个稳定 Genre ID 与 `localogue-community-data` 的 323 条 Classification Crosswalk、两份 MetaTube 日文分类参考表系统性合并；V1-25B 再根据 FANZA 2026 Provider Snapshot 补入一批此前确实缺失的稳定概念。当前主仓库维护 **359 个 Canonical Genre**：
+V1-25A 将主仓库原有 33 个稳定 Genre ID 与 `localogue-community-data` Classification Crosswalk、两份 MetaTube 日文分类参考表系统性合并；V1-25B 再根据 FANZA 2026 Provider Snapshot 补入一批此前确实缺失的稳定概念。V2 SQLite 迁移前补齐社区新增的 `初体験` 与 `性感開発`，当前主仓库维护 **361 个 Canonical Genre**：
 
 - `resources/vocabularies/genres.json`
 - `resources/vocabularies/genres.csv`

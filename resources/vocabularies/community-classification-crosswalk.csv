@@ -322,3 +322,5 @@ genre_000320,media,mediaFormat,SD,标清,Standard Definition,sourceOnly,media_sd
 genre_000321,rating,contentRating,R-18,R-18,R-18,sourceOnly,rating_r18,recognized-source-only
 genre_000322,rating,contentRating,R-15,R-15,R-15,sourceOnly,rating_r15,recognized-source-only
 genre_000323,rating,contentRating,成人指定,成人限定,Adults Only,sourceOnly,rating_adults_only,recognized-source-only
+genre_000324,theme,genreIds,初体験,初次体验,First Experience,genre,first_experience,community-canonical-genre
+genre_000325,practice,genreIds,性感開発,性感开发,Sensuality Development,genre,sensuality_development,community-canonical-genre

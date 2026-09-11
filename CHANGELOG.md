@@ -1,5 +1,7 @@
 # Changelog
 
+- Community Catalog 的 `初体験`、`性感開発` 补入稳定 Canonical Genre 与 Crosswalk，公共分类达到 325 / 325 全映射；SQLite 构建时将旧 `genre_000xxx` 分别归入 Genre、Work Type 和 Source-only 关系，不把旧混合分类 ID 带入运行时关系表。
+- 启动 V2 SQLite 存储迁移：以 ADR-046 将数据收敛为 Source Evidence、Curated Catalog 与 Personal Library，明确 Shared Pack 只是 Catalog 发布包；新增标准 SQLite 3 `catalog.db` Schema、原子 JSON 构建器和逐集合/完整性/外键对账脚本。现阶段不切换运行时默认 Repository，JSON 继续作为可回滚来源。
 - JavBus 分类固化脚本停止重排既有 Alias，只在末尾追加新审核结论，避免 Git 将位置变化显示成大量删除与新增；审核队列移除的条目仍完整保存在正式 Alias 和 Provider Evidence 中。
 - 按用户确认的分类原则应用第一批 JavBus 来源词：引入仅用于离线治理脚本的 OpenCC，将 60 个香港繁体词在转简体后唯一精确命中现有 Genre / Work Type / Source-only，并生成可重复执行、默认预览的固化脚本。未映射降至 528；复合词和 `手淫` 的 Provider 语义歧义继续失败关闭。
 - 新增 JavBus 分类人工审核表：12 个 review-required、1 个运行时歧义和 588 个未映射来源词集中到可填写 CSV；重建时保留审核决定、目标 ID 与备注。明确 `手淫` 是 JavDB Provider 别名同时命中 masturbation / handjob，而未映射不等同于应批量新增 Genre。

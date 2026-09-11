@@ -23,7 +23,7 @@
 
 ## V1.x：资料治理与 Desktop 对齐
 
-当前已推进到 **V1-24 Foundation Cleanup：Library Profiles / Source Model / Rich Fixture**。V1-24A 已完成 Presentation Preference Workbench；Foundation Cleanup 进一步加入多资料库 Library Profile、资料源设置收敛、全根目录 Unified Sync 完成语义、Desktop bundle 拆分与更丰富的示例/测试资料库，同时保持 V1-23 Governance 与 Shared Pack Native 只读边界。
+当前已进入 **V2 Storage Migration**。V1 的 JSON Repository 与完整 Desktop 业务链继续作为可运行回退；V2 将公共 Curated Catalog 构建为只读 `catalog.db`，并逐步把私人状态迁移到可写 `local.db`。Repository Contract Test 通过前不切换默认实现。
 
 已完成重点：
 

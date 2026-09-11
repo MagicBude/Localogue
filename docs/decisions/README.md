@@ -84,3 +84,4 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 - [ADR-042：首次使用只选择内容目录](ADR-042-guided-first-library-setup.md)
 
 - [ADR-040：用 Library Profile 组织 Desktop 本机资料源](ADR-040-library-profiles-group-desktop-sources.md)
+- [ADR-046：公共 Catalog 与私人资料分别使用 SQLite](ADR-046-sqlite-catalog-and-personal-databases.md)

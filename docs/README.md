@@ -164,6 +164,7 @@
 - [学习路线：从网页到数据库](development/learning-path.md)
 - [V1-01 基础实现导读](development/v1-foundation-walkthrough.md)
 - [教材：JSON Repository](development/json-repository-walkthrough.md)
+- [教材：Curated Catalog 构建为 SQLite](development/sqlite-catalog-walkthrough.md)
 - [代码规范](development/coding-guidelines.md)
 - [测试原则](development/testing.md)
 - [Dev Fixture Library](development/dev-fixture-library.md)

@@ -2,7 +2,7 @@
 
 Localogue 主仓库不会复制 `localogue-community-data` 的真实公共实体成为第二份真相，但受控词表属于程序语义，因此可以建立稳定 Crosswalk。
 
-V1-25A 对 Community v0.3.1 的 **323 条 classification 做到 323 / 323 明确分流**：
+当前对 Community 的 **325 条 classification 做到 325 / 325 明确分流**：
 
 | 目标 | Community 行数 | 说明 |
 |---|---:|---|
