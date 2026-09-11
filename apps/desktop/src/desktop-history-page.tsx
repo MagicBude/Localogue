@@ -9,6 +9,7 @@ import type { Work } from "@/domain/entities/work";
 import { useDesktopI18n } from "./desktop-i18n";
 import { GovernanceTitle } from "./desktop-page-primitives";
 import { desktopBridge } from "./tauri-bridge";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 /**
  * History 页面封装完整恢复用例：Restore Snapshot -> Restore Receipt -> Provenance。
@@ -16,6 +17,7 @@ import { desktopBridge } from "./tauri-bridge";
  */
 export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, openWork }: { privateRoot: string; onLibraryChanged: () => void; setMessage: (value: string) => void; openWork: (id: string) => void }) {
   const { t } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const [commits, setCommits] = useState<CanonicalCommitReceipt[]>([]);
   const [restores, setRestores] = useState<CanonicalRestoreReceipt[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, 
 
   async function restore(commit: CanonicalCommitReceipt): Promise<void> {
     if (!commit.snapshotId || restoredIds.has(commit.id)) return;
-    if (!window.confirm(`确认恢复 ${commit.targetWorkCode} 到该 Commit 之前的状态？`)) return;
+    if (!await confirm({ title: t("确认"), description: `确认恢复 ${commit.targetWorkCode} 到该 Commit 之前的状态？`, confirmLabel: t("确认"), dangerous: true })) return;
     setBusyId(commit.id);
     try {
       const count = await desktopBridge.restoreGovernanceSnapshot(commit.snapshotId);

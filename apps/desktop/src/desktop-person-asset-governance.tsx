@@ -9,6 +9,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 const PERSON_ASSET_NATIVE_CONTRACT_REVISION = 3;
 const fileOpener = new TauriFileOpenerAdapter();
@@ -31,6 +32,7 @@ export function PersonAssetGovernance({
   setMessage: (message: string) => void;
 }) {
   const { t, assetTypeLabel } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const ordered = useMemo(() => orderAssets(assets, resolved?.id), [assets, resolved?.id]);
   const [activeId, setActiveId] = useState<string | undefined>(resolved?.id ?? ordered[0]?.id);
   const [busy, setBusy] = useState(false);
@@ -105,7 +107,7 @@ export function PersonAssetGovernance({
         setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
         return;
       }
-      if (!window.confirm(t("把这个人物 Private Asset 移入回收站？\n\n{path}\n\n可以恢复；若它仍被首选头像引用，需要先恢复默认。", { path: asset.storagePath }))) return;
+      if (!await confirm({ title: t("确认"), description: t("把这个人物 Private Asset 移入回收站？\n\n{path}\n\n可以恢复；若它仍被首选头像引用，需要先恢复默认。", { path: asset.storagePath }), confirmLabel: t("删除"), dangerous: true })) return;
       await recyclePrivateAsset(repository, asset, person);
       setMessage(t("人物图片已移入回收站；content-addressed 图片文件保留。"));
       onLibraryChanged();

@@ -6,6 +6,7 @@ import type { Person, PersonActivityStatus, PersonName, PersonNameType } from "@
 import { useDesktopI18n } from "./desktop-i18n";
 import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 /** Desktop Person 的新建与编辑表单；名称类型在本模块内保持明确语义。 */
 export function CreatePersonPanel({ repository, onSaved, setMessage }: { repository: TauriLibraryRepository; onSaved: (person: Person) => void; setMessage: (message: string) => void }) {
@@ -53,6 +54,7 @@ export function PersonEditor(props: { repository: TauriLibraryRepository; person
 
 function PersonEditorSession({ repository, person, onSaved, onDeleted, setMessage, onCancel }: { repository: TauriLibraryRepository; person: Person; onSaved: () => void; onDeleted: () => void; setMessage: (message: string) => void; onCancel: () => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -107,7 +109,7 @@ function PersonEditorSession({ repository, person, onSaved, onDeleted, setMessag
 
   async function remove(): Promise<void> {
     if (operationPending.current) return;
-    if (!isPrivate || !window.confirm(t("删除 Private Person {name}？", { name: getPreferredPersonName(person, metadataLanguage) }))) return;
+    if (!isPrivate || !await confirm({ title: t("确认"), description: t("删除 Private Person {name}？", { name: getPreferredPersonName(person, metadataLanguage) }), confirmLabel: t("删除"), dangerous: true })) return;
     operationPending.current = true;
     setBusy(true);
     try { await repository.deletePrivatePerson(person.id); setMessage(t("已删除 Private Person。")); onDeleted(); }

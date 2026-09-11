@@ -23,6 +23,7 @@ import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { UiEmptyState } from "./ui/feedback";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 // Adapter 没有 React 状态，可以在模块级复用；每次渲染重新 new 只会制造无意义对象。
 const fileOpener = new TauriFileOpenerAdapter();
@@ -83,6 +84,7 @@ export function DesktopWorkDetailPage({
   filterWorks: (query: WorkQuery) => void;
 }) {
   const { t, metadataLanguage, assetTypeLabel } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const data = useStableAsyncData(async () => {
     const work = await repository.findWorkById(id);
     if (!work) return null;
@@ -129,7 +131,7 @@ export function DesktopWorkDetailPage({
         setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
         return;
       }
-      if (!window.confirm(t("从 {code} 移除这个 Private Asset 记录？\n\n{path}\n\n可以通过“恢复最近移除”找回；原图和管理副本均不会删除。", { code: work.code, path: asset.storagePath }))) return;
+      if (!await confirm({ title: t("确认"), description: t("从 {code} 移除这个 Private Asset 记录？\n\n{path}\n\n可以通过“恢复最近移除”找回；原图和管理副本均不会删除。", { code: work.code, path: asset.storagePath }), confirmLabel: t("删除"), dangerous: true })) return;
       await recyclePrivateAsset(repository, asset, work);
       setMessage(t("已从 {code} 移入图片回收站；原图和管理副本均未删除。", { code: work.code }));
       onLibraryChanged();

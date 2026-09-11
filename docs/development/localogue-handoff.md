@@ -4,6 +4,8 @@
 
 当前最新导航节点：详情页只保留右下角悬浮返回；作品与人物分页共用 `desktop-pagination.tsx`，只在吸顶筛选区显示。顶部应用框架新增作品搜索和紧凑语言菜单，删除重复设置与手动刷新。继续开发时不要重做分页或浏览快照，先验收长页面中段返回、吸顶翻页、搜索、翻页后定位和多级关系返回。
 
+统一确认节点：全部 `window.confirm` 已由应用级 `UiConfirmProvider` 替换。后续不要在业务页面重新引入浏览器原生确认框；实际删除、Review Commit 和 History Restore 需使用隔离测试库验收确认 / 取消分支。
+
 ## 代码与本机数据
 
 - 仓库：`https://github.com/MagicBude/Localogue.git`，当前工作分支 `main`。

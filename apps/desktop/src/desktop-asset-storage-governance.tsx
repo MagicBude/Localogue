@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { DesktopAssetStorageHealth } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
 import { desktopBridge } from "./tauri-bridge";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 const ASSET_STORAGE_NATIVE_CONTRACT_REVISION = 4;
 
@@ -16,6 +17,7 @@ export function DesktopAssetStorageGovernance({
   setMessage: (message: string) => void;
 }) {
   const { t } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const [health, setHealth] = useState<DesktopAssetStorageHealth | null>(null);
   const [busy, setBusy] = useState(false);
   const nativeReady = runtimeContractRevision >= ASSET_STORAGE_NATIVE_CONTRACT_REVISION;
@@ -47,10 +49,10 @@ export function DesktopAssetStorageGovernance({
 
   async function cleanup(): Promise<void> {
     if (!health?.orphanFiles.length || !nativeReady) return;
-    const confirmed = window.confirm(t(
+    const confirmed = await confirm({ title: t("确认"), description: t(
       "清理 {count} 个孤儿文件并回收 {bytes}？\n\n只删除当前 Private Library/asset-files 中没有任何 Asset JSON 引用的普通文件。",
       { count: health.orphanFiles.length, bytes: formatBytes(health.reclaimableBytes) },
-    ));
+    ), confirmLabel: t("确认"), dangerous: true });
     if (!confirmed) return;
 
     setBusy(true);

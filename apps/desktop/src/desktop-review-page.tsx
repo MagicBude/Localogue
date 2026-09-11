@@ -19,6 +19,7 @@ import { CommitPlanView, EntityDecisionList, FieldDecisionTable } from "./deskto
 import { desktopVocabularyRepository } from "./desktop-vocabulary-repository";
 import type { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 interface DesktopReviewPageProps {
   repository: TauriLibraryRepository;
@@ -45,6 +46,7 @@ export function DesktopReviewPage({
   reloadSignal = 0,
 }: DesktopReviewPageProps) {
   const { t } = useDesktopI18n();
+  const confirm = useUiConfirm();
   // Inbox 原始证据与生命周期分开保存，因为 Evidence 是不可变来源，忽略/提交状态属于独立审计记录。
   const [records, setRecords] = useState<EvidenceRecord[]>([]);
   const [lifecycles, setLifecycles] = useState<EvidenceLifecycleRecord[]>([]);
@@ -126,7 +128,7 @@ export function DesktopReviewPage({
 
   async function commitPlan(): Promise<void> {
     if (!selected || !built || built.plan.blockers.length) return;
-    if (!window.confirm(`确认执行 ${built.plan.targetWorkCode} 的 ${built.plan.operations.length} 个 Canonical 操作？`)) return;
+    if (!await confirm({ title: t("确认"), description: `确认执行 ${built.plan.targetWorkCode} 的 ${built.plan.operations.length} 个 Canonical 操作？`, confirmLabel: t("确认") })) return;
     setBusy(true);
     let snapshot: CanonicalSnapshot | null = null;
     try {

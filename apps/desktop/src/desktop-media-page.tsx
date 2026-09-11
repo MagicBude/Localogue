@@ -40,6 +40,7 @@ import {
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useStableAsyncData } from "./use-stable-async-data";
+import { useUiConfirm } from "./ui/confirm-dialog";
 import {
   applyVocabularyRepair,
   previewVocabularyRepair,
@@ -88,6 +89,7 @@ export function DesktopMediaPage({
   openWork: (id: string) => void;
 }) {
   const { t } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const [scan, setScan] = useState<MediaScanJobSnapshot | null>(null);
   const [selectedPath, setSelectedPath] = useState("");
   const [probe, setProbe] = useState<DesktopMediaProbeResult | null>(null);
@@ -395,7 +397,7 @@ export function DesktopMediaPage({
 
   async function repairVocabulary(): Promise<void> {
     if (!vocabularyPreview?.affectedWorks) return;
-    if (!window.confirm(t("应用分类修复？只重排 V1-16/17 NFO 自动生成的 Genre / Tag 引用，不会删除用户手工 Tag。"))) return;
+    if (!await confirm({ title: t("确认"), description: t("应用分类修复？只重排 V1-16/17 NFO 自动生成的 Genre / Tag 引用，不会删除用户手工 Tag。"), confirmLabel: t("确认") })) return;
     setVocabularyBusy(true);
     try {
       const result = await applyVocabularyRepair(repository, vocabularyPreview, (value) => fileHash.sha256Text(value));

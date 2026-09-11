@@ -12,6 +12,7 @@ import type { Work, WorkPersonRelation } from "@/domain/entities/work";
 import { useDesktopI18n } from "./desktop-i18n";
 import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
+import { useUiConfirm } from "./ui/confirm-dialog";
 
 /** Desktop Work 的新建与编辑表单；查询和文件写入仍通过 Repository 完成。 */
 export function CreateWorkPanel({
@@ -129,6 +130,7 @@ function WorkEditorSession({
   onCancel,
 }: WorkEditorProps & { onCancel: () => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
+  const confirm = useUiConfirm();
   const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -272,7 +274,7 @@ function WorkEditorSession({
 
   async function remove(): Promise<void> {
     if (operationPending.current) return;
-    if (!isPrivate || !window.confirm(t("删除 Private Work {code}？如 Shared Pack 中存在同 ID，删除后会重新显示 Shared 版本。", { code: work.code }))) return;
+    if (!isPrivate || !await confirm({ title: t("确认"), description: t("删除 Private Work {code}？如 Shared Pack 中存在同 ID，删除后会重新显示 Shared 版本。", { code: work.code }), confirmLabel: t("删除"), dangerous: true })) return;
     operationPending.current = true;
     setBusy(true);
     try {

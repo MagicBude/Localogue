@@ -25,6 +25,7 @@ import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 import { UiToast, type ToastTone } from "./ui/toast";
+import { UiConfirmProvider } from "./ui/confirm-dialog";
 import type { DesktopWorkExplorerState } from "./desktop-work-explorer";
 import {
   activeLibraryProfile,
@@ -437,6 +438,7 @@ export default function App() {
       />
 
       <main className="content-shell">
+        <UiConfirmProvider>
         <DesktopTopbar
           page={page}
           version={runtime?.version}
@@ -545,6 +547,7 @@ export default function App() {
         )}
         </Suspense>
         </DesktopFavoritesProvider>
+        </UiConfirmProvider>
       </main>
     </div>
   );
