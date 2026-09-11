@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 
 import {
   getPreferredPersonName,
@@ -404,16 +405,17 @@ function WorkFacetPanel({
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
 
-        <button type="button" className="ghost-button desktop-facet-clear" hidden={!hasActiveFilters(query)} onClick={() => onChange({ sort: "release_desc" })}>
-          {t("清除")}
-        </button>
         {pagination ? <div className="desktop-facet-pagination">{pagination}</div> : null}
       </div>
 
-      {drawerOpen ? (
-        <div className="desktop-facet-bar__drawer">
-          <div className="desktop-facet-drawer-heading"><div><strong>{t("更多筛选")}</strong><small>{t("选择条件后立即更新作品结果")}</small></div><button type="button" onClick={() => setDrawerOpen(false)}>{t("完成")}</button></div>
-          <div className="desktop-facet-bar__pairs">
+      {drawerOpen && typeof document !== "undefined" ? createPortal(
+        <section aria-label={t("更多筛选")} className="desktop-facet-bar__drawer">
+          <header className="desktop-facet-drawer-heading">
+            <div><strong>{t("筛选作品")}</strong><small>{t("选择条件后立即更新作品结果")}</small></div>
+            <button aria-label={t("关闭")} className="ui-icon-button" type="button" onClick={() => setDrawerOpen(false)}>×</button>
+          </header>
+          <div className="desktop-facet-drawer-body">
+            <div className="desktop-facet-bar__pairs">
             <div className="desktop-filter-pair">
               <label className="field check-inline desktop-facet-fav"><input type="checkbox" checked={query.favoriteOnly === true} onChange={(event) => patch({ favoriteOnly: event.target.checked || undefined })} /><span>{t("仅看收藏")}</span></label>
               <label className="field desktop-facet-rating"><span>{t("评分至少")}</span><select value={query.ratingMin ?? ""} onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}><option value="">{t("任意")}</option><option value="1">★1+</option><option value="2">★2+</option><option value="3">★3+</option><option value="4">★4+</option><option value="5">★5</option></select></label>
@@ -430,9 +432,9 @@ function WorkFacetPanel({
               <BooleanSelect label={t("有封面")} value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
               <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
             </div>
-          </div>
+            </div>
 
-          <div className="desktop-facet-bar__groups">
+            <div className="desktop-facet-bar__groups">
             {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
             <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
             <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
@@ -444,8 +446,14 @@ function WorkFacetPanel({
             <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
             <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
             <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
+            </div>
           </div>
-        </div>
+          <footer className="desktop-facet-drawer-footer">
+            <button type="button" disabled={!hasActiveFilters(query)} onClick={() => onChange({ sort: query.sort ?? "release_desc" })}>{t("清除全部")}</button>
+            <button className="primary-button" type="button" onClick={() => setDrawerOpen(false)}>{t("完成")}</button>
+          </footer>
+        </section>,
+        document.body,
       ) : null}
     </aside>
   );

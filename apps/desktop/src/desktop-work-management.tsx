@@ -37,6 +37,16 @@ export function CreateWorkPanel({
   const [busy, setBusy] = useState(false);
   const operationPending = useRef(false);
 
+  function resetDraft(): void {
+    setCode("");
+    setTitleJa("");
+    setTitleZh("");
+    setTitleEn("");
+    setDescriptionJa("");
+    setDescriptionZh("");
+    setDescriptionEn("");
+  }
+
   async function save(): Promise<void> {
     if (operationPending.current) return;
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
@@ -72,13 +82,7 @@ export function CreateWorkPanel({
         updatedAt: now,
       };
       await repository.saveWork(work);
-      setCode("");
-      setTitleJa("");
-      setTitleZh("");
-      setTitleEn("");
-      setDescriptionJa("");
-      setDescriptionZh("");
-      setDescriptionEn("");
+      resetDraft();
       setOpen(false);
       setMessage(t("已在 Private Library 新建 Work {code}。", { code: work.code }));
       onSaved(work);
@@ -90,12 +94,10 @@ export function CreateWorkPanel({
     }
   }
 
-  return <section className="settings-card compact-management-card">
-    <div className="section-heading">
-      <div><span className="eyebrow">PRIVATE CRUD</span><h2>{t("新建作品")}</h2><p className="muted">{t("直接创建最小 Canonical Work；完整关系可进入详情页继续编辑。")}</p></div>
-      <button className={open ? "ghost-button" : "primary-button"} disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("+ 新建 Work")}</button>
-    </div>
-    {open ? <fieldset className="editor-grid" disabled={busy}>
+  return <div className="desktop-create-work-trigger-row">
+    <button className="primary-button" disabled={busy} onClick={() => setOpen(true)}>{t("+ 新建 Work")}</button>
+    <UiActionDialog wide open={open} onOpenChange={(next) => { setOpen(next); if (!next) resetDraft(); }} title={t("新建作品")} description={t("直接创建最小 Canonical Work；完整关系可进入详情页继续编辑。")} closeLabel={t("关闭")}>
+      <fieldset className="editor-grid desktop-create-work-dialog" disabled={busy}>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} placeholder="MIDV-077" /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} placeholder={t("作品标题")} /></label>
       <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
@@ -103,9 +105,10 @@ export function CreateWorkPanel({
       <label>{t("日文简介")}<textarea value={descriptionJa} onChange={(event) => setDescriptionJa(event.target.value)} rows={4} /></label>
       <label>{t("中文简介")}<textarea value={descriptionZh} onChange={(event) => setDescriptionZh(event.target.value)} rows={4} /></label>
       <label className="span-2">{t("英文简介")}<textarea value={descriptionEn} onChange={(event) => setDescriptionEn(event.target.value)} rows={4} /></label>
-      <div className="span-2 form-actions"><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
-    </fieldset> : null}
-  </section>;
+        <div className="span-2 form-actions"><button type="button" onClick={() => { setOpen(false); resetDraft(); }}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
+      </fieldset>
+    </UiActionDialog>
+  </div>;
 }
 
 interface WorkEditorProps {
