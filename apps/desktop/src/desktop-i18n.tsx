@@ -79,29 +79,33 @@ export function useDesktopI18n(): DesktopI18nValue {
   return value;
 }
 
-export function DesktopLanguageControls() {
+export function DesktopLanguageControls({ compact = false }: { compact?: boolean }) {
   const { uiLanguage, metadataLanguage, setUiLanguage, setMetadataLanguage, t } = useDesktopI18n();
+  const uiSelect = <select value={uiLanguage} onChange={(event) => {
+    const language = event.target.value as SupportedLanguage;
+    setUiLanguage(language);
+    setMetadataLanguage(language);
+  }}><option value="zh-CN">简体中文</option><option value="ja">日本語</option><option value="en">English</option></select>;
+  const metadataSelect = <select value={metadataLanguage} onChange={(event) => setMetadataLanguage(event.target.value as SupportedLanguage)}><option value="ja">日本語</option><option value="zh-CN">简体中文</option><option value="en">English</option></select>;
+
+  if (compact) return (
+    <details className="desktop-language-menu">
+      <summary>{t("语言")}</summary>
+      <div className="desktop-language-menu__panel">
+        <label><span>{t("语言（界面 + 元数据）")}</span>{uiSelect}</label>
+        <label title={t("优先显示所选语言；实体没有对应翻译时保留来源原文。")}><span>{t("元数据语言（高级）")}</span>{metadataSelect}</label>
+      </div>
+    </details>
+  );
   return (
     <div className="desktop-language-controls" aria-label="Localogue language preferences">
       <label>
         <span>{t("语言（界面 + 元数据）")}</span>
-        <select value={uiLanguage} onChange={(event) => {
-          const language = event.target.value as SupportedLanguage;
-          setUiLanguage(language);
-          setMetadataLanguage(language);
-        }}>
-          <option value="zh-CN">简体中文</option>
-          <option value="ja">日本語</option>
-          <option value="en">English</option>
-        </select>
+        {uiSelect}
       </label>
       <label title={t("优先显示所选语言；实体没有对应翻译时保留来源原文。")}>
         <span>{t("元数据语言（高级）")}</span>
-        <select value={metadataLanguage} onChange={(event) => setMetadataLanguage(event.target.value as SupportedLanguage)}>
-          <option value="ja">日本語</option>
-          <option value="zh-CN">简体中文</option>
-          <option value="en">English</option>
-        </select>
+        {metadataSelect}
       </label>
     </div>
   );

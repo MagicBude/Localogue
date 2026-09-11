@@ -81,12 +81,12 @@ export function DesktopPersonExplorer({
   }
 
   const pagination = total > PAGE_SIZE
-    ? <DesktopPagination page={currentPage} pageCount={pageCount} onChange={changePage} />
+    ? <DesktopPagination compact page={currentPage} pageCount={pageCount} onChange={changePage} />
     : undefined;
 
   return (
     <>
-      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} pagination={pagination ? <DesktopPagination compact page={currentPage} pageCount={pageCount} onChange={changePage} /> : undefined} />
+      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} pagination={pagination} />
       <section className="desktop-results-panel desktop-people-results" ref={resultsPanelRef}>
         <div className="desktop-results-toolbar">
           <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
@@ -103,7 +103,6 @@ export function DesktopPersonExplorer({
           ))}
         </div>
         {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
-        {pagination}
       </section>
     </>
   );

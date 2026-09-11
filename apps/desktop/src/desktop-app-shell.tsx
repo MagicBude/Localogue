@@ -1,6 +1,5 @@
 import {
   ArrowSync20Regular,
-  ArrowClockwise20Regular,
   BookDatabase20Regular,
   ChevronLeft20Regular,
   ChevronRight20Regular,
@@ -15,11 +14,12 @@ import {
   Heart20Regular,
   People20Regular,
   SearchSquare20Regular,
+  Search20Regular,
   Wrench20Regular,
   Settings20Regular,
   Toolbox20Regular,
 } from "@fluentui/react-icons";
-import type { ComponentType } from "react";
+import { useState, type ComponentType, type FormEvent } from "react";
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import { activeLibraryProfile } from "./library-profiles";
@@ -115,9 +115,15 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
   </aside>;
 }
 
-/** 顶栏只提供全局展示操作；刷新和导航仍由 App 决定。 */
-export function DesktopTopbar({ page, version, settingsModule, showBack, onBack, onNavigate, onSettingsModule, onRefresh, onOpenSettings }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; showBack?: boolean; onBack?: () => void; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void; onRefresh: () => void; onOpenSettings: () => void }) {
+/** 顶部应用框架只保留跨页面能力；页面设置和数据刷新由各自唯一入口负责。 */
+export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavigate, onSettingsModule }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; onSearch: (text: string) => void; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {
   const { t } = useDesktopI18n();
+  const [searchText, setSearchText] = useState("");
+  function submitSearch(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    const text = searchText.trim();
+    if (text) onSearch(text);
+  }
   const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "favorites"
     ? [
       { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
@@ -139,5 +145,5 @@ export function DesktopTopbar({ page, version, settingsModule, showBack, onBack,
           { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },
         ]
         : [];
-  return <header className="topbar"><div className="topbar-main"><div className="topbar-leading">{showBack && onBack ? <button className="topbar-back-button" type="button" onClick={onBack}><ChevronLeft20Regular />{t("返回上一页")}</button> : null}<span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span></div><div className="topbar-actions"><DesktopLanguageControls /><button className="ghost-button" onClick={onRefresh}><ArrowClockwise20Regular />{t("刷新资料")}</button>{page !== "settings" && page !== "packs" ? <button className="ghost-button" onClick={onOpenSettings}><Settings20Regular />{t("设置")}</button> : null}</div></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
+  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><form className="topbar-search" role="search" onSubmit={submitSearch}><input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} /><button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button></form><DesktopLanguageControls compact /></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
 }

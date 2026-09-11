@@ -98,6 +98,13 @@ export function DesktopWorkExplorer({
   const scrollRestored = useRef(false);
   const resultsPanelRef = useRef<HTMLElement>(null);
 
+  // 顶部全局搜索在用户已经位于 Works 页面时不会触发页面卸载，因此要响应新的入口查询。
+  useEffect(() => {
+    if (initialState || !initialQuery) return;
+    setQuery({ sort: "release_desc", ...initialQuery });
+    setPage(1);
+  }, [initialQuery, initialState]);
+
   const publishState = useCallback((scrollY = window.scrollY) => {
     onStateChange?.({ query, page, view, scrollY });
   }, [onStateChange, page, query, view]);
@@ -336,7 +343,6 @@ export function DesktopWorkExplorer({
             onLoadMore={loadMoreWaterfallItems}
           />
         ) : null}
-        {showPagination ? <DesktopPagination page={page} pageCount={pageCount} onChange={changePage} /> : null}
       </section>
     </div>
   );

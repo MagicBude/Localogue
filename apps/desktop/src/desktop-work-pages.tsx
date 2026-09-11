@@ -22,7 +22,6 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { TauriFileOpenerAdapter } from "./platform/tauri-platform-adapters";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
-import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 
 // Adapter 没有 React 状态，可以在模块级复用；每次渲染重新 new 只会制造无意义对象。
@@ -117,9 +116,8 @@ export function DesktopWorkDetailPage({
   }, [repository, id], toMessage);
 
   // 读取中、失效链接和 I/O 失败也必须保留返回入口，不能把用户困在空页面。
-  const backAction = <UiButton variant="ghost" onClick={onBack}>{t("返回上一页")}</UiButton>;
-  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} action={backAction} />;
-  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("作品不存在。") : t("无法读取资料库。")} description={data.error} action={backAction} />;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("作品不存在。") : t("无法读取资料库。")} description={data.error} />;
   const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation, recycledAsset } = data.value;
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -189,7 +187,6 @@ export function DesktopWorkDetailPage({
 
   return (
     <div className="page-stack desktop-work-detail-page">
-      <button className="back-button" onClick={onBack}>← {t("返回上一页")}</button>
       <DesktopWorkAssetGallery assets={assets} workCode={work.code} mediaCount={media.length} assetTypeLabel={assetTypeLabel} />
       <section className="desktop-work-record desktop-work-record--stacked">
         <div className="desktop-work-record__content">

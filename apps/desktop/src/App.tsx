@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { ChevronLeft20Regular } from "@fluentui/react-icons";
 
 import type {
   DesktopBootstrapSettings,
@@ -440,13 +441,12 @@ export default function App() {
           page={page}
           version={runtime?.version}
           settingsModule={settingsModule}
-          showBack={detail !== null}
-          onBack={returnToPreviousLocation}
+          onSearch={(text) => filterWorks({ text, sort: "release_desc" })}
           onNavigate={navigate}
           onSettingsModule={(module) => { setSettingsModule(module); navigate("settings"); }}
-          onRefresh={refreshLibrary}
-          onOpenSettings={() => navigate("settings")}
         />
+
+        {detail ? <button className="desktop-floating-back" type="button" onClick={returnToPreviousLocation}><ChevronLeft20Regular />{t("返回上一页")}</button> : null}
 
         {message ? <UiToast key={messageState.revision} closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 

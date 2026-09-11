@@ -11,7 +11,6 @@ import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
-import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 import { personActivityStatusLabel } from "./desktop-person-labels";
 
@@ -82,15 +81,13 @@ export function DesktopPersonDetailPage({
     };
   }, [repository, id], toMessage);
 
-  const backAction = <UiButton variant="ghost" onClick={onBack}>{t("返回上一页")}</UiButton>;
-  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} action={backAction} />;
-  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("人物不存在。") : t("无法读取资料库。")} description={data.error} action={backAction} />;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("人物不存在。") : t("无法读取资料库。")} description={data.error} />;
   const { person, workCount, portrait, presentationPreference, presentation, personAssets } = data.value;
   const displayName = getPreferredPersonName(person, metadataLanguage);
 
   return (
     <div className="page-stack">
-      <button className="back-button" onClick={onBack}>← {t("返回上一页")}</button>
       <section className="detail-hero person-detail-hero desktop-person-detail-hero">
         <div className="desktop-person-detail-portrait">
           <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />

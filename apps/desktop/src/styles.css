@@ -63,11 +63,14 @@ p { line-height: 1.68; }
   padding: 0 clamp(24px, 2.2vw, 58px) 54px;
 }
 .topbar { position: sticky; top: 0; z-index: 10; display: grid; gap: 7px; padding: 8px 0; background: rgba(243,243,239,.9); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(220,220,213,.75); }
-.topbar-main { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.topbar-leading { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.topbar-back-button { display: inline-flex; align-items: center; gap: 4px; padding: 7px 10px; font-weight: 750; }
-.topbar-back-button svg { width: 18px; height: 18px; }
+.topbar-main { min-height: 44px; display: grid; grid-template-columns: minmax(130px, 1fr) minmax(260px, 480px) minmax(130px, 1fr); align-items: center; gap: 20px; }
 .topbar-product { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.topbar-search { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 7px; padding: 3px 4px 3px 10px; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); }
+.topbar-search svg { width: 16px; color: var(--muted); }
+.topbar-search input { min-width: 0; border: 0; padding: 6px 2px; background: transparent; box-shadow: none; }
+.topbar-search button { border: 0; padding: 6px 9px; background: transparent; color: var(--muted); }
+.desktop-floating-back { position: fixed; right: 28px; bottom: 24px; z-index: 20; display: inline-flex; align-items: center; gap: 6px; padding: 11px 15px; border-radius: 999px; box-shadow: 0 9px 28px rgba(0,0,0,.2); font-weight: 800; }
+.desktop-floating-back svg { width: 19px; height: 19px; }
 .topbar-actions, .button-row, .row-actions, .people-inline { display: flex; flex-wrap: wrap; gap: 8px; }
 .topbar-actions > button { display: inline-flex; align-items: center; gap: 6px; }
 .topbar-actions > button svg { width: 17px; height: 17px; }
@@ -1199,6 +1202,11 @@ select[multiple] { min-height: 105px; padding: 6px; }
   border-radius: 9px;
   font-size: 10px;
 }
+.desktop-language-menu { position: relative; justify-self: end; }
+.desktop-language-menu > summary { list-style: none; cursor: pointer; border: 1px solid var(--border-strong); border-radius: 9px; background: var(--panel); padding: 8px 12px; font-size: 11px; font-weight: 750; }
+.desktop-language-menu > summary::-webkit-details-marker { display: none; }
+.desktop-language-menu__panel { position: absolute; top: calc(100% + 7px); right: 0; z-index: 30; display: grid; gap: 10px; width: 250px; padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); box-shadow: 0 12px 32px rgba(0,0,0,.18); }
+.desktop-language-menu__panel label { display: grid; gap: 5px; color: var(--muted); font-size: 10px; font-weight: 750; }
 
 /* 顶部筛选栏下没有左侧轨道，整列宽度都留给海报墙。 */
 .desktop-facet-bar .field,
@@ -1229,6 +1237,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
      single source of truth instead of visually forcing a collapsed sidebar. */
   .desktop-layout:not(.is-sidebar-collapsed) { grid-template-columns: 168px minmax(0, 1fr); }
   .topbar-actions { width: 100%; justify-content: flex-start; }
+  .topbar-main { grid-template-columns: auto minmax(220px, 1fr) auto; gap: 10px; }
 }
 @media (max-width: 1040px) {
   /* 此宽度下顶部工具栏会换行，高度不再固定；取消第二层吸顶可避免覆盖。 */
