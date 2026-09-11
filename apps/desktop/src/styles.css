@@ -818,7 +818,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
   box-shadow: 0 18px 54px rgba(0,0,0,.24);
   overflow: hidden;
 }
-.desktop-facet-drawer-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 16px 13px; border-bottom: 1px solid var(--border); }
+.desktop-facet-drawer-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 16px 13px; border-bottom: 1px solid var(--border); cursor: grab; touch-action: none; user-select: none; }
+.desktop-facet-drawer-heading:active { cursor: grabbing; }
 .desktop-facet-drawer-heading > div { display: grid; gap: 3px; }
 .desktop-facet-drawer-heading small { color: var(--muted); font-size: 10px; }
 .desktop-facet-drawer-heading .ui-icon-button { flex: 0 0 auto; font-size: 20px; }

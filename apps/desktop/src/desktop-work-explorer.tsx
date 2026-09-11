@@ -5,7 +5,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ChangeEvent,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
@@ -370,7 +372,35 @@ function WorkFacetPanel({
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
   // 已选条件由徽标和 Chips 持续呈现，重新进入页面时不自动展开浮层遮住作品。
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerPosition, setDrawerPosition] = useState<{ left: number; top: number; height: number }>();
+  const drawerRef = useRef<HTMLElement>(null);
   const advancedCount = countAdvancedFilters(query);
+
+  function beginDrawerDrag(event: ReactPointerEvent<HTMLElement>): void {
+    if (event.button !== 0 || !drawerRef.current) return;
+    const rect = drawerRef.current.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+    event.preventDefault();
+
+    const move = (pointerEvent: PointerEvent) => {
+      const left = Math.min(Math.max(8, pointerEvent.clientX - offsetX), Math.max(8, window.innerWidth - rect.width - 8));
+      const top = Math.min(Math.max(38, pointerEvent.clientY - offsetY), Math.max(38, window.innerHeight - rect.height - 8));
+      setDrawerPosition({ left, top, height: rect.height });
+    };
+    const stop = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", stop, { once: true });
+    window.addEventListener("pointercancel", stop, { once: true });
+  }
+
+  const drawerStyle: CSSProperties | undefined = drawerPosition
+    ? { left: drawerPosition.left, top: drawerPosition.top, right: "auto", bottom: "auto", height: drawerPosition.height }
+    : undefined;
   return (
     <aside className="desktop-facet-bar">
       <div className="desktop-facet-bar__primary">
@@ -409,10 +439,10 @@ function WorkFacetPanel({
       </div>
 
       {drawerOpen && typeof document !== "undefined" ? createPortal(
-        <section aria-label={t("更多筛选")} className="desktop-facet-bar__drawer">
-          <header className="desktop-facet-drawer-heading">
-            <div><strong>{t("筛选作品")}</strong><small>{t("选择条件后立即更新作品结果")}</small></div>
-            <button aria-label={t("关闭")} className="ui-icon-button" type="button" onClick={() => setDrawerOpen(false)}>×</button>
+        <section aria-label={t("更多筛选")} className="desktop-facet-bar__drawer" ref={drawerRef} style={drawerStyle}>
+          <header className="desktop-facet-drawer-heading" onPointerDown={beginDrawerDrag}>
+            <div><strong>{t("筛选作品")}</strong><small>{t("拖动顶部可移动；选择条件后立即更新作品结果")}</small></div>
+            <button aria-label={t("关闭")} className="ui-icon-button" type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => setDrawerOpen(false)}>×</button>
           </header>
           <div className="desktop-facet-drawer-body">
             <div className="desktop-facet-bar__pairs">
