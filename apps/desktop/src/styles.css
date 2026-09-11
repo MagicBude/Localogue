@@ -141,8 +141,10 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .desktop-work-grid > .desktop-work-card:hover,
 .desktop-work-cover-grid > .desktop-work-card:hover { border-color: #b8c9df; box-shadow: 0 10px 24px rgba(35,74,120,.1); transform: translateY(-1px); }
 .desktop-work-grid .desktop-work-card__poster { aspect-ratio: 640 / 900; border: 0; border-radius: 0; box-shadow: none; }
-.desktop-work-cover-grid .desktop-work-card__poster { aspect-ratio: 800 / 538; border: 0; border-radius: 0; box-shadow: none; }
-.desktop-work-cover-grid .desktop-work-card__poster img { object-fit: contain; background: #111; }
+.desktop-work-cover-grid .desktop-work-card__poster { aspect-ratio: auto; border: 0; border-radius: 0; box-shadow: none; }
+/* fanart 比例并不统一。让真实图片撑开媒体区，才能同时做到不裁图、无补边。 */
+.desktop-work-cover-grid .desktop-work-card__poster img { height: auto; object-fit: contain; }
+.desktop-work-cover-grid .desktop-poster-placeholder { aspect-ratio: 800 / 538; }
 .desktop-work-grid .desktop-work-card__body,
 .desktop-work-cover-grid .desktop-work-card__body { flex: 1; padding: 11px 12px 13px; }
 .desktop-work-card__media { position: relative; }

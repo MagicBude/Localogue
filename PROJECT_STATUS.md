@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-2026-09-11 根据实机反馈修正作品展示语义：原 `海报墙` 恢复为 `poster` 竖版海报，JavBoss 式 `fanart` 卡片作为新增的独立 `封面墙`，并以 contain 方式完整展示图片；视图切换扩展为海报墙 / 封面墙 / 瀑布流 / 列表 / 表格五项。自动检查已通过，等待用户实机验收图片比例与信息密度。
+2026-09-11 根据实机反馈修正作品展示语义：原 `海报墙` 恢复为 `poster` 竖版海报，JavBoss 式 `fanart` 卡片作为新增的独立 `封面墙`，fanart 使用自然比例，不强制统一画框，因此不裁图也不补黑边；视图切换扩展为海报墙 / 封面墙 / 瀑布流 / 列表 / 表格五项。自动检查已通过，等待用户实机验收图片比例与信息密度。
 
 2026-09-11 V2 Storage Migration 第二节点建立 `local.db`：迁移器只读现有 Private Library JSON，以临时数据库和 Migration Receipt 完成复制；可重新导出一实体一 JSON。当前开发库已对账 2 个 Presentation Preference 与 2 个 Evidence，原文件保持不变。下一节点开始 Repository Contract 与 Desktop Native SQLite Adapter。
 
@@ -420,3 +420,4 @@ Desktop Vite 配置现在以 `apps/desktop/vite.config.mts` 为唯一正式来�
 ## V1-27C 当前状态
 
 Maker / Label / Series Registry Foundation 已通过 V1-27A/V1-27B 验证；V1-27C 首次建立 Registry Evidence → Community Catalog 的 Canonical 晋升链路。当前 Community Catalog 为 22 Maker / 13 Label / 9 Series；当前 Demo / Private Library 自身仍可保留独立自定义实体，Browse 会在“无作品 / 全部”中与只读 Community Catalog 合并显示。
+
