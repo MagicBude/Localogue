@@ -232,6 +232,12 @@ if (!errors.length) {
   const desktopI18nTranslations = readFileSync(path.join(root, "apps/desktop/src/desktop-i18n-translations.ts"), "utf8");
   const desktopI18n = desktopI18nLogic + desktopI18nTranslations;
   const desktopStyles = readFileSync(path.join(root, "apps/desktop/src/styles.css"), "utf8");
+  if (!rust.includes("read_sqlite_library_collection") || !desktopBridge.includes("readSqliteLibraryCollection")) {
+    errors.push("V2 Desktop 必须保留由 Rust 自行解析允许路径的 SQLite 只读 Adapter。")
+  }
+  if (desktopBridge.includes('readSqliteLibraryCollection: <T>(databasePath')) {
+    errors.push("V2 Desktop WebView 不得向 SQLite Adapter 传入任意数据库路径。")
+  }
   if (!desktopStyles.includes(".desktop-work-gallery__stage.is-landscape")) {
     errors.push("V1-24B Work Hero Gallery 必须保留横版展示样式。");
   }

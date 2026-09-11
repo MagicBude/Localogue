@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use rusqlite::{Connection, OpenFlags};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet, VecDeque},
@@ -148,6 +149,13 @@ struct DesktopSharedPackInfo {
     license: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DesktopSqliteCollection {
+    available: bool,
+    items: Vec<Value>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -1622,6 +1630,91 @@ async fn read_library_collection(library_path: String, collection: String) -> Re
     spawn_native_io("read_library_collection", move || read_library_collection_blocking(library_path, collection)).await
 }
 
+/// 读取当前 Desktop 配置所允许的 SQLite 数据库。
+///
+/// WebView 只能传集合名，不能传数据库路径。Private `local.db`、已挂载 Pack 的
+/// `catalog.db` 以及应用数据目录中的发布库都由 Rust 自行推导，保持 Native Boundary。
+#[tauri::command]
+async fn read_sqlite_library_collection(app: AppHandle, collection: String) -> Result<DesktopSqliteCollection, String> {
+    spawn_native_io("read_sqlite_library_collection", move || read_sqlite_library_collection_blocking(app, collection)).await
+}
+
+fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -> Result<DesktopSqliteCollection, String> {
+    if !matches!(collection.as_str(), "works" | "people" | "organizations" | "series" | "genres" | "tags" | "assets" | "media-files") {
+        return Err(format!("SQLite 不允许读取集合：{collection}"));
+    }
+    let settings = load_desktop_settings(app.clone())?;
+    let mut sources: Vec<(PathBuf, bool)> = Vec::new();
+    if let Some(private) = settings.library_path {
+        sources.push((PathBuf::from(private).join("local.db"), true));
+    }
+    for pack in settings.shared_pack_paths {
+        let root = PathBuf::from(pack);
+        sources.push((root.join("catalog.db"), false));
+    }
+    if let Ok(app_data) = app.path().app_local_data_dir() {
+        sources.push((app_data.join("local.db"), true));
+        sources.push((app_data.join("catalog.db"), false));
+    }
+    #[cfg(debug_assertions)]
+    if let Some(root) = find_workspace_root() {
+        sources.push((root.join(".localogue/local.db"), true));
+        sources.push((root.join(".localogue/catalog.db"), false));
+    }
+
+    let mut available = false;
+    let mut merged = BTreeMap::<String, Value>::new();
+    for (database_path, local) in sources {
+        if !database_path.is_file() || (!local && collection == "media-files") { continue; }
+        available = true;
+        for value in read_sqlite_json_collection(&database_path, local, &collection)? {
+            let Some(id) = value.get("id").and_then(Value::as_str) else { continue; };
+            merged.entry(id.to_string()).or_insert(value);
+        }
+    }
+    Ok(DesktopSqliteCollection { available, items: merged.into_values().collect() })
+}
+
+fn read_sqlite_json_collection(database_path: &Path, local: bool, collection: &str) -> Result<Vec<Value>, String> {
+    let connection = Connection::open_with_flags(database_path, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|error| format!("无法只读打开 SQLite {}：{error}", database_path.display()))?;
+    let (sql, parameter) = if local {
+        if collection == "media-files" { ("SELECT json FROM media_files ORDER BY id", None) }
+        else { ("SELECT json FROM private_entities WHERE collection = ?1 ORDER BY id", Some(collection)) }
+    } else {
+        (match collection {
+            "works" => "SELECT json FROM works ORDER BY id",
+            "people" => "SELECT json FROM people ORDER BY id",
+            "organizations" => "SELECT json FROM organizations ORDER BY id",
+            "series" => "SELECT json FROM series ORDER BY id",
+            "genres" => "SELECT json FROM genres ORDER BY id",
+            "tags" => "SELECT json FROM tags ORDER BY id",
+            "assets" => "SELECT json FROM assets ORDER BY id",
+            _ => return Ok(Vec::new()),
+        }, None)
+    };
+    let mut statement = connection.prepare(sql).map_err(display_error)?;
+    let rows = if let Some(value) = parameter {
+        statement.query_map([value], read_sqlite_json_cell)
+    } else {
+        statement.query_map([], read_sqlite_json_cell)
+    }.map_err(display_error)?;
+    rows.map(|row| {
+        let json = row.map_err(display_error)?;
+        serde_json::from_str(&json).map_err(display_error)
+    }).collect()
+}
+
+fn read_sqlite_json_cell(row: &rusqlite::Row<'_>) -> rusqlite::Result<String> {
+    row.get(0)
+}
+
+#[cfg(debug_assertions)]
+fn find_workspace_root() -> Option<PathBuf> {
+    let current = std::env::current_dir().ok()?;
+    current.ancestors().take(8).find(|path| path.join("pnpm-workspace.yaml").is_file()).map(Path::to_path_buf)
+}
+
 fn read_library_collection_blocking(library_path: String, collection: String) -> Result<Vec<Value>, String> {
     let directory = safe_collection_directory(&library_path, &collection)?;
     if !directory.exists() { return Ok(Vec::new()); }
@@ -2380,6 +2473,28 @@ mod tests {
     use super::*;
 
     #[test]
+    fn sqlite_reader_maps_catalog_and_local_json_without_writing() {
+        let root = std::env::temp_dir().join(format!("localogue-sqlite-reader-{}", now_marker()));
+        fs::create_dir_all(&root).expect("create sqlite temp");
+        let catalog_path = root.join("catalog.db");
+        let local_path = root.join("local.db");
+        {
+            let catalog = Connection::open(&catalog_path).expect("create catalog");
+            catalog.execute_batch("CREATE TABLE works(id TEXT PRIMARY KEY, json TEXT NOT NULL); INSERT INTO works VALUES ('work_catalog', '{\"id\":\"work_catalog\",\"code\":\"CAT-1\"}');").expect("seed catalog");
+            let local = Connection::open(&local_path).expect("create local");
+            local.execute_batch("CREATE TABLE private_entities(collection TEXT, id TEXT, json TEXT NOT NULL); CREATE TABLE media_files(id TEXT PRIMARY KEY, json TEXT NOT NULL); INSERT INTO private_entities VALUES ('works', 'work_private', '{\"id\":\"work_private\",\"code\":\"LOCAL-1\"}'); INSERT INTO media_files VALUES ('media_1', '{\"id\":\"media_1\",\"path\":\"video.mp4\"}');").expect("seed local");
+        }
+
+        let catalog_works = read_sqlite_json_collection(&catalog_path, false, "works").expect("read catalog");
+        let local_works = read_sqlite_json_collection(&local_path, true, "works").expect("read local");
+        let media = read_sqlite_json_collection(&local_path, true, "media-files").expect("read media");
+        assert_eq!(catalog_works[0]["id"], "work_catalog");
+        assert_eq!(local_works[0]["id"], "work_private");
+        assert_eq!(media[0]["id"], "media_1");
+        fs::remove_dir_all(root).expect("cleanup sqlite temp");
+    }
+
+    #[test]
     fn walk_files_skips_localogueignore_subtree() {
         let root = std::env::temp_dir().join(format!("localogue-ignore-{}", now_marker()));
         let included = root.join("included");
@@ -2547,6 +2662,7 @@ pub fn run() {
             sha256_file,
             inspect_shared_pack,
             read_library_collection,
+            read_sqlite_library_collection,
             write_library_entity,
             read_private_audit_collection,
             write_private_audit_entity,

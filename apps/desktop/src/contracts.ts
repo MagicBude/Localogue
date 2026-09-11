@@ -30,6 +30,11 @@ export interface DesktopFileEntry {
   modifiedAt: string;
 }
 
+export interface DesktopSqliteCollection<T = unknown> {
+  available: boolean;
+  items: T[];
+}
+
 
 export interface DesktopImportedAssetFile {
   storagePath: string;

@@ -79,6 +79,11 @@ function insertEntity(db, collection, entity) {
       else if (target?.kind === "sourceOnly") db.prepare("INSERT OR IGNORE INTO work_source_classifications VALUES (?, ?)").run(entity.id, target.id);
       else db.prepare("INSERT OR IGNORE INTO work_unmapped_classifications VALUES (?, ?)").run(entity.id, sourceId);
     }
+    // catalog.db 的 JSON payload 也必须是规范化后的 Domain Work，确保 Web 与 Tauri
+    // 读取同一投影，而不要求每个 Adapter 再解释旧 Community 混合分类。
+    const normalizedGenreIds = db.prepare("SELECT genre_id AS id FROM work_genres WHERE work_id = ? ORDER BY genre_id").all(entity.id).map((row) => row.id);
+    const normalizedWorkTypeIds = db.prepare("SELECT work_type_id AS id FROM work_types WHERE work_id = ? ORDER BY work_type_id").all(entity.id).map((row) => row.id);
+    db.prepare("UPDATE works SET json = ? WHERE id = ?").run(JSON.stringify({ ...entity, genreIds: normalizedGenreIds, workTypeIds: normalizedWorkTypeIds }), entity.id);
   } else if (collection === "people") {
     const primary = (entity.names ?? []).find((name) => name.type === "primary")?.value ?? entity.names?.[0]?.value ?? null;
     db.prepare("INSERT INTO people VALUES (?, ?, ?, ?, ?)").run(entity.id, primary, entity.activityStatus ?? null, entity.birthDate?.value ?? null, json);
@@ -112,7 +117,7 @@ function insertEntity(db, collection, entity) {
 function insertControlledVocabularies(db) {
   const genreStatement = db.prepare("INSERT INTO genres VALUES (?, ?, ?, ?, ?, ?, ?)");
   for (const item of canonicalGenres.items) {
-    genreStatement.run(item.id, item.facets?.[0] ?? null, item.ja, item["zh-CN"], item.en, "active", JSON.stringify(item));
+    genreStatement.run(item.id, item.facets?.[0] ?? null, item.ja, item["zh-CN"], item.en, "active", JSON.stringify({ id: item.id, names: { ja: item.ja, "zh-CN": item["zh-CN"], en: item.en } }));
     for (const language of ["ja", "zh-CN", "en"]) insertName(db, "genre", item.id, language, "primary", item[language], 0);
   }
   const workTypeStatement = db.prepare("INSERT INTO work_type_definitions VALUES (?, ?, ?, ?, ?)");

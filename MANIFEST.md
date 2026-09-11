@@ -2,7 +2,7 @@
 
 ## 阶段名称
 
-**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite。** 已建立标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具，以及 Web 侧 `SqliteLibraryRepository` 和副本式 Contract。Shared Pack 统一解释为 Curated Catalog 的只读发布包；默认运行时仍用 JSON，Desktop Native SQLite Adapter 完成前只允许通过环境变量显式试用。
+**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite。** 已建立标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具、Web Repository Contract，以及 Desktop 受限只读 Native Adapter。Shared Pack 统一解释为 Curated Catalog 的只读发布包；默认运行时仍用 JSON，完成双写与差异对账前不切换 Desktop 读取。
 
 Desktop 全流程审核持续进行：页面顶部移除面向开发阶段的英文口号，标题、说明和主要操作使用紧凑层级，首页欢迎区也收为横向短条。作品详情返回会保留完整浏览现场，详情使用独立悬浮返回，作品与人物分页只在吸顶筛选区显示；顶部应用框架提供全局作品搜索与紧凑语言菜单。作品编辑入口位于详情首屏，并通过宽弹窗集中编辑；收藏成为左侧独立入口，作品筛选只在目录、人物、分类、更多四个小型锚点菜单中展示常用条件。作品海报墙使用横向封面和等高紧凑卡片，标题、人物与分类限制可见行数，瀑布流保留竖版连续浏览。低频关系继续通过分类浏览和详情反向导航进入，已选条件以单行 Chips 呈现。作品新建同样使用紧凑按钮和弹窗，不再用大卡片推迟首屏结果。人物与作品编辑支持取消草稿、保存期完整锁定和重复提交防护；所有高影响操作使用统一应用内确认框；收藏、评分与首图偏好使用同一串行字段合并入口。已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
 

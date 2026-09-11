@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-11 V2 Storage Migration 第四节点建立 Desktop SQLite 只读 Native Adapter：Rust 使用 bundled SQLite，只允许从当前配置推导数据库并以只读方式打开；WebView 不能提供任意路径。Catalog Work/Genre JSON payload 已标准化，Rust 单元测试覆盖 Catalog、Private 与 Media 三类读取。该 Bridge 尚未替换现有 JSON Repository，下一节点先实现双写和双读差异报告。
+
 2026-09-11 V2 Storage Migration 第三节点完成 Web 侧 SQLite Repository 与 Contract：`LOCALOGUE_STORAGE=sqlite` 可显式切换 `catalog.db + local.db`，页面仍只依赖 `LibraryRepository`，过滤/Facet 继续复用 `queryWorks/queryPeople`。Contract 已在数据库副本验证 5 个 Works、13 个 People、番号规范化和 Private Override；默认仍为 JSON，下一节点实现 Desktop Native SQLite Adapter 与真实应用双读对账。
 
 2026-09-11 根据实机反馈修正作品展示语义：原 `海报墙` 恢复为 `poster` 竖版海报，JavBoss 式 `fanart` 卡片作为新增的独立 `封面墙`；fanart 使用自然比例，不强制统一画框，因此不裁图也不补黑边。视图切换扩展为海报墙 / 封面墙 / 瀑布流 / 列表 / 表格五项，等待用户实机验收。

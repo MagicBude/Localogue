@@ -50,6 +50,8 @@ Contract 会复制 `local.db` 到临时文件，在副本中验证作品/人物�
 
 Web 可用 `LOCALOGUE_STORAGE=sqlite` 显式试运行；未设置时继续使用 JSON Repository。当前 Desktop 仍通过 Tauri Native JSON Adapter 读取资料，下一阶段才实现 Native SQLite Adapter，因此不能把 Web Contract 通过描述为 Desktop 已完成切换。
 
+Desktop 已增加 `read_sqlite_library_collection` 原生命令作为迁移边界。调用方只能提供集合名；Rust 从当前设置推导 Private `local.db`、Shared Pack `catalog.db` 和应用数据目录，使用 SQLite read-only flags 打开。当前 Bridge 只用于下一阶段双读对账，尚未替换 JSON Repository；否则编辑仍写 JSON 时会造成数据库内容过期。
+
 ## 私人 local.db
 
 私人 JSON 可以无损复制进可写 `local.db`，来源文件不会被移动或删除：
