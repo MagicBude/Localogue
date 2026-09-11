@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-2026-09-11 JavBus 词表审计进入人工决策阶段：新增 601 项审核 CSV，12 个 review-required 与 1 个歧义置顶，588 个未映射词保留来源分类、分区、ID 和 URL。表格重建会保留人工填写的决定；当前尚未把任何待处理项写入 Canonical，等待用户审核。
+2026-09-11 用户确认 JavBus 分类分流原则后，已用 OpenCC 香港繁体转简体执行第一批保守精确归并：60 个来源词唯一命中既有 Genre / Work Type / Source-only，未新建 Canonical Genre。当前为 239 Genre / 16 Work Type / 11 Source-only / 12 Review / 1 Ambiguous / 528 Unmapped；541 项审核 CSV 继续保留来源证据和人工结论列。
 
 2026-09-11 Desktop 作品海报墙开始按 JavBoss 的横向封面卡片范式收敛：封面墙与瀑布流不再只是同一卡片的排列差异，前者优先横向 `cover`、固定信息密度并限制标题/人物/分类行数，后者保留连续浏览和竖版首图。当前开发资料库实测 46 个 Work、0 个 Asset，因此现有番号占位图属于没有封面数据，不是图片组件渲染失败；需要通过本地图片同步、手工图片导入、来源封面接入或显式视频抽帧补齐。界面布局等待用户实机验收。
 
@@ -370,7 +370,7 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 - 完整保存 888 条 JavBus Genre 来源记录、839 个名称/页面分类组合与 807 个唯一名称；
 - 保存原文、来源分区、页面分类、Provider ID、URL、采集时间与响应/提取摘要；
 - 新增显式联网刷新、离线路由重算和来源证据校验命令；
-- 当前路由为 184 Genre / 12 Work Type / 10 Source-only / 12 Review / 1 Ambiguous / 588 Unmapped；
+- 用户确认分流原则后的当前路由为 239 Genre / 16 Work Type / 11 Source-only / 12 Review / 1 Ambiguous / 528 Unmapped；
 - `censored:hd` 来源 ID 冲突保持待审，不覆盖 Canonical。
 
 ## 下一阶段建议

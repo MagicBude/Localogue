@@ -35,6 +35,7 @@
     "vocabulary:javbus:refresh": "node scripts/audit-javbus-genres.mjs --write && node scripts/write-javbus-routing-audit.mjs && node scripts/write-javbus-manual-review.mjs",
     "vocabulary:javbus:routing": "node scripts/write-javbus-routing-audit.mjs && node scripts/write-javbus-manual-review.mjs",
     "vocabulary:javbus:review": "node scripts/write-javbus-manual-review.mjs",
+    "vocabulary:javbus:apply-reviewed": "node scripts/apply-javbus-reviewed-classifications.mjs --write && pnpm vocabulary:javbus:routing",
     "desktop:demo:seed": "node scripts/manage-dev-fixture.mjs seed",
     "desktop:demo:reset": "node scripts/manage-dev-fixture.mjs reset",
     "desktop:demo:clean": "node scripts/manage-dev-fixture.mjs clean",
@@ -50,11 +51,11 @@
     "registry:coverage": "node scripts/report-entity-registry-coverage.mjs"
   },
   "dependencies": {
+    "exceljs": "4.4.0",
+    "fast-xml-parser": "5.11.1",
     "next": "16.3.3",
     "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "exceljs": "4.4.0",
-    "fast-xml-parser": "5.11.1"
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -62,6 +63,7 @@
     "@types/react-dom": "^19.2.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
+    "opencc-js": "1.4.2",
     "typescript": "5.9.3"
   }
 }

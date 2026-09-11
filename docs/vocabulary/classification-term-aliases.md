@@ -9,12 +9,14 @@
 - 经人工整理的 MetaTube 日文分类参考词；
 - Source-only 分类名称和别名。
 
-当前共登记 **1161 个精确词条**：
+当前共登记 **1226 个精确词条**：
 
-- `approved`：1127 条；必须恰好指向一个 `genre:*`、`workType:*` 或 `sourceOnly:*`，允许自动路由；
-- `review-required`：34 条；只保存候选，不允许自动写入 Canonical。
+- `approved`：1191 条；必须恰好指向一个 `genre:*`、`workType:*` 或 `sourceOnly:*`，允许自动路由；
+- `review-required`：35 条；只保存候选，不允许自动写入 Canonical。
 
 V1-25B 新增 FANZA Provider Snapshot 的精确词条；`独占配信`、促销、竖屏推荐等平台属性进入 Source-only，复合来源桶继续保留 Review。
+
+V1-28 在用户确认分流原则后新增 60 个 JavBus 繁体来源别名：OpenCC 只做香港繁体到简体的字符规范化，转换结果必须唯一精确命中既有目标，不做模糊或语义推断。
 
 ## 核心规则
 

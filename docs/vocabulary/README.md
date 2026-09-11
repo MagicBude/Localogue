@@ -51,7 +51,7 @@ solo
 - `genres.*`：359 个 Canonical Genre；
 - `work-types.*`：43 个 Canonical Work Type；
 - `source-only-classifications.*`：51 个可识别但不提升为 Canonical 的来源属性；
-- `classification-term-aliases.*`：1161 个精确来源词，其中 1127 个可自动路由、34 个必须审核；
+- `classification-term-aliases.*`：1226 个精确来源词，其中 1191 个可自动路由、35 个必须审核；
 - `community-classification-crosswalk.*`：`localogue-community-data` 323 / 323 Classification 到 Localogue Runtime 维度的交叉映射。
 
 辅助命令：
