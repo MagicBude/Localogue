@@ -51,8 +51,9 @@ const NAV_GROUPS: DesktopNavGroup[] = [
     label: "资料库",
     icon: BookDatabase20Regular,
     landingPage: "works",
-    pages: ["works", "people", "browse", "favorites"],
+    pages: ["works", "people", "browse"],
   },
+  { id: "favorites", label: "收藏", icon: Heart20Regular, landingPage: "favorites", pages: ["favorites"] },
   {
     id: "organize",
     label: "导入与整理",
@@ -124,12 +125,11 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
     const text = searchText.trim();
     if (text) onSearch(text);
   }
-  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "favorites"
+  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse"
     ? [
       { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
       { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
       { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
-      { id: "favorites", label: t("我的收藏"), icon: Heart20Regular, active: page === "favorites", onSelect: () => onNavigate("favorites") },
     ]
     : page === "curation" || page === "history"
       ? [

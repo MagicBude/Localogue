@@ -420,9 +420,6 @@ function WorkFacetPanel({
 
         <FilterMenu label={t("分类")} count={countClassificationFilters(query)} open={openMenu === "classification"} onToggle={() => toggleMenu("classification")} onClose={() => setOpenMenu(undefined)}>
           <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
-          <FilterGroup label={t("厂商")} values={query.makerIds} options={data.makers} onChange={(values) => patch({ makerIds: values.length ? values : undefined })} />
-          <FilterGroup label={t("厂牌")} values={query.labelIds} options={data.labels} onChange={(values) => patch({ labelIds: values.length ? values : undefined })} />
-          <FilterGroup label={t("系列")} values={query.seriesIds} options={data.series} onChange={(values) => patch({ seriesIds: values.length ? values : undefined })} />
           <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
           <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
         </FilterMenu>
@@ -430,20 +427,12 @@ function WorkFacetPanel({
         <FilterMenu alignRight label={t("更多")} count={countMoreFilters(query)} open={openMenu === "more"} onToggle={() => toggleMenu("more")} onClose={() => setOpenMenu(undefined)}>
           <div className="desktop-facet-bar__pairs">
             <div className="desktop-filter-pair">
-              <label className="field check-inline desktop-facet-fav"><input type="checkbox" checked={query.favoriteOnly === true} onChange={(event) => patch({ favoriteOnly: event.target.checked || undefined })} /><span>{t("仅看收藏")}</span></label>
               <label className="field desktop-facet-rating"><span>{t("评分至少")}</span><select value={query.ratingMin ?? ""} onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}><option value="">{t("任意")}</option><option value="1">★1+</option><option value="2">★2+</option><option value="3">★3+</option><option value="4">★4+</option><option value="5">★5</option></select></label>
-            </div>
-            <div className="desktop-filter-pair">
-              <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
-              <label className="field"><span>{t("发行日期")} ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
+              <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
             </div>
             <div className="desktop-filter-pair">
               <label className="field"><span>{t("时长")} ≥</span><input min="0" value={query.durationMin ?? ""} onChange={(event) => patch({ durationMin: parseOptionalNumber(event.target.value) })} placeholder="90" type="number" /></label>
               <label className="field"><span>{t("时长")} ≤</span><input min="0" value={query.durationMax ?? ""} onChange={(event) => patch({ durationMax: parseOptionalNumber(event.target.value) })} placeholder="180" type="number" /></label>
-            </div>
-            <div className="desktop-filter-pair">
-              <BooleanSelect label={t("有封面")} value={query.hasCover} onChange={(value) => patch({ hasCover: value })} />
-              <BooleanSelect label={t("有本地媒体")} value={query.hasMedia} onChange={(value) => patch({ hasMedia: value })} />
             </div>
           </div>
           <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
@@ -659,19 +648,15 @@ function removeChip(query: WorkQuery, key: keyof WorkQuery, value?: string): Wor
 }
 
 function countClassificationFilters(query: WorkQuery): number {
-  return [query.workTypeIds, query.makerIds, query.labelIds, query.seriesIds, query.genreIds, query.tagIds]
+  return [query.workTypeIds, query.genreIds, query.tagIds]
     .reduce((count, values) => count + (values?.length ?? 0), 0);
 }
 
 function countMoreFilters(query: WorkQuery): number {
   let count = (query.releaseYears?.length ?? 0) + (query.resolutionTiers?.length ?? 0);
-  if (query.releaseFrom) count += 1;
-  if (query.releaseTo) count += 1;
   if (query.durationMin !== undefined) count += 1;
   if (query.durationMax !== undefined) count += 1;
-  if (query.hasCover !== undefined) count += 1;
   if (query.hasMedia !== undefined) count += 1;
-  if (query.favoriteOnly) count += 1;
   if (query.ratingMin !== undefined) count += 1;
   return count;
 }
