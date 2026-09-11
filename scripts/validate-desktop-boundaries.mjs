@@ -656,6 +656,12 @@ if (!errors.length) {
   if (!desktopBridge.includes("provisionLocalSqlite") || !desktopApp.includes("sqliteReady") || !desktopRepository.includes("preferSqlite")) {
     errors.push("V2 Desktop 必须按 Profile 自动准备 local.db，并只在零差异对账后启用 SQLite 私人读取。");
   }
+  for (const token of ["catalog.db", "validate_catalog_sqlite_at", "PRAGMA integrity_check", "pack_id", "pack_version"]) {
+    if (!rust.includes(token)) errors.push(`V2 Shared catalog.db 安装校验缺少：${token}`);
+  }
+  if (!desktopPortableV124C.includes('path === "catalog.db"') || !desktopPortableV124C.includes('normalized !== "catalog.db"')) {
+    errors.push("V2 Shared Portable Pack 必须将 catalog.db 作为白名单二进制文件传输。");
+  }
   const tauriBuild = readFileSync(path.join(root, "apps/desktop/src-tauri/build.rs"), "utf8");
   for (const watched of ["src/lib.rs", "permissions", "capabilities", "tauri.conf.json"]) {
     if (!tauriBuild.includes(`cargo:rerun-if-changed=${watched}`)) {

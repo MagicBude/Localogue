@@ -672,6 +672,10 @@ async fn collect_shared_portable_files(app: AppHandle, pack_path: String) -> Res
         let mut files = collect_portable_files(&root, &["library", "sources"])?;
         let manifest = root.join("localogue-pack.json");
         files.push(DesktopPortableFile { path: "localogue-pack.json".into(), bytes: fs::read(manifest).map_err(display_error)? });
+        let catalog = root.join("catalog.db");
+        if catalog.is_file() {
+            files.push(DesktopPortableFile { path: "catalog.db".into(), bytes: fs::read(catalog).map_err(display_error)? });
+        }
         files.sort_by(|a, b| a.path.cmp(&b.path));
         Ok(files)
     }).await
@@ -706,6 +710,8 @@ async fn install_shared_portable_files(app: AppHandle, source_id: String, source
             for file in files {
                 let target = if file.path == "localogue-pack.json" {
                     temp.join("localogue-pack.json")
+                } else if file.path == "catalog.db" {
+                    temp.join("catalog.db")
                 } else {
                     safe_portable_relative_path(&temp, &file.path, &allowed)?
                 };
@@ -1643,6 +1649,12 @@ fn inspect_shared_pack(pack_path: String) -> Result<DesktopSharedPackInfo, Strin
     if id.is_none() || name.is_none() || version.is_none() {
         return Ok(invalid("Shared Pack manifest 缺少 id / name / version。".into()));
     }
+    let catalog_path = absolute.join("catalog.db");
+    if catalog_path.is_file() {
+        if let Err(error) = validate_catalog_sqlite_at(&catalog_path, id.unwrap(), version.unwrap()) {
+            return Ok(invalid(error));
+        }
+    }
 
     Ok(DesktopSharedPackInfo {
         configured_path: configured,
@@ -1656,6 +1668,32 @@ fn inspect_shared_pack(pack_path: String) -> Result<DesktopSharedPackInfo, Strin
         license: manifest.get("license").and_then(Value::as_str).map(str::to_string),
         error: None,
     })
+}
+
+/// catalog.db 是 Shared Pack JSON 的只读发布投影。挂载前检查数据库完整性、
+/// Schema 和来源身份，避免把损坏或属于另一版本的数据库加入 Repository。
+fn validate_catalog_sqlite_at(database_path: &Path, expected_id: &str, expected_version: &str) -> Result<(), String> {
+    let connection = Connection::open_with_flags(database_path, OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|error| format!("无法只读打开 catalog.db：{error}"))?;
+    let integrity: String = connection.query_row("PRAGMA integrity_check", [], |row| row.get(0)).map_err(display_error)?;
+    if integrity != "ok" { return Err(format!("catalog.db 完整性检查失败：{integrity}")); }
+    let required_tables = ["catalog_meta", "works", "people", "organizations", "series", "genres", "assets"];
+    for table in required_tables {
+        let exists: i64 = connection.query_row(
+            "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?1",
+            [table],
+            |row| row.get(0),
+        ).map_err(display_error)?;
+        if exists != 1 { return Err(format!("catalog.db 缺少必要表：{table}")); }
+    }
+    let meta = |key: &str| -> Result<String, String> {
+        connection.query_row("SELECT value FROM catalog_meta WHERE key=?1", [key], |row| row.get(0))
+            .map_err(|error| format!("catalog.db 缺少或无法读取 {key}：{error}"))
+    };
+    if meta("schema_version")? != "1" { return Err("catalog.db schema_version 不是 1。".into()); }
+    if meta("pack_id")? != expected_id { return Err("catalog.db pack_id 与 localogue-pack.json 不一致。".into()); }
+    if meta("pack_version")? != expected_version { return Err("catalog.db pack_version 与 localogue-pack.json 不一致。".into()); }
+    Ok(())
 }
 
 #[tauri::command]
@@ -2706,6 +2744,24 @@ mod tests {
         assert_eq!(local_works[0]["id"], "work_private");
         assert_eq!(media[0]["id"], "media_1");
         fs::remove_dir_all(root).expect("cleanup sqlite temp");
+    }
+
+    #[test]
+    fn catalog_sqlite_validation_locks_pack_identity() {
+        let root = std::env::temp_dir().join(format!("localogue-catalog-validation-{}", now_marker()));
+        fs::create_dir_all(&root).expect("create catalog validation temp");
+        let database_path = root.join("catalog.db");
+        let database = Connection::open(&database_path).expect("create catalog database");
+        database.execute_batch(include_str!("../../../../resources/sqlite/catalog-schema.sql")).expect("catalog schema");
+        database.execute("INSERT INTO catalog_meta VALUES ('schema_version','1')", []).expect("schema meta");
+        database.execute("INSERT INTO catalog_meta VALUES ('pack_id','community.example')", []).expect("pack id");
+        database.execute("INSERT INTO catalog_meta VALUES ('pack_version','1.2.3')", []).expect("pack version");
+        drop(database);
+
+        validate_catalog_sqlite_at(&database_path, "community.example", "1.2.3").expect("valid catalog");
+        let mismatch = validate_catalog_sqlite_at(&database_path, "community.example", "2.0.0").expect_err("version mismatch must fail");
+        assert!(mismatch.contains("pack_version"));
+        fs::remove_dir_all(root).expect("cleanup catalog validation temp");
     }
 
     #[test]

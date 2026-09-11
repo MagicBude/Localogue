@@ -49,6 +49,7 @@
     "validate:catalog": "node scripts/validate-community-catalog.mjs",
     "catalog:sqlite:build": "node scripts/build-catalog-sqlite.mjs",
     "catalog:sqlite:validate": "node scripts/validate-catalog-sqlite.mjs",
+    "catalog:sqlite:publish": "node scripts/build-catalog-sqlite.mjs --output ../localogue-community-data/catalog.db && node scripts/validate-catalog-sqlite.mjs ../localogue-community-data/catalog.db ../localogue-community-data/library",
     "local:sqlite:build": "node scripts/build-local-sqlite.mjs",
     "local:sqlite:validate": "node scripts/validate-local-sqlite.mjs",
     "local:sqlite:export": "node scripts/export-local-sqlite.mjs",

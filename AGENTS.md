@@ -434,3 +434,4 @@ Localogue 的目标不是为了展示技术复杂度。优先级始终是：
 - Desktop SQLite Command 的数据库路径必须由 Rust 根据当前 Profile 和受信 Catalog 推导，WebView 不得提交任意数据库路径。
 - 切换 SQLite 读取前必须完成当前 Profile 的迁移并通过逐集合 ID/内容零差异对账；没有数据库或存在差异时必须保留 JSON 回退。
 - Snapshot / Restore、Personal Pack、删除与普通 CRUD 都必须同步维护 `local.db`，不能只覆盖日常编辑入口。
+- Shared Portable Pack 的 `catalog.db` 必须按二进制文件传输并校验 size / SHA-256；Native 安装还必须校验 SQLite 完整性、必要表、Schema 与 Pack ID/Version，失败不得挂载。旧 Pack 可暂时回退只读 JSON。

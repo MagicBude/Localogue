@@ -32,9 +32,9 @@ Restore 恢复 Snapshot 内容，但 Commit Receipt 保留。Desktop 追加 Rest
 
 ### 6. Portable Pack 不是任意压缩包解压器
 
-Portable Pack 继续使用 V1-11 gzip JSON Envelope。Desktop Native 层只允许 Personal 白名单目录，或 Shared 的 `library/`、`sources/`、`localogue-pack.json`。
+Portable Pack 继续使用 V1-11 gzip JSON Envelope。Desktop Native 层只允许 Personal 白名单目录，或 Shared 的 `library/`、`sources/`、`localogue-pack.json` 与根目录只读投影 `catalog.db`。
 
-Personal Import 失败时删除本轮创建的文件；Shared Import 先进入临时目录，校验完成后 rename 到正式目录。这样错误包不会留下半安装状态。
+Personal Import 失败时删除本轮创建的文件；Shared Import 先进入临时目录，校验完成后 rename 到正式目录。若包含 `catalog.db`，安装器还会校验 SQLite 完整性、必要表、Schema 与 Pack ID/Version。这样错误包不会留下半安装状态，也不会把另一版本的数据库挂到当前 Manifest 下。
 
 ## 结果
 

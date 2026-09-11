@@ -20,6 +20,14 @@ node scripts/build-catalog-sqlite.mjs --source D:\path\to\shared-pack --output D
 node scripts/validate-catalog-sqlite.mjs D:\path\to\catalog.db D:\path\to\shared-pack\library
 ```
 
+维护官方同级 Community Data 仓库时，可以直接生成发布投影：
+
+```bash
+pnpm catalog:sqlite:publish
+```
+
+它会把 `catalog.db` 写到 `../localogue-community-data/catalog.db` 并立即执行完整对账。这个文件可以随 Shared Portable Pack 发布，但不可反向编辑 JSON；公共数据审核仍在一实体一 JSON、Sources 和 CSV 中进行。
+
 构建器先写 `.tmp`，所有实体和关系成功提交后才替换正式文件。校验器检查集合计数、SQLite 完整性、外键、Schema 版本，以及 Community Classification 是否全部经过 Crosswalk。
 
 ## 分类为什么在构建时拆开
@@ -62,7 +70,9 @@ Desktop 启动或切换 Library Profile 时会检查 `<Private Library>/local.db
 - 双方没有缺失的 `collection/id`；
 - 对应实体解析后的 JSON 内容一致。
 
-任何创建错误或对账差异都会让当前 Profile 继续使用 JSON。这样迁移是可逐库回退的，不会因为存在一个残缺数据库就静默切换。Shared Pack 如果尚未发布 `catalog.db`，仍从只读 `library/*.json` 补齐；下一节点将把 `catalog.db` 纳入 Shared Pack 发布和安装验证。
+任何创建错误或对账差异都会让当前 Profile 继续使用 JSON。这样迁移是可逐库回退的，不会因为存在一个残缺数据库就静默切换。
+
+Shared Portable Pack 根目录允许携带 `catalog.db`。导出时它按二进制编码并记录 size + SHA-256；Native 安装先写入临时目录，再只读验证 SQLite 完整性、必要表、`schema_version`、`pack_id` 与 `pack_version`，最后原子启用。缺少数据库的旧 Pack 仍从只读 `library/*.json` 读取。
 
 ## 私人 local.db
 

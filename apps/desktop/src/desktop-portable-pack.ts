@@ -105,7 +105,7 @@ export async function pickAndPreviewPortablePack(): Promise<DesktopPortablePrevi
       if (bytes.byteLength !== file.size) errors.push(`${normalized}: 文件大小不一致。`);
       if (await sha256Bytes(bytes) !== file.sha256) errors.push(`${normalized}: SHA-256 校验失败。`);
       if (envelope.manifest.kind === "personal-backup" && !PERSONAL_ALLOWED.has(normalized.split("/")[0] ?? "")) errors.push(`${normalized}: 不属于 Personal Pack 白名单。`);
-      if (envelope.manifest.kind === "shared-library" && normalized !== "localogue-pack.json" && !normalized.startsWith("library/") && !normalized.startsWith("sources/")) errors.push(`${normalized}: 不属于 Shared Pack 白名单。`);
+      if (envelope.manifest.kind === "shared-library" && normalized !== "localogue-pack.json" && normalized !== "catalog.db" && !normalized.startsWith("library/") && !normalized.startsWith("sources/")) errors.push(`${normalized}: 不属于 Shared Pack 白名单。`);
     } catch (error) { errors.push(message(error)); }
   }
 
@@ -229,7 +229,7 @@ function inspectPortableAssetIntegrity(envelope: PortablePackEnvelope): DesktopP
 async function toPortableFile(file: DesktopPortableFile): Promise<PortablePackFile> {
   const path = normalizePackPath(file.path);
   const collectedBytes = toBytes(file.bytes);
-  const binary = path.startsWith("asset-files/");
+  const binary = path.startsWith("asset-files/") || path === "catalog.db";
   // 原图绝对路径只在当前电脑有效，也可能暴露私人目录结构。管理副本已随包导出，
   // 因此剥离该字段不会影响恢复后的图片展示。
   const bytes = !binary && path.startsWith("assets/") && path.endsWith(".json")

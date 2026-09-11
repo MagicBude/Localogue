@@ -28,6 +28,12 @@ const integrity = database.prepare("PRAGMA integrity_check").get().integrity_che
 const foreignKeys = database.prepare("PRAGMA foreign_key_check").all();
 const version = database.prepare("PRAGMA user_version").get().user_version;
 const unmappedRelations = Number(database.prepare("SELECT count(*) AS count FROM work_unmapped_classifications").get().count);
+const packRoot = path.dirname(sourceRoot);
+const manifest = JSON.parse(await readFile(path.join(packRoot, "localogue-pack.json"), "utf8"));
+const meta = (key) => String(database.prepare("SELECT value FROM catalog_meta WHERE key = ?").get(key)?.value ?? "");
+if (meta("schema_version") !== "1") errors.push("catalog_meta.schema_version 不是 1");
+if (meta("pack_id") !== manifest.id) errors.push(`catalog_meta.pack_id 与 manifest 不一致：${meta("pack_id")} / ${manifest.id}`);
+if (meta("pack_version") !== manifest.version) errors.push(`catalog_meta.pack_version 与 manifest 不一致：${meta("pack_version")} / ${manifest.version}`);
 database.close();
 if (integrity !== "ok") errors.push(`integrity_check: ${integrity}`);
 if (foreignKeys.length) errors.push(`foreign_key_check: ${foreignKeys.length} 项`);

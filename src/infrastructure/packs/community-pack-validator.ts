@@ -1,4 +1,5 @@
 import { readFile, readdir, stat } from "node:fs/promises";
+import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 
 export interface CommunityPackValidationResult {
@@ -9,7 +10,8 @@ export interface CommunityPackValidationResult {
 }
 
 /**
- * 与 MagicBude/localogue-community-data V0-01 的 validator 对齐。
+ * 与 MagicBude/localogue-community-data 当前稳定顺序 ID 规则对齐，同时兼容早期
+ * 已发布的 UUIDv4 Pack；消费端不能反过来强迫官方数据改掉已发布稳定 ID。
  *
  * 只有正式 Community Data Pack 才启用严格 typed UUIDv4 / Source Record 规则；
  * 其他第三方 Shared Pack 仍可通过 V1-09 的普通 manifest 协议挂载。
@@ -49,7 +51,7 @@ export async function validateCommunityPackRoot(root: string): Promise<Community
   }
 
   for (const person of collections.people) {
-    requireUuidId(String(person.id ?? ""), "person", `person ${person.id}`, errors);
+    requireCommunityId(String(person.id ?? ""), "person", `person ${person.id}`, errors);
     if (person.schemaVersion !== 1) errors.push(`person ${person.id}: schemaVersion 必须为 1`);
     const names = Array.isArray(person.names) ? person.names as Array<Record<string, unknown>> : [];
     if (!names.some((name) => name.language === "ja" && name.type === "primary" && typeof name.value === "string" && name.value.trim())) {
@@ -63,17 +65,17 @@ export async function validateCommunityPackRoot(root: string): Promise<Community
   for (const org of collections.organizations) {
     const kind = org.kind;
     if (kind !== "maker" && kind !== "label") errors.push(`organization ${org.id}: kind 必须为 maker 或 label`);
-    requireUuidId(String(org.id ?? ""), kind === "label" ? "label" : "maker", `organization ${org.id}`, errors);
+    requireCommunityId(String(org.id ?? ""), kind === "label" ? "label" : "maker", `organization ${org.id}`, errors);
     if (org.parentOrganizationId && !indexes.organizations.has(String(org.parentOrganizationId))) {
       errors.push(`organization ${org.id}: parentOrganizationId 不存在 (${org.parentOrganizationId})`);
     }
   }
-  for (const item of collections.series) requireUuidId(String(item.id ?? ""), "series", `series ${item.id}`, errors);
-  for (const item of collections.genres) requireUuidId(String(item.id ?? ""), "genre", `genre ${item.id}`, errors);
+  for (const item of collections.series) requireCommunityId(String(item.id ?? ""), "series", `series ${item.id}`, errors);
+  for (const item of collections.genres) requireCommunityId(String(item.id ?? ""), "genre", `genre ${item.id}`, errors);
 
   const codes = new Map<string, string>();
   for (const work of collections.works) {
-    requireUuidId(String(work.id ?? ""), "work", `work ${work.id}`, errors);
+    requireCommunityId(String(work.id ?? ""), "work", `work ${work.id}`, errors);
     if (work.schemaVersion !== 1) errors.push(`work ${work.id}: schemaVersion 必须为 1`);
     if (work.originalLanguage !== "ja") warnings.push(`work ${work.id}: originalLanguage 不是 ja，请确认原始语言`);
     const titles = isObject(work.titles) ? work.titles : {};
@@ -99,6 +101,7 @@ export async function validateCommunityPackRoot(root: string): Promise<Community
 
   await validateSources(root, allEntities, errors);
   await validateForbidden(root, errors);
+  await validateCatalogDatabase(root, manifest, collections, errors, warnings);
   return result();
 
   function result(): CommunityPackValidationResult {
@@ -108,6 +111,49 @@ export async function validateCommunityPackRoot(root: string): Promise<Community
       warnings,
       counts,
     };
+  }
+}
+
+async function validateCatalogDatabase(
+  root: string,
+  manifest: Record<string, unknown>,
+  collections: Record<"people" | "works" | "organizations" | "series" | "genres", Array<Record<string, unknown>>>,
+  errors: string[],
+  warnings: string[],
+) {
+  const databasePath = path.join(root, "catalog.db");
+  try {
+    const info = await stat(databasePath);
+    if (!info.isFile()) { errors.push("catalog.db: 必须是普通文件"); return; }
+  } catch (error) {
+    if (isMissing(error)) {
+      warnings.push("Shared Pack 尚未提供 catalog.db；运行时会使用只读 JSON 兼容路径。");
+      return;
+    }
+    throw error;
+  }
+
+  let database: DatabaseSync | undefined;
+  try {
+    database = new DatabaseSync(databasePath, { readOnly: true });
+    const integrity = database.prepare("PRAGMA integrity_check").get() as Record<string, unknown> | undefined;
+    if (String(Object.values(integrity ?? {})[0] ?? "") !== "ok") errors.push("catalog.db: SQLite 完整性检查失败");
+    const meta = (key: string) => String((database?.prepare("SELECT value FROM catalog_meta WHERE key = ?").get(key) as { value?: unknown } | undefined)?.value ?? "");
+    if (meta("schema_version") !== "1") errors.push("catalog.db: schema_version 必须为 1");
+    if (meta("pack_id") !== manifest.id) errors.push("catalog.db: pack_id 与 localogue-pack.json 不一致");
+    if (meta("pack_version") !== manifest.version) errors.push("catalog.db: pack_version 与 localogue-pack.json 不一致");
+    for (const collection of ["works", "people", "organizations", "series"] as const) {
+      const rows = database.prepare(`SELECT id FROM ${collection} ORDER BY id`).all() as Array<{ id: string }>;
+      const databaseIds = rows.map((row) => row.id);
+      const jsonIds = collections[collection].map((item) => String(item.id)).sort();
+      if (databaseIds.length !== jsonIds.length || databaseIds.some((id, index) => id !== jsonIds[index])) {
+        errors.push(`catalog.db: ${collection} ID 集合与 library JSON 不一致`);
+      }
+    }
+  } catch (error) {
+    errors.push(`catalog.db: 无法验证 (${message(error)})`);
+  } finally {
+    database?.close();
   }
 }
 
@@ -175,9 +221,10 @@ async function readJson(filePath: string, errors: string[], label: string): Prom
   catch (error) { errors.push(`${label}: JSON 无法解析或文件不可读 (${message(error)})`); return null; }
 }
 
-function requireUuidId(id: string, prefix: string, owner: string, errors: string[]) {
-  const pattern = new RegExp(`^${prefix}_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "i");
-  if (!pattern.test(id)) errors.push(`${owner}: id 必须使用 ${prefix}_<UUIDv4>`);
+function requireCommunityId(id: string, prefix: string, owner: string, errors: string[]) {
+  const sequential = new RegExp(`^${prefix}_[0-9]{6}$`);
+  const uuidV4 = new RegExp(`^${prefix}_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`, "i");
+  if (!sequential.test(id) && !uuidV4.test(id)) errors.push(`${owner}: id 必须使用 ${prefix}_<六位顺序号>（或兼容已发布 UUIDv4）`);
 }
 function requireRef(ownerId: string, kind: string, value: unknown, index: Map<string, unknown>, errors: string[]) {
   const id = typeof value === "string" ? value : "";

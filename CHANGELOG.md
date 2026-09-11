@@ -1,5 +1,6 @@
 # Changelog
 
+- Shared Portable Pack 支持携带只读 `catalog.db`：Web/Desktop 导出按二进制保存，Native 安装在临时目录验证 SHA-256、SQLite integrity、必要表、Schema 与 Pack ID/Version 后才原子启用；旧 Pack 保留只读 JSON 回退。新增 `catalog:sqlite:publish` 可为同级 Community Data 生成并对账发布数据库。
 - Desktop 会为当前 Library Profile 原子创建 `<Private Library>/local.db`，完整导入既有 JSON 后执行逐集合零差异对账；只有对账通过才让 Canonical 浏览与 MediaFile 读取切换到 SQLite。创建失败或已有库出现差异时自动保留 JSON 读取，Shared Pack 在尚未携带 `catalog.db` 时继续使用只读 JSON 回退。
 - Desktop 私人写入进入 JSON / `local.db` 双写迁移：Canonical Override、MediaFile、Presentation Preference、Evidence、审计、Snapshot / Restore、删除与 Personal Pack 新增文件均同步镜像；SQLite 失败会恢复 JSON 写前内容。设置 → 工具新增逐集合对账入口，只有缺失和内容差异均为零才具备切换读取条件。
 - Desktop Native Boundary 新增 SQLite 只读 Adapter：WebView 只传集合名，Rust 从当前 Private Library、已挂载 Catalog 与应用数据目录推导 `local.db / catalog.db`，不开放任意数据库路径。Catalog 构建产物中的 Work JSON 同步改为规范化 Domain 投影，Genre JSON 改为标准 `names` 结构，使 Web 与 Tauri 可读取同一 payload。

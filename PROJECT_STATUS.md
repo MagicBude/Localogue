@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-11 V2 Storage Migration 第七节点完成公共 Catalog 发布边界：Shared Pack 可同时携带 `catalog.db`、可审核 JSON 与 Sources；Portable 导出将数据库作为二进制，Native 安装进行摘要、SQLite 完整性、Schema 和 Pack 身份校验后原子启用。官方 Community Data 已用可重复脚本生成 827392 字节发布投影并通过数据库对账；其仓库中的发布文件需独立提交。旧 Shared Pack 继续使用只读 JSON，等待用户实机导出/安装验收。
+
 2026-09-11 V2 Storage Migration 第六节点完成 Profile 自动迁移与读取门控：Desktop 启动或切换资料库时，在当前 Private Library 缺少数据库的情况下通过临时文件构建 `local.db`，合并 WAL 后原子发布，并以 JSON/SQLite ID 与内容零差异作为启用条件。Canonical 浏览与 MediaFile 读取可使用 SQLite；失败或差异状态继续使用 JSON。Shared Pack 暂时保留 JSON 回退，下一节点完成只读 `catalog.db` 的发布包交付与安装校验。
 
 2026-09-11 V2 Storage Migration 第五节点完成 Desktop 私人数据双写和可见对账：现有 Native 写入口在 Private 根存在 `local.db` 时同步更新数据库，镜像失败恢复 JSON before-image；Personal Pack 与 Governance Restore 同样进入该链。设置 → 工具可查看 JSON/SQLite 总数、缺失和内容差异。Rust 7 项测试覆盖读取、双写、失败补偿与差异检测；下一节点自动 provision/migrate 每个 Profile 的 local.db，并以差异为零作为 SQLite 读取门槛。

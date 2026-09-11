@@ -29,7 +29,8 @@ JSON 继续作为 Git 维护、交换、Portable Pack 与回滚格式；CSV 继�
 4. 每阶段保留 JSON Adapter 回退，完成数据对账后才切换默认实现；
 5. 最终停止运行时遍历“一实体一 JSON”，但不取消 JSON 导入导出。
 
+Shared Portable Pack 可以在根目录携带 `catalog.db`，同时保留 `library/` 和 `sources/`。数据库是同版本 JSON 与受控词表构建出的发布投影，必须在安装前通过 SHA-256、SQLite 完整性、Schema、Pack ID/Version 和实体 ID 对账；缺少数据库的旧 Pack 在迁移期继续使用只读 JSON Adapter。
+
 ## 人工查阅
 
 两个数据库都是标准 SQLite 3 文件，可用 SQLiteStudio、DB Browser for SQLite 或 DBeaver 打开。外部工具浏览时应使用只读模式；程序运行期间不建议从外部工具直接写入 `local.db`。
-

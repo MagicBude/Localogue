@@ -81,6 +81,8 @@ export async function exportSharedPack(configuredPath: string): Promise<{ bytes:
 
   const files: PortablePackFile[] = [];
   files.push(makePortableFile("localogue-pack.json", await readFile(path.join(resolved.absolutePath, "localogue-pack.json"))));
+  const catalogPath = path.join(resolved.absolutePath, "catalog.db");
+  if (await exists(catalogPath)) files.push(makePortableFile("catalog.db", await readFile(catalogPath), true));
   for (const directory of SHARED_DIRECTORIES) files.push(...await collectFiles(resolved.absolutePath, directory, false));
   const manifest: PortablePackManifest = {
     schemaVersion: 1,
@@ -254,7 +256,7 @@ function isAllowedPersonalPath(value: string): boolean {
 }
 function isAllowedSharedPath(value: string): boolean {
   const normalized = normalizePackPath(value);
-  return normalized === "localogue-pack.json" || SHARED_DIRECTORIES.some((directory) => normalized.startsWith(`${directory}/`));
+  return normalized === "localogue-pack.json" || normalized === "catalog.db" || SHARED_DIRECTORIES.some((directory) => normalized.startsWith(`${directory}/`));
 }
 function safeJoin(root: string, relativePath: string): string {
   const normalized = normalizePackPath(relativePath);
