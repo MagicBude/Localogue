@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import { WORK_TYPE_DEFINITIONS } from "@/application/importers/import-classification-normalizer";
@@ -33,8 +33,10 @@ export function CreateWorkPanel({
   const [descriptionZh, setDescriptionZh] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
   const [busy, setBusy] = useState(false);
+  const operationPending = useRef(false);
 
   async function save(): Promise<void> {
+    if (operationPending.current) return;
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
     // Canonical Work 保存的是按语言分开的 LocalizedText。这里与编辑页共用相同的
     // 压缩规则，避免新建时先把中文塞进日文字段，之后还要靠用户手工纠正。
@@ -44,6 +46,7 @@ export function CreateWorkPanel({
       setMessage(t("新建 Work 至少需要番号和标题。"));
       return;
     }
+    operationPending.current = true;
     setBusy(true);
     try {
       const existing = await repository.findWorkByCode(normalizedCode);
@@ -80,6 +83,7 @@ export function CreateWorkPanel({
     } catch (error) {
       setMessage(t("新建 Work 失败：{error}", { error: message(error) }));
     } finally {
+      operationPending.current = false;
       setBusy(false);
     }
   }
@@ -87,9 +91,9 @@ export function CreateWorkPanel({
   return <section className="settings-card compact-management-card">
     <div className="section-heading">
       <div><span className="eyebrow">PRIVATE CRUD</span><h2>{t("新建作品")}</h2><p className="muted">{t("直接创建最小 Canonical Work；完整关系可进入详情页继续编辑。")}</p></div>
-      <button className={open ? "ghost-button" : "primary-button"} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("+ 新建 Work")}</button>
+      <button className={open ? "ghost-button" : "primary-button"} disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("+ 新建 Work")}</button>
     </div>
-    {open ? <div className="editor-grid">
+    {open ? <fieldset className="editor-grid" disabled={busy}>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} placeholder="MIDV-077" /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} placeholder={t("作品标题")} /></label>
       <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
@@ -97,8 +101,8 @@ export function CreateWorkPanel({
       <label>{t("日文简介")}<textarea value={descriptionJa} onChange={(event) => setDescriptionJa(event.target.value)} rows={4} /></label>
       <label>{t("中文简介")}<textarea value={descriptionZh} onChange={(event) => setDescriptionZh(event.target.value)} rows={4} /></label>
       <label className="span-2">{t("英文简介")}<textarea value={descriptionEn} onChange={(event) => setDescriptionEn(event.target.value)} rows={4} /></label>
-      <div className="span-2 form-actions"><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
-    </div> : null}
+      <div className="span-2 form-actions"><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
+    </fieldset> : null}
   </section>;
 }
 
@@ -128,6 +132,7 @@ function WorkEditorSession({
   const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
+  const operationPending = useRef(false);
   const [people, setPeople] = useState<Person[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [seriesOptions, setSeriesOptions] = useState<Array<{ id: string; label: string }>>([]);
@@ -201,6 +206,7 @@ function WorkEditorSession({
   }
 
   async function save(): Promise<void> {
+    if (operationPending.current) return;
     const normalizedCode = normalizeNfoCode(code.trim()) ?? code.trim().toUpperCase();
     const titles = compactLocalizedText({ ja: titleJa, "zh-CN": titleZh, en: titleEn });
     const descriptions = compactLocalizedText({ ja: descriptionJa, "zh-CN": descriptionZh, en: descriptionEn });
@@ -216,6 +222,7 @@ function WorkEditorSession({
       setMessage(t("时长必须是大于 0 的整数分钟。"));
       return;
     }
+    operationPending.current = true;
     setBusy(true);
     try {
       const existingCode = await repository.findWorkByCode(normalizedCode);
@@ -258,12 +265,15 @@ function WorkEditorSession({
     } catch (error) {
       setMessage(t("保存 Work 失败：{error}", { error: message(error) }));
     } finally {
+      operationPending.current = false;
       setBusy(false);
     }
   }
 
   async function remove(): Promise<void> {
+    if (operationPending.current) return;
     if (!isPrivate || !window.confirm(t("删除 Private Work {code}？如 Shared Pack 中存在同 ID，删除后会重新显示 Shared 版本。", { code: work.code }))) return;
+    operationPending.current = true;
     setBusy(true);
     try {
       await repository.deletePrivateWork(work.id);
@@ -272,6 +282,7 @@ function WorkEditorSession({
     } catch (error) {
       setMessage(t("删除 Work 失败：{error}", { error: message(error) }));
     } finally {
+      operationPending.current = false;
       setBusy(false);
     }
   }
@@ -279,9 +290,9 @@ function WorkEditorSession({
   return <section className="settings-card compact-management-card">
     <div className="section-heading">
       <div><span className="eyebrow">DESKTOP EDIT</span><h2>{t("编辑作品")}</h2><p className="muted">{isPrivate ? t("当前实体来自 Private Library，可直接编辑。") : t("当前来自 Shared Pack；保存会建立同 ID 的 Private Override，不修改 Shared Pack。")}</p></div>
-      <div className="button-row"><button onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Work")}</button> : null}</div>
+      <div className="button-row"><button disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Work")}</button> : null}</div>
     </div>
-    {open ? <div className="editor-grid">
+    {open ? <fieldset className="editor-grid" disabled={busy}>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} /></label>
       <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
@@ -305,8 +316,8 @@ function WorkEditorSession({
           <button disabled={!customTagName.trim()} onClick={addCustomTag} type="button">{t("创建并选中")}</button>
         </div>
       </div>
-      <div className="span-2 form-actions"><button disabled={busy} onClick={onCancel}>{t("取消")}</button><button className="primary-button" disabled={busy} onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
-    </div> : null}
+      <div className="span-2 form-actions"><button onClick={onCancel}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
+    </fieldset> : null}
   </section>;
 }
 

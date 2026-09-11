@@ -2,7 +2,7 @@
 
 ## 阶段名称
 
-Desktop 全流程审核持续进行：作品详情返回现在保留筛选、页码或瀑布流批次、视图和滚动位置；已有离线三语帮助、首页分类导航、异常详情返回和作品取消编辑能力继续保持。已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
+Desktop 全流程审核持续进行：作品详情返回会保留完整浏览现场；人物与作品编辑支持取消草稿、保存期完整锁定和重复提交防护；收藏、评分与首图偏好使用同一串行字段合并入口。已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
 
 **V1-27D：Entity Localization & Browse Relationship Presentation**
 

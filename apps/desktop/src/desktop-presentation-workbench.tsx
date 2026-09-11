@@ -9,7 +9,6 @@ import type { Work } from "@/domain/entities/work";
 import { DesktopAssetImage } from "./desktop-asset-image";
 import { useDesktopI18n } from "./desktop-i18n";
 import {
-  makePresentationPreferenceId,
   personPresentationCandidates,
   resolvePersonPresentation,
   resolveWorkPresentation,
@@ -94,21 +93,11 @@ export function DesktopPresentationWorkbench({
   }, [data]);
 
   async function savePreference(entityType: PresentationMode, entityId: string, assetId?: string): Promise<void> {
-    const previous = preferenceByEntity.get(`${entityType}:${entityId}`);
-    const preference: PresentationPreference = {
-      ...(previous ?? {}),
-      schemaVersion: 1,
-      id: makePresentationPreferenceId(entityType, entityId),
-      entityType,
-      entityId,
-      ...(entityType === "work"
-        ? { preferredCoverAssetId: assetId || undefined }
-        : { preferredPortraitAssetId: assetId || undefined }),
-      updatedAt: new Date().toISOString(),
-    };
     setBusyId(`${entityType}:${entityId}`);
     try {
-      await repository.savePresentationPreference(preference);
+      await repository.updatePresentationPreference(entityType, entityId, entityType === "work"
+        ? { preferredCoverAssetId: assetId || undefined }
+        : { preferredPortraitAssetId: assetId || undefined });
       await reload();
       onLibraryChanged();
       setMessage(assetId
@@ -252,20 +241,11 @@ export function PresentationAssetPicker({
   const preferredId = entityType === "work" ? preference?.preferredCoverAssetId : preference?.preferredPortraitAssetId;
 
   async function save(assetId?: string): Promise<void> {
-    const next: PresentationPreference = {
-      ...(preference ?? {}),
-      schemaVersion: 1,
-      id: makePresentationPreferenceId(entityType, entityId),
-      entityType,
-      entityId,
-      ...(entityType === "work"
-        ? { preferredCoverAssetId: assetId || undefined }
-        : { preferredPortraitAssetId: assetId || undefined }),
-      updatedAt: new Date().toISOString(),
-    };
     setBusy(true);
     try {
-      await repository.savePresentationPreference(next);
+      await repository.updatePresentationPreference(entityType, entityId, entityType === "work"
+        ? { preferredCoverAssetId: assetId || undefined }
+        : { preferredPortraitAssetId: assetId || undefined });
       setMessage(assetId
         ? t("已保存私人展示偏好；Canonical / Shared Pack 数据没有被修改。")
         : t("已恢复默认展示；Canonical / Shared Pack 数据没有被修改。"));

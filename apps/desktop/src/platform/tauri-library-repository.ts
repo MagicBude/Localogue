@@ -17,6 +17,10 @@ import type { LibraryRepository } from "@/domain/repositories/library-repository
 import type { DesktopLibraryCollection, DesktopWritableLibraryCollection } from "../contracts";
 import { desktopBridge } from "../tauri-bridge";
 
+// App 刷新资料后会创建新的 Repository 实例；队列按 Private Library 路径共享，
+// 才能覆盖新旧实例短暂并存时的偏好写入，而不只是保护单个 React 渲染周期。
+const presentationWriteQueues = new Map<string, Promise<void>>();
+
 /**
  * Desktop 的完整“浏览型” LibraryRepository。
  *
@@ -28,7 +32,6 @@ import { desktopBridge } from "../tauri-bridge";
  */
 export class TauriLibraryRepository implements LibraryRepository {
   private readonly cache = new Map<DesktopLibraryCollection, Promise<unknown[]>>();
-
   constructor(
     private readonly readRoots: readonly string[],
     private readonly privateRoot: string | null,
@@ -196,9 +199,36 @@ export class TauriLibraryRepository implements LibraryRepository {
     return values.find((item) => item.entityType === entityType && item.entityId === entityId) ?? null;
   }
 
-  savePresentationPreference(preference: PresentationPreference): Promise<void> {
+  updatePresentationPreference(
+    entityType: "person" | "work",
+    entityId: string,
+    patch: Partial<Pick<PresentationPreference, "favorite" | "rating" | "preferredCoverAssetId" | "preferredPortraitAssetId">>,
+  ): Promise<PresentationPreference> {
     if (!this.privateRoot) return missingPrivateRoot();
-    return desktopBridge.writePrivatePresentationPreference(preference);
+    const privateRoot = this.privateRoot;
+    const queue = presentationWriteQueues.get(privateRoot) ?? Promise.resolve();
+    const operation = queue
+      .catch(() => undefined)
+      .then(async () => {
+        const current = await this.findPresentationPreference(entityType, entityId);
+        const next: PresentationPreference = {
+          ...(current ?? {}),
+          schemaVersion: 1,
+          id: current?.id ?? `presentation_${entityType}_${entityId}`,
+          entityType,
+          entityId,
+          ...patch,
+          updatedAt: new Date().toISOString(),
+        };
+        await desktopBridge.writePrivatePresentationPreference(next);
+        return next;
+      });
+    const settled = operation.then(() => undefined, () => undefined);
+    presentationWriteQueues.set(privateRoot, settled);
+    void settled.finally(() => {
+      if (presentationWriteQueues.get(privateRoot) === settled) presentationWriteQueues.delete(privateRoot);
+    });
+    return operation;
   }
 
   async isPrivateEntity(collection: Exclude<DesktopLibraryCollection, "media-files">, id: string): Promise<boolean> {

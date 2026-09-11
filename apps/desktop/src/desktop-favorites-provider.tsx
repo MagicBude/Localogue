@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -48,6 +49,7 @@ export function DesktopFavoritesProvider({
   const { t } = useDesktopI18n();
   const [preferences, setPreferences] = useState<PresentationPreference[]>([]);
   const [persistedRevision, setPersistedRevision] = useState(0);
+  const operationVersions = useRef(new Map<string, number>());
 
   useEffect(() => {
     let disposed = false;
@@ -72,47 +74,26 @@ export function DesktopFavoritesProvider({
       workId: string,
       patch: { favorite?: boolean; rating?: number | null },
     ): Promise<void> => {
-      const existing = preferences.find(
-        (item) => item.entityType === "work" && item.entityId === workId,
-      );
-      const next: PresentationPreference = {
-        schemaVersion: 1,
-        id: existing?.id ?? `presentation_work_${workId}`,
-        entityType: "work",
-        entityId: workId,
-        favorite: patch.favorite ?? existing?.favorite,
-        rating: patch.rating !== undefined
-          ? (patch.rating === null ? undefined : patch.rating)
-          : existing?.rating,
-        preferredPortraitAssetId: existing?.preferredPortraitAssetId,
-        preferredCoverAssetId: existing?.preferredCoverAssetId,
-        updatedAt: new Date().toISOString(),
-      };
-      // 乐观更新内存快照；持久化失败回滚本次结果，并明确告知用户保存没有成功。
-      setPreferences((current) => [
-        ...current.filter(
-          (item) => !(item.entityType === "work" && item.entityId === workId),
-        ),
-        next,
-      ]);
+      const version = (operationVersions.current.get(workId) ?? 0) + 1;
+      operationVersions.current.set(workId, version);
+      // 乐观状态同样按字段合并；收藏与评分快速连续点击时，后一个动作不会在界面中抹掉前一个。
+      setPreferences((current) => upsertPreference(current, workId, patch));
       try {
-        await repository.savePresentationPreference(next);
+        const saved = await repository.updatePresentationPreference("work", workId, {
+          ...(patch.favorite !== undefined ? { favorite: patch.favorite } : {}),
+          ...(patch.rating !== undefined ? { rating: patch.rating === null ? undefined : patch.rating } : {}),
+        });
+        // 旧请求可以先完成，但只有当前实体最新一次操作才能校正内存快照。
+        if (operationVersions.current.get(workId) === version) {
+          setPreferences((current) => replacePreference(current, saved));
+        }
         // 此时 Native 写入已经完成，随后触发的作品查询一定能读到新值。
         setPersistedRevision((value) => value + 1);
       } catch (error: unknown) {
         setMessage(t("保存失败：{error}", { error: error instanceof Error ? error.message : String(error) }));
-        // 仅当内存里仍是本次乐观结果时回滚。若用户已经进行了更新的操作，
-        // 旧请求失败不能覆盖新状态；对象引用在这里充当这一轮操作的身份标记。
-        setPreferences((current) => {
-          const currentItem = current.find(
-            (item) => item.entityType === "work" && item.entityId === workId,
-          );
-          if (currentItem !== next) return current;
-          const withoutOptimistic = current.filter(
-            (item) => !(item.entityType === "work" && item.entityId === workId),
-          );
-          return existing ? [...withoutOptimistic, existing] : withoutOptimistic;
-        });
+        if (operationVersions.current.get(workId) === version) {
+          void repository.listPresentationPreferences().then(setPreferences).catch(() => undefined);
+        }
       }
     };
 
@@ -129,6 +110,28 @@ export function DesktopFavoritesProvider({
   }, [preferences, persistedRevision, repository, setMessage, t]);
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
+}
+
+function upsertPreference(
+  values: PresentationPreference[],
+  workId: string,
+  patch: { favorite?: boolean; rating?: number | null },
+): PresentationPreference[] {
+  const existing = values.find((item) => item.entityType === "work" && item.entityId === workId);
+  return replacePreference(values, {
+    ...(existing ?? {}),
+    schemaVersion: 1,
+    id: existing?.id ?? `presentation_work_${workId}`,
+    entityType: "work",
+    entityId: workId,
+    ...(patch.favorite !== undefined ? { favorite: patch.favorite } : {}),
+    ...(patch.rating !== undefined ? { rating: patch.rating === null ? undefined : patch.rating } : {}),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+function replacePreference(values: PresentationPreference[], next: PresentationPreference): PresentationPreference[] {
+  return [...values.filter((item) => !(item.entityType === next.entityType && item.entityId === next.entityId)), next];
 }
 
 export function useFavorites(): FavoritesValue {
