@@ -440,6 +440,8 @@ export default function App() {
           page={page}
           version={runtime?.version}
           settingsModule={settingsModule}
+          showBack={detail !== null}
+          onBack={returnToPreviousLocation}
           onNavigate={navigate}
           onSettingsModule={(module) => { setSettingsModule(module); navigate("settings"); }}
           onRefresh={refreshLibrary}

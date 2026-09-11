@@ -28,6 +28,7 @@ import {
   type DesktopWorkViewMode,
 } from "./desktop-work-results";
 import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
+import { DesktopPagination } from "./desktop-pagination";
 
 interface FilterOption {
   id: string;
@@ -95,6 +96,7 @@ export function DesktopWorkExplorer({
     return saved === "list" || saved === "table" || saved === "waterfall" ? saved : "grid";
   });
   const scrollRestored = useRef(false);
+  const resultsPanelRef = useRef<HTMLElement>(null);
 
   const publishState = useCallback((scrollY = window.scrollY) => {
     onStateChange?.({ query, page, view, scrollY });
@@ -287,6 +289,14 @@ export function DesktopWorkExplorer({
 
   const { result, cards } = data.value;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
+  const showPagination = !isWaterfall && result.total > pageSize;
+
+  function changePage(nextPage: number): void {
+    if (nextPage === page) return;
+    setPage(nextPage);
+    // 换页后从新结果的开头继续阅读。scroll-margin-top 会给吸顶筛选栏预留空间。
+    window.requestAnimationFrame(() => resultsPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
 
   return (
     <div className="desktop-library-layout">
@@ -297,9 +307,10 @@ export function DesktopWorkExplorer({
         onViewChange={changeView}
         fixedPersonId={fixedPersonId}
         data={data.value}
+        pagination={showPagination ? <DesktopPagination compact page={page} pageCount={pageCount} onChange={changePage} /> : undefined}
       />
 
-      <section className="desktop-results-panel">
+      <section className="desktop-results-panel" ref={resultsPanelRef}>
         <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">
@@ -325,13 +336,7 @@ export function DesktopWorkExplorer({
             onLoadMore={loadMoreWaterfallItems}
           />
         ) : null}
-        {!isWaterfall && result.total > pageSize ? (
-          <div className="desktop-pagination" aria-label={t("分页")}>
-            <button disabled={page <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
-            <span>{page} / {pageCount}</span>
-            <button disabled={page >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
-          </div>
-        ) : null}
+        {showPagination ? <DesktopPagination page={page} pageCount={pageCount} onChange={changePage} /> : null}
       </section>
     </div>
   );
@@ -344,6 +349,7 @@ function WorkFacetPanel({
   onViewChange,
   fixedPersonId,
   data,
+  pagination,
 }: {
   query: WorkQuery;
   onChange: (query: WorkQuery) => void;
@@ -351,6 +357,7 @@ function WorkFacetPanel({
   onViewChange: (view: DesktopWorkViewMode) => void;
   fixedPersonId?: string;
   data: ExplorerData;
+  pagination?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
@@ -427,6 +434,7 @@ function WorkFacetPanel({
         <button type="button" className="ghost-button desktop-facet-clear" onClick={() => onChange({ sort: "release_desc" })}>
           {t("清除")}
         </button>
+        {pagination ? <div className="desktop-facet-pagination">{pagination}</div> : null}
       </div>
 
       {drawerOpen ? (

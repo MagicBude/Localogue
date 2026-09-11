@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type ReactNode } from "react";
+import { useRef, useState, type ChangeEvent, type ReactNode } from "react";
 
 import { getPreferredPersonName } from "@/application/services/localization-service";
 import type { Asset } from "@/domain/entities/asset";
@@ -12,6 +12,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { resolvePersonPresentation } from "./desktop-presentation";
 import { personActivityStatusLabel } from "./desktop-person-labels";
+import { DesktopPagination } from "./desktop-pagination";
 
 const PAGE_SIZE = 24;
 
@@ -25,6 +26,7 @@ export function DesktopPersonExplorer({
   const { t } = useDesktopI18n();
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
   const [page, setPage] = useState(1);
+  const resultsPanelRef = useRef<HTMLElement>(null);
   const data = useAsyncPersonData(async () => {
     const [filteredPeople, allPeople, allWorks, assets, preferences] = await Promise.all([
       repository.listPeople({ ...query, page: 1, pageSize: 100000 }),
@@ -72,10 +74,20 @@ export function DesktopPersonExplorer({
     setQuery(next);
   }
 
+  function changePage(nextPage: number): void {
+    if (nextPage === currentPage) return;
+    setPage(nextPage);
+    window.requestAnimationFrame(() => resultsPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
+
+  const pagination = total > PAGE_SIZE
+    ? <DesktopPagination page={currentPage} pageCount={pageCount} onChange={changePage} />
+    : undefined;
+
   return (
     <>
-      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} />
-      <section className="desktop-results-panel desktop-people-results">
+      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} pagination={pagination ? <DesktopPagination compact page={currentPage} pageCount={pageCount} onChange={changePage} /> : undefined} />
+      <section className="desktop-results-panel desktop-people-results" ref={resultsPanelRef}>
         <div className="desktop-results-toolbar">
           <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
         </div>
@@ -91,13 +103,7 @@ export function DesktopPersonExplorer({
           ))}
         </div>
         {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
-        {total > PAGE_SIZE ? (
-          <div className="desktop-pagination" aria-label={t("分页")}>
-            <button disabled={currentPage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>← {t("上一页")}</button>
-            <span>{currentPage} / {pageCount}</span>
-            <button disabled={currentPage >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>{t("下一页")} →</button>
-          </div>
-        ) : null}
+        {pagination}
       </section>
     </>
   );
@@ -136,6 +142,7 @@ function PersonFilterPanel({
   query,
   onChange,
   data,
+  pagination,
 }: {
   query: PersonQuery;
   onChange: (query: PersonQuery) => void;
@@ -145,6 +152,7 @@ function PersonFilterPanel({
     debutYears: string[];
     retirementYears: string[];
   };
+  pagination?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<PersonQuery>) => onChange({ ...query, ...next });
@@ -156,7 +164,7 @@ function PersonFilterPanel({
     <section className="desktop-person-filter-panel">
       <div className="desktop-person-filter-heading">
         <div><strong>{t("人物高级筛选")}</strong><small>{t("姓名 / 状态 / 年份 / 身高 / 排序")}</small></div>
-        <button onClick={() => onChange({ sort: "name_asc" })} type="button">{t("清除")}</button>
+        <div className="desktop-person-filter-actions">{pagination}<button onClick={() => onChange({ sort: "name_asc" })} type="button">{t("清除")}</button></div>
       </div>
       <div className="desktop-person-filter-grid">
         <label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>

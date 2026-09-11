@@ -116,7 +116,7 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
 }
 
 /** 顶栏只提供全局展示操作；刷新和导航仍由 App 决定。 */
-export function DesktopTopbar({ page, version, settingsModule, onNavigate, onSettingsModule, onRefresh, onOpenSettings }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void; onRefresh: () => void; onOpenSettings: () => void }) {
+export function DesktopTopbar({ page, version, settingsModule, showBack, onBack, onNavigate, onSettingsModule, onRefresh, onOpenSettings }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; showBack?: boolean; onBack?: () => void; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void; onRefresh: () => void; onOpenSettings: () => void }) {
   const { t } = useDesktopI18n();
   const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "favorites"
     ? [
@@ -139,5 +139,5 @@ export function DesktopTopbar({ page, version, settingsModule, onNavigate, onSet
           { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },
         ]
         : [];
-  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><div className="topbar-actions"><DesktopLanguageControls /><button className="ghost-button" onClick={onRefresh}><ArrowClockwise20Regular />{t("刷新资料")}</button>{page !== "settings" && page !== "packs" ? <button className="ghost-button" onClick={onOpenSettings}><Settings20Regular />{t("设置")}</button> : null}</div></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
+  return <header className="topbar"><div className="topbar-main"><div className="topbar-leading">{showBack && onBack ? <button className="topbar-back-button" type="button" onClick={onBack}><ChevronLeft20Regular />{t("返回上一页")}</button> : null}<span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span></div><div className="topbar-actions"><DesktopLanguageControls /><button className="ghost-button" onClick={onRefresh}><ArrowClockwise20Regular />{t("刷新资料")}</button>{page !== "settings" && page !== "packs" ? <button className="ghost-button" onClick={onOpenSettings}><Settings20Regular />{t("设置")}</button> : null}</div></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
 }
