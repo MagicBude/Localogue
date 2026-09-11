@@ -29,6 +29,7 @@ export interface DesktopWorkCardViewModel {
   genres: Array<{ id: string; label: string }>;
   tags: Array<{ id: string; label: string }>;
   poster?: Asset;
+  landscapeCover?: Asset;
 }
 
 export function buildDesktopWorkCards(
@@ -58,7 +59,13 @@ export function buildDesktopWorkCards(
   return works.map((work) => {
     const referenced = work.assetIds.map((id) => assetsById.get(id)).filter((item): item is Asset => Boolean(item));
     const candidates = uniqueAssets([...referenced, ...(subjectAssets.get(work.id) ?? [])]);
-    const poster = resolveWorkPresentation(work, candidates, preferenceByWorkId.get(work.id)).resolved;
+    const presentation = resolveWorkPresentation(work, candidates, preferenceByWorkId.get(work.id));
+    const poster = presentation.resolved;
+    // 横向封面墙优先使用来源提供的 cover；用户显式选择的首图继续拥有最高优先级。
+    // 瀑布流仍使用 resolved poster，避免为了一个展示模式改写 Presentation Preference。
+    const landscapeCover = presentation.preferred
+      ?? presentation.candidates.find((asset) => asset.type === "cover")
+      ?? presentation.resolved;
     const performers = work.personRelations
       .filter((relation) => relation.role === "performer")
       .sort((a, b) => (a.billingOrder ?? 999) - (b.billingOrder ?? 999))
@@ -69,7 +76,7 @@ export function buildDesktopWorkCards(
 
     return {
       work,
-      title: localizeText(work.titles, metadataLanguage),
+      title: withoutLeadingWorkCode(work.code, localizeText(work.titles, metadataLanguage)),
       releaseDate: work.releaseDate?.value ?? "—",
       performerNames: performers.map((item) => item.name),
       performers,
@@ -78,6 +85,7 @@ export function buildDesktopWorkCards(
       genres: work.genreIds.map((id) => ({ id, label: localizeGenre(genresById.get(id), metadataLanguage, id) })),
       tags: work.tagIds.map((id) => ({ id, label: localizeText(tagsById.get(id)?.names, metadataLanguage, id) })),
       poster,
+      landscapeCover,
     };
   });
 }
@@ -202,7 +210,7 @@ export function DesktopWorkResults({
     return (
       <div className={`desktop-work-waterfall is-${waterfallSize}`}>
         {cards.map((card) => (
-          <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
+          <DesktopWorkCard key={card.work.id} card={card} layout="waterfall" onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
         ))}
       </div>
     );
@@ -211,7 +219,7 @@ export function DesktopWorkResults({
   return (
     <div className="desktop-work-grid">
       {cards.map((card) => (
-        <DesktopWorkCard key={card.work.id} card={card} onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
+        <DesktopWorkCard key={card.work.id} card={card} layout="grid" onOpen={onOpen} onOpenPerson={onOpenPerson} onSelectGenre={onSelectGenre} onSelectTag={onSelectTag} />
       ))}
     </div>
   );
@@ -223,9 +231,21 @@ export function chooseWorkPoster(assets: Asset[]): Asset | undefined {
 }
 
 function PosterPlaceholder({ code }: { code: string }) {
-  return <span className="desktop-poster-placeholder"><b>{code}</b></span>;
+  return <span className="desktop-poster-placeholder"><b>{code}</b><small>暂无封面</small></span>;
 }
 
 function uniqueAssets(assets: Asset[]): Asset[] {
   return [...new Map(assets.map((asset) => [asset.id, asset])).values()];
+}
+
+/**
+ * NFO 标题有时会把番号写在标题开头，甚至重复两次。卡片已经单独展示番号，
+ * 因此这里只清理展示文本；Canonical titles 保持原样，编辑和审计不会丢失来源内容。
+ */
+function withoutLeadingWorkCode(code: string, title: string): string {
+  const escapedCode = code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const prefix = new RegExp(`^(?:${escapedCode})(?:\\s+|[：:·]+\\s*)`, "i");
+  let display = title.trim();
+  while (prefix.test(display)) display = display.replace(prefix, "").trim();
+  return display || title;
 }

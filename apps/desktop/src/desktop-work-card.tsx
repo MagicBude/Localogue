@@ -6,6 +6,7 @@ import { UiTooltip } from "./ui/tooltip";
 
 interface DesktopWorkCardProps {
   card: DesktopWorkCardViewModel;
+  layout?: "grid" | "waterfall";
   onOpen: (id: string) => void;
   onOpenPerson?: (id: string) => void;
   onSelectGenre?: (id: string) => void;
@@ -19,12 +20,18 @@ interface DesktopWorkCardProps {
  * 标题/番号/演员/类型 chip 的信息层级；收藏按钮作为卡片级别的 Presentation
  * Preference 操作，不修改 Canonical Work。
  */
-export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onSelectTag }: DesktopWorkCardProps) {
+export function DesktopWorkCard({ card, layout = "grid", onOpen, onOpenPerson, onSelectGenre, onSelectTag }: DesktopWorkCardProps) {
   const { t } = useDesktopI18n();
-  const { work, title, releaseDate, performers, makerName, workTypeNames, genres, tags, poster } = card;
+  const { work, title, releaseDate, performers, makerName, workTypeNames, genres, tags, poster, landscapeCover } = card;
+  const visiblePerformers = performers.slice(0, 3);
+  const hiddenPerformerCount = performers.length - visiblePerformers.length;
+  const visibleGenres = genres.slice(0, 4);
+  const visibleTags = tags.slice(0, Math.max(0, 6 - visibleGenres.length));
+  const hiddenClassificationCount = genres.length + tags.length - visibleGenres.length - visibleTags.length;
+  const displayAsset = layout === "grid" ? landscapeCover : poster;
 
   return (
-    <article className="desktop-work-card">
+    <article className={`desktop-work-card is-${layout}`}>
       <div className="desktop-work-card__media">
         <DesktopFavoriteButton variant="card" workId={work.id} />
 
@@ -35,8 +42,8 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
           aria-label={`${work.code} ${title}`}
         >
           <DesktopAssetImage
-            asset={poster}
-            alt={`${work.code} poster`}
+            asset={displayAsset}
+            alt={`${work.code} cover`}
             fallback={<PosterPlaceholder code={work.code} />}
           />
         </button>
@@ -59,11 +66,11 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
           >
             {work.code}
           </button>
-          {workTypeNames.map((label) => (
+          {workTypeNames.slice(0, 2).map((label) => (
             <span className="desktop-work-card__chip" key={label}>{label}</span>
           ))}
         </div>
-        <h3>
+        <h3 title={title}>
           <button onClick={() => onOpen(work.id)} type="button">
             {title}
           </button>
@@ -76,11 +83,12 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
               {work.durationMinutes} {t("分钟")}
             </span>
           ) : null}
+          {makerName ? <span title={makerName}>{makerName}</span> : null}
         </div>
 
         {performers.length ? (
           <div className="desktop-work-card__people" aria-label={t("演员")}>
-            {performers.map((performer) => onOpenPerson ? (
+            {visiblePerformers.map((performer) => onOpenPerson ? (
               <UiTooltip
                 key={performer.id}
                 rich
@@ -90,6 +98,7 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
                 <button onClick={() => onOpenPerson(performer.id)} type="button">{performer.name}</button>
               </UiTooltip>
             ) : <span key={performer.id}>{performer.name}</span>)}
+            {hiddenPerformerCount > 0 ? <span className="desktop-work-card__more">+{hiddenPerformerCount}</span> : null}
           </div>
         ) : makerName ? (
           <p className="desktop-work-card__people">{makerName}</p>
@@ -97,12 +106,13 @@ export function DesktopWorkCard({ card, onOpen, onOpenPerson, onSelectGenre, onS
 
         {genres.length || tags.length ? (
           <div className="desktop-work-card__classifications">
-            {genres.slice(0, 6).map((genre) => (
+            {visibleGenres.map((genre) => (
               <button className="is-genre" disabled={!onSelectGenre} key={genre.id} onClick={() => onSelectGenre?.(genre.id)} type="button">{genre.label}</button>
             ))}
-            {tags.slice(0, 6).map((tag) => (
+            {visibleTags.map((tag) => (
               <button className="is-tag" disabled={!onSelectTag} key={tag.id} onClick={() => onSelectTag?.(tag.id)} type="button">{tag.label}</button>
             ))}
+            {hiddenClassificationCount > 0 ? <span className="desktop-work-card__more">+{hiddenClassificationCount}</span> : null}
           </div>
         ) : null}
       </div>
@@ -142,6 +152,7 @@ function PosterPlaceholder({ code }: { code: string }) {
   return (
     <div className="desktop-poster-placeholder" aria-hidden="true">
       <b>{code}</b>
+      <small>暂无封面</small>
     </div>
   );
 }
