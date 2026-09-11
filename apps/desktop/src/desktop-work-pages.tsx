@@ -197,6 +197,7 @@ export function DesktopWorkDetailPage({
               <span className="code-badge">{work.code}</span>
               <DesktopFavoriteButton workId={work.id} variant="detail" />
               <DesktopRatingControl workId={work.id} />
+              <WorkEditor key={work.id} repository={repository} work={work} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
               <span className="desktop-work-record__summary-counts">
                 <span>{t("本地媒体")} <strong>{media.length}</strong></span>
                 <span>{t("作品图片")} <strong>{assets.length}</strong></span>
@@ -221,7 +222,6 @@ export function DesktopWorkDetailPage({
       </section>
       <DesktopWorkMediaSection media={media} onPlay={(path) => void playMedia(path)} onReveal={(path) => void revealMedia(path)} />
       <PresentationAssetPicker entityType="work" entityId={work.id} candidates={presentation.candidates} preference={presentationPreference} resolved={presentation.resolved} stalePreferredAssetId={presentation.stalePreferredAssetId} repository={repository} onSaved={onLibraryChanged} setMessage={setMessage} />
-      <WorkEditor key={work.id} repository={repository} work={work} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
       <section className="settings-card desktop-local-assets-section">
         <div className="section-heading">
           <div><span className="eyebrow">WORK ASSETS</span><h2>{t("作品图片资产")}</h2></div>

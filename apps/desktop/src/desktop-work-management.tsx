@@ -13,6 +13,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useUiConfirm } from "./ui/confirm-dialog";
+import { UiActionDialog } from "./ui/action-dialog";
 
 /** Desktop Work 的新建与编辑表单；查询和文件写入仍通过 Repository 完成。 */
 export function CreateWorkPanel({
@@ -118,7 +119,18 @@ interface WorkEditorProps {
 /** 取消意味着丢弃未保存草稿。重新挂载编辑会话同时清理关系选择和暂存 Tag，且不写磁盘。 */
 export function WorkEditor(props: WorkEditorProps) {
   const [session, setSession] = useState(0);
-  return <WorkEditorSession key={session} {...props} onCancel={() => setSession((value) => value + 1)} />;
+  const [open, setOpen] = useState(false);
+  const { t } = useDesktopI18n();
+  function closeAndReset(): void {
+    setOpen(false);
+    setSession((value) => value + 1);
+  }
+  return <>
+    <button className="primary-button desktop-work-edit-trigger" type="button" onClick={() => setOpen(true)}>{t("编辑作品")}</button>
+    <UiActionDialog wide open={open} onOpenChange={(next) => { if (!next) closeAndReset(); }} title={t("编辑作品")} description={t("集中修改作品信息，保存后返回当前详情。明确信息来源后再改动事实字段。")} closeLabel={t("关闭")}>
+      <WorkEditorSession key={session} {...props} onSaved={() => { props.onSaved(); setOpen(false); setSession((value) => value + 1); }} onCancel={closeAndReset} />
+    </UiActionDialog>
+  </>;
 }
 
 function WorkEditorSession({
@@ -131,7 +143,6 @@ function WorkEditorSession({
 }: WorkEditorProps & { onCancel: () => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const confirm = useUiConfirm();
-  const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
   const operationPending = useRef(false);
@@ -289,21 +300,19 @@ function WorkEditorSession({
     }
   }
 
-  return <section className="settings-card compact-management-card">
-    <div className="section-heading">
-      <div><span className="eyebrow">DESKTOP EDIT</span><h2>{t("编辑作品")}</h2><p className="muted">{isPrivate ? t("当前实体来自 Private Library，可直接编辑。") : t("当前来自 Shared Pack；保存会建立同 ID 的 Private Override，不修改 Shared Pack。")}</p></div>
-      <div className="button-row"><button disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Work")}</button> : null}</div>
-    </div>
-    {open ? <fieldset className="editor-grid" disabled={busy}>
+  return <div className="desktop-work-editor-dialog"><p className="muted">{isPrivate ? t("当前实体来自 Private Library，可直接编辑。") : t("当前来自 Shared Pack；保存会建立同 ID 的 Private Override，不修改 Shared Pack。")}</p><fieldset className="editor-grid" disabled={busy}>
+      <h3 className="span-2 desktop-editor-section-title">{t("基础信息")}</h3>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} /></label>
       <label>{t("中文标题")}<input value={titleZh} onChange={(event) => setTitleZh(event.target.value)} /></label>
       <label className="span-2">{t("英文标题")}<input value={titleEn} onChange={(event) => setTitleEn(event.target.value)} /></label>
+      <label>{t("发行日期")}<input value={releaseDate} onChange={(event) => setReleaseDate(event.target.value)} placeholder="2026-09-03 / 2026-09 / 2026" /></label>
+      <label>{t("时长（分钟）")}<input type="number" min="1" value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
+      <h3 className="span-2 desktop-editor-section-title">{t("作品简介")}</h3>
       <label>{t("日文简介")}<textarea value={descriptionJa} onChange={(event) => setDescriptionJa(event.target.value)} rows={4} /></label>
       <label>{t("中文简介")}<textarea value={descriptionZh} onChange={(event) => setDescriptionZh(event.target.value)} rows={4} /></label>
       <label className="span-2">{t("英文简介")}<textarea value={descriptionEn} onChange={(event) => setDescriptionEn(event.target.value)} rows={4} /></label>
-      <label>{t("发行日期")}<input value={releaseDate} onChange={(event) => setReleaseDate(event.target.value)} placeholder="2026-09-03 / 2026-09 / 2026" /></label>
-      <label>{t("时长（分钟）")}<input type="number" min="1" value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
+      <h3 className="span-2 desktop-editor-section-title">{t("关系与分类")}</h3>
       <label>{t("厂商")}<select value={makerId} onChange={(event) => setMakerId(event.target.value)}><option value="">{t("未设置")}</option>{makers.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
       <label>{t("厂牌")}<select value={labelId} onChange={(event) => setLabelId(event.target.value)}><option value="">{t("未设置")}</option>{labels.map((item) => <option key={item.id} value={item.id}>{localizeText(item.names, metadataLanguage, item.id)}</option>)}</select></label>
       <ChoicePicker label={t("演员")} values={performerIds} onChange={setPerformerIds} options={people.map((item) => ({ id: item.id, label: getPreferredPersonName(item, metadataLanguage), searchNames: item.names.map((name) => name.value) }))} />
@@ -318,9 +327,8 @@ function WorkEditorSession({
           <button disabled={!customTagName.trim()} onClick={addCustomTag} type="button">{t("创建并选中")}</button>
         </div>
       </div>
-      <div className="span-2 form-actions"><button onClick={onCancel}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
-    </fieldset> : null}
-  </section>;
+      <div className="span-2 form-actions desktop-work-editor-actions">{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Work")}</button> : <span />}<button onClick={onCancel}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div>
+    </fieldset></div>;
 }
 
 function ChoicePicker({ label, options, values, onChange }: { label: string; options: Array<{ id: string; label: string; searchNames?: string[] }>; values: string[]; onChange: (values: string[]) => void }) {

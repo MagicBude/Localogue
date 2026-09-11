@@ -367,21 +367,12 @@ function WorkFacetPanel({
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
-  const [drawerOpen, setDrawerOpen] = useState(() => countAdvancedFilters(query) > 0);
+  // 已选条件由徽标和 Chips 持续呈现，重新进入页面时不自动展开浮层遮住作品。
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const advancedCount = countAdvancedFilters(query);
   return (
     <aside className="desktop-facet-bar">
       <div className="desktop-facet-bar__primary">
-        <label className="field desktop-facet-search">
-          <input
-            aria-label={t("搜索番号或标题")}
-            value={query.text ?? ""}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })}
-            placeholder={t("搜索番号或标题")}
-            type="search"
-          />
-        </label>
-
         <label className="field">
           <span>{t("排序")}</span>
           <select value={query.sort ?? "release_desc"} onChange={(event) => patch({ sort: event.target.value as WorkSort })}>
@@ -400,30 +391,6 @@ function WorkFacetPanel({
           </select>
         </label>
 
-        <label className="field check-inline desktop-facet-fav">
-          <input
-            type="checkbox"
-            checked={query.favoriteOnly === true}
-            onChange={(event) => patch({ favoriteOnly: event.target.checked || undefined })}
-          />
-          <span>{t("仅看收藏")}</span>
-        </label>
-
-        <label className="field desktop-facet-rating">
-          <span>{t("评分至少")}</span>
-          <select
-            value={query.ratingMin ?? ""}
-            onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}
-          >
-            <option value="">{t("任意")}</option>
-            <option value="1">★1+</option>
-            <option value="2">★2+</option>
-            <option value="3">★3+</option>
-            <option value="4">★4+</option>
-            <option value="5">★5</option>
-          </select>
-        </label>
-
         <button
           type="button"
           className="desktop-facet-toggle"
@@ -437,7 +404,7 @@ function WorkFacetPanel({
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
 
-        <button type="button" className="ghost-button desktop-facet-clear" onClick={() => onChange({ sort: "release_desc" })}>
+        <button type="button" className="ghost-button desktop-facet-clear" hidden={!hasActiveFilters(query)} onClick={() => onChange({ sort: "release_desc" })}>
           {t("清除")}
         </button>
         {pagination ? <div className="desktop-facet-pagination">{pagination}</div> : null}
@@ -445,7 +412,12 @@ function WorkFacetPanel({
 
       {drawerOpen ? (
         <div className="desktop-facet-bar__drawer">
+          <div className="desktop-facet-drawer-heading"><div><strong>{t("更多筛选")}</strong><small>{t("选择条件后立即更新作品结果")}</small></div><button type="button" onClick={() => setDrawerOpen(false)}>{t("完成")}</button></div>
           <div className="desktop-facet-bar__pairs">
+            <div className="desktop-filter-pair">
+              <label className="field check-inline desktop-facet-fav"><input type="checkbox" checked={query.favoriteOnly === true} onChange={(event) => patch({ favoriteOnly: event.target.checked || undefined })} /><span>{t("仅看收藏")}</span></label>
+              <label className="field desktop-facet-rating"><span>{t("评分至少")}</span><select value={query.ratingMin ?? ""} onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}><option value="">{t("任意")}</option><option value="1">★1+</option><option value="2">★2+</option><option value="3">★3+</option><option value="4">★4+</option><option value="5">★5</option></select></label>
+            </div>
             <div className="desktop-filter-pair">
               <label className="field"><span>{t("发行日期")} ≥</span><input value={query.releaseFrom ?? ""} onChange={(event) => patch({ releaseFrom: event.target.value || undefined })} type="date" /></label>
               <label className="field"><span>{t("发行日期")} ≤</span><input value={query.releaseTo ?? ""} onChange={(event) => patch({ releaseTo: event.target.value || undefined })} type="date" /></label>
@@ -654,9 +626,8 @@ function removeChip(query: WorkQuery, key: keyof WorkQuery, value?: string): Wor
 }
 
 /**
- * 统计“抽屉”中已选的高级筛选数量：用于「更多筛选」按钮上的徽标，
- * 以及首次进入时是否自动展开抽屉。基础栏里的搜索/排序/收藏/评分不计入，
- * 因为它们始终可见。
+ * 统计浮层中已选的高级筛选数量，用于「更多筛选」按钮上的徽标。
+ * 全局搜索另由顶部框架和已选 Chips 呈现；排序属于结果顺序，不算筛选条件。
  */
 function countAdvancedFilters(query: WorkQuery): number {
   const arrayKeys: Array<keyof WorkQuery> = [
@@ -674,5 +645,11 @@ function countAdvancedFilters(query: WorkQuery): number {
   if (query.durationMax !== undefined) count += 1;
   if (query.hasCover !== undefined) count += 1;
   if (query.hasMedia !== undefined) count += 1;
+  if (query.favoriteOnly) count += 1;
+  if (query.ratingMin !== undefined) count += 1;
   return count;
+}
+
+function hasActiveFilters(query: WorkQuery): boolean {
+  return Boolean(query.text) || countAdvancedFilters(query) > 0;
 }
