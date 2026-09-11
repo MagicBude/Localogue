@@ -1,6 +1,7 @@
 # Changelog
 
-- 修正 Desktop 将封面墙误替换海报墙的问题：`海报墙` 恢复为 `poster` 竖版海报，另增使用完整 `fanart` 的独立 `封面墙`；fanart 按图片自然比例撑开媒体区，不裁图也不补黑边。它与瀑布流、列表、表格组成五种展示方式；五种视图继续复用同一 WorkQuery、分页和返回状态。
+- 新增 `SqliteLibraryRepository` 与可重复 Repository Contract：Web 可通过 `LOCALOGUE_STORAGE=sqlite` 显式启用 `catalog.db + local.db`，作品/人物查询继续复用共享 Query Service，私人实体以完整 Override 覆盖只读 Catalog。Contract 在临时 `local.db` 副本中验证查询、番号查找与覆盖写入，不触碰真实数据库；Desktop Native Adapter 尚未切换。
+- 修正 Desktop 将封面墙误替换海报墙的问题：`海报墙` 恢复为 `poster` 竖版海报，另增使用完整 `fanart` 的独立 `封面墙`；fanart 按图片自然比例撑开媒体区，不裁图也不补黑边。五种视图继续复用同一 WorkQuery、分页和返回状态。
 - 新增私人 `local.db` Schema、非破坏性 JSON 迁移器、逐集合/Receipt/完整性对账和 SQLite → JSON 原子导出工具；私人 Canonical Override、媒体、展示偏好、Evidence 与审计记录分表保存，Asset 二进制和视频继续留在文件系统。
 - Community Catalog 的 `初体験`、`性感開発` 补入稳定 Canonical Genre 与 Crosswalk，公共分类达到 325 / 325 全映射；SQLite 构建时将旧 `genre_000xxx` 分别归入 Genre、Work Type 和 Source-only 关系，不把旧混合分类 ID 带入运行时关系表。
 - 启动 V2 SQLite 存储迁移：以 ADR-046 将数据收敛为 Source Evidence、Curated Catalog 与 Personal Library，明确 Shared Pack 只是 Catalog 发布包；新增标准 SQLite 3 `catalog.db` Schema、原子 JSON 构建器和逐集合/完整性/外键对账脚本。现阶段不切换运行时默认 Repository，JSON 继续作为可回滚来源。
@@ -872,4 +873,3 @@
 - Series 新增可选 `parentOrganizationId`，补齐 Maker → Label → Series 归属链。
 - 新增 `validate:registry` 与 `registry:audit`，并把 Registry Validator 接入 `pnpm check`。
 - 不进行基于名称相似度的自动 Organization 合并。
-

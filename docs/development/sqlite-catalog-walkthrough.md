@@ -36,7 +36,19 @@ node scripts/validate-catalog-sqlite.mjs D:\path\to\catalog.db D:\path\to\shared
 
 `.db` 是标准 SQLite 3 文件，可用 SQLiteStudio、DB Browser for SQLite 或 DBeaver 打开。建议以只读方式查看；`json` 列保存完整原实体，普通列和关系表用于筛选、排序与关联。
 
-当前阶段只完成 `catalog.db` 构建与对账，默认 Repository 尚未切换。下一阶段会增加 SQLite Repository Contract Test，通过后再让 Desktop 优先读取数据库。
+## Repository Contract 与试运行
+
+先构建两个数据库，再运行 Contract：
+
+```powershell
+pnpm catalog:sqlite:build
+pnpm local:sqlite:build
+pnpm sqlite:repository:validate
+```
+
+Contract 会复制 `local.db` 到临时文件，在副本中验证作品/人物查询、番号规范化和 Private Override，结束后删除副本。它不会修改真实私人数据库。
+
+Web 可用 `LOCALOGUE_STORAGE=sqlite` 显式试运行；未设置时继续使用 JSON Repository。当前 Desktop 仍通过 Tauri Native JSON Adapter 读取资料，下一阶段才实现 Native SQLite Adapter，因此不能把 Web Contract 通过描述为 Desktop 已完成切换。
 
 ## 私人 local.db
 

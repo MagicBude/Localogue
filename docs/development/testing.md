@@ -13,7 +13,7 @@ V1 优先覆盖：
 - Import Diff；
 - Review 后写入结果。
 
-V2 再增加 Repository Contract Test，确保 JSON Repository 与 SQLite Repository 的行为一致。
+V2 已增加 `pnpm sqlite:repository:validate`。它在 `local.db` 临时副本中验证 SQLite Repository 的查询、查找和私人覆盖语义；由于 Catalog 构建会把旧 Community 混合分类规范化为 Genre / Work Type / Source-only，Contract 验证 Domain 行为与关系完整性，而不是要求旧 JSON 字节完全相等。
 
 
 ## V1-07：审计数据校验
