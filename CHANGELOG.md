@@ -1,5 +1,6 @@
 # Changelog
 
+- JavBus 分类固化脚本停止重排既有 Alias，只在末尾追加新审核结论，避免 Git 将位置变化显示成大量删除与新增；审核队列移除的条目仍完整保存在正式 Alias 和 Provider Evidence 中。
 - 按用户确认的分类原则应用第一批 JavBus 来源词：引入仅用于离线治理脚本的 OpenCC，将 60 个香港繁体词在转简体后唯一精确命中现有 Genre / Work Type / Source-only，并生成可重复执行、默认预览的固化脚本。未映射降至 528；复合词和 `手淫` 的 Provider 语义歧义继续失败关闭。
 - 新增 JavBus 分类人工审核表：12 个 review-required、1 个运行时歧义和 588 个未映射来源词集中到可填写 CSV；重建时保留审核决定、目标 ID 与备注。明确 `手淫` 是 JavDB Provider 别名同时命中 masturbation / handjob，而未映射不等同于应批量新增 Genre。
 - 保存完整 JavBus Genre Provider Evidence：888 条来源记录、839 个名称/页面分类组合和 807 个唯一名称；新增可重复联网刷新、离线路由审计和结构校验脚本。分类沿用 JavBoss 的 `genre-box + h4` 思路，但不直接修改 Canonical；来源 ID 冲突和 588 个未映射词均保留待审。

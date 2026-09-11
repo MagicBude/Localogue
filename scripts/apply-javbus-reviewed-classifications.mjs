@@ -51,7 +51,8 @@ for (const item of additions) console.log(`- ${item.term} -> ${item.targets[0]}`
 if (!shouldWrite || additions.length === 0) process.exit(0);
 
 aliases.items.push(...additions);
-aliases.items.sort((left, right) => left.term.localeCompare(right.term, "ja"));
+// 保持既有人工治理顺序，只在末尾追加新结论。重新排序会让 Git 把大量旧行显示成
+// “删除后新增”，虽然数据没有丢失，却会严重干扰代码审查和用户判断。
 await atomicWrite(path.join(vocabularyRoot, "classification-term-aliases.json"), `${JSON.stringify(aliases, null, 2)}\n`);
 await atomicWrite(path.join(vocabularyRoot, "classification-term-aliases.csv"), toCsv(aliases.items));
 console.log(`已写入 ${additions.length} 个 JavBus 精确别名；其余条目继续等待语义分流。`);
