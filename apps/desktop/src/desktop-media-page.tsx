@@ -455,11 +455,11 @@ export function DesktopMediaPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow">ONE ROOT · ONE ACTION</span>
-            <h2>{t("扫描资料库")}</h2>
-            <p className="muted">{t("一次检查作品资料、封面图片和视频文件；新增内容会自动加入当前资料库。")}</p>
+            <h2>{t("扫描资料库（全部目录）")}</h2>
+            <p className="muted">{t("检查全部启用目录中的 NFO、图片和视频；目录卡片只处理单个目录。")}</p>
           </div>
           <button className="primary-button sync-library-button" disabled={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void syncUnifiedLibrary()}>
-            {metadataBusy || scan?.status === "running" ? t("扫描中…") : t("扫描资料库")}
+            {metadataBusy || scan?.status === "running" ? t("扫描中…") : t("扫描资料库（全部目录）")}
           </button>
         </div>
         <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置内容目录；仍可使用下方高级媒体 / NFO 目录。")}</code>
