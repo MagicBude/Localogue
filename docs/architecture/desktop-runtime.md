@@ -183,8 +183,7 @@ Desktop Settings 位于 Tauri App Config；其：
 
 - `libraryPath`；
 - `sharedPackPaths`；
-- `mediaScanPaths`；
-- `nfoScanPaths`；
+- 当前 Profile 的 `contentFolders`（每项明确视频、NFO、图片扫描范围）；
 - `ffprobePath`；
 - `webUrl`；
 

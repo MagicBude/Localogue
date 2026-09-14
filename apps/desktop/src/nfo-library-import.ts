@@ -80,7 +80,7 @@ export interface NfoImportResult {
 /**
  * NFO 与视频目录完全解耦的批量预览。
  *
- * 这里只扫描 settings.nfoScanPaths 对应的元数据目录，不要求 NFO 与 MediaFile
+ * 这里只扫描当前影片库 contentFolders 中启用 NFO 的元数据目录，不要求 NFO 与 MediaFile
  * 同名、同目录或一一相邻。真正把媒体绑定到 Work 的仍是既有番号匹配器。
  */
 export async function previewNfoImport(

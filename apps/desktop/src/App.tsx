@@ -36,7 +36,7 @@ import {
   updateLibraryProfile,
 } from "./library-profiles";
 
-// Native Profile 命令的最小契约版本；低版本 Runtime 只能读取旧设置，不能安全保存多资料库配置。
+// Native Profile 命令的最小契约版本；低版本 Runtime 不能安全保存 Settings V2。
 const PROFILE_NATIVE_CONTRACT_REVISION = 15;
 // 一次选择初始化依赖 Native 创建受控 Private Library，因此必须等待 revision 7。
 const QUICK_SETUP_NATIVE_CONTRACT_REVISION = 7;
