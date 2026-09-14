@@ -119,8 +119,8 @@ export function DesktopWorkDetailPage({
   }, [repository, id], toMessage);
 
   // 读取中、失效链接和 I/O 失败也必须保留返回入口，不能把用户困在空页面。
-  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
-  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("作品不存在。") : t("无法读取资料库。")} description={data.error} />;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("作品不存在。") : t("无法读取影片库。")} description={data.error} />;
   const { work, people, organizations, series, genres, tags, media, assets, presentationPreference, presentation, recycledAsset } = data.value;
   const performers = work.personRelations.filter((item) => item.role === "performer");
   const directors = work.personRelations.filter((item) => item.role === "director");
@@ -129,7 +129,7 @@ export function DesktopWorkDetailPage({
     try {
       const isPrivateAsset = await repository.isPrivateEntity("assets", asset.id);
       if (!isPrivateAsset) {
-        setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
+        setMessage(t("这张图片来自社区资料，不能直接删除；社区资料始终只读。"));
         return;
       }
       if (!await confirm({ title: t("确认"), description: t("从 {code} 移除这个 Private Asset 记录？\n\n{path}\n\n可以通过“恢复最近移除”找回；原图和管理副本均不会删除。", { code: work.code, path: asset.storagePath }), confirmLabel: t("删除"), dangerous: true })) return;
@@ -240,7 +240,7 @@ export function DesktopWorkDetailPage({
               </article>
             ))}
           </div>
-        ) : <p className="muted">{t("尚未关联本地图片资产。可在“本地资料”执行一键同步，将 Unified Root 中的 poster / fanart / thumb 导入。")}</p>}
+        ) : <p className="muted">{t("尚未关联本地图片。可在“导入与整理”扫描影片库，导入内容目录中的 poster / fanart / thumb 图片。")}</p>}
       </section>
     </div>
   );

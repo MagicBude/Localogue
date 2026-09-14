@@ -30,7 +30,7 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { loading, error, media, works } = props;
 
-  if (loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  if (loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
   if (error || !media || !works) return <UiEmptyState eyebrow="READ ERROR" tone="error" title={t("无法读取当前页面")} description={toMessage(error)} />;
 
   return (

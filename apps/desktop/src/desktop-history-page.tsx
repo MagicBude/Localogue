@@ -70,7 +70,7 @@ export function DesktopHistoryPage({ privateRoot, preferSqlite, onLibraryChanged
   }
 
   return <div className="page-stack governance-page"><GovernanceTitle eyebrow="HISTORY · SNAPSHOT · RESTORE" title={t("历史与恢复")} body={t("Commit 前保存最小 before-image Snapshot；恢复不会删除历史 Receipt，而是追加 Restore Receipt 与 Provenance。")} />
-    <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">COMMIT RECEIPTS</span><h2>{t("Canonical 历史")}</h2></div><strong>{commits.length}</strong></div>
+    <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">CHANGE RECORDS</span><h2>{t("资料变更历史")}</h2></div><strong>{commits.length}</strong></div>
       <div className="history-list">{commits.map((commit) => <article key={commit.id}><div><b>{commit.targetWorkCode}</b><small>{new Date(commit.committedAt).toLocaleString()} · {commit.operationCount} operations</small><code>{commit.fingerprint.slice(0, 16)}…</code></div><div className="button-row"><button onClick={() => openWork(commit.targetWorkId)}>{t("打开 Work")}</button><button disabled={!commit.snapshotId || restoredIds.has(commit.id) || busyId === commit.id} onClick={() => void restore(commit)}>{restoredIds.has(commit.id) ? t("已恢复") : busyId === commit.id ? t("恢复中…") : t("恢复 Snapshot")}</button></div></article>)}</div>
     </section>
   </div>;

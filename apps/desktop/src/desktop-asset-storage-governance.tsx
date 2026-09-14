@@ -24,7 +24,7 @@ export function DesktopAssetStorageGovernance({
 
   async function inspect(): Promise<void> {
     if (!hasPrivateLibrary) {
-      setMessage(t("请先在设置页选择 Private Library。"));
+      setMessage(t("请先创建影片库并确认数据存储位置。"));
       return;
     }
     if (!nativeReady) {
@@ -73,7 +73,7 @@ export function DesktopAssetStorageGovernance({
         <div>
           <span className="eyebrow">ASSET STORAGE HEALTH</span>
           <h2>{t("资源文件健康")}</h2>
-          <p className="muted">{t("检查 Private Library 的 asset-files 与 Asset JSON 是否一致；只清理没有任何 Asset 元数据引用的孤儿文件。")}</p>
+          <p className="muted">{t("检查管理图片文件与图片资料是否一致；只清理没有任何资料引用的孤儿文件。")}</p>
         </div>
         <div className="button-row">
           <button disabled={busy || !hasPrivateLibrary || !nativeReady} onClick={() => void inspect()} type="button">{busy ? t("处理中…") : t("检查存储")}</button>

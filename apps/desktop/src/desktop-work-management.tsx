@@ -84,7 +84,7 @@ export function CreateWorkPanel({
       await repository.saveWork(work);
       resetDraft();
       setOpen(false);
-      setMessage(t("已在 Private Library 新建 Work {code}。", { code: work.code }));
+      setMessage(t("已在当前影片库新建作品 {code}。", { code: work.code }));
       onSaved(work);
     } catch (error) {
       setMessage(t("新建 Work 失败：{error}", { error: message(error) }));
@@ -96,7 +96,7 @@ export function CreateWorkPanel({
 
   return <div className="desktop-create-work-trigger-row">
     <button className="primary-button" disabled={busy} onClick={() => setOpen(true)}>{t("+ 新建 Work")}</button>
-    <UiActionDialog wide open={open} onOpenChange={(next) => { setOpen(next); if (!next) resetDraft(); }} title={t("新建作品")} description={t("直接创建最小 Canonical Work；完整关系可进入详情页继续编辑。")} closeLabel={t("关闭")}>
+    <UiActionDialog wide open={open} onOpenChange={(next) => { setOpen(next); if (!next) resetDraft(); }} title={t("新建作品")} description={t("先创建包含番号和标题的基础作品，保存后可在详情页继续补充人物、分类和图片。")} closeLabel={t("关闭")}>
       <fieldset className="editor-grid desktop-create-work-dialog" disabled={busy}>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} placeholder="MIDV-077" /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} placeholder={t("作品标题")} /></label>
@@ -288,7 +288,7 @@ function WorkEditorSession({
 
   async function remove(): Promise<void> {
     if (operationPending.current) return;
-    if (!isPrivate || !await confirm({ title: t("确认"), description: t("删除 Private Work {code}？如 Shared Pack 中存在同 ID，删除后会重新显示 Shared 版本。", { code: work.code }), confirmLabel: t("删除"), dangerous: true })) return;
+    if (!isPrivate || !await confirm({ title: t("确认"), description: t("删除当前影片库中的作品 {code}？如果社区资料中存在同一作品，删除个人版本后会重新显示社区版本。", { code: work.code }), confirmLabel: t("删除"), dangerous: true })) return;
     operationPending.current = true;
     setBusy(true);
     try {
@@ -303,7 +303,7 @@ function WorkEditorSession({
     }
   }
 
-  return <div className="desktop-work-editor-dialog"><p className="muted">{isPrivate ? t("当前实体来自 Private Library，可直接编辑。") : t("当前来自 Shared Pack；保存会建立同 ID 的 Private Override，不修改 Shared Pack。")}</p><fieldset className="editor-grid" disabled={busy}>
+  return <div className="desktop-work-editor-dialog"><p className="muted">{isPrivate ? t("这是当前影片库的个人版本，可以直接编辑。") : t("当前显示社区资料；保存后会在影片库中建立个人版本，不会修改社区资料。")}</p><fieldset className="editor-grid" disabled={busy}>
       <h3 className="span-2 desktop-editor-section-title">{t("基础信息")}</h3>
       <label>{t("番号")}<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
       <label>{t("日文标题")}<input value={titleJa} onChange={(event) => setTitleJa(event.target.value)} /></label>

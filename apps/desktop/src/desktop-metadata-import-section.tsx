@@ -36,12 +36,12 @@ export function MetadataImportSection(props: MetadataImportSectionProps) {
         </div>
         <div className="button-row">
           <button disabled={busy} onClick={props.onPreview}>{busy ? t("处理中…") : t("预览 NFO + 图片")}</button>
-          <button disabled={busy || !nfoPreview?.importable} onClick={props.onSaveEvidence}>{t("保存为 Evidence")}</button>
+          <button disabled={busy || !nfoPreview?.importable} onClick={props.onSaveEvidence}>{t("保存为待审核资料")}</button>
           <button className="primary-button" disabled={busy || !(nfoPreview?.importable || assetPreview?.linkable)} onClick={props.onImport}>{t("导入当前预览")}</button>
         </div>
       </div>
 
-      <code className="path-block">{roots.length ? roots.join("\n") : t("尚未配置 Unified Library Root / 兼容扫描路径")}</code>
+      <code className="path-block">{roots.length ? roots.join("\n") : t("尚未配置内容目录或高级兼容目录")}</code>
       {nfoPreview ? <NfoPreview preview={nfoPreview} /> : <p className="muted">{t("多段 NFO（例如 MDVR-195.part1～part6）会聚合成一个 Work 组，不再把其余文件显示成一长串“重复番号”。")}</p>}
       {assetPreview ? <AssetPreview preview={assetPreview} /> : null}
       {nfoResult || assetResult ? <ImportResults nfo={nfoResult} assets={assetResult} /> : null}

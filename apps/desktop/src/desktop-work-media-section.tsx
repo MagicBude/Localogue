@@ -36,7 +36,7 @@ export function DesktopWorkMediaSection({ media, onPlay, onReveal }: DesktopWork
           <button type="button" onClick={() => onReveal(file.path)}>{t("打开所在位置")}</button>
         </div>
       </article>)}
-    </div> : <p className="muted">{t("尚未关联本地视频。请在“本地资料”中执行一键同步，或为扫描到的媒体人工绑定作品。")}</p>}
+    </div> : <p className="muted">{t("尚未关联本地视频。请在“导入与整理”扫描影片库，或把已发现的视频手动关联到作品。")}</p>}
   </section>;
 }
 

@@ -15,11 +15,11 @@ export function DesktopAboutPage({ runtime, setMessage }: { runtime: DesktopRunt
   return <div className="page-stack about-page">
     <PageTitle eyebrow="LOCALOGUE DESKTOP" title={t("关于")} description={t("查看版本、运行环境和本机数据位置。")}/>
     <div className="ui-settings-list">
-      <SettingsRow icon={<Info20Regular />} title="Localogue Desktop" description={t("本地优先的 AV 元数据资料库")} action={<strong>{runtime?.version ?? "…"}</strong>} />
+      <SettingsRow icon={<Info20Regular />} title="Localogue Desktop" description={t("本地优先的 AV 个人影片库与策展管理器")} action={<strong>{runtime?.version ?? "…"}</strong>} />
       <SettingsRow icon={<WindowDevTools20Regular />} title={t("运行环境")} description={runtime?.identifier ?? "—"} action={<span>{runtime?.environment ?? "—"}</span>} />
       <SettingsRow icon={<DocumentText20Regular />} title={t("程序日志")} description={t("查看扫描、导入和本机运行记录")} action={<LogViewerDialog setMessage={setMessage} trigger={<UiButton variant="primary">{t("查看日志")}</UiButton>} />} />
       <SettingsRow icon={<FolderOpen20Regular />} title={t("设置文件")} description={runtime?.settingsPath ?? t("尚不可用")} />
-      <SettingsRow icon={<BookInformation20Regular />} title={t("项目说明")} description={t("Canonical Library、Evidence 与私人展示偏好均保持本地可用。")}/>
+      <SettingsRow icon={<BookInformation20Regular />} title={t("项目说明")} description={t("作品资料、来源记录和个人设置均保存在本机，核心功能可以离线使用。")}/>
       <DesktopHelp />
     </div>
   </div>;

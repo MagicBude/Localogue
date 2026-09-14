@@ -48,7 +48,7 @@ const NAV_GROUPS: DesktopNavGroup[] = [
   { id: "home", label: "首页", icon: Home20Regular, landingPage: "home", pages: ["home"] },
   {
     id: "library",
-    label: "资料库",
+    label: "影片库",
     icon: BookDatabase20Regular,
     landingPage: "works",
     pages: ["works", "people", "browse"],
@@ -110,7 +110,7 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
         </button></UiTooltip>
       </div>;
     })}</nav>
-    <div className="source-summary">{settings.libraryProfiles?.length ? <select className="source-profile-select" aria-label={t("快速切换资料库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择资料库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select> : <button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t("+ 新建资料库")}</button>}<small>{settings.libraryPath ? t("Private + {count} Shared", { count: validSharedCount }) : t("{count} Shared", { count: validSharedCount })}</small></div>
+    <div className="source-summary">{settings.libraryProfiles?.length ? <select className="source-profile-select" aria-label={t("快速切换影片库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择影片库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select> : <button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t("+ 新建影片库")}</button>}<small>{settings.libraryPath ? t("本机数据 + {count} 份社区资料", { count: validSharedCount }) : t("{count} 份社区资料", { count: validSharedCount })}</small></div>
     <button className="sidebar-collapse-button" title={collapsed ? t("展开侧边栏") : t("收起侧边栏")} aria-label={collapsed ? t("展开侧边栏") : t("收起侧边栏")} onClick={onToggleCollapsed} type="button">{collapsed ? <ChevronRight20Regular /> : <ChevronLeft20Regular />}<span className="sidebar-collapse-label">{collapsed ? t("展开侧边栏") : t("收起侧边栏")}</span></button>
     <div className="runtime-pill"><span className={runtime ? "runtime-dot online" : "runtime-dot"} /><span>{runtime ? `${runtime.environment} · ${runtime.version}` : "connecting"}</span></div>
   </aside>;
@@ -138,8 +138,8 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
       ]
       : page === "settings" || page === "packs"
         ? [
-          { id: "library", label: t("资料库与目录"), icon: Database20Regular, active: page === "settings" && settingsModule === "library", onSelect: () => onSettingsModule("library") },
-          { id: "sources", label: t("共享资料"), icon: BookContacts20Regular, active: page === "settings" && settingsModule === "sources", onSelect: () => onSettingsModule("sources") },
+          { id: "library", label: t("影片库与目录"), icon: Database20Regular, active: page === "settings" && settingsModule === "library", onSelect: () => onSettingsModule("library") },
+          { id: "sources", label: t("社区资料"), icon: BookContacts20Regular, active: page === "settings" && settingsModule === "sources", onSelect: () => onSettingsModule("sources") },
           { id: "tools", label: t("扫描与工具"), icon: Wrench20Regular, active: page === "settings" && settingsModule === "tools", onSelect: () => onSettingsModule("tools") },
           { id: "about", label: t("诊断"), icon: BoxMultiple20Regular, active: page === "settings" && settingsModule === "about", onSelect: () => onSettingsModule("about") },
           { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },

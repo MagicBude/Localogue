@@ -81,8 +81,8 @@ export function DesktopPersonDetailPage({
     };
   }, [repository, id], toMessage);
 
-  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
-  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("人物不存在。") : t("无法读取资料库。")} description={data.error} />;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={data.value === null ? t("人物不存在。") : t("无法读取影片库。")} description={data.error} />;
   const { person, workCount, portrait, presentationPreference, presentation, personAssets } = data.value;
   const displayName = getPreferredPersonName(person, metadataLanguage);
 

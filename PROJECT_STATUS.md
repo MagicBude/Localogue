@@ -4,6 +4,8 @@
 
 **0.2 Desktop Beta Readiness。** V2 SQLite 存储迁移已经技术收口，当前重心从内部阶段编号转为普通用户可感知的完整流程：首次选择目录、可观察同步、异常处理、资料浏览与编辑、委托播放、备份恢复和 Windows 发行验收。
 
+2026-09-14 完成第一轮用户术语治理：普通界面统一使用“影片库、内容目录、社区资料、待审核资料、个人备份”，不再要求用户理解 Library Profile、Private Library、Shared Pack、Canonical、Evidence 或 Commit Plan。内部 Domain / Schema 稳定名称保持不变；完整定义与可合并项见 `docs/product/user-terminology.md`。日英翻译已同步，等待用户实机验收。
+
 2026-09-14 首次使用流程完成第一处收敛：选择内容目录并创建受控私人资料库后，Desktop 直接进入“导入与整理”并触发已有 Unified Sync，不再返回首页要求用户再次点击“一键同步”。NFO → 图片 → Media 编排、进度和取消仍复用同一 Application / Platform 边界，等待全新 Profile 的 Windows 实机验收。
 
 2026-09-14 目录任务反馈参考 JavBoss 完成第一轮增强：每个内容目录卡片显示空闲、扫描中、完成、取消或失败状态，并保留上次扫描时间、耗时、新增、更新、关联与未关联统计；单目录同步只标记对应目录。状态继续由 Unified Sync 与 Media Scan Receipt 派生，没有新增第二套目录数据库。

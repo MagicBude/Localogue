@@ -164,12 +164,12 @@ export function DesktopMediaPage({
 
   async function startScan(options: { waitForCompletion?: boolean; roots?: string[]; nfoIdentityHints?: Array<{ path: string; code: string }> } = {}): Promise<MediaScanJobSnapshot | null> {
     if (!settings.libraryPath) {
-      setMessage(t("请先在设置页选择 Private Library。Shared Pack 不能保存 MediaFile。"));
+      setMessage(t("请先创建影片库并确认数据存储位置；社区资料不能保存本地视频记录。"));
       return null;
     }
     const requestedRoots = options.roots ?? mediaRoots;
     if (!requestedRoots.length) {
-      setMessage(t("请先添加 Unified Library Root，或在高级设置里添加媒体扫描目录。"));
+      setMessage(t("请先添加内容目录，或在高级设置里添加额外媒体目录。"));
       return null;
     }
 
@@ -250,11 +250,11 @@ export function DesktopMediaPage({
 
   async function scanMetadataSource(): Promise<void> {
     if (!settings.libraryPath) {
-      setMessage(t("请先在设置页选择 Private Library；NFO 与本地 Asset 导入都会写入私人资料库。"));
+      setMessage(t("请先创建影片库并确认数据存储位置；NFO 和本地图片会写入当前影片库。"));
       return;
     }
     if (!nfoRoots.length && !assetRoots.length) {
-      setMessage(t("请先添加 Unified Library Root，或配置高级 NFO / Media 扫描路径。"));
+      setMessage(t("请先添加内容目录，或配置高级 NFO / 视频目录。"));
       return;
     }
 
@@ -324,11 +324,11 @@ export function DesktopMediaPage({
     const syncAssetRoots = onlyRoots ?? assetRoots;
     const syncMediaRoots = onlyRoots ?? mediaRoots;
     if (!settings.libraryPath) {
-      setMessage(t("请先在设置页选择 Private Library；统一同步需要写入 Work / Asset / MediaFile。"));
+      setMessage(t("请先创建影片库并确认数据存储位置；扫描需要保存作品、图片和视频记录。"));
       return;
     }
     if (!unique([...syncNfoRoots, ...syncAssetRoots, ...syncMediaRoots]).length) {
-      setMessage(t("请先添加 Unified Library Root，或配置高级扫描路径。"));
+      setMessage(t("请先添加内容目录，或配置高级兼容目录。"));
       return;
     }
     if (metadataBusy || scan?.status === "running" || scan?.status === "cancelling") return;
@@ -339,7 +339,7 @@ export function DesktopMediaPage({
     setAssetResult(null);
     let nfoIdentityHints: Array<{ path: string; code: string }> = [];
     try {
-      setMessage(t("统一资料库同步：正在发现 NFO 与本地图片…"));
+      setMessage(t("正在扫描 NFO 和本地图片…"));
       const discovery = await discoverDesktopMetadataFiles(syncNfoRoots, syncAssetRoots);
       const nfoPreviewNext = await previewNfoImport(syncNfoRoots, repository, discovery.nfoEntries);
       nfoIdentityHints = buildNfoIdentityHints(nfoPreviewNext);
@@ -453,7 +453,7 @@ export function DesktopMediaPage({
             {metadataBusy || scan?.status === "running" ? t("扫描中…") : t("扫描资料库")}
           </button>
         </div>
-        <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
+        <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置内容目录；仍可使用下方高级媒体 / NFO 目录。")}</code>
         {syncStage !== "idle" ? (
           <div className={`unified-sync-progress is-${syncStage}`} role="status" aria-live="polite">
             {["discover", "metadata", "media", "complete"].map((stage, index) => {
@@ -491,7 +491,7 @@ export function DesktopMediaPage({
       />
 
       <section className="organize-review-section">
-        <div className="section-heading organize-section-heading"><div><span className="eyebrow">REVIEW</span><h2>{t("核对需要判断的资料")}</h2><p className="muted">{t("只有保存为 Evidence 的来源资料才会出现在这里；明确无冲突的本地导入不需要重复审核。")}</p></div><button className="ghost-button" type="button" onClick={onOpenLibrary}>{t("查看作品库")}</button></div>
+        <div className="section-heading organize-section-heading"><div><span className="eyebrow">REVIEW</span><h2>{t("核对需要判断的资料")}</h2><p className="muted">{t("只有保存为待审核资料的来源内容才会出现在这里；明确无冲突的本地导入不需要重复审核。")}</p></div><button className="ghost-button" type="button" onClick={onOpenLibrary}>{t("查看作品库")}</button></div>
         <DesktopReviewPage repository={repository} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} embedded reloadSignal={evidenceEpoch} />
       </section>
 

@@ -12,6 +12,7 @@
 - [设计原则](product/principles.md)
 - [范围](product/scope.md)
 - [路线图](product/roadmap.md)
+- [用户用语规范](product/user-terminology.md)
 
 ## 架构
 

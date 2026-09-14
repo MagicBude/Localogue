@@ -46,11 +46,11 @@ export function DesktopPacksPage({
     if (!path) return;
     try {
       const inspected = await desktopBridge.inspectSharedPack(path);
-      if (!inspected.valid) throw new Error(inspected.error ?? t("Shared Pack 校验失败。"));
+      if (!inspected.valid) throw new Error(inspected.error ?? t("社区资料包校验失败。"));
       setSettings((current) => ({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) }));
-      setMessage(t("已加入 Shared Pack 草稿：{name}。点击“保存资料包配置”后生效。", { name: inspected.name ?? path }));
+      setMessage(t("已加入社区资料包：{name}。点击“保存设置”后生效。", { name: inspected.name ?? path }));
     } catch (error) {
-      setMessage(t("无法挂载 Shared Pack：{error}", { error: toMessage(error) }));
+      setMessage(t("无法添加社区资料包：{error}", { error: toMessage(error) }));
     }
   }
 
@@ -73,7 +73,7 @@ export function DesktopPacksPage({
     try {
       await desktopBridge.revealInFolder(privateLibraryPath);
     } catch (error) {
-      setMessage(t("无法打开 Private Library：{error}", { error: toMessage(error) }));
+      setMessage(t("无法打开数据存储位置：{error}", { error: toMessage(error) }));
     }
   }
 
@@ -81,21 +81,21 @@ export function DesktopPacksPage({
 
   return (
     <div className="page-stack">
-      <section className="page-title"><span className="eyebrow">SHARED · PRIVATE · PRIORITY</span><h1>{t("资料包")}</h1><p>{t("Shared Pack 在 Desktop 中支持挂载、Native 校验、优先级调整和卸载；内容仍由 Rust Boundary 强制只读。")}</p></section>
+      <section className="page-title"><span className="eyebrow">COMMUNITY DATA · PERSONAL BACKUP</span><h1>{t("社区资料与个人备份")}</h1><p>{t("安装只读的社区资料，或备份当前影片库的个人数据；两者不会包含原始视频。")}</p></section>
       <section className="settings-card">
-        <div className="section-heading"><div><span className="eyebrow">SOURCE PRIORITY</span><h2>{t("当前资料源优先级")}</h2><p className="muted">{t("Private 永远最高；Shared Pack 顺序决定相同稳定 ID 的读取优先级。")}</p></div><div className="button-row"><button onClick={() => void addPack()}>{t("+ 挂载 Shared Pack")}</button><button className="primary-button" disabled={busy || !hasDraftChanges} onClick={() => void onSave()}>{busy ? t("保存中…") : t("保存资料包配置")}</button></div></div>
+        <div className="section-heading"><div><span className="eyebrow">DISPLAY ORDER</span><h2>{t("资料显示顺序")}</h2><p className="muted">{t("当前影片库的个人资料优先；多个社区资料包按下列顺序补充内容。")}</p></div><div className="button-row"><button onClick={() => void addPack()}>{t("+ 添加社区资料包")}</button><button className="primary-button" disabled={busy || !hasDraftChanges} onClick={() => void onSave()}>{busy ? t("保存中…") : t("保存设置")}</button></div></div>
         <ol className="source-priority-list">
-          {privateLibraryPath ? <li><span className="source-index">1</span><div><strong>Private Library</strong><code>{privateLibraryPath}</code></div><div className="pack-actions"><span className="status-chip ok">WRITABLE</span><button onClick={() => void revealPrivateLibrary()}>{t("打开位置")}</button></div></li> : null}
+          {privateLibraryPath ? <li><span className="source-index">1</span><div><strong>{t("当前影片库的个人资料")}</strong><code>{privateLibraryPath}</code></div><div className="pack-actions"><span className="status-chip ok">{t("本机可写")}</span><button onClick={() => void revealPrivateLibrary()}>{t("打开位置")}</button></div></li> : null}
           {settings.sharedPackPaths.map((path, index) => {
             const pack = packInfos.find((item) => item.configuredPath === path);
             return <li key={path}><span className="source-index">{index + (privateLibraryPath ? 2 : 1)}</span><div><strong>{pack?.name ?? path}</strong><code>{pack?.libraryPath ?? path}</code><small>{pack ? (pack.valid ? `${pack.id} · ${pack.version}${pack.license ? ` · ${pack.license}` : ""}` : pack.error) : t("尚未保存 / 重新校验")}</small></div><div className="pack-actions"><button disabled={index === 0} onClick={() => movePack(index, -1)}>↑</button><button disabled={index === settings.sharedPackPaths.length - 1} onClick={() => movePack(index, 1)}>↓</button><button className="danger-button" onClick={() => removePack(path)}>{t("卸载")}</button></div></li>;
           })}
         </ol>
         {!privateLibraryPath && !settings.sharedPackPaths.length ? <p className="muted">{t("当前没有配置资料源。")} </p> : null}
-        {hasDraftChanges ? <p className="status-chip warn">{t("存在未保存的 Shared Pack 变更")}</p> : <p className="status-chip ok">{t("Shared Pack 配置已保存")}</p>}
+        {hasDraftChanges ? <p className="status-chip warn">{t("社区资料设置尚未保存")}</p> : <p className="status-chip ok">{t("社区资料设置已保存")}</p>}
       </section>
       <DesktopPortablePackWorkbench privateLibraryPath={privateLibraryPath} profileName={profileName} runtimeContractRevision={runtimeContractRevision} packInfos={packInfos} onSharedInstalled={onSharedInstalled} onPrivateImported={onPrivateImported} setMessage={setMessage} />
-      <section className="settings-card soft-card"><span className="eyebrow">NATIVE READ-ONLY BOUNDARY</span><h2>{t("Shared Pack 不会被 Desktop CRUD 修改")}</h2><p>{t("编辑 Shared Work / Person 时，Desktop 会在 Private Library 写入同 ID Override；删除也只删除 Private Override。Shared Pack 本身不会通过 Canonical Writer 被修改。")}</p><button onClick={onOpenSettings}>{t("打开完整实例设置")}</button></section>
+      <section className="settings-card soft-card"><span className="eyebrow">READ ONLY</span><h2>{t("社区资料始终只读")}</h2><p>{t("你对作品和人物的编辑只保存在当前影片库，不会修改已安装的社区资料包。移除个人修改后，社区资料会重新显示。")}</p><button onClick={onOpenSettings}>{t("打开影片库设置")}</button></section>
     </div>
   );
 }

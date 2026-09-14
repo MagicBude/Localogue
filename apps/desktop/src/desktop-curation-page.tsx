@@ -34,7 +34,7 @@ export function DesktopCurationPage({ repository, openWork, openPerson, onLibrar
   }, [repository, mode]);
 
   return <div className="page-stack governance-page">
-    <GovernanceTitle eyebrow="CURATION · COMPLETENESS · PRESENTATION" title={t("资料治理")} body={t("完整度、重复候选与私人展示偏好都在这里治理；Presentation 只影响当前 Private Library 的显示选择。")} />
+    <GovernanceTitle eyebrow="CURATION · COMPLETENESS" title={t("资料治理")} body={t("在这里检查资料完整度、重复候选和显示设置；所有个人选择只保存在当前影片库。")} />
     <div className="desktop-segmented-control governance-subnav" role="tablist" aria-label={t("治理视图")}><button className={mode === "overview" ? "is-active" : undefined} onClick={() => setMode("overview")} type="button">{t("完整度 / 重复")}</button><button className={mode === "presentation" ? "is-active" : undefined} onClick={() => setMode("presentation")} type="button">{t("展示偏好")}</button></div>
     {mode === "presentation" ? <DesktopPresentationWorkbench repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={onLibraryChanged} setMessage={setMessage} /> : error ? <GovernanceEmpty title={t("Curation 读取失败")} body={error} /> : !data ? <GovernanceEmpty title={t("正在计算资料完整度")} body={t("正在分析 Work / Person 完整度与重复候选…")} /> : <>
       <div className="governance-metrics governance-metrics--wide"><GovernanceMetric label={t("Work 待完善")} value={data.stats.worksNeedingAttention} /><GovernanceMetric label={t("Person 待完善")} value={data.stats.peopleNeedingAttention} /><GovernanceMetric label={t("Work 重复候选")} value={data.stats.duplicateWorks} /><GovernanceMetric label={t("Person 重复候选")} value={data.stats.duplicatePeople} /></div>

@@ -14,7 +14,7 @@ const DEV_FIXTURE_PROFILE_ID = "library_profile_dev_fixture";
  * - Shared Packs。
  *
  * Profile 不带任何内容分类含义。除内置开发 Fixture 使用“示例库”外，
- * 新建资料库只使用“资料库 1 / 资料库 2 …”这类中性名称，由用户自行重命名。
+ * 新建影片库只使用“影片库 1 / 影片库 2 …”这类中性名称，由用户自行重命名。
  * ffprobe / Web URL 等真正的应用级设置保持全局，不随资料库切换。
  */
 export function createLibraryProfileId(): string {
@@ -54,10 +54,10 @@ export function createEmptyLibraryProfile(id: string, name: string): DesktopLibr
   };
 }
 
-/** 默认名称永远是无业务含义的“资料库 N”。 */
+/** 默认名称永远是无业务含义的“影片库 N”。 */
 export function nextLibraryProfileName(
   settings: DesktopBootstrapSettings,
-  prefix = "资料库",
+  prefix = "影片库",
 ): string {
   const names = new Set((settings.libraryProfiles ?? []).map((profile) => profile.name.trim()));
   for (let index = 1; index < 10_000; index += 1) {
@@ -95,7 +95,7 @@ export function ensureLibraryProfiles(settings: DesktopBootstrapSettings): Deskt
     const profile = createLibraryProfile(
       settings,
       isFixture ? DEV_FIXTURE_PROFILE_ID : LEGACY_PROFILE_ID,
-      isFixture ? "示例库" : "资料库 1",
+      isFixture ? "示例库" : "影片库 1",
     );
     return applyLibraryProfile({ ...settings, libraryProfiles: [profile] }, profile);
   }
@@ -270,7 +270,7 @@ function normalizeProfile(profile: DesktopLibraryProfile): DesktopLibraryProfile
 
 function cleanProfileName(value: string): string {
   const name = value.trim().replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ");
-  return name.slice(0, 80) || "未命名资料库";
+  return name.slice(0, 80) || "未命名影片库";
 }
 
 function unique(values: string[]): string[] {

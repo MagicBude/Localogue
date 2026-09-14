@@ -35,7 +35,7 @@ export function DesktopGovernance({
   setMessage,
 }: GovernanceProps) {
   if (!privateRoot) {
-    return <GovernanceEmpty title="治理工作台" body="Governance 只允许写入 Private Library。请先在设置中配置私人资料库。" />;
+    return <GovernanceEmpty title="资料维护" body="请先创建影片库并确认数据存储位置，再使用审核、历史和恢复功能。" />;
   }
   if (section === "curation") {
     return <DesktopCurationPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />;

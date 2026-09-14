@@ -323,7 +323,7 @@ if (!errors.length) {
   for (const token of ["previewPrivatePortableFiles", "personalPlan", "assetDigestMismatches", "skippedConflicts", "assetStorageAfterImport"]) {
     if (!desktopPortableV124C.includes(token)) errors.push(`V1-24C Portable Pack 结构化预览缺少：${token}`);
   }
-  for (const token of ["完全相同", "内容冲突", "导入结果", "当前资料库"]) {
+  for (const token of ["完全相同", "内容冲突", "导入结果", "当前影片库"]) {
     if (!desktopPortableWorkbenchV124C.includes(token)) errors.push(`V1-24C Portable Workbench 缺少结构化展示：${token}`);
   }
   if (!rust.includes("example-shared-pack") || !rust.includes("provision_resource_snapshot") || !desktopApp.includes("sharedPackPaths.length === 0")) {
@@ -626,8 +626,8 @@ if (!errors.length) {
   if (!desktopApp.includes("switchLibraryProfile") || !desktopAppShell.includes("source-profile-select") || !desktopAppShell.includes("source-profile-manage")) {
     errors.push("V1-24 Desktop 必须在侧栏提供资料库快速切换与管理入口。");
   }
-  if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建资料库")')) {
-    errors.push("V1-24 新建资料库必须使用“资料库 N”中性默认命名，并提供明确的新建入口。");
+  if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建影片库")')) {
+    errors.push("V1-24 新建影片库必须使用“影片库 N”中性默认命名，并提供明确的新建入口。");
   }
   if (!libraryProfiles.includes('"示例库"') || !desktopSettingsPage.includes('t("+ 添加示例库")')) {
     errors.push("V1-24 开发 Fixture 必须以短名称“示例库”接入 Library Profile。");

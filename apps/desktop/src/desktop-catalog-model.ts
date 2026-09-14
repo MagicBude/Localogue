@@ -75,9 +75,9 @@ export function genreFacetLabel(facet: GenreFacetFilter, language: SupportedLang
 }
 
 export function catalogCommunityDescription(language: SupportedLanguage): string {
-  if (language === "ja") return "作品ありは現在の Library Profile に実際に関連する項目だけを表示します。作品なし / すべてでは、レビュー済みでまだ作品に登場していない Maker・Label・Series を読み取り専用 Community Catalog から補います。";
-  if (language === "en") return "With works reflects only actual links in the current Library Profile. Without works / All also adds reviewed Maker, Label, and Series entries from the read-only Community Catalog even when no current work uses them yet.";
-  return "有作品只反映当前 Library Profile 的实际关联；无作品 / 全部还会补充只读 Community Catalog，让已经审核但尚未出现在作品中的 Maker、Label、Series 也可见。";
+  if (language === "ja") return "「作品あり」は現在のコレクションで使われている項目だけを表示します。「作品なし / すべて」では、コミュニティ資料から未使用のメーカー・レーベル・シリーズも補います。";
+  if (language === "en") return "With works shows items used by the current collection. Without works / All also includes unused makers, labels, and series from Community Data.";
+  return "“有作品”只显示当前影片库正在使用的项目；“无作品 / 全部”还会从社区资料补充尚未使用的厂商、厂牌和系列。";
 }
 
 export function genreFacetDescription(language: SupportedLanguage): string {

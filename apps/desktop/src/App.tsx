@@ -191,7 +191,7 @@ export default function App() {
         setSettings(prepared);
         setSavedSettings(prepared);
         await refreshSources(prepared);
-        if (!disposed) setMessage(t("Desktop 已连接；正在直接读取 Localogue Canonical Library。"));
+        if (!disposed) setMessage(t("Desktop 已连接，正在读取当前影片库。"));
       })
       .catch((error: unknown) => {
         if (!disposed) setMessage(t("无法连接 Desktop Runtime：{error}", { error: toMessage(error) }));
@@ -306,7 +306,7 @@ export default function App() {
     setBusy(true);
     try {
       await persistDesktopSettings(settings);
-      setMessage(t("Desktop 实例设置已保存；当前资料库配置、资料源与 Shared Packs 已重新加载。"));
+      setMessage(t("设置已保存；当前影片库、内容目录和社区资料已重新加载。"));
     } catch (error) {
       setMessage(t("保存失败：{error}", { error: toMessage(error) }));
     } finally {
@@ -330,7 +330,7 @@ export default function App() {
       setMessage(successMessage);
       return saved;
     } catch (error) {
-      setMessage(t("资料库配置保存失败：{error}", { error: toMessage(error) }));
+      setMessage(t("影片库设置保存失败：{error}", { error: toMessage(error) }));
       throw error;
     } finally {
       setBusy(false);
@@ -376,7 +376,7 @@ export default function App() {
       const profile = (prepared.libraryProfiles ?? []).find((item) => item.id === profileId);
       if (!profile || profile.id === prepared.activeLibraryProfileId) return;
       const next = applyLibraryProfile(prepared, profile);
-      await persistProfileMutation(next, t("已切换资料库：{name}", { name: profile.name }));
+      await persistProfileMutation(next, t("已切换影片库：{name}", { name: profile.name }));
     } catch {
       // persistProfileMutation 已给出错误信息。
     }
@@ -405,7 +405,7 @@ export default function App() {
       const now = new Date().toISOString();
       const profile: DesktopLibraryProfile = {
         id: `library_${crypto.randomUUID()}`,
-        name: t("我的资料库"),
+        name: t("我的影片库"),
         description: t("由首次设置自动创建"),
         libraryPath: managed.libraryPath,
         libraryRoots: [contentRoot],
@@ -423,7 +423,7 @@ export default function App() {
       setDetail(null);
       setPage("media");
       setMediaSyncRequest((value) => value + 1);
-      setMessage(t("资料库已经准备好，正在扫描 NFO、图片和视频。"));
+      setMessage(t("影片库已经准备好，正在扫描 NFO、图片和视频。"));
     } catch (error) {
       setMessage(t("首次设置失败：{error}", { error: toMessage(error) }));
     } finally {
@@ -575,7 +575,7 @@ function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { bu
     <UiEmptyState
       className="large-empty"
       eyebrow="NO LIBRARY SOURCE"
-      title={t("先连接你的资料库")}
+      title={t("先创建你的影片库")}
       description={<>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}{!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}</>}
       action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择目录并开始扫描")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
     />
@@ -585,7 +585,7 @@ function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { bu
 /** 页面代码正在按需加载时保持稳定高度，避免 WebView 因内容骤缩跳回顶部。 */
 function PageLoadingState() {
   const { t } = useDesktopI18n();
-  return <UiEmptyState busy title={t("正在读取资料库…")} />;
+  return <UiEmptyState busy title={t("正在读取影片库…")} />;
 }
 
 function invalidPackInfo(path: string, error: unknown): DesktopSharedPackInfo {

@@ -42,12 +42,12 @@ export function DesktopPortablePackWorkbench({
   );
 
   async function exportPersonal(): Promise<void> {
-    if (!privateLibraryPath) { setMessage(t("请先配置 Private Library。")); return; }
+    if (!privateLibraryPath) { setMessage(t("请先创建影片库并确认数据存储位置。")); return; }
     setBusy(true);
     try {
       const path = await exportDesktopPersonalPack();
-      if (path) setMessage(t("当前资料库 Personal Backup 已导出：{path}", { path }));
-    } catch (error) { setMessage(t("导出 Personal Pack 失败：{error}", { error: message(error) })); }
+      if (path) setMessage(t("个人备份已导出：{path}", { path }));
+    } catch (error) { setMessage(t("导出个人备份失败：{error}", { error: message(error) })); }
     finally { setBusy(false); }
   }
 
@@ -58,9 +58,9 @@ export function DesktopPortablePackWorkbench({
       setPreview(next);
       setResult(null);
       if (next) setMessage(next.importable
-        ? t("Portable Pack 预览完成：{count} 个文件。", { count: next.fileCount })
-        : t("Portable Pack 有 {count} 个阻塞问题。", { count: next.errors.length }));
-    } catch (error) { setPreview(null); setResult(null); setMessage(t("读取 Portable Pack 失败：{error}", { error: message(error) })); }
+        ? t("资料包预览完成：{count} 个文件。", { count: next.fileCount })
+        : t("资料包有 {count} 个阻塞问题。", { count: next.errors.length }));
+    } catch (error) { setPreview(null); setResult(null); setMessage(t("读取资料包失败：{error}", { error: message(error) })); }
     finally { setBusy(false); }
   }
 
@@ -72,27 +72,27 @@ export function DesktopPortablePackWorkbench({
       if (next.kind === "shared-library" && next.sharedPackPath) await onSharedInstalled(next.sharedPackPath);
       if (next.kind === "personal-backup") onPrivateImported();
       setResult(next);
-      setMessage(t("Portable Pack 导入完成：导入 {imported}，跳过 {skipped}。", { imported: next.imported, skipped: next.skipped }));
+      setMessage(t("资料包导入完成：导入 {imported}，跳过 {skipped}。", { imported: next.imported, skipped: next.skipped }));
       setPreview(null);
-    } catch (error) { setMessage(t("导入 Portable Pack 失败：{error}", { error: message(error) })); }
+    } catch (error) { setMessage(t("导入资料包失败：{error}", { error: message(error) })); }
     finally { setBusy(false); }
   }
 
   return <section className="settings-card portable-pack-card">
     <div className="section-heading">
       <div>
-        <span className="eyebrow">PORTABLE PACK · V1-24C</span>
-        <h2>{t("便携包导入 / 导出")}</h2>
-        <p className="muted">{t("Personal Backup 只备份当前资料库的 Private Canonical、Audit、Presentation 与 Asset；不会携带 Profile 路径、媒体文件路径或实例设置。导入前会区分新增、相同与冲突文件。")}</p>
-        {profileName ? <p className="portable-profile-note"><b>{t("当前资料库")}</b> · {profileName}{privateLibraryPath ? <> · <code>{privateLibraryPath}</code></> : null}</p> : null}
+        <span className="eyebrow">IMPORT · EXPORT</span>
+        <h2>{t("个人备份与资料包")}</h2>
+        <p className="muted">{t("个人备份包含当前影片库的作品资料、收藏、个人修改、管理图片和历史记录，不包含原始视频、内容目录和本机设置。导入前会列出新增、相同与冲突文件。")}</p>
+        {profileName ? <p className="portable-profile-note"><b>{t("当前影片库")}</b> · {profileName}{privateLibraryPath ? <> · <code>{privateLibraryPath}</code></> : null}</p> : null}
       </div>
-      <div className="button-row"><button disabled={busy || !privateLibraryPath} onClick={() => void exportPersonal()}>{t("导出当前资料库备份")}</button><button disabled={busy || !nativeReady} onClick={() => void chooseImport()}>{t("导入 .localogue-pack…")}</button></div>
+      <div className="button-row"><button disabled={busy || !privateLibraryPath} onClick={() => void exportPersonal()}>{t("导出个人备份")}</button><button disabled={busy || !nativeReady} onClick={() => void chooseImport()}>{t("导入资料包…")}</button></div>
     </div>
 
-    {!nativeReady ? <p className="desktop-presentation-warning">{t("Portable Pack 冲突预览需要新版 Native Runtime；请完全退出并重新启动 Desktop。")}</p> : null}
+    {!nativeReady ? <p className="desktop-presentation-warning">{t("资料包冲突预览需要新版桌面运行组件；请完全退出并重新启动 Localogue。")}</p> : null}
 
     {packInfos.some((item) => item.valid) ? <div className="portable-shared-export-list">
-      {packInfos.filter((item) => item.valid && item.id && item.version).map((item) => <div key={item.configuredPath}><span><b>{item.name ?? item.id}</b><small>{item.id} · {item.version}</small></span><button disabled={busy} onClick={() => void exportShared(item)}>{t("导出 Shared Archive")}</button></div>)}
+      {packInfos.filter((item) => item.valid && item.id && item.version).map((item) => <div key={item.configuredPath}><span><b>{item.name ?? item.id}</b><small>{item.id} · {item.version}</small></span><button disabled={busy} onClick={() => void exportShared(item)}>{t("导出社区资料包")}</button></div>)}
     </div> : null}
 
     {preview ? <div className="portable-preview">
@@ -107,10 +107,10 @@ export function DesktopPortablePackWorkbench({
       {preview.personalPlan ? <>
         <div className="portable-import-target">
           <span>{t("导入目标")}</span>
-          <strong>{profileName ?? t("当前资料库")}</strong>
+          <strong>{profileName ?? t("当前影片库")}</strong>
           <code>{preview.personalPlan.targetLibraryPath}</code>
         </div>
-        {previewTargetChanged ? <p className="desktop-presentation-warning">{t("当前资料库已经切换。为了避免把备份导入错误的资料库，请重新选择 Portable Pack 生成新的导入预览。")}</p> : null}
+        {previewTargetChanged ? <p className="desktop-presentation-warning">{t("当前影片库已经切换。为了避免导入到错误的位置，请重新选择资料包生成预览。")}</p> : null}
         <div className="governance-metrics portable-plan-metrics">
           <PortableMetric label={t("新增")} value={String(preview.personalPlan.newFiles)} />
           <PortableMetric label={t("完全相同")} value={String(preview.personalPlan.identicalFiles)} />
@@ -153,8 +153,8 @@ export function DesktopPortablePackWorkbench({
     setBusy(true);
     try {
       const path = await exportDesktopSharedPack({ configuredPath: item.configuredPath, id: item.id, name: item.name ?? item.id, version: item.version });
-      if (path) setMessage(t("Shared Portable Archive 已导出：{path}", { path }));
-    } catch (error) { setMessage(t("导出 Shared Portable Archive 失败：{error}", { error: message(error) })); }
+      if (path) setMessage(t("社区资料包已导出：{path}", { path }));
+    } catch (error) { setMessage(t("导出社区资料包失败：{error}", { error: message(error) })); }
     finally { setBusy(false); }
   }
 }
@@ -164,11 +164,11 @@ function formatBytes(value: number): string { if (value < 1024) return `${value}
 function message(error: unknown): string { return error instanceof Error ? error.message : String(error); }
 function categoryLabel(category: string, t: (key: string, values?: Record<string, string | number>) => string): string {
   const labels: Record<string, string> = {
-    canonical: t("Canonical 元数据"),
-    assetMetadata: t("Asset 元数据"),
-    assetFiles: t("Asset 文件"),
-    presentation: t("展示偏好"),
-    audit: t("Audit / History"),
+    canonical: t("作品与人物资料"),
+    assetMetadata: t("图片资料"),
+    assetFiles: t("管理图片文件"),
+    presentation: t("显示与收藏设置"),
+    audit: t("变更历史"),
   };
   return labels[category] ?? category;
 }

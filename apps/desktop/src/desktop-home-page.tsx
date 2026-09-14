@@ -74,8 +74,8 @@ export function DesktopHomePage({
     };
   }, [repository, metadataLanguage], toMessage);
 
-  if (data.loading) return <UiEmptyState busy title={t("正在读取资料库…")} />;
-  if (data.error || !data.value) return <UiEmptyState tone="error" title={t("无法读取资料库。")} description={data.error} />;
+  if (data.loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
+  if (data.error || !data.value) return <UiEmptyState tone="error" title={t("无法读取影片库。")} description={data.error} />;
   const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
   const unlinkedMediaCount = media.filter((file) => !file.workId).length;
 
@@ -83,7 +83,7 @@ export function DesktopHomePage({
     <div className="page-stack">
       <section className="hero-panel desktop-hero">
         <div className="desktop-home-hero-copy">
-          <h1>{t("我的资料库")}</h1>
+          <h1>{t("我的影片库")}</h1>
           <p>{t("浏览本地作品与人物，或同步内容目录中的新增文件。")}</p>
         </div>
         <div className="button-row desktop-home-primary-actions">
@@ -92,11 +92,11 @@ export function DesktopHomePage({
         </div>
       </section>
       <section className="stat-grid">
-        <Stat label={t("作品")} value={works.total} note="Canonical" />
-        <Stat label={t("人物")} value={people.total} note="Canonical" />
-        <Stat label={t("厂商")} value={organizations.filter((item) => item.kind === "maker").length} note="Organizations" />
-        <Stat label={t("系列")} value={series.length} note="Canonical" />
-        <Stat label={t("媒体")} value={media.length} note="Private" />
+        <Stat label={t("作品")} value={works.total} />
+        <Stat label={t("人物")} value={people.total} />
+        <Stat label={t("厂商")} value={organizations.filter((item) => item.kind === "maker").length} />
+        <Stat label={t("系列")} value={series.length} />
+        <Stat label={t("视频文件")} value={media.length} />
       </section>
       <SectionTitle
         eyebrow="RECENT WORKS"
@@ -116,8 +116,8 @@ export function DesktopHomePage({
   );
 }
 
-function Stat({ label, value, note }: { label: string; value: number; note: string }) {
-  return <article className="stat-card"><span>{label}</span><strong>{value}</strong><small>{note}</small></article>;
+function Stat({ label, value }: { label: string; value: number }) {
+  return <article className="stat-card"><span>{label}</span><strong>{value}</strong></article>;
 }
 
 function SectionTitle({ eyebrow, title, action }: { eyebrow: string; title: string; action?: ReactNode }) {

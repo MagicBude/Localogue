@@ -25,9 +25,9 @@ export function DesktopFavoritesPage({
   return (
     <div className="page-stack">
       <section className="page-title">
-        <span className="eyebrow">FAVORITES · PRESENTATION PREFERENCE</span>
+        <span className="eyebrow">FAVORITES</span>
         <h1>{t("收藏")}</h1>
-        <p>{t("你收藏的作品。收藏与评分保存在私人展示偏好层，不修改 Canonical Work，也不进入 Shared Pack。")}</p>
+        <p>{t("你收藏的作品。收藏和评分只保存在当前影片库，不会修改社区资料。")}</p>
       </section>
       {favoriteCount === 0 ? (
         <section className="empty-state">

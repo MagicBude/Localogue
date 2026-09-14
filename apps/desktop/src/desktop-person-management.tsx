@@ -37,7 +37,7 @@ export function CreatePersonPanel({ repository, onSaved, setMessage }: { reposit
       };
       await repository.savePerson(person);
       setNameJa(""); setNameZh(""); setNameEn(""); setOpen(false);
-      setMessage(t("已在 Private Library 新建 Person：{name}。", { name: getPreferredPersonName(person, metadataLanguage) }));
+      setMessage(t("已在当前影片库新建人物：{name}。", { name: getPreferredPersonName(person, metadataLanguage) }));
       onSaved(person);
     } catch (error) { setMessage(t("新建 Person 失败：{error}", { error: message(error) })); }
     finally { operationPending.current = false; setBusy(false); }

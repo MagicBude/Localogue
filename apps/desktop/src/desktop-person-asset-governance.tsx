@@ -90,8 +90,8 @@ export function PersonAssetGovernance({
         }
       }
       setMessage(type === "portrait"
-        ? t("人物头像已导入 Private Library；可在“首选头像”中决定显示哪一张。")
-        : t("人物 Gallery 图片已导入 Private Library。"));
+        ? t("人物头像已导入当前影片库；可在“首选头像”中决定显示哪一张。")
+        : t("人物图库图片已导入当前影片库。"));
       onLibraryChanged();
     } catch (error) {
       setMessage(t("导入人物图片失败：{error}", { error: message(error) }));
@@ -104,7 +104,7 @@ export function PersonAssetGovernance({
     setBusy(true);
     try {
       if (!await repository.isPrivateEntity("assets", asset.id)) {
-        setMessage(t("该 Asset 来自 Shared Pack，不能直接删除；Shared Pack 始终只读。"));
+        setMessage(t("这张图片来自社区资料，不能直接删除；社区资料始终只读。"));
         return;
       }
       if (!await confirm({ title: t("确认"), description: t("把这个人物 Private Asset 移入回收站？\n\n{path}\n\n可以恢复；若它仍被首选头像引用，需要先恢复默认。", { path: asset.storagePath }), confirmLabel: t("删除"), dangerous: true })) return;
@@ -148,7 +148,7 @@ export function PersonAssetGovernance({
         <div>
           <span className="eyebrow">PORTRAIT · GALLERY · PRIVATE ASSET</span>
           <h2>{t("人物图片")}</h2>
-          <p className="muted">{t("头像与 Gallery 都作为 Private Asset 管理；导入不会改写 Shared Pack。")}</p>
+          <p className="muted">{t("头像和人物图库作为当前影片库的管理图片保存；导入不会修改社区资料。")}</p>
         </div>
         <div className="button-row">
           <button disabled={busy || !nativeReady} onClick={() => void importAsset("portrait")} type="button">+ {t("导入头像")}</button>

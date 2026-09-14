@@ -76,7 +76,7 @@ export function DesktopSettingsPage({
   async function createProfile(): Promise<void> {
     try {
       const prepared = syncActiveLibraryProfile(settings);
-      const name = nextLibraryProfileName(prepared, t("资料库"));
+      const name = nextLibraryProfileName(prepared, t("影片库"));
       const profileId = createLibraryProfileId();
       const managed = await desktopBridge.provisionPrivateLibrary(profileId);
       const profile = createLibraryProfile(
@@ -86,7 +86,7 @@ export function DesktopSettingsPage({
       );
       await onPersistProfiles(
         addLibraryProfile(prepared, profile),
-        t("已新建资料库：{name}。Private Library 已自动准备好，只需添加内容根目录。", { name }),
+        t("已新建影片库：{name}。数据存储位置已自动准备好，只需添加内容目录。", { name }),
       );
     } catch {
       // 父级已经显示保存错误。
@@ -137,7 +137,7 @@ export function DesktopSettingsPage({
     if (!profile || profile.id === prepared.activeLibraryProfileId) return;
 
     try {
-      await onPersistProfiles(applyLibraryProfile(prepared, profile), t("已切换资料库：{name}", { name: profile.name }));
+      await onPersistProfiles(applyLibraryProfile(prepared, profile), t("已切换影片库：{name}", { name: profile.name }));
     } catch {
       // 父级已经显示保存错误。
     }
@@ -157,11 +157,11 @@ export function DesktopSettingsPage({
     try {
       const saved = await onPersistProfiles(
         renameLibraryProfile(settings, profile.id, name),
-        t("资料库已重命名为：{name}", { name }),
+        t("影片库已重命名为：{name}", { name }),
       );
       const renamed = (saved.libraryProfiles ?? []).find((item) => item.id === profile.id);
       if (renamed?.name !== name) {
-        setMessage(t("资料库重命名未能持久化，请重试。"));
+        setMessage(t("影片库重命名未能保存，请重试。"));
       } else {
         setRenameOpen(false);
       }
@@ -182,7 +182,7 @@ export function DesktopSettingsPage({
     const canDeleteManagedData = isManagedPrivateLibrary(profile.id, profile.libraryPath, runtime?.appLocalDataDir);
     const shouldDeleteManagedData = canDeleteManagedData && deleteManagedData;
     try {
-      await onPersistProfiles(removeLibraryProfile(settings, profile.id), t("资料库配置已删除：{name}", { name: profile.name }));
+      await onPersistProfiles(removeLibraryProfile(settings, profile.id), t("影片库已从列表移除：{name}", { name: profile.name }));
       setDeleteOpen(false);
       if (shouldDeleteManagedData && profile.libraryPath) {
         try {
@@ -295,7 +295,7 @@ export function DesktopSettingsPage({
 
   return (
     <div className={`page-stack settings-page settings-mode-${settingsModule}`}>
-      <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("资料库设置")} description={t("每个资料库独立保存可写数据、内容位置与共享资料；需要不同用途时新建资料库并自行命名，然后从侧栏快速切换。") } />
+      <PageTitle eyebrow="LIBRARY · SOURCES · PROFILES" title={t("影片库设置")} description={t("每个影片库独立保存内容目录、个人修改和收藏；需要分开管理时新建影片库，然后从侧栏切换。") } />
 
       {!profileNativeRuntimeReady ? (
         <UiFeedback tone="warning">
@@ -305,77 +305,77 @@ export function DesktopSettingsPage({
 
       <section className="settings-card library-profile-card settings-module-library">
         <div className="section-heading">
-          <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("资料库")}</h2></div>
+          <div><span className="eyebrow">LIBRARY PROFILE</span><h2>{t("影片库")}</h2></div>
           <div className="button-row">
             <UiButton disabled={busy || !profileNativeRuntimeReady} onClick={() => void addDevFixtureProfile()}>{t("+ 添加示例库")}</UiButton>
-            <UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</UiButton>
+            <UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建影片库")}</UiButton>
           </div>
         </div>
-        <p className="muted">{t("新建资料库会自动获得独立的 Private Library；你只需添加影片所在的内容根目录。名称和高级设置以后都可以修改。")}</p>
+        <p className="muted">{t("新建影片库会自动准备独立的数据存储位置；你只需添加影片所在的内容目录。名称和高级设置以后都可以修改。")}</p>
         {profiles.length ? (
           <div className="profile-toolbar">
-            <UiSelectField label={t("当前资料库")} disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
-                <option value="" disabled>{t("选择资料库…")}</option>
+            <UiSelectField label={t("当前影片库")} disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
+                <option value="" disabled>{t("选择影片库…")}</option>
                 {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
             </UiSelectField>
             <div className="button-row">
               <UiButton disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openRenameProfile}>{t("重命名")}</UiButton>
-              <UiButton variant="danger" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openDeleteProfile}>{t("删除资料库")}</UiButton>
+              <UiButton variant="danger" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openDeleteProfile}>{t("移除影片库")}</UiButton>
             </div>
           </div>
-        ) : <UiEmptyState title={t("还没有资料库")} description={t("点击“新建资料库”会创建“资料库 1”；也可以一键加入内置“示例库”体验功能。")} action={<UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建资料库")}</UiButton>} />}
+        ) : <UiEmptyState title={t("还没有影片库")} description={t("点击“新建影片库”会创建“影片库 1”；也可以加入内置示例库体验功能。")} action={<UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建影片库")}</UiButton>} />}
       </section>
 
       <UiActionDialog
         actions={<><UiButton variant="ghost" onClick={() => setRenameOpen(false)}>{t("取消")}</UiButton><UiButton variant="primary" loading={busy} disabled={!renameDraft.trim()} onClick={() => void renameProfile()}>{t("保存修改")}</UiButton></>}
         closeLabel={t("关闭")}
-        description={t("只修改 Localogue 中显示的资料库名称，不移动或重命名磁盘目录。")}
+        description={t("只修改 Localogue 中显示的影片库名称，不移动或重命名磁盘目录。")}
         onOpenChange={setRenameOpen}
         open={renameOpen}
-        title={t("重命名资料库")}
+        title={t("重命名影片库")}
       >
-        <UiTextField autoFocus label={t("资料库配置名称")} value={renameDraft} onChange={(event) => setRenameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && renameDraft.trim()) void renameProfile(); }} />
+        <UiTextField autoFocus label={t("影片库名称")} value={renameDraft} onChange={(event) => setRenameDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && renameDraft.trim()) void renameProfile(); }} />
       </UiActionDialog>
 
       <UiActionDialog
-        actions={<><UiButton variant="ghost" onClick={() => setDeleteOpen(false)}>{t("取消")}</UiButton><UiButton variant="danger" loading={busy} onClick={() => void deleteProfile()}>{deleteManagedData ? t("删除资料库和管理数据") : t("从列表移除")}</UiButton></>}
+        actions={<><UiButton variant="ghost" onClick={() => setDeleteOpen(false)}>{t("取消")}</UiButton><UiButton variant="danger" loading={busy} onClick={() => void deleteProfile()}>{deleteManagedData ? t("移除影片库并删除管理数据") : t("只从列表移除")}</UiButton></>}
         closeLabel={t("关闭")}
-        description={selectedProfileIsManaged ? t("从列表移除只会删除资料库配置；如需清理 Localogue 为它保存的管理数据，请在下方明确勾选。影片内容目录始终保留。") : t("这个资料库使用用户选择的存储位置。移除后磁盘资料会完整保留，Localogue 不会递归删除用户目录。")}
+        description={selectedProfileIsManaged ? t("只从列表移除会保留 Localogue 管理数据；如需一并清理，请在下方明确勾选。内容目录和原始视频始终保留。") : t("这个影片库使用用户选择的数据存储位置。移除后磁盘资料会完整保留，Localogue 不会递归删除用户目录。")}
         onOpenChange={setDeleteOpen}
         open={deleteOpen}
-        title={t("删除资料库“{name}”？", { name: selectedProfile?.name ?? "" })}
+        title={t("移除影片库“{name}”？", { name: selectedProfile?.name ?? "" })}
       >
-        {selectedProfileIsManaged ? <label className="ui-action-dialog__choice"><input type="checkbox" checked={deleteManagedData} onChange={(event) => setDeleteManagedData(event.target.checked)} /><span><strong>{t("同时删除 Localogue 管理数据")}</strong><small>{t("将永久删除该资料库中的作品、人物、图片副本和审计记录；影片内容根目录仍不会删除。")}</small></span></label> : <UiFeedback tone="info">{t("如需清理这个自选目录，请在文件管理器中自行确认内容；Localogue 不会把它当作缓存自动删除。")}</UiFeedback>}
+        {selectedProfileIsManaged ? <label className="ui-action-dialog__choice"><input type="checkbox" checked={deleteManagedData} onChange={(event) => setDeleteManagedData(event.target.checked)} /><span><strong>{t("同时删除 Localogue 管理数据")}</strong><small>{t("将永久删除这个影片库的作品资料、图片副本和审计记录；内容目录和原始视频不会删除。")}</small></span></label> : <UiFeedback tone="info">{t("如需清理这个自选目录，请在文件管理器中自行确认内容；Localogue 不会把它当作缓存自动删除。")}</UiFeedback>}
       </UiActionDialog>
 
       <details className="settings-card advanced-source-settings source-model-card settings-module-library">
         <summary><span><span className="eyebrow">PATH GUIDE</span><strong>{t("了解各种目录的用途")}</strong></span><small>{t("需要时展开")}</small></summary>
         <div className="source-model-grid advanced-settings-stack">
-          <article><strong>1 · {t("私人资料库")}</strong><p>{t("Localogue 自己维护的可写 Canonical / Evidence / Asset / MediaFile。每个资料库配置通常只对应一个。")}</p></article>
-          <article><strong>2 · {t("内容根目录")}</strong><p>{t("推荐入口。你的影片、NFO、poster、fanart 可以散在子目录里，Localogue 会递归发现并按番号汇聚。")}</p></article>
-          <article><strong>3 · {t("只读共享资料")}</strong><p>{t("公共元数据基础层，例如 localogue-community-data。只读，且永远低于你的 Private Library。")}</p></article>
+          <article><strong>1 · {t("数据存储位置")}</strong><p>{t("保存这个影片库的作品资料、个人修改、收藏和管理记录，通常由 Localogue 自动设置。")}</p></article>
+          <article><strong>2 · {t("内容目录")}</strong><p>{t("存放原始视频、NFO 和图片；可以添加多个，也可以单独扫描其中一个。")}</p></article>
+          <article><strong>3 · {t("社区资料")}</strong><p>{t("社区整理的只读作品、人物和分类资料，不包含你的视频、收藏和私人修改。")}</p></article>
           <article><strong>4 · {t("高级兼容目录")}</strong><p>{t("只有媒体或 NFO / 图片完全放在内容根目录之外时才需要；普通用户可以不展开。")}</p></article>
         </div>
       </details>
 
       <details className="settings-card advanced-source-settings settings-module-library">
-        <summary><span><span className="eyebrow">PRIVATE STORAGE</span><strong>{t("私人资料存储位置")}</strong></span><small>{t("通常无需修改")}</small></summary>
+        <summary><span><span className="eyebrow">PRIVATE STORAGE</span><strong>{t("数据存储位置")}</strong></span><small>{t("通常无需修改")}</small></summary>
         <div className="advanced-settings-stack">
           <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
           <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
-          <div className="button-row"><UiButton onClick={() => void chooseLibrary()}>{t("选择目录")}</UiButton>{settings.libraryPath ? <UiButton variant="danger" onClick={() => void saveOrdinarySettings({ ...settings, libraryPath: undefined }, t("私人资料存储位置已清除并自动保存。"))}>{t("清除 Private Library")}</UiButton> : null}</div>
+          <div className="button-row"><UiButton onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{settings.libraryPath ? <UiButton variant="danger" onClick={() => void saveOrdinarySettings({ ...settings, libraryPath: undefined }, t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
         </div>
       </details>
 
       <section className="settings-card featured-card settings-module-library">
-        <div className="section-heading"><div><span className="eyebrow">CONTENT ROOTS</span><h2>{t("内容根目录（推荐）")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加资料源")}</UiButton></div>
+        <div className="section-heading"><div><span className="eyebrow">CONTENT FOLDERS</span><h2>{t("内容目录")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加内容目录")}</UiButton></div>
         <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
         <PathList values={settings.libraryRoots} onRemove={(path) => void removePath("libraryRoots", path)} />
       </section>
 
       <section className="settings-card settings-module-sources">
-        <div className="section-heading"><div><span className="eyebrow">SHARED PACKS</span><h2>{t("只读共享资料")}</h2></div><div className="button-row"><UiButton onClick={() => void addSharedPack()}>{t("+ 挂载资料包")}</UiButton><UiButton variant="primary" onClick={onOpenPacks}>{t("导入、导出与备份")}</UiButton></div></div>
-        <p className="muted">{t("适合社区公共元数据。推荐继续把 localogue-community-data 作为独立 Shared Pack 维护，而不是复制进每个私人资料库。")}</p>
+        <div className="section-heading"><div><span className="eyebrow">COMMUNITY DATA</span><h2>{t("社区资料")}</h2></div><div className="button-row"><UiButton onClick={() => void addSharedPack()}>{t("+ 添加社区资料")}</UiButton><UiButton variant="primary" onClick={onOpenPacks}>{t("社区资料与个人备份")}</UiButton></div></div>
+        <p className="muted">{t("社区资料提供只读的作品、人物、厂商、系列、分类和多语言名称，不包含你的原始视频、收藏、评分或私人修改。")}</p>
         <PathList values={settings.sharedPackPaths} onRemove={(path) => void removePath("sharedPackPaths", path)} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
       </section>
