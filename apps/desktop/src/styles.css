@@ -372,6 +372,8 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .unified-sync-progress > div.is-done span { background: #39734b; color: white; border-color: transparent; }
 .unified-sync-progress > p { grid-column: 1 / -1; margin: 2px 0 0; color: var(--muted); }
 .directory-card-list { display: grid; gap: 10px; margin-top: 14px; }
+.directory-scan-live { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 14px; padding: 10px 12px; border: 1px solid #b9d8ef; border-radius: 10px; background: #edf7ff; color: #245d83; font-size: 12px; }
+.directory-scan-live strong { color: #1769a8; }
 .directory-card-list > article { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--soft); }
 .directory-card-main { display: grid; gap: 7px; min-width: 0; }
 .directory-card-main > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
