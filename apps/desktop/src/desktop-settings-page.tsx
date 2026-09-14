@@ -1,7 +1,6 @@
 import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
-import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
-import { normalizeContentFolders } from "./content-folders";
+import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard, PageTitle } from "./desktop-page-primitives";
 import {
@@ -189,20 +188,6 @@ export function DesktopSettingsPage({
     await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { sharedPackPaths: unique([...selectedProfile.sharedPackPaths, path]) }), t("共享资料目录已添加并保存。"));
   }
 
-  async function addLibraryRoot(): Promise<void> {
-    if (!selectedProfile) return;
-    const folders = normalizeContentFolders(selectedProfile);
-    const path = await fileDialog.pickDirectory(folders.at(-1)?.path);
-    if (!path) return;
-    if (folders.some((folder) => samePath(folder.path, path))) return;
-    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { contentFolders: [...folders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }), t("内容目录已添加并保存，可以直接开始扫描。"));
-  }
-
-  async function updateContentFolders(folders: DesktopContentFolder[]): Promise<void> {
-    if (!selectedProfile) return;
-    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { contentFolders: folders }), t("内容目录设置已保存。"));
-  }
-
   async function persistPaths(next: DesktopBootstrapSettings, message: string): Promise<void> {
     try {
       await onPersistProfiles(next, message);
@@ -335,7 +320,7 @@ export function DesktopSettingsPage({
         <summary><span><span className="eyebrow">PATH GUIDE</span><strong>{t("了解各种目录的用途")}</strong></span><small>{t("需要时展开")}</small></summary>
         <div className="source-model-grid advanced-settings-stack">
           <article><strong>1 · {t("数据存储位置")}</strong><p>{t("保存这个影片库的作品资料、个人修改、收藏和管理记录，通常由 Localogue 自动设置。")}</p></article>
-          <article><strong>2 · {t("内容目录")}</strong><p>{t("存放原始视频、NFO 和图片；可以添加多个，也可以单独扫描其中一个。")}</p></article>
+          <article><strong>2 · {t("内容目录")}</strong><p>{t("内容目录的添加、扫描范围和扫描操作统一在“影片库 → 目录与扫描”中完成。")}</p></article>
           <article><strong>3 · {t("社区资料")}</strong><p>{t("社区整理的只读作品、人物和分类资料，不包含你的视频、收藏和私人修改。")}</p></article>
           <article><strong>4 · {t("高级兼容目录")}</strong><p>{t("只有媒体或 NFO / 图片完全放在内容根目录之外时才需要；普通用户可以不展开。")}</p></article>
         </div>
@@ -349,12 +334,6 @@ export function DesktopSettingsPage({
           <div className="button-row"><UiButton disabled={!selectedProfile} onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{selectedProfile?.libraryPath ? <UiButton variant="danger" onClick={() => void persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: undefined }), t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
         </div>
       </details>
-
-      <section className="settings-card featured-card settings-module-library">
-        <div className="section-heading"><div><span className="eyebrow">CONTENT FOLDERS</span><h2>{t("内容目录")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加内容目录")}</UiButton></div>
-        <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
-        <ContentFolderList values={selectedProfile ? normalizeContentFolders(selectedProfile) : []} onChange={(folders) => void updateContentFolders(folders)} />
-      </section>
 
       <section className="settings-card settings-module-sources">
         <div className="section-heading"><div><span className="eyebrow">COMMUNITY DATA</span><h2>{t("社区资料")}</h2></div><div className="button-row"><UiButton onClick={() => void addSharedPack()}>{t("+ 添加社区资料")}</UiButton><UiButton variant="primary" onClick={onOpenPacks}>{t("社区资料与个人备份")}</UiButton></div></div>
@@ -410,28 +389,8 @@ function PathList({ values, onRemove }: { values: string[]; onRemove: (value: st
   return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><UiButton size="compact" variant="danger" onClick={() => onRemove(path)}>{t("移除")}</UiButton></li>)}</ul>;
 }
 
-function ContentFolderList({ values, onChange }: { values: DesktopContentFolder[]; onChange: (values: DesktopContentFolder[]) => void }) {
-  const { t } = useDesktopI18n();
-  if (!values.length) return <p className="muted">{t("尚未配置。")}</p>;
-  const update = (path: string, patch: Partial<DesktopContentFolder>) => onChange(values.map((item) => samePath(item.path, path) ? { ...item, ...patch } : item));
-  return <ul className="path-list content-folder-list">{values.map((folder) => <li key={folder.path}>
-    <code>{folder.path}</code>
-    <div className="button-row">
-      <label><input type="checkbox" checked={folder.scanVideo} onChange={(event) => update(folder.path, { scanVideo: event.target.checked })} /> {t("视频")}</label>
-      <label><input type="checkbox" checked={folder.scanNfo} onChange={(event) => update(folder.path, { scanNfo: event.target.checked })} /> NFO</label>
-      <label><input type="checkbox" checked={folder.scanImages} onChange={(event) => update(folder.path, { scanImages: event.target.checked })} /> {t("图片")}</label>
-      <UiButton size="compact" variant="danger" onClick={() => onChange(values.filter((item) => !samePath(item.path, folder.path)))}>{t("移除")}</UiButton>
-    </div>
-  </li>)}</ul>;
-}
-
 function unique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
-}
-
-function samePath(left: string, right: string): boolean {
-  const normalize = (value: string) => value.trim().replaceAll("\\", "/").replace(/\/+$/, "").toLocaleLowerCase();
-  return normalize(left) === normalize(right);
 }
 
 function isManagedPrivateLibrary(profileId: string, libraryPath?: string, appLocalDataDir?: string): boolean {

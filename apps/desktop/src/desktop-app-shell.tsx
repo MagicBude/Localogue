@@ -123,7 +123,7 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
       { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
       { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
       { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
-      { id: "scan", label: t("扫描资料库"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
+      { id: "scan", label: t("目录与扫描"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
     ]
     : page === "curation" || page === "history"
       ? [
