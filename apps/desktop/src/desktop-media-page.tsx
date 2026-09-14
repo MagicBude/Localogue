@@ -79,6 +79,7 @@ export function DesktopMediaPage({
   onOpenSettings,
   onAddContentFolder,
   onUpdateContentFolder,
+  onRemoveContentFolder,
   onOpenLibrary,
   openWork,
 }: {
@@ -92,6 +93,7 @@ export function DesktopMediaPage({
   onOpenSettings: () => void;
   onAddContentFolder: () => void;
   onUpdateContentFolder: (path: string, patch: Partial<DesktopContentFolder>) => void;
+  onRemoveContentFolder: (path: string) => void;
   onOpenLibrary: () => void;
   openWork: (id: string) => void;
 }) {
@@ -448,7 +450,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
       <section className="settings-card unified-sync-card">
         <div className="section-heading">
           <div>
@@ -556,7 +558,7 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ folders, media, history, syncingRoots, running, onAdd, onUpdate, onSync }: {
+function DirectoryScanPanel({ folders, media, history, syncingRoots, running, onAdd, onUpdate, onRemove, onSync }: {
   folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
@@ -564,6 +566,7 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, on
   running: boolean;
   onAdd: () => void;
   onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
+  onRemove: (path: string) => void;
   onSync: (path: string) => void;
 }) {
   const { t } = useDesktopI18n();
@@ -584,7 +587,7 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, on
           {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
           {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
         </div>
-        <button className="primary-button" disabled={running} type="button" onClick={() => onSync(root)}>{t("扫描此目录")}</button>
+         <div className="button-row"><button className="primary-button" disabled={running || !(folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={() => onSync(root)}>{t("扫描此目录")}</button><button type="button" disabled={running} onClick={() => onRemove(root)}>{t("移除")}</button></div>
       </article>;
     })}</div> : <p className="muted">{t("尚未添加内容目录。")}</p>}
   </section>;

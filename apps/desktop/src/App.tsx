@@ -385,6 +385,15 @@ export default function App() {
     );
   }
 
+  async function removeContentFolderFromMedia(path: string): Promise<void> {
+    const profile = activeLibraryProfile(settings);
+    if (!profile) return;
+    await persistProfileMutation(
+      updateLibraryProfile(settings, profile.id, { contentFolders: profile.contentFolders.filter((item) => item.path !== path) }),
+      t("目录已移除并保存。"),
+    );
+  }
+
   async function switchLibraryProfile(profileId: string): Promise<void> {
     try {
       const profile = settings.libraryProfiles.find((item) => item.id === profileId);
@@ -543,6 +552,7 @@ export default function App() {
             onOpenSettings={() => navigate("settings")}
             onAddContentFolder={() => void addContentFolderFromMedia()}
             onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
+            onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
             onOpenLibrary={() => navigate("works")}
             openWork={openWork}
           />
