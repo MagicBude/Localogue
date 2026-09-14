@@ -8,6 +8,8 @@
 
 2026-09-14 明确 Portable Pack 产品边界：个人备份用于迁移私人资料和恢复，不包含原始视频；社区资料包用于分发只读公共元数据。Portable Pack 不承担视频共享、云盘同步或跨设备播放，详细决策见 ADR-051。
 
+2026-09-14 明确 SQLite 运行时边界：Desktop 正常读取以 `local.db / catalog.db` 为主，数据库覆盖的数据根不再重复遍历 JSON；JSON 保留为迁移、交换、备份、恢复和故障回退格式。SQLite 与 JSON 的物理层不再被误认为两套产品真相，详细决策见 ADR-052。
+
 2026-09-14 完成第一轮用户术语治理：普通界面统一使用“影片库、内容目录、社区资料、待审核资料、个人备份”，不再要求用户理解 Library Profile、Private Library、Shared Pack、Canonical、Evidence 或 Commit Plan。内部 Domain / Schema 稳定名称保持不变；完整定义与可合并项见 `docs/product/user-terminology.md`。日英翻译已同步，等待用户实机验收。
 
 2026-09-14 首次使用流程完成第一处收敛：选择内容目录并创建受控私人资料库后，Desktop 直接进入“导入与整理”并触发已有 Unified Sync，不再返回首页要求用户再次点击“一键同步”。NFO → 图片 → Media 编排、进度和取消仍复用同一 Application / Platform 边界，等待全新 Profile 的 Windows 实机验收。
