@@ -12,7 +12,7 @@
 - Desktop 多资料库、多目录、统一同步、增量扫描与可观察 Job；
 - Desktop 作品、人物、分类、收藏、编辑、治理、备份与委托播放基础；
 - 日 / 中 / 英界面与元数据显示；
-- JSON / CSV / NFO / Portable Pack 交换能力。
+- JSON / CSV / NFO 交换能力，以及用于个人备份和社区资料分发的 Portable Pack。
 
 ## 当前：0.2 Desktop Beta Readiness
 
@@ -42,7 +42,7 @@
 
 目标是让新用户不读文档也能完成：选择目录 → 查看同步进度 → 处理异常 → 浏览和编辑 → 委托播放 → 备份。
 
-Beta 可以使用本地 NFO、Portable Pack 和手工编辑验证闭环。Windows 是首个实机支持平台；macOS、Linux 和 Docker 在完成验证前不得写成已支持。
+Beta 可以使用本地 NFO、个人备份包和手工编辑验证闭环；社区资料包继续作为只读公共资料分发方式。Portable Pack 不包含原始视频，不能被描述为视频分享或跨设备播放。Windows 是首个实机支持平台；macOS、Linux 和 Docker 在完成验证前不得写成已支持。
 
 ## 0.2.0 Stable
 

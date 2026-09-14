@@ -6,6 +6,8 @@
 
 2026-09-14 Settings V2 完成破冗余收口：每个内容目录只保存一次，并分别声明是否扫描视频、NFO 和图片；路径只属于当前 `libraryProfiles[]`，全局旧路径字段不再写回。Native 读取旧设置时只做一次内存迁移，下一次保存即输出纯 V2；旧 EXE 不再作为兼容目标。等待多目录隔离环境实机验收。
 
+2026-09-14 明确 Portable Pack 产品边界：个人备份用于迁移私人资料和恢复，不包含原始视频；社区资料包用于分发只读公共元数据。Portable Pack 不承担视频共享、云盘同步或跨设备播放，详细决策见 ADR-051。
+
 2026-09-14 完成第一轮用户术语治理：普通界面统一使用“影片库、内容目录、社区资料、待审核资料、个人备份”，不再要求用户理解 Library Profile、Private Library、Shared Pack、Canonical、Evidence 或 Commit Plan。内部 Domain / Schema 稳定名称保持不变；完整定义与可合并项见 `docs/product/user-terminology.md`。日英翻译已同步，等待用户实机验收。
 
 2026-09-14 首次使用流程完成第一处收敛：选择内容目录并创建受控私人资料库后，Desktop 直接进入“导入与整理”并触发已有 Unified Sync，不再返回首页要求用户再次点击“一键同步”。NFO → 图片 → Media 编排、进度和取消仍复用同一 Application / Platform 边界，等待全新 Profile 的 Windows 实机验收。
