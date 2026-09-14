@@ -450,7 +450,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
       <section className="settings-card unified-sync-card">
         <div className="section-heading">
           <div>
@@ -558,7 +558,7 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ folders, media, history, syncingRoots, running, onAdd, onUpdate, onRemove, onSync }: {
+function DirectoryScanPanel({ folders, media, history, syncingRoots, running, onAdd, onUpdate, onRemove, onSyncAll, onSync }: {
   folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
@@ -567,11 +567,12 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, on
   onAdd: () => void;
   onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onRemove: (path: string) => void;
+  onSyncAll: () => void;
   onSync: (path: string) => void;
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("只检查选中的内容目录；其他目录不会参与本轮扫描。")}</p></div><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("只检查选中的内容目录；其他目录不会参与本轮扫描。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" type="button" disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} onClick={onSyncAll}>{t("扫描全部启用目录")}</button></div></div>
     {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
       const root = folder.path;
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
