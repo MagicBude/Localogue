@@ -100,6 +100,7 @@ export function DesktopMediaPage({
   const [assetResult, setAssetResult] = useState<LocalAssetImportResult | null>(null);
   const [metadataBusy, setMetadataBusy] = useState(false);
   const [syncStage, setSyncStage] = useState<"idle" | "discover" | "metadata" | "media" | "complete" | "error">("idle");
+  const [syncingRoots, setSyncingRoots] = useState<string[]>([]);
   const [bindingMediaId, setBindingMediaId] = useState<string | null>(null);
   const [vocabularyPreview, setVocabularyPreview] = useState<VocabularyRepairPreview | null>(null);
   const [vocabularyResult, setVocabularyResult] = useState<VocabularyRepairResult | null>(null);
@@ -329,6 +330,7 @@ export function DesktopMediaPage({
     }
     if (metadataBusy || scan?.status === "running" || scan?.status === "cancelling") return;
 
+    setSyncingRoots(unique([...syncNfoRoots, ...syncAssetRoots, ...syncMediaRoots]));
     setMetadataBusy(true);
     setNfoResult(null);
     setAssetResult(null);
@@ -359,6 +361,7 @@ export function DesktopMediaPage({
       onLibraryChanged();
       setMessage(t("元数据与图片已同步：NFO {nfo}；图片 {assets}。正在继续启动媒体增量扫描…", { nfo: nfo ? `${nfo.imported} / +${nfo.createdWorks} Work` : "—", assets: assets ? `${assets.imported} / +${assets.createdAssets} Asset` : `${assetPreviewNext.discovered} / ${assetPreviewNext.linkable} linkable` }));
     } catch (error) {
+      setSyncingRoots([]);
       setMessage(t("统一资料库同步失败：{error}", { error: toMessage(error) }));
       return;
     } finally {
@@ -369,6 +372,7 @@ export function DesktopMediaPage({
     const media = onlyRoots
       ? await startScan({ waitForCompletion: true, roots: syncMediaRoots, nfoIdentityHints })
       : await startScan({ waitForCompletion: true, nfoIdentityHints });
+    setSyncingRoots([]);
     if (media?.status === "completed") {
       setSyncStage("complete");
       setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
@@ -434,7 +438,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel roots={unifiedRoots} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onManage={onOpenSettings} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel roots={unifiedRoots} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onManage={onOpenSettings} onSync={(root) => void syncUnifiedLibrary([root])} />
       <section className="settings-card unified-sync-card">
         <div className="section-heading">
           <div>
@@ -537,10 +541,11 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ roots, media, history, running, onManage, onSync }: {
+function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onManage, onSync }: {
   roots: string[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
+  syncingRoots: string[];
   running: boolean;
   onManage: () => void;
   onSync: (path: string) => void;
@@ -552,12 +557,37 @@ function DirectoryScanPanel({ roots, media, history, running, onManage, onSync }
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
       const linked = files.filter((item) => item.workId).length;
       const last = history.find((entry) => entry.snapshot.result?.roots.some((item) => samePath(item, root)));
+      const isCurrent = syncingRoots.some((item) => samePath(item, root));
+      const status = isCurrent ? "running" : last?.snapshot.status ?? "idle";
       return <article key={root}>
-        <div className="directory-card-main"><strong title={root}>{root}</strong><div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span></div>{last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })}</small> : <small>{t("尚未扫描")}</small>}</div>
+        <div className="directory-card-main">
+          <div className="directory-card-title"><strong title={root}>{root}</strong><span className={`directory-status is-${status}`}>{directoryStatusLabel(status, t)}</span></div>
+          <div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span>{last?.snapshot.result ? <><span>{t("新增")} {last.snapshot.result.added}</span><span>{t("已更新")} {last.snapshot.result.updated}</span></> : null}</div>
+          {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
+          {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
+        </div>
         <button className="primary-button" disabled={running} type="button" onClick={() => onSync(root)}>{t("同步此目录")}</button>
       </article>;
     })}</div> : <p className="muted">{t("尚未添加内容目录。")}</p>}
   </section>;
+}
+
+function directoryStatusLabel(status: MediaScanHistoryEntry["snapshot"]["status"] | "idle", t: (source: string) => string): string {
+  switch (status) {
+    case "running": return t("扫描中");
+    case "cancelling": return t("正在取消");
+    case "completed": return t("已完成");
+    case "cancelled": return t("已取消");
+    case "failed": return t("失败");
+    default: return t("空闲");
+  }
+}
+
+function formatDirectoryDuration(milliseconds: number): string {
+  const seconds = Math.max(0, Math.round(milliseconds / 1000));
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}m ${seconds % 60}s`;
 }
 
 function samePath(left: string, right: string): boolean {

@@ -376,6 +376,15 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .directory-card-main { display: grid; gap: 7px; min-width: 0; }
 .directory-card-main > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .directory-card-main > small { color: var(--muted); }
+.directory-card-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.directory-card-title > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.directory-status { flex: 0 0 auto; padding: 3px 8px; border-radius: 999px; background: #e8e9e5; color: var(--muted); font-size: 10px; font-weight: 750; }
+.directory-status.is-running, .directory-status.is-cancelling { background: #e2eefb; color: #1769a8; }
+.directory-status.is-running::before, .directory-status.is-cancelling::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: currentColor; animation: pulse 1.2s ease-in-out infinite; }
+.directory-status.is-completed { background: #e2efe5; color: #39734b; }
+.directory-status.is-failed { background: #f7e5e3; color: #a63d32; }
+.directory-status.is-cancelled { background: #f4ecd8; color: #805f18; }
+.directory-card-error { color: #a63d32 !important; }
 .soft-card { background: var(--panel-soft); }
 .form-card { display: grid; gap: 16px; }
 .form-card label { display: grid; gap: 7px; font-size: 12px; font-weight: 720; }
