@@ -6,7 +6,7 @@ import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 import type { MediaFile } from "@/domain/entities/media-file";
 
-import type { DesktopBootstrapSettings, DesktopLibraryProfile, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopLibraryProfile, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { contentFolderRoots, normalizeContentFolders } from "./content-folders";
 import { activeLibraryProfile } from "./library-profiles";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
@@ -78,6 +78,7 @@ export function DesktopMediaPage({
   autoSyncRequest,
   onOpenSettings,
   onAddContentFolder,
+  onUpdateContentFolder,
   onOpenLibrary,
   openWork,
 }: {
@@ -90,6 +91,7 @@ export function DesktopMediaPage({
   autoSyncRequest: number;
   onOpenSettings: () => void;
   onAddContentFolder: () => void;
+  onUpdateContentFolder: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onOpenLibrary: () => void;
   openWork: (id: string) => void;
 }) {
@@ -446,7 +448,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel roots={unifiedRoots} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
       <section className="settings-card unified-sync-card">
         <div className="section-heading">
           <div>
@@ -554,19 +556,21 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onAdd, onSync }: {
-  roots: string[];
+function DirectoryScanPanel({ folders, media, history, syncingRoots, running, onAdd, onUpdate, onSync }: {
+  folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
   syncingRoots: string[];
   running: boolean;
   onAdd: () => void;
+  onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onSync: (path: string) => void;
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
     <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("只检查选中的内容目录；其他目录不会参与本轮扫描。")}</p></div><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button></div>
-    {roots.length ? <div className="directory-card-list">{roots.map((root) => {
+    {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
+      const root = folder.path;
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
       const linked = files.filter((item) => item.workId).length;
       const last = history.find((entry) => entry.snapshot.result?.roots.some((item) => samePath(item, root)));
@@ -576,6 +580,7 @@ function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onAd
         <div className="directory-card-main">
           <div className="directory-card-title"><strong title={root}>{root}</strong><span className={`directory-status is-${status}`}>{directoryStatusLabel(status, t)}</span></div>
           <div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span>{last?.snapshot.result ? <><span>{t("新增")} {last.snapshot.result.added}</span><span>{t("已更新")} {last.snapshot.result.updated}</span></> : null}</div>
+          <div className="directory-scope-options"><label><input type="checkbox" checked={folder.scanVideo} onChange={(event) => onUpdate(root, { scanVideo: event.target.checked })} />{t("视频")}</label><label><input type="checkbox" checked={folder.scanNfo} onChange={(event) => onUpdate(root, { scanNfo: event.target.checked })} />NFO</label><label><input type="checkbox" checked={folder.scanImages} onChange={(event) => onUpdate(root, { scanImages: event.target.checked })} />{t("图片")}</label></div>
           {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
           {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
         </div>

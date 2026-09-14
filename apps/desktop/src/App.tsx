@@ -11,6 +11,7 @@ import { ChevronLeft20Regular } from "@fluentui/react-icons";
 
 import type {
   DesktopBootstrapSettings,
+  DesktopContentFolder,
   DesktopLibraryProfile,
   DesktopRuntimeInfo,
   DesktopSharedPackInfo,
@@ -374,6 +375,16 @@ export default function App() {
     );
   }
 
+  async function updateContentFolderFromMedia(path: string, patch: Partial<DesktopContentFolder>): Promise<void> {
+    const profile = activeLibraryProfile(settings);
+    const folder = profile?.contentFolders.find((item) => item.path === path);
+    if (!profile || !folder) return;
+    await persistProfileMutation(
+      updateLibraryProfile(settings, profile.id, { contentFolders: profile.contentFolders.map((item) => item.path === path ? { ...item, ...patch } : item) }),
+      t("内容目录设置已保存。"),
+    );
+  }
+
   async function switchLibraryProfile(profileId: string): Promise<void> {
     try {
       const profile = settings.libraryProfiles.find((item) => item.id === profileId);
@@ -531,6 +542,7 @@ export default function App() {
             autoSyncRequest={mediaSyncRequest}
             onOpenSettings={() => navigate("settings")}
             onAddContentFolder={() => void addContentFolderFromMedia()}
+            onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
             onOpenLibrary={() => navigate("works")}
             openWork={openWork}
           />
