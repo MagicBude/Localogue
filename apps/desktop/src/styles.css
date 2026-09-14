@@ -735,6 +735,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
   background: linear-gradient(135deg, rgba(243,249,242,.96), rgba(255,255,255,.92));
 }
 .sync-library-button { min-width: 132px; }
+.unified-sync-next-actions { margin-top: 12px; }
+.media-library-anchor { scroll-margin-top: 118px; }
 .desktop-asset-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

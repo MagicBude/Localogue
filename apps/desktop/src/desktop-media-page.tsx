@@ -41,6 +41,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { useUiConfirm } from "./ui/confirm-dialog";
+import { UiButton } from "./ui/button";
 import {
   applyVocabularyRepair,
   previewVocabularyRepair,
@@ -110,6 +111,7 @@ export function DesktopMediaPage({
   const scanTimer = useRef<number | null>(null);
   const handledAutoSyncRequest = useRef(0);
   const recordedScanIds = useRef(new Set<string>());
+  const mediaLibraryRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
@@ -137,6 +139,7 @@ export function DesktopMediaPage({
       scanHistory: scanHistory.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).slice(0, 20),
     };
   }, [repository]);
+  const unlinkedMediaCount = data.value?.media.filter((item) => !item.workId).length ?? 0;
 
   async function recordScanHistory(snapshot: MediaScanJobSnapshot): Promise<void> {
     if (["running", "cancelling"].includes(snapshot.status) || recordedScanIds.current.has(snapshot.id)) return;
@@ -462,6 +465,10 @@ export function DesktopMediaPage({
             {syncStage === "media" && scan ? <p>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</p> : null}
           </div>
         ) : null}
+        {syncStage === "complete" ? <div className="button-row unified-sync-next-actions">
+          <UiButton variant="primary" onClick={onOpenLibrary}>{t("查看作品库")}</UiButton>
+          {unlinkedMediaCount ? <UiButton onClick={() => mediaLibraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
+        </div> : null}
       </section>
       <MediaScanSection
         roots={mediaRoots}
@@ -506,6 +513,7 @@ export function DesktopMediaPage({
         onReveal={() => void fileOpener.revealInFolder(selectedPath)}
       />
 
+      <div ref={mediaLibraryRef} className="media-library-anchor">
       <MediaLibrarySection
         loading={data.loading}
         error={data.error}
@@ -517,6 +525,7 @@ export function DesktopMediaPage({
         onReveal={(path) => void fileOpener.revealInFolder(path)}
         onToggleBinding={(id) => setBindingMediaId((current) => current === id ? null : id)}
       />
+      </div>
 
       <DesktopAssetStorageGovernance
         hasPrivateLibrary={Boolean(settings.libraryPath)}
