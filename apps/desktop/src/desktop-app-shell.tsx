@@ -51,7 +51,7 @@ const NAV_GROUPS: DesktopNavGroup[] = [
     label: "影片库",
     icon: BookDatabase20Regular,
     landingPage: "works",
-    pages: ["works", "people", "browse"],
+    pages: ["works", "people", "browse", "media", "review"],
   },
   { id: "favorites", label: "收藏", icon: Heart20Regular, landingPage: "favorites", pages: ["favorites"] },
   {
@@ -59,14 +59,14 @@ const NAV_GROUPS: DesktopNavGroup[] = [
     label: "资料维护",
     icon: Toolbox20Regular,
     landingPage: "curation",
-    pages: ["review", "curation", "history"],
+    pages: ["curation", "history"],
   },
   {
     id: "settings",
     label: "设置",
     icon: Settings20Regular,
     landingPage: "settings",
-    pages: ["settings", "packs", "media"],
+    pages: ["settings", "packs"],
   },
   { id: "about", label: "关于", icon: Info20Regular, landingPage: "about", pages: ["about"] },
 ];
@@ -118,21 +118,21 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
     const text = searchText.trim();
     if (text) onSearch(text);
   }
-  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse"
+  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "media"
     ? [
       { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
       { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
       { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
+      { id: "scan", label: t("扫描资料库"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
     ]
     : page === "curation" || page === "history"
       ? [
         { id: "curation", label: t("资料问题"), icon: Wrench20Regular, active: page === "curation", onSelect: () => onNavigate("curation") },
         { id: "history", label: t("变更历史"), icon: Clock20Regular, active: page === "history", onSelect: () => onNavigate("history") },
       ]
-      : page === "settings" || page === "packs" || page === "media"
+      : page === "settings" || page === "packs"
         ? [
           { id: "library", label: t("影片库与目录"), icon: Database20Regular, active: page === "settings" && settingsModule === "library", onSelect: () => onSettingsModule("library") },
-          { id: "scan", label: t("扫描资料库"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
           { id: "sources", label: t("社区资料"), icon: BookContacts20Regular, active: page === "settings" && settingsModule === "sources", onSelect: () => onSettingsModule("sources") },
           { id: "tools", label: t("扫描与工具"), icon: Wrench20Regular, active: page === "settings" && settingsModule === "tools", onSelect: () => onSettingsModule("tools") },
           { id: "about", label: t("诊断"), icon: BoxMultiple20Regular, active: page === "settings" && settingsModule === "about", onSelect: () => onSettingsModule("about") },

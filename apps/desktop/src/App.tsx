@@ -365,12 +365,12 @@ export default function App() {
     const path = await contentFolderDialog.pickDirectory(profile.contentFolders.at(-1)?.path);
     if (!path) return;
     if (profile.contentFolders.some((folder) => folder.path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase() === path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase())) {
-      setMessage(t("这个内容目录已经添加。"));
+      setMessage(t("内容目录设置已保存。"));
       return;
     }
     await persistProfileMutation(
       updateLibraryProfile(settings, profile.id, { contentFolders: [...profile.contentFolders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }),
-      t("内容目录已添加，可以直接扫描。"),
+      t("内容目录设置已保存。"),
     );
   }
 

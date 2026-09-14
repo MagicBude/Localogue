@@ -565,7 +565,7 @@ function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onAd
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("目录配置和扫描在这里连续完成；只检查选中的内容目录。")}</p></div><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("只检查选中的内容目录；其他目录不会参与本轮扫描。")}</p></div><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button></div>
     {roots.length ? <div className="directory-card-list">{roots.map((root) => {
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
       const linked = files.filter((item) => item.workId).length;
