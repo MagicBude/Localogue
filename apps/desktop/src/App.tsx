@@ -35,11 +35,13 @@ import {
   selectLibraryProfile,
   updateLibraryProfile,
 } from "./library-profiles";
+import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 
 // Native Profile 命令的最小契约版本；低版本 Runtime 不能安全保存 Settings V2。
 const PROFILE_NATIVE_CONTRACT_REVISION = 15;
 // 一次选择初始化依赖 Native 创建受控 Private Library，因此必须等待 revision 7。
 const QUICK_SETUP_NATIVE_CONTRACT_REVISION = 7;
+const contentFolderDialog = new TauriFileDialogAdapter();
 
 /**
  * 页面模块按需下载。React.lazy 接受默认导出，因此这里把各文件的命名导出映射成 default。
@@ -354,6 +356,24 @@ export default function App() {
     }
   }
 
+  async function addContentFolderFromMedia(): Promise<void> {
+    const profile = activeLibraryProfile(settings);
+    if (!profile) {
+      setMessage(t("请先创建影片库并确认数据存储位置。"));
+      return;
+    }
+    const path = await contentFolderDialog.pickDirectory(profile.contentFolders.at(-1)?.path);
+    if (!path) return;
+    if (profile.contentFolders.some((folder) => folder.path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase() === path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase())) {
+      setMessage(t("这个内容目录已经添加。"));
+      return;
+    }
+    await persistProfileMutation(
+      updateLibraryProfile(settings, profile.id, { contentFolders: [...profile.contentFolders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }),
+      t("内容目录已添加，可以直接扫描。"),
+    );
+  }
+
   async function switchLibraryProfile(profileId: string): Promise<void> {
     try {
       const profile = settings.libraryProfiles.find((item) => item.id === profileId);
@@ -510,6 +530,7 @@ export default function App() {
             runtimeContractRevision={runtime?.contractRevision ?? 0}
             autoSyncRequest={mediaSyncRequest}
             onOpenSettings={() => navigate("settings")}
+            onAddContentFolder={() => void addContentFolderFromMedia()}
             onOpenLibrary={() => navigate("works")}
             openWork={openWork}
           />
