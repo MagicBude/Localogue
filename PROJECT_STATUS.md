@@ -4,6 +4,8 @@
 
 **0.2 Desktop Beta Readiness。** V2 SQLite 存储迁移已经技术收口，当前重心从内部阶段编号转为普通用户可感知的完整流程：首次选择目录、可观察同步、异常处理、资料浏览与编辑、委托播放、备份恢复和 Windows 发行验收。
 
+2026-09-14 首次使用流程完成第一处收敛：选择内容目录并创建受控私人资料库后，Desktop 直接进入“导入与整理”并触发已有 Unified Sync，不再返回首页要求用户再次点击“一键同步”。NFO → 图片 → Media 编排、进度和取消仍复用同一 Application / Platform 边界，等待全新 Profile 的 Windows 实机验收。
+
 Localogue Desktop 是正式产品入口；Next.js Web 暂时作为历史能力宿主与开发验证入口。ADR-047 提议在能力迁移后退役 Web，ADR-048 提议通过受控子进程 Adapter 补齐元数据获取。两项均处于提议状态，不代表已经实现。
 
 2026-09-14 V2 Storage Migration 完成技术收口：Evidence / Curated Catalog / Personal Library 三层、只读 `catalog.db`、可写 `local.db`、原子迁移、零差异门控、双写补偿、SQLite → JSON 回导和 Shared Portable 发布链均已有实现与验证。Community Catalog 数据库对账通过；当前开发 Profile 对账为实体 200、媒体 173、偏好 1、Evidence 0、审计 5，并成功回导 379 个 JSON。Web 的保留或退役作为后续独立产品决策，不改变 Desktop 存储结论；用户界面行为仍待实机验收。

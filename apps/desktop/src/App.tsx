@@ -417,9 +417,13 @@ export default function App() {
       };
       const next = addLibraryProfile(ensureLibraryProfiles(savedSettings), profile);
       await persistDesktopSettings(next, { syncActiveProfile: false });
+      // 首次使用是一条连续任务：用户选完内容目录后直接进入既有 Unified Sync。
+      // 同步仍由 DesktopMediaPage 编排，App 只发出一次意图，避免在首次设置里复制扫描规则。
+      navigationHistory.current = [];
       setDetail(null);
-      setPage("home");
-      setMessage(t("资料库已经准备好。下一步点击首页的“一键同步”导入 NFO、图片和视频。"));
+      setPage("media");
+      setMediaSyncRequest((value) => value + 1);
+      setMessage(t("资料库已经准备好，正在扫描 NFO、图片和视频。"));
     } catch (error) {
       setMessage(t("首次设置失败：{error}", { error: toMessage(error) }));
     } finally {
@@ -573,7 +577,7 @@ function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { bu
       eyebrow="NO LIBRARY SOURCE"
       title={t("先连接你的资料库")}
       description={<>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}{!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}</>}
-      action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择影片资料目录")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
+      action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择目录并开始同步")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
     />
   );
 }
