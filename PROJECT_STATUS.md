@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-14 V2 Storage Migration 完成技术收口：Evidence / Curated Catalog / Personal Library 三层、只读 `catalog.db`、可写 `local.db`、原子迁移、零差异门控、双写补偿、SQLite → JSON 回导和 Shared Portable 发布链均已有实现与验证。Community Catalog 数据库对账通过；当前开发 Profile 对账为实体 200、媒体 173、偏好 1、Evidence 0、审计 5，并成功回导 379 个 JSON。Web 的保留或退役作为后续独立产品决策，不改变 Desktop 存储结论；用户界面行为仍待实机验收。
+
 2026-09-14 V2 Storage Migration 第九节点停止数据库化数据根的重复 JSON 遍历：Native SQLite Reader 返回当前集合实际覆盖的 Private / Shared `library` 根，Desktop Repository 只为缺少数据库的旧 Shared Pack 调用 JSON Adapter。多 Pack 的 Private > Shared 1 > Shared 2 优先级不变，JSON 继续承担交换、审核、回滚与旧包兼容职责。
 
 2026-09-14 V2 Storage Migration 第八节点完成 Desktop 私人运行时读取切换：Presentation Preference、Evidence 与 Governance 审计集合和 Canonical / MediaFile 一样，只在当前 Profile 的 JSON / `local.db` 零差异门控通过后读取 SQLite；不满足门控时继续读取 JSON。Native IPC 显式传递 `preferSqlite`，Contract revision 提升到 14，避免 WebView 与 Rust 参数漂移。
