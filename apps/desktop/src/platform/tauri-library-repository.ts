@@ -172,7 +172,7 @@ export class TauriLibraryRepository implements LibraryRepository {
 
   listAssetDeletionReceipts(): Promise<AssetDeletionReceipt[]> {
     if (!this.privateRoot) return Promise.resolve([]);
-    return desktopBridge.readPrivateAuditCollection<AssetDeletionReceipt>("asset-deletion-receipts");
+    return desktopBridge.readPrivateAuditCollection<AssetDeletionReceipt>("asset-deletion-receipts", this.preferSqlite);
   }
 
   saveAssetDeletionReceipt(receipt: AssetDeletionReceipt): Promise<void> {
@@ -182,7 +182,7 @@ export class TauriLibraryRepository implements LibraryRepository {
 
   listMediaScanHistory(): Promise<MediaScanHistoryEntry[]> {
     if (!this.privateRoot) return Promise.resolve([]);
-    return desktopBridge.readPrivateAuditCollection<MediaScanHistoryEntry>("media-scan-history");
+    return desktopBridge.readPrivateAuditCollection<MediaScanHistoryEntry>("media-scan-history", this.preferSqlite);
   }
 
   saveMediaScanHistory(entry: MediaScanHistoryEntry): Promise<void> {
@@ -192,7 +192,7 @@ export class TauriLibraryRepository implements LibraryRepository {
 
   async listPresentationPreferences(): Promise<PresentationPreference[]> {
     if (!this.privateRoot) return [];
-    return desktopBridge.readPrivatePresentationPreferences<PresentationPreference>();
+    return desktopBridge.readPrivatePresentationPreferences<PresentationPreference>(this.preferSqlite);
   }
 
   async findPresentationPreference(entityType: "person" | "work", entityId: string): Promise<PresentationPreference | null> {

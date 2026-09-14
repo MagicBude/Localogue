@@ -84,12 +84,12 @@ export const desktopBridge = {
   provisionLocalSqlite: () => invoke<DesktopStorageSyncReport>("provision_local_sqlite"),
   writeLibraryEntity: (collection: DesktopWritableLibraryCollection, entity: unknown) =>
     invoke<void>("write_library_entity", { collection, entity }),
-  readPrivateAuditCollection: <T>(collection: DesktopPrivateAuditCollection) =>
-    invoke<T[]>("read_private_audit_collection", { collection }),
+  readPrivateAuditCollection: <T>(collection: DesktopPrivateAuditCollection, preferSqlite = false) =>
+    invoke<T[]>("read_private_audit_collection", { collection, preferSqlite }),
   writePrivateAuditEntity: (collection: DesktopPrivateAuditCollection, entity: unknown) =>
     invoke<void>("write_private_audit_entity", { collection, entity }),
-  readPrivatePresentationPreferences: <T>() =>
-    invoke<T[]>("read_private_presentation_preferences"),
+  readPrivatePresentationPreferences: <T>(preferSqlite = false) =>
+    invoke<T[]>("read_private_presentation_preferences", { preferSqlite }),
   writePrivatePresentationPreference: (entity: unknown) =>
     invoke<void>("write_private_presentation_preference", { entity }),
   createGovernanceSnapshot: <T>(plan: unknown) =>

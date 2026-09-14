@@ -329,7 +329,7 @@ if (!errors.length) {
   if (!rust.includes("example-shared-pack") || !rust.includes("provision_resource_snapshot") || !desktopApp.includes("sharedPackPaths.length === 0")) {
     errors.push("V1-24C 内置示例库必须自动修复 Starter Shared Pack，并使用 App Local Data 稳定副本。");
   }
-  if (!rust.includes("contract_revision: 13") || !rust.includes("preview_private_portable_files")) {
+  if (!rust.includes("contract_revision: 14") || !rust.includes("preview_private_portable_files")) {
     errors.push("V2 Native Runtime 必须保持最新 Contract revision，并开放 Portable Import Plan 与 SQLite 迁移命令。");
   }
   for (const token of ["expected_library_path", "same_library_path", "target_library_path", "当前资料库已在预览后发生切换"]) {
@@ -644,10 +644,10 @@ if (!errors.length) {
   if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
     errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 13")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 14")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
-  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 13") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
+  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 14") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
     errors.push("V1-24 Profile UI 必须在 Native Runtime 版本落后时阻止误保存并给出明确诊断。");
   }
   for (const token of ["provision_local_sqlite", "read_sqlite_library_collection", "inspect_local_sqlite_sync"]) {
@@ -655,6 +655,9 @@ if (!errors.length) {
   }
   if (!desktopBridge.includes("provisionLocalSqlite") || !desktopApp.includes("sqliteReady") || !desktopRepository.includes("preferSqlite")) {
     errors.push("V2 Desktop 必须按 Profile 自动准备 local.db，并只在零差异对账后启用 SQLite 私人读取。");
+  }
+  if (!desktopBridge.includes('{ collection, preferSqlite }') || !desktopBridge.includes('"read_private_presentation_preferences", { preferSqlite }')) {
+    errors.push("V2 Desktop 私人偏好与审计集合读取必须显式传递 preferSqlite，避免 Native IPC 参数漂移。");
   }
   for (const token of ["catalog.db", "validate_catalog_sqlite_at", "PRAGMA integrity_check", "pack_id", "pack_version"]) {
     if (!rust.includes(token)) errors.push(`V2 Shared catalog.db 安装校验缺少：${token}`);

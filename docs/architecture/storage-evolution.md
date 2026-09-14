@@ -20,6 +20,8 @@
 
 V2 采用两个数据库：公共只读 `catalog.db` 与私人可写 `local.db`。Shared Pack 是 Curated Catalog 的发布包，不再被描述为另一套 Canonical 数据库。详细决策见 ADR-046。
 
+Desktop 对 `local.db` 的切换采用逐 Profile 门控。启动或切换 Profile 时先从 JSON 非破坏性迁移，再比较每个集合的 ID 与完整 JSON 内容；只有零差异时，Canonical、MediaFile、Presentation Preference、Evidence 和 Governance 审计集合才读取 SQLite。任何迁移失败或内容差异都会让该 Profile 继续读取 JSON，因此交换与恢复格式不会因为数据库切换而失去作用。
+
 ## 迁移要求
 
 - Domain ID 稳定；

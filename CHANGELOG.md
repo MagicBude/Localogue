@@ -1,5 +1,7 @@
 # Changelog
 
+- Desktop 私人运行时读取进一步切换到 `local.db`：收藏、评分、首图偏好、Evidence Inbox、Lifecycle、Provenance、Commit / Restore 历史及扫描审计在零差异门控后读取 SQLite；门控未通过时继续读取 JSON。Native IPC 新增显式 `preferSqlite` 参数并将 Runtime Contract 提升到 revision 14。
+
 - Shared Portable Pack 支持携带只读 `catalog.db`：Web/Desktop 导出按二进制保存，Native 安装在临时目录验证 SHA-256、SQLite integrity、必要表、Schema 与 Pack ID/Version 后才原子启用；旧 Pack 保留只读 JSON 回退。新增 `catalog:sqlite:publish` 可为同级 Community Data 生成并对账发布数据库。
 - Desktop 会为当前 Library Profile 原子创建 `<Private Library>/local.db`，完整导入既有 JSON 后执行逐集合零差异对账；只有对账通过才让 Canonical 浏览与 MediaFile 读取切换到 SQLite。创建失败或已有库出现差异时自动保留 JSON 读取，Shared Pack 在尚未携带 `catalog.db` 时继续使用只读 JSON 回退。
 - Desktop 私人写入进入 JSON / `local.db` 双写迁移：Canonical Override、MediaFile、Presentation Preference、Evidence、审计、Snapshot / Restore、删除与 Personal Pack 新增文件均同步镜像；SQLite 失败会恢复 JSON 写前内容。设置 → 工具新增逐集合对账入口，只有缺失和内容差异均为零才具备切换读取条件。

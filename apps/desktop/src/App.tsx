@@ -508,11 +508,11 @@ export default function App() {
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} />
         ) : page === "review" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "curation" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "history" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "media" ? (
           <DesktopMediaPage
             repository={repository}

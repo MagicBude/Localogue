@@ -28,6 +28,7 @@ interface DesktopReviewPageProps {
   setMessage: (message: string) => void;
   embedded?: boolean;
   reloadSignal?: number;
+  preferSqlite?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ export function DesktopReviewPage({
   openWork,
   embedded = false,
   reloadSignal = 0,
+  preferSqlite = false,
 }: DesktopReviewPageProps) {
   const { t } = useDesktopI18n();
   const confirm = useUiConfirm();
@@ -66,8 +68,8 @@ export function DesktopReviewPage({
   async function reloadInbox(): Promise<void> {
     // 两个集合互不依赖，可以并行读取；排序只影响界面，不改写 Evidence 本体。
     const [nextRecords, nextLifecycles] = await Promise.all([
-      desktopBridge.readPrivateAuditCollection<EvidenceRecord>("evidence"),
-      desktopBridge.readPrivateAuditCollection<EvidenceLifecycleRecord>("evidence-lifecycle"),
+      desktopBridge.readPrivateAuditCollection<EvidenceRecord>("evidence", preferSqlite),
+      desktopBridge.readPrivateAuditCollection<EvidenceLifecycleRecord>("evidence-lifecycle", preferSqlite),
     ]);
     nextRecords.sort((a, b) => b.importedAt.localeCompare(a.importedAt));
     setRecords(nextRecords);
@@ -77,7 +79,7 @@ export function DesktopReviewPage({
   useEffect(() => {
     // 页面首次进入时加载 Inbox。写操作完成后会显式调用 reloadInbox，无需依赖轮询。
     void reloadInbox().catch((error) => setMessage(`Evidence 读取失败：${message(error)}`));
-  }, [reloadSignal]);
+  }, [reloadSignal, preferSqlite]);
 
   useEffect(() => {
     // 切换 Evidence 后，旧 Plan 立即失效。disposed 防止较慢的旧分析覆盖用户后来选择的新记录。
@@ -155,7 +157,7 @@ export function DesktopReviewPage({
       // Canonical 写入完成后追加来源历史；Provenance 记录“为什么变成这样”，不能覆盖成单一当前来源。
       const provenanceEvents = buildAdoptedProvenanceEvents(selected, fresh.plan, receiptId);
       if (provenanceEvents.length) {
-        const logs = await desktopBridge.readPrivateAuditCollection<WorkProvenanceLog>("provenance");
+        const logs = await desktopBridge.readPrivateAuditCollection<WorkProvenanceLog>("provenance", preferSqlite);
         const existing = logs.find((item) => item.workId === fresh.plan.targetWorkId);
         const created = provenanceEvents.map((event) => ({
           schemaVersion: 1 as const,

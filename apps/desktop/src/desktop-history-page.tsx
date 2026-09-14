@@ -15,7 +15,7 @@ import { useUiConfirm } from "./ui/confirm-dialog";
  * History 页面封装完整恢复用例：Restore Snapshot -> Restore Receipt -> Provenance。
  * 顺序必须保持连续；页面组件负责协调，Native Boundary 负责受限文件恢复。
  */
-export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, openWork }: { privateRoot: string; onLibraryChanged: () => void; setMessage: (value: string) => void; openWork: (id: string) => void }) {
+export function DesktopHistoryPage({ privateRoot, preferSqlite, onLibraryChanged, setMessage, openWork }: { privateRoot: string; preferSqlite: boolean; onLibraryChanged: () => void; setMessage: (value: string) => void; openWork: (id: string) => void }) {
   const { t } = useDesktopI18n();
   const confirm = useUiConfirm();
   const [commits, setCommits] = useState<CanonicalCommitReceipt[]>([]);
@@ -23,13 +23,13 @@ export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, 
   const [busyId, setBusyId] = useState<string | null>(null);
   async function reload(): Promise<void> {
     const [nextCommits, nextRestores] = await Promise.all([
-      desktopBridge.readPrivateAuditCollection<CanonicalCommitReceipt>("review-commits"),
-      desktopBridge.readPrivateAuditCollection<CanonicalRestoreReceipt>("restore-receipts"),
+      desktopBridge.readPrivateAuditCollection<CanonicalCommitReceipt>("review-commits", preferSqlite),
+      desktopBridge.readPrivateAuditCollection<CanonicalRestoreReceipt>("restore-receipts", preferSqlite),
     ]);
     nextCommits.sort((a, b) => b.committedAt.localeCompare(a.committedAt));
     setCommits(nextCommits); setRestores(nextRestores);
   }
-  useEffect(() => { void reload().catch((error) => setMessage(`History 读取失败：${toMessage(error)}`)); }, []);
+  useEffect(() => { void reload().catch((error) => setMessage(`History 读取失败：${toMessage(error)}`)); }, [preferSqlite]);
   const restoredIds = useMemo(() => new Set(restores.map((item) => item.commitReceiptId)), [restores]);
 
   async function restore(commit: CanonicalCommitReceipt): Promise<void> {
@@ -53,7 +53,7 @@ export function DesktopHistoryPage({ privateRoot, onLibraryChanged, setMessage, 
       await desktopBridge.writePrivateAuditEntity("restore-receipts", receipt);
       const events = buildRestoredProvenanceEvents(commit, receipt.id, restoredWork);
       if (events.length) {
-        const logs = await desktopBridge.readPrivateAuditCollection<WorkProvenanceLog>("provenance");
+        const logs = await desktopBridge.readPrivateAuditCollection<WorkProvenanceLog>("provenance", preferSqlite);
         const existing = logs.find((item) => item.workId === commit.targetWorkId);
         await desktopBridge.writePrivateAuditEntity("provenance", {
           schemaVersion: 1,

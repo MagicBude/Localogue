@@ -23,9 +23,9 @@ import { UiActionDialog } from "./ui/action-dialog";
 import { UiEmptyState, UiFeedback } from "./ui/feedback";
 import { UiSelectField, UiTextField } from "./ui/form-control";
 
-// revision 13 同时保证 Profile 隔离、受控删除、ffprobe 引导和 SQLite 迁移命令齐全；旧 EXE
+// revision 14 同时保证 Profile 隔离、受控删除、ffprobe 引导和 SQLite 私人读取命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
-const PROFILE_NATIVE_CONTRACT_REVISION = 13;
+const PROFILE_NATIVE_CONTRACT_REVISION = 14;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**

@@ -327,7 +327,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 13,
+        contract_revision: 14,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -1909,13 +1909,17 @@ fn write_library_entity_blocking(app: AppHandle, collection: String, entity: Val
 }
 
 #[tauri::command]
-async fn read_private_audit_collection(app: AppHandle, collection: String) -> Result<Vec<Value>, String> {
+async fn read_private_audit_collection(app: AppHandle, collection: String, prefer_sqlite: bool) -> Result<Vec<Value>, String> {
     spawn_native_io("read_private_audit_collection", move || {
         if !is_private_audit_collection(&collection) {
             return Err("Desktop Audit Reader 拒绝未授权集合。".into());
         }
-        let library_path = configured_private_library_path(&app)?;
-        read_json_objects(&PathBuf::from(library_path).join(collection))
+        let root = PathBuf::from(configured_private_library_path(&app)?);
+        let database_path = root.join("local.db");
+        if prefer_sqlite && database_path.is_file() {
+            return read_sqlite_json_collection(&database_path, true, &collection);
+        }
+        read_json_objects(&root.join(collection))
     }).await
 }
 
@@ -1936,10 +1940,14 @@ fn write_private_audit_entity_blocking(app: AppHandle, collection: String, entit
 }
 
 #[tauri::command]
-async fn read_private_presentation_preferences(app: AppHandle) -> Result<Vec<Value>, String> {
+async fn read_private_presentation_preferences(app: AppHandle, prefer_sqlite: bool) -> Result<Vec<Value>, String> {
     spawn_native_io("read_private_presentation_preferences", move || {
-        let library_path = configured_private_library_path(&app)?;
-        read_json_objects(&PathBuf::from(library_path).join("presentation-preferences"))
+        let root = PathBuf::from(configured_private_library_path(&app)?);
+        let database_path = root.join("local.db");
+        if prefer_sqlite && database_path.is_file() {
+            return read_sqlite_json_collection(&database_path, true, "presentation-preferences");
+        }
+        read_json_objects(&root.join("presentation-preferences"))
     }).await
 }
 

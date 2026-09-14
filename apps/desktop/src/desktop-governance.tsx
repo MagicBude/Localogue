@@ -9,6 +9,7 @@ export type GovernanceSection = "review" | "curation" | "history";
 interface GovernanceProps {
   repository: TauriLibraryRepository;
   privateRoot: string | null;
+  preferSqlite: boolean;
   section: GovernanceSection;
   openWork: (id: string) => void;
   openPerson: (id: string) => void;
@@ -26,6 +27,7 @@ interface GovernanceProps {
 export function DesktopGovernance({
   repository,
   privateRoot,
+  preferSqlite,
   section,
   openWork,
   openPerson,
@@ -39,7 +41,7 @@ export function DesktopGovernance({
     return <DesktopCurationPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />;
   }
   if (section === "history") {
-    return <DesktopHistoryPage privateRoot={privateRoot} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} />;
+    return <DesktopHistoryPage privateRoot={privateRoot} preferSqlite={preferSqlite} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} />;
   }
-  return <DesktopReviewPage repository={repository} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} />;
+  return <DesktopReviewPage repository={repository} preferSqlite={preferSqlite} onLibraryChanged={onLibraryChanged} setMessage={setMessage} openWork={openWork} />;
 }
