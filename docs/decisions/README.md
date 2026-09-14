@@ -85,3 +85,8 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-040：用 Library Profile 组织 Desktop 本机资料源](ADR-040-library-profiles-group-desktop-sources.md)
 - [ADR-046：公共 Catalog 与私人资料分别使用 SQLite](ADR-046-sqlite-catalog-and-personal-databases.md)
+
+### 0.2 产品收敛（提议）
+
+- [ADR-047：Desktop 作为正式产品入口，分阶段冻结 Web](ADR-047-desktop-primary-product-and-web-retirement.md)
+- [ADR-048：在线元数据通过受控 Adapter 形成 Evidence](ADR-048-controlled-metadata-acquisition-adapters.md)

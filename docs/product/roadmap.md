@@ -1,159 +1,65 @@
 # 路线图
 
-## V0：设计与规范
+路线图按可交付产品阶段组织。历史实现细节由 `CHANGELOG.md`、`MANIFEST.md` 和 Git Commit 保存，不再把每个内部编号堆在产品路线图中。
 
-目标：把产品边界、数据模型、词表、查询、导入和 UI 设计沉淀为文档。
+## 已完成的基础
 
-## V1：File-backed Library
+- Domain / Application / Repository 分层；
+- Work、Person、Organization、Series、Genre、Tag、Asset、MediaFile 结构化模型；
+- Evidence、字段审核、Commit Plan、Provenance、Snapshot 与 Restore；
+- Curated Catalog / Personal Library 分层；
+- `catalog.db` 只读公共库与 `local.db` 私人库迁移；
+- Desktop 多资料库、多目录、统一同步、增量扫描与可观察 Job；
+- Desktop 作品、人物、分类、收藏、编辑、治理、备份与委托播放基础；
+- 日 / 中 / 英界面与元数据显示；
+- JSON / CSV / NFO / Portable Pack 交换能力。
 
-目标：先看到完整产品效果。
+## 当前：0.2 Desktop Beta Readiness
 
-- Next.js Web；
-- JSON Repository；
-- JSON 示例资料；
-- 作品浏览；
-- 人物档案；
-- Faceted Search；
-- 时长筛选；
-- 时间线；
-- 三语；
-- 主题；
-- JSON / CSV / XLSX / NFO 导入导出；
-- Review 与治理链路。
+### 0.1.26：文档与产品边界收敛
 
-## V1.x：资料治理与 Desktop 对齐
+- 统一仓库介绍、产品定位和当前阶段；
+- 把 Desktop 定为正式用户入口；
+- 记录 Web 退役和元数据 Adapter 的提议，不提前实现；
+- 清理把已完成 SQLite 迁移写成未来工作的陈旧文档。
 
-当前已进入 **V2 Storage Migration**。V1 的 JSON Repository 与完整 Desktop 业务链继续作为可运行回退；V2 将公共 Curated Catalog 构建为只读 `catalog.db`，并逐步把私人状态迁移到可写 `local.db`。Repository Contract Test 通过前不切换默认实现。
+### 0.1.27：日常闭环验收
 
-已完成重点：
+- 用隔离资料库完成首次启动、多目录、单目录增量扫描验收；
+- 验收作品编辑、筛选、收藏、返回、分页和五种展示；
+- 验收日志、错误恢复、备份、导入与恢复；
+- 解决 `desktop-ux-audit.md` 中阻断普通使用的问题。
 
-- ~~资料完整度与治理队列~~（V1-08）；
-- ~~Evidence 生命周期批量治理~~（V1-08）；
-- ~~人物资料手工维护~~（V1-08）；
-- ~~重复作品 / 人物候选基础~~（V1-08）；
-- ~~网页设置中心、Library 路径与 Shared Pack 数据分层~~（V1-09）；
-- ~~Asset 上传、封面选择、Presentation Preference 与 SHA-256 内容寻址~~（V1-10）；
-- ~~MediaFile 扫描、ffprobe 与可选视频哈希~~（V1-10）；
-- ~~Work ↔ MediaFile 手工绑定 / 解绑与候选审核~~（V1-11 Web）；
-- ~~Shared / Personal Pack 打包导入导出~~（V1-11 Web）；
-- ~~Media Scan Platform Ports 与 Node/Web Adapter~~（V1-12）；
-- ~~size + mtime 增量扫描、Sidecar Observation 与可取消 Scan Job~~（V1-12）；
-- ~~Tauri 2 Desktop Alpha~~（V1-13）；
-- ~~原生 Folder Picker / Open / Reveal / Rust ffprobe Command~~（V1-13）；
-- ~~完整 Tauri FileSystem / FileHash Adapter 与 MediaScanCoordinator~~（V1-14）；
-- ~~Desktop Home / Works / People / Media / Packs / Settings 正式应用壳~~（V1-15）；
-- ~~Private + Shared Pack Desktop 合并浏览~~（V1-15）；
-- ~~Web / Desktop 共享 Works / People Query Core~~（V1-15）；
-- ~~独立 `nfoScanPaths` 与 NFO Preview / Explicit Import~~（V1-16）；
-- ~~XML 番号优先 + 文件名番号 / 日期 / 片名 fallback~~（V1-16）；
-- ~~Private-only Native Canonical Writer 与 media-only 删除边界~~（V1-16）；
-- ~~`libraryRoots` Unified Library Source 与跨子目录视频/NFO发现~~（V1-17）；
-- ~~同番号 NFO Work Group 预览~~（V1-17）；
-- ~~poster / cover / fanart / thumb 本地 Asset Preview / Explicit Import~~（V1-17）；
-- ~~Native 图片格式校验、SHA-256 内容寻址与 Private-only Asset Writer~~（V1-17）；
-- ~~Desktop Work / Person Private CRUD 与 Shared Entity Private Override~~（V1-17）；
-- ~~Desktop Works / People 核心搜索、筛选、排序~~（V1-17）；
-- ~~Shared Pack 挂载、Native 校验、优先级调整、卸载~~（V1-17）；
-- ~~Work 元数据关系编辑~~（V1-17）；
-- ~~MediaFile bind / rebind / unbind 与审计 Receipt~~（V1-17）；
-- ~~Desktop Works 海报墙 / 列表 / 表格三视图~~（V1-18）；
-- ~~Private poster / cover 受限 Native IPC 实际展示~~（V1-18）；
-- ~~Unified Library NFO → Asset → Media 一键显式同步~~（V1-18）；
-- ~~Desktop 首页最近作品真实海报~~（V1-19）；
-- ~~Desktop Works 完整多维 Facet 与已选筛选 Chips~~（V1-19）；
-- ~~Desktop People 高级筛选~~（V1-19）；
-- ~~Person Detail 相关作品海报 / 三视图 / 二次 Facet~~（V1-19）；
-- ~~Desktop Maker / Label / Series / Genre / Director / Work Type / Tag 分类浏览~~（V1-19）。
-- ~~Desktop Sidebar 默认收窄、可折叠并持久化~~（V1-20）；
-- ~~Desktop Facet Rail 加宽与长选项换行~~（V1-20）；
-- ~~poster / fanart / screenshot / cover 用户语义与展示顺序统一~~（V1-20）；
-- ~~Desktop UI / Metadata 中日英独立语言偏好~~（V1-20）；
-- ~~NFO 混合分类 Vocabulary Routing 与 unmapped policy~~（V1-21）；
-- ~~早期 NFO Genre / Tag 污染 Preview → Explicit Repair~~（V1-21）；
-- ~~Desktop Work Detail 分开展示 Work Type / Genre / Tag~~（V1-21）；
-- ~~Desktop stale-while-refresh，筛选 / 分页 / 切语言保持滚动位置~~（V1-22）；
-- ~~Genre 多语与来源别名治理~~（V1-22；Hotfix 3 改为 33 个 Canonical Genre + 67 条 Approved Source Aliases，不保留完整 1271 条参考表）；
-- ~~Desktop Work Detail 高密度“海报 + Metadata Table”信息架构~~（V1-22）。
-- ~~Desktop Evidence Inbox / 字段与实体 Review / Commit Plan~~（V1-23）；
-- ~~Desktop Native before-image Snapshot / Commit 失败自动恢复~~（V1-23）；
-- ~~Desktop Curation Completeness / Duplicate Candidates~~（V1-23）；
-- ~~Desktop History / Restore Receipt / Provenance~~（V1-23）；
-- ~~Desktop Personal Backup / Shared Library Portable Pack 导入导出~~（V1-23）。
-- ~~Desktop Work / Person Presentation Preference Workbench 与 stale Preference 治理~~（V1-24A）；
-- ~~Library Profile：示例库 / 资料库 1 / 资料库 2 等多资料库快速切换~~（V1-24 Foundation Cleanup）；
-- ~~资料源设置四层语义与高级兼容目录收敛~~（V1-24 Foundation Cleanup）；
-- ~~Unified Sync 等待全部媒体根目录并报告实际 roots~~（V1-24 Foundation Cleanup）；
-- ~~11 Works / 8 People / 生成式视觉素材 Rich Dev Fixture~~（V1-24 Foundation Cleanup）。
+### 0.1.28：发行工程
 
-### V1-19：Desktop Discovery & Presentation Parity
+- 干净 Windows 环境安装、升级、卸载；
+- 明确 ffprobe 获取、许可、版本和完整性策略；
+- 完成日志定位、崩溃说明、版本展示和发布检查；
+- 决定签名、更新通道与发布包策略。
 
-本阶段完成日常浏览对齐：完整 Work Facet、People 高级筛选、Person 相关作品二次筛选、首页/关联作品海报和分类浏览。
+## 0.2.0 Beta
 
-### V1-20：Desktop UX & I18N Parity
+目标是让新用户不读文档也能完成：选择目录 → 查看同步进度 → 处理异常 → 浏览和编辑 → 委托播放 → 备份。
 
-本阶段完成 Desktop 布局和三语 Presentation 对齐：可折叠窄 Sidebar、宽 Facet Rail、Asset 语义/顺序，以及独立 UI / Metadata Language。
+Beta 可以使用本地 NFO、Portable Pack 和手工编辑验证闭环。Windows 是首个实机支持平台；macOS、Linux 和 Docker 在完成验证前不得写成已支持。
 
-### V1-21：Vocabulary Governance & Work Metadata Visibility
+## 0.2.0 Stable
 
-本阶段先修复真实来源词表问题：受控 NFO 分类映射、历史分类审计/修复、Work Detail 分类展示。
+除 Beta 验收外，还必须明确元数据获取策略。推荐至少完成一个受控 Adapter 的端到端试点，使采集结果进入 Evidence 而不是直接覆盖 Catalog；如果没有完成，应明确把产品描述为本地资料整理器，不能宣称全链路单一 App。
 
-### V1-22：Desktop Information Architecture & Metadata Localization
+## 0.3：元数据连接器
 
-本阶段修复筛选 / 分页 / 切语言时的滚动回跳，统一受控枚举与 Genre 多语展示，并把 Work Detail 重构为高密度信息表。完整外部 Genre 参考表不进入仓库；仅保留人工批准来源别名，不绕过 Canonical Vocabulary 映射边界。
+- 版本化 Provider Adapter 协议；
+- 进程超时、取消、日志、限速和凭据隔离；
+- Provider 原始响应与标准 Evidence 保存；
+- 多来源冲突、字段置信度与人工审核；
+- 第三方许可证与二进制发布策略。
 
-### V1-23：Desktop Governance Parity
+## 更后阶段
 
-本阶段完成 Evidence → Review → Commit Plan → Native Snapshot → Commit、Curation、History / Restore，以及 Shared / Personal Portable Pack Desktop 导入导出。Desktop 治理规则继续复用 Web Application Core，真实写权限由 Rust Private Boundary 控制。
+- macOS / Linux 桌面发行；
+- NAS / Docker 的后台索引形态；
+- 经真实需求验证的播放进度、截图书签或播放器集成；
+- 可解释的辅助匹配与翻译建议。
 
-### V1-24：Desktop Personal Presentation & Asset Governance
-
-已完成：
-
-- Presentation Preference Workbench；
-- Library Profile 多资料库快速切换与资料源设置收敛；
-- 多根目录 Unified Sync 完成语义修复；
-- Rich Dev / Showcase Fixture 与 Desktop bundle code splitting。
-
-下一阶段候选：
-
-- 人物 portrait / gallery Asset 更完整管理；
-- Work Hero / cover 用户偏好治理继续完善；
-- Portable / Shared Pack 冲突预览进一步增强；
-- 首次启动“体验示例库”和 Community Pack Registry；
-- 继续抽取共享 Presentation/DTO，避免 Web/Desktop 重复表现逻辑。
-
-### 后续 Desktop Native Enhancement
-
-- Native Pack Open / Save Dialog 与拖放；
-- ffprobe Sidecar target-triple 获取、版本、License、Hash 与发行流程；
-- 安装器、签名和自动更新；
-- Asset 孤儿治理与安全删除；
-- Community Pack 更新检查、版本升级与冲突预览。
-
-同时继续保留：
-
-- 更安全的实体 Merge Plan；
-- CSV / XLSX 更完整的批量编辑回写。
-
-## V2：SQLite
-
-- SQLite Repository；
-- JSON → SQLite 迁移器；
-- 索引；
-- 聚合 Facet；
-- FTS5；
-- 更大规模资料库性能优化。
-
-## V3：Connectors
-
-- JavInfo、DMM 或其他用户选择的数据源；
-- Connector 只能生成 Evidence；
-- 不直接修改 Canonical Library。
-
-## V4：AI
-
-- 自然语言检索；
-- 疑似重复人物辅助判断；
-- Genre / 名称映射辅助；
-- 缺失字段检查；
-- 资料治理解释。
+通用视频管理、云盘下载、磁力下载、内嵌解码和媒体服务器均不在默认路线内，若未来进入范围必须单独立项和决策。

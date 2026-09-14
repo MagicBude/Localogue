@@ -4,13 +4,13 @@
 
 ## 一、当前阶段
 
-当前阶段：**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite**。
+当前阶段：**0.2 Desktop Beta Readiness：把已完成的数据与 Desktop 基础收敛为可验收的日常产品闭环。**
 
-V1 当前约束：
+当前约束：
 
-- 保留 JSON Repository 作为交换与回退 Adapter，通过 Repository 分阶段引入 SQLite；
-- 不接入在线爬虫或必须联网的数据源；
-- 不实现播放器、转码和复杂微服务；
+- SQLite 已是受门控的运行时存储；JSON Repository 继续作为交换、对账与回退 Adapter，不绕过 Repository 直接读写；
+- 在 ADR-048 被接受、许可证与 Native 进程边界明确前，不接入在线爬虫或必须联网的数据源；
+- 0.2 不实现内嵌播放器、转码、下载器和复杂微服务；委托系统或用户指定播放器属于产品闭环；
 - 不用临时代码绕开既有 Domain Model；
 - 新页面不得直接读取文件系统；
 - 优先把浏览、筛选、人物档案和资料治理体验做完整。

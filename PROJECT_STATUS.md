@@ -2,6 +2,10 @@
 
 ## 当前阶段
 
+**0.2 Desktop Beta Readiness。** V2 SQLite 存储迁移已经技术收口，当前重心从内部阶段编号转为普通用户可感知的完整流程：首次选择目录、可观察同步、异常处理、资料浏览与编辑、委托播放、备份恢复和 Windows 发行验收。
+
+Localogue Desktop 是正式产品入口；Next.js Web 暂时作为历史能力宿主与开发验证入口。ADR-047 提议在能力迁移后退役 Web，ADR-048 提议通过受控子进程 Adapter 补齐元数据获取。两项均处于提议状态，不代表已经实现。
+
 2026-09-14 V2 Storage Migration 完成技术收口：Evidence / Curated Catalog / Personal Library 三层、只读 `catalog.db`、可写 `local.db`、原子迁移、零差异门控、双写补偿、SQLite → JSON 回导和 Shared Portable 发布链均已有实现与验证。Community Catalog 数据库对账通过；当前开发 Profile 对账为实体 200、媒体 173、偏好 1、Evidence 0、审计 5，并成功回导 379 个 JSON。Web 的保留或退役作为后续独立产品决策，不改变 Desktop 存储结论；用户界面行为仍待实机验收。
 
 2026-09-14 V2 Storage Migration 第九节点停止数据库化数据根的重复 JSON 遍历：Native SQLite Reader 返回当前集合实际覆盖的 Private / Shared `library` 根，Desktop Repository 只为缺少数据库的旧 Shared Pack 调用 JSON Adapter。多 Pack 的 Private > Shared 1 > Shared 2 优先级不变，JSON 继续承担交换、审核、回滚与旧包兼容职责。
@@ -397,24 +401,23 @@ V1-24A Presentation Preference 已通过实机验收。本轮继续整理 Deskto
 
 ## 下一阶段建议
 
-**下一阶段建议：Community Catalog Coverage Round 2 + Works 多维筛选规划。**
+**下一阶段建议：0.2 Desktop 日常闭环与发行验收。**
 
-1. 继续从公开页面、厂商官网、现成数据集和外部工具补充静态 Maker / Label / Series Evidence；
-2. 对已有 name-only Evidence 做人工身份核对，证据充分后再晋升 Community Catalog；
-3. 继续补可靠的多语言显示名与 Maker → Label → Series parent 关系，但 Browse 不增加级联筛选；
-4. Works 页面后续统一承接 Maker / Label / Series / Genre / Person 等多维组合筛选；
-5. 同名、改名、历史名称继续作为 Alias / Evidence 保留，不按字符串相似度自动合并。
+1. 使用隔离资料库完成首次启动、多目录、单目录增量扫描和取消的实机验收；
+2. 解决 `docs/development/desktop-ux-audit.md` 中阻断浏览、编辑、备份和恢复的项目；
+3. 在干净 Windows 环境验证安装、升级、卸载、日志定位与错误恢复；
+4. 对 ADR-047 的 Web 能力迁移清单和 ADR-048 的首个元数据 Adapter 作正式决策；
+5. Community Catalog 与多语言覆盖继续维护，但不再替代核心用户流程的交付。
 
 ## 当前不做
 
-- SQLite；
-- 在线爬虫与 Provider；
-- 外部 API Connector；
+- 未接受 ADR-048 前的在线爬虫与 Provider 实现；
+- 通用视频模式、CloudDrive2、磁力下载和浏览器下载扩展；
 - AI Agent；
-- 内置视频播放器；
-- 自动搬移用户媒体文件；
+- 内嵌视频播放器、视频转码和串流；
+- 自动搬移、重命名或删除用户媒体文件；
 - Desktop 与 Web 设置的隐式双向同步；
-- 未经过许可/版本流程的 FFmpeg 二进制自动打包。
+- 未经过许可、版本与校验流程的第三方二进制自动打包。
 
 ### V1-13 Webview Build Target 补充
 

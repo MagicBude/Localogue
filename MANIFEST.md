@@ -2,7 +2,11 @@
 
 ## 阶段名称
 
-**V2 Storage Migration：Evidence / Curated Catalog / Personal Library + SQLite（技术收口完成）。** 已建立标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具、Web Repository Contract、Desktop 受限只读 Adapter，以及带 JSON before-image 补偿的私人数据双写。Desktop 会按当前 Library Profile 自动原子创建 `local.db`，并仅在逐集合零差异时让 Canonical、MediaFile、Presentation Preference、Evidence 与治理审计读取切换到 SQLite；失败或差异状态继续使用 JSON。Shared Portable Pack 可携带经完整性、Schema 和 Pack 身份验证的只读 `catalog.db`，数据库化的数据根不会再重复遍历 JSON；旧 Pack 继续使用只读 JSON 兼容路径。JSON/CSV 继续作为交换、审核和恢复格式，Web 产品壳是否退役留作独立产品决策。
+**0.2 Desktop Beta Readiness。** Localogue 的正式定位是本地优先的 AV 个人资料库与策展管理器；Desktop 是面向普通用户的正式入口。当前目标是把选择目录、可观察同步、异常处理、浏览编辑、委托播放和备份恢复收敛为无需阅读文档的日常闭环。
+
+V2 Storage Migration 已完成技术收口：标准 SQLite `catalog.db` / `local.db` Schema、非破坏性迁移与导出工具、Web Repository Contract、Desktop 受限只读 Adapter，以及带 JSON before-image 补偿的私人数据双写均已建立。Desktop 会按当前 Library Profile 自动原子创建 `local.db`，并仅在逐集合零差异时让 Canonical、MediaFile、Presentation Preference、Evidence 与治理审计读取切换到 SQLite；失败或差异状态继续使用 JSON。Shared Portable Pack 可携带经完整性、Schema 和 Pack 身份验证的只读 `catalog.db`；旧 Pack 继续使用只读 JSON 兼容路径。JSON/CSV 继续作为交换、审核和恢复格式。
+
+Web 分阶段冻结与在线元数据 Adapter 分别记录为 ADR-047、ADR-048 的提议，尚未视为已接受或已实现。
 
 Desktop 全流程审核持续进行：页面顶部移除面向开发阶段的英文口号，标题、说明和主要操作使用紧凑层级，首页欢迎区也收为横向短条。作品详情返回会保留完整浏览现场，详情使用独立悬浮返回，作品与人物分页只在吸顶筛选区显示；顶部应用框架提供全局作品搜索与紧凑语言菜单。作品编辑入口位于详情首屏，并通过宽弹窗集中编辑；收藏成为左侧独立入口，作品筛选只在目录、人物、分类、更多四个小型锚点菜单中展示常用条件。作品海报墙显示 `poster` 竖版海报，独立封面墙按自然比例完整显示 `fanart`，另有瀑布流、列表和表格。低频关系继续通过分类浏览和详情反向导航进入，已选条件以单行 Chips 呈现。作品新建同样使用紧凑按钮和弹窗，不再用大卡片推迟首屏结果。人物与作品编辑支持取消草稿、保存期完整锁定和重复提交防护；所有高影响操作使用统一应用内确认框；收藏、评分与首图偏好使用同一串行字段合并入口。已知未完成项与实机验收范围统一记录在 `docs/development/desktop-ux-audit.md`，不视为全流程已验收。
 
@@ -156,7 +160,7 @@ Desktop 设置页将资料源解释为四层：
 
 ### 下一阶段
 
-继续有限实体目录建设：优先补 Community Catalog 中 Maker → Label → Series 的静态证据、Alias 与 parent 关系；证据不足的 Registry Evidence 不自动晋升。Catalog 稳定后再评估发布为正式 Shared Pack，仍不在 Localogue 内加入在线 Provider 抓取/API 客户端。
+进入 0.2 Desktop 日常闭环与发行验收：优先验证首次启动、多目录与单目录增量同步、异常处理、浏览编辑、委托播放、备份恢复和 Windows 安装升级。Community Catalog 继续维护，但不再替代用户流程交付。在线 Provider 仅按 ADR-048 评估，在该 ADR 被接受前不实现。
 
 ## 版本
 
