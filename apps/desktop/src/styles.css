@@ -737,6 +737,13 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .sync-library-button { min-width: 132px; }
 .unified-sync-next-actions { margin-top: 12px; }
 .media-library-anchor { scroll-margin-top: 118px; }
+.advanced-media-scan > summary { cursor: pointer; list-style: none; }
+.advanced-media-scan > summary::-webkit-details-marker { display: none; }
+.advanced-media-scan > summary > span { display: grid; gap: 4px; }
+.advanced-media-scan > summary strong { font-size: 14px; }
+.advanced-media-scan > summary small { color: var(--muted); }
+.advanced-media-scan[open] > summary { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.advanced-media-scan > .section-heading { margin-top: 14px; }
 .desktop-asset-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

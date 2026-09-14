@@ -577,7 +577,7 @@ function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { bu
       eyebrow="NO LIBRARY SOURCE"
       title={t("先连接你的资料库")}
       description={<>{t("选择存放影片、NFO 和封面的大目录。Localogue 会自动准备自己的数据空间，不会移动或改名原始文件。")}{!quickSetupReady ? <small className="muted">{t("请完全退出并重新启动 Desktop，以加载新版首次设置能力。")}</small> : null}</>}
-      action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择目录并开始同步")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
+      action={<div className="button-row"><UiButton variant="primary" loading={busy} disabled={!quickSetupReady} onClick={onQuickSetup}>{busy ? t("正在准备…") : t("选择目录并开始扫描")}</UiButton><UiButton variant="ghost" disabled={busy} onClick={onConfigure}>{t("高级设置")}</UiButton></div>}
     />
   );
 }

@@ -87,7 +87,7 @@ export function DesktopHomePage({
           <p>{t("浏览本地作品与人物，或同步内容目录中的新增文件。")}</p>
         </div>
         <div className="button-row desktop-home-primary-actions">
-          <UiButton variant="primary" onClick={startUnifiedSync}>{t("一键同步资料库")}</UiButton>
+          <UiButton variant="primary" onClick={startUnifiedSync}>{t("扫描资料库")}</UiButton>
           {unlinkedMediaCount ? <UiButton variant="ghost" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
         </div>
       </section>

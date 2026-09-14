@@ -353,7 +353,7 @@ if (!errors.length) {
   for (const token of ["find_asset_record_at_root", "read_asset_bytes_from_root", "settings.shared_pack_paths", "storagePath 与当前最高优先级来源不一致"]) {
     if (!rust.includes(token)) errors.push(`V1-24B Shared Asset Reader 缺少来源绑定或路径保护：${token}`);
   }
-  if (!desktopMediaPage.includes("syncUnifiedLibrary") || !desktopMediaPage.includes("一键同步 Unified Library")) {
+  if (!desktopMediaPage.includes("syncUnifiedLibrary") || !desktopMediaPage.includes("扫描资料库")) {
     errors.push("V1-18 Desktop Media 必须提供 NFO -> Asset -> Media 的统一同步入口，避免半同步状态。");
   }
   if (!adapters.includes("class TauriFileSystemAdapter") || !adapters.includes("class TauriFileHashAdapter")) {

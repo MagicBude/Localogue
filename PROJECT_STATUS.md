@@ -10,6 +10,8 @@
 
 2026-09-14 统一同步补齐完成后的任务出口：用户可在同步卡片直接查看作品库；存在未关联媒体时可在同一“导入与整理”工作台平滑定位到媒体处理区，减少同步后再次寻找入口。
 
+2026-09-14 扫描术语完成面向用户的收敛：主操作统一称“扫描资料库”，明确同时处理 NFO、图片和视频；只更新视频文件与技术参数的独立 Media Scan 默认折叠为高级操作。内部 Unified Sync / MediaScanCoordinator 分层保持不变。
+
 Localogue Desktop 是正式产品入口；Next.js Web 暂时作为历史能力宿主与开发验证入口。ADR-047 提议在能力迁移后退役 Web，ADR-048 提议通过受控子进程 Adapter 补齐元数据获取。两项均处于提议状态，不代表已经实现。
 
 2026-09-14 V2 Storage Migration 完成技术收口：Evidence / Curated Catalog / Personal Library 三层、只读 `catalog.db`、可写 `local.db`、原子迁移、零差异门控、双写补偿、SQLite → JSON 回导和 Shared Portable 发布链均已有实现与验证。Community Catalog 数据库对账通过；当前开发 Profile 对账为实体 200、媒体 173、偏好 1、Evidence 0、审计 5，并成功回导 379 个 JSON。Web 的保留或退役作为后续独立产品决策，不改变 Desktop 存储结论；用户界面行为仍待实机验收。

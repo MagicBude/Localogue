@@ -365,7 +365,7 @@ export function DesktopMediaPage({
       setMessage(t("元数据与图片已同步：NFO {nfo}；图片 {assets}。正在继续启动媒体增量扫描…", { nfo: nfo ? `${nfo.imported} / +${nfo.createdWorks} Work` : "—", assets: assets ? `${assets.imported} / +${assets.createdAssets} Asset` : `${assetPreviewNext.discovered} / ${assetPreviewNext.linkable} linkable` }));
     } catch (error) {
       setSyncingRoots([]);
-      setMessage(t("统一资料库同步失败：{error}", { error: toMessage(error) }));
+      setMessage(t("资料库扫描失败：{error}", { error: toMessage(error) }));
       return;
     } finally {
       setMetadataBusy(false);
@@ -378,7 +378,7 @@ export function DesktopMediaPage({
     setSyncingRoots([]);
     if (media?.status === "completed") {
       setSyncStage("complete");
-      setMessage(t("统一资料库同步完成：全部 {roots} 个媒体目录均已检查，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
+      setMessage(t("资料库扫描完成：已检查 {roots} 个目录，发现 {files} 个视频。", { roots: media.result?.roots.length ?? 0, files: media.result?.discovered ?? 0 }));
     }
   }
 
@@ -446,11 +446,11 @@ export function DesktopMediaPage({
         <div className="section-heading">
           <div>
             <span className="eyebrow">ONE ROOT · ONE ACTION</span>
-            <h2>{t("一键同步 Unified Library")}</h2>
-            <p className="muted">{t("按固定顺序执行 NFO → poster / cover / fanart / thumb → Media。这样不会再出现“视频已经扫描，但 Work / Asset 还没导入”的半同步状态。")}</p>
+            <h2>{t("扫描资料库")}</h2>
+            <p className="muted">{t("一次检查作品资料、封面图片和视频文件；新增内容会自动加入当前资料库。")}</p>
           </div>
           <button className="primary-button sync-library-button" disabled={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void syncUnifiedLibrary()}>
-            {metadataBusy || scan?.status === "running" ? t("同步中…") : t("同步资料库")}
+            {metadataBusy || scan?.status === "running" ? t("扫描中…") : t("扫描资料库")}
           </button>
         </div>
         <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置 Unified Library Root；仍可使用下方高级媒体 / NFO 路径。")}</code>
@@ -561,7 +561,7 @@ function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onMa
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录同步")}</h2><p className="muted">{t("选择已经配置的目录单独同步；目录的添加和移除统一在设置中管理。")}</p></div><button type="button" onClick={onManage}>{t("管理内容目录")}</button></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("只检查选中的内容目录；其他目录不会参与本轮扫描。")}</p></div><button type="button" onClick={onManage}>{t("管理内容目录")}</button></div>
     {roots.length ? <div className="directory-card-list">{roots.map((root) => {
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
       const linked = files.filter((item) => item.workId).length;
@@ -575,7 +575,7 @@ function DirectoryScanPanel({ roots, media, history, syncingRoots, running, onMa
           {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
           {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
         </div>
-        <button className="primary-button" disabled={running} type="button" onClick={() => onSync(root)}>{t("同步此目录")}</button>
+        <button className="primary-button" disabled={running} type="button" onClick={() => onSync(root)}>{t("扫描此目录")}</button>
       </article>;
     })}</div> : <p className="muted">{t("尚未添加内容目录。")}</p>}
   </section>;

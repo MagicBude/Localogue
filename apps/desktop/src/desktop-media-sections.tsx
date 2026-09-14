@@ -19,14 +19,15 @@ export function MediaScanSection({ roots, scan, onStart, onCancel }: {
 }) {
   const { t } = useDesktopI18n();
   const running = scan?.status === "running" || scan?.status === "cancelling";
-  return <section className="settings-card">
-    <div className="section-heading"><div><span className="eyebrow">INCREMENTAL MEDIA SCAN</span><h2>{t("媒体扫描")}</h2><p className="muted">{t("递归扫描 Unified Roots + 高级媒体路径。未变化文件继续走 V1-12 Fast Path。")}</p></div><div className="button-row"><UiButton variant="primary" loading={running} onClick={onStart}>{t("仅扫描视频")}</UiButton><UiButton disabled={scan?.status !== "running"} onClick={onCancel}>{t("取消")}</UiButton></div></div>
+  return <details className="settings-card advanced-media-scan">
+    <summary><span><strong>{t("高级：仅检查视频文件")}</strong><small>{t("不读取 NFO 和图片，只更新视频文件、时长、分辨率与作品关联。")}</small></span></summary>
+    <div className="section-heading"><p className="muted">{t("适合排查视频变化；普通使用请点击上方“扫描资料库”。")}</p><div className="button-row"><UiButton variant="primary" loading={running} onClick={onStart}>{t("检查视频文件")}</UiButton><UiButton disabled={scan?.status !== "running"} onClick={onCancel}>{t("取消")}</UiButton></div></div>
     <code className="path-block">{roots.length ? roots.join("\n") : t("尚未配置可扫描资料根目录")}</code>
     {scan ? <UiFeedback tone={scanTone(scan.status)}><strong>{scan.status} · {scan.progress.phase}</strong><span>{scan.progress.message}</span><span>{scan.progress.current} / {scan.progress.total}</span></UiFeedback> : null}
     {scan?.result ? <><div className="mini-stat-grid">
       <MiniStat label={t("扫描目录")} value={scan.result.roots.length} /><MiniStat label={t("已发现")} value={scan.result.discovered} /><MiniStat label={t("新增")} value={scan.result.added} /><MiniStat label={t("已更新")} value={scan.result.updated} /><MiniStat label={t("未变化")} value={scan.result.unchanged} /><MiniStat label={t("已移除")} value={scan.result.removed} />
     </div><details className="scan-root-report"><summary>{t("本轮实际扫描的 {count} 个目录", { count: scan.result.roots.length })}</summary><code className="path-block">{scan.result.roots.join("\n")}</code></details>{scan.result.warnings.length ? <details><summary>{t("{count} 条媒体扫描警告", { count: scan.result.warnings.length })}</summary><ul>{scan.result.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul></details> : null}</> : null}
-  </section>;
+  </details>;
 }
 
 /** 历史区只解释已落盘 Receipt，不参与任务轮询或扫描写入。 */
