@@ -90,3 +90,4 @@ ADR 用于记录“为什么这样设计”，避免未来只看到结果而不�
 
 - [ADR-047：Desktop 作为正式产品入口，分阶段冻结 Web](ADR-047-desktop-primary-product-and-web-retirement.md)
 - [ADR-048：在线元数据通过受控 Adapter 形成 Evidence](ADR-048-controlled-metadata-acquisition-adapters.md)
+- [ADR-049：用带扫描范围的内容目录取代三组重叠路径](ADR-049-unified-content-folder-scopes.md)

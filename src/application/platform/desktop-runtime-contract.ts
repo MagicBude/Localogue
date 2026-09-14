@@ -26,9 +26,18 @@ export interface DesktopLibraryProfile {
   libraryRoots: string[];
   mediaScanPaths: string[];
   nfoScanPaths: string[];
+  /** V2 统一内容目录；旧三组路径只作为兼容镜像。 */
+  contentFolders?: DesktopContentFolder[];
   sharedPackPaths: string[];
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface DesktopContentFolder {
+  path: string;
+  scanVideo: boolean;
+  scanNfo: boolean;
+  scanImages: boolean;
 }
 
 export interface DesktopExampleLibraryInfo {
@@ -51,6 +60,8 @@ export interface DesktopBootstrapSettings {
   /** 兼容/高级媒体专用路径；与 libraryRoots 合并扫描。 */
   mediaScanPaths: string[];
   nfoScanPaths: string[];
+  /** 影片、NFO、图片共用的唯一业务目录模型。 */
+  contentFolders?: DesktopContentFolder[];
   sharedPackPaths: string[];
   /** Desktop 本机资料库配置预设；切换时整组替换路径字段，不复制 Canonical 数据。 */
   libraryProfiles?: DesktopLibraryProfile[];

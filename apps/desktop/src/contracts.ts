@@ -4,6 +4,7 @@
  */
 export type {
   DesktopBootstrapSettings,
+  DesktopContentFolder,
   DesktopLibraryProfile,
   DesktopExampleLibraryInfo,
   DesktopPrivateLibraryInfo,

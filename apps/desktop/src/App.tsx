@@ -411,6 +411,7 @@ export default function App() {
         libraryRoots: [contentRoot],
         mediaScanPaths: [],
         nfoScanPaths: [],
+        contentFolders: [{ path: contentRoot, scanVideo: true, scanNfo: true, scanImages: true }],
         sharedPackPaths: [],
         createdAt: now,
         updatedAt: now,

@@ -7,6 +7,7 @@ import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history
 import type { MediaFile } from "@/domain/entities/media-file";
 
 import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
+import { contentFolderRoots, normalizeContentFolders } from "./content-folders";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopReviewPage } from "./desktop-review-page";
@@ -121,7 +122,7 @@ export function DesktopMediaPage({
   const nfoRoots = effectiveNfoRoots(settings);
   const assetRoots = effectiveAssetRoots(settings);
   // 组合路径只计算一次，避免 JSX 为“是否为空”和“实际展示”重复做去重工作。
-  const unifiedRoots = unique(settings.libraryRoots);
+  const unifiedRoots = normalizeContentFolders(settings).map((folder) => folder.path);
   const metadataRoots = unique([...nfoRoots, ...assetRoots]);
 
   // 使用 stale-while-refresh Hook：资料变化时保留旧列表，避免整个工作台闪烁并丢失滚动位置。
@@ -605,16 +606,15 @@ function samePath(left: string, right: string): boolean {
 }
 
 function effectiveMediaRoots(settings: DesktopBootstrapSettings): string[] {
-  return unique([...settings.libraryRoots, ...settings.mediaScanPaths]);
+  return contentFolderRoots(settings, "video");
 }
 
 function effectiveNfoRoots(settings: DesktopBootstrapSettings): string[] {
-  return unique([...settings.libraryRoots, ...settings.nfoScanPaths]);
+  return contentFolderRoots(settings, "nfo");
 }
 
 function effectiveAssetRoots(settings: DesktopBootstrapSettings): string[] {
-  // 兼容旧配置：专用 NFO / Media 路径中的图片也应参与发现。
-  return unique([...settings.libraryRoots, ...settings.nfoScanPaths, ...settings.mediaScanPaths]);
+  return contentFolderRoots(settings, "images");
 }
 
 function unique(values: string[]): string[] {

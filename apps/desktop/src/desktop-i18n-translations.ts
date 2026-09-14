@@ -1388,6 +1388,8 @@ export const desktopSupplementalTranslations: Record<Exclude<SupportedLanguage, 
     "人物图库图片已导入当前影片库。": "人物ギャラリー画像を現在のライブラリに取り込みました。",
     "头像和人物图库作为当前影片库的管理图片保存；导入不会修改社区资料。": "人物画像とギャラリーは現在のライブラリの管理画像として保存され、コミュニティ資料は変更されません。",
     "已在当前影片库新建人物：{name}。": "現在のライブラリに人物を作成しました：{name}。",
+    "内容目录已添加并保存，可以直接开始扫描。": "コンテンツフォルダーを追加して保存しました。スキャンを開始できます。",
+    "内容目录设置已保存。": "コンテンツフォルダー設定を保存しました。",
   },
   en: {
     "中文字幕": "Chinese subtitles",
@@ -1990,6 +1992,8 @@ export const desktopSupplementalTranslations: Record<Exclude<SupportedLanguage, 
     "人物图库图片已导入当前影片库。": "The gallery image was imported into the current library.",
     "头像和人物图库作为当前影片库的管理图片保存；导入不会修改社区资料。": "Portraits and gallery images are saved as managed images in the current library. Importing does not modify Community Data.",
     "已在当前影片库新建人物：{name}。": "Created person in the current library: {name}.",
+    "内容目录已添加并保存，可以直接开始扫描。": "Content folder added and saved. You can start scanning.",
+    "内容目录设置已保存。": "Content folder settings saved.",
 },
 };
 

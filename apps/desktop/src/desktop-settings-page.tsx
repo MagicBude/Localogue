@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
-import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
+import { normalizeContentFolders, withContentFolderCompatibility } from "./content-folders";
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard, PageTitle } from "./desktop-page-primitives";
 import {
@@ -204,21 +205,15 @@ export function DesktopSettingsPage({
   }
 
   async function addLibraryRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory(settings.libraryRoots.at(-1));
+    const folders = normalizeContentFolders(settings);
+    const path = await fileDialog.pickDirectory(folders.at(-1)?.path);
     if (!path) return;
-    await persistPaths({ ...settings, libraryRoots: unique([...settings.libraryRoots, path]) }, t("内容目录已添加并保存，可以直接开始同步。"));
+    if (folders.some((folder) => samePath(folder.path, path))) return;
+    await persistPaths(withContentFolderCompatibility(settings, [...folders, { path, scanVideo: true, scanNfo: true, scanImages: true }]), t("内容目录已添加并保存，可以直接开始扫描。"));
   }
 
-  async function addMediaRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory(settings.mediaScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
-    if (!path) return;
-    await persistPaths({ ...settings, mediaScanPaths: unique([...settings.mediaScanPaths, path]) }, t("额外媒体目录已添加并保存。"));
-  }
-
-  async function addNfoRoot(): Promise<void> {
-    const path = await fileDialog.pickDirectory(settings.nfoScanPaths.at(-1) ?? settings.libraryRoots.at(-1));
-    if (!path) return;
-    await persistPaths({ ...settings, nfoScanPaths: unique([...settings.nfoScanPaths, path]) }, t("额外 NFO 目录已添加并保存。"));
+  async function updateContentFolders(folders: DesktopContentFolder[]): Promise<void> {
+    await persistPaths(withContentFolderCompatibility(settings, folders), t("内容目录设置已保存。"));
   }
 
   async function persistPaths(next: DesktopBootstrapSettings, message: string): Promise<void> {
@@ -229,7 +224,7 @@ export function DesktopSettingsPage({
     }
   }
 
-  async function removePath(key: "libraryRoots" | "sharedPackPaths" | "mediaScanPaths" | "nfoScanPaths", path: string): Promise<void> {
+  async function removePath(key: "sharedPackPaths", path: string): Promise<void> {
     await persistPaths({ ...settings, [key]: settings[key].filter((item) => item !== path) }, t("目录已移除并保存。"));
   }
 
@@ -370,7 +365,7 @@ export function DesktopSettingsPage({
       <section className="settings-card featured-card settings-module-library">
         <div className="section-heading"><div><span className="eyebrow">CONTENT FOLDERS</span><h2>{t("内容目录")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加内容目录")}</UiButton></div>
         <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
-        <PathList values={settings.libraryRoots} onRemove={(path) => void removePath("libraryRoots", path)} />
+        <ContentFolderList values={normalizeContentFolders(settings)} onChange={(folders) => void updateContentFolders(folders)} />
       </section>
 
       <section className="settings-card settings-module-sources">
@@ -379,22 +374,6 @@ export function DesktopSettingsPage({
         <PathList values={settings.sharedPackPaths} onRemove={(path) => void removePath("sharedPackPaths", path)} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
       </section>
-
-      <details className="settings-card advanced-source-settings settings-module-tools">
-        <summary><span><span className="eyebrow">ADVANCED COMPATIBILITY</span><strong>{t("高级兼容目录")}</strong></span><small>{t("大多数用户不需要配置")}</small></summary>
-        <div className="advanced-settings-stack">
-          <div>
-            <div className="section-heading"><div><h3>{t("额外媒体目录")}</h3></div><UiButton onClick={() => void addMediaRoot()}>{t("+ 添加目录")}</UiButton></div>
-            <p className="muted">{t("只在影片不位于上面的内容根目录中时添加；多个目录会全部参与同步和媒体扫描。")}</p>
-            <PathList values={settings.mediaScanPaths} onRemove={(path) => void removePath("mediaScanPaths", path)} />
-          </div>
-          <div>
-            <div className="section-heading"><div><h3>{t("额外 NFO / 图片目录")}</h3></div><UiButton onClick={() => void addNfoRoot()}>{t("+ 添加目录")}</UiButton></div>
-            <p className="muted">{t("只在 NFO / 海报完全放在另一处时添加；这里也会参与 poster / fanart / thumb 发现。")}</p>
-            <PathList values={settings.nfoScanPaths} onRemove={(path) => void removePath("nfoScanPaths", path)} />
-          </div>
-        </div>
-      </details>
 
       <section className="settings-card form-card settings-module-tools">
         <div>
@@ -443,8 +422,28 @@ function PathList({ values, onRemove }: { values: string[]; onRemove: (value: st
   return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><UiButton size="compact" variant="danger" onClick={() => onRemove(path)}>{t("移除")}</UiButton></li>)}</ul>;
 }
 
+function ContentFolderList({ values, onChange }: { values: DesktopContentFolder[]; onChange: (values: DesktopContentFolder[]) => void }) {
+  const { t } = useDesktopI18n();
+  if (!values.length) return <p className="muted">{t("尚未配置。")}</p>;
+  const update = (path: string, patch: Partial<DesktopContentFolder>) => onChange(values.map((item) => samePath(item.path, path) ? { ...item, ...patch } : item));
+  return <ul className="path-list content-folder-list">{values.map((folder) => <li key={folder.path}>
+    <code>{folder.path}</code>
+    <div className="button-row">
+      <label><input type="checkbox" checked={folder.scanVideo} onChange={(event) => update(folder.path, { scanVideo: event.target.checked })} /> {t("视频")}</label>
+      <label><input type="checkbox" checked={folder.scanNfo} onChange={(event) => update(folder.path, { scanNfo: event.target.checked })} /> NFO</label>
+      <label><input type="checkbox" checked={folder.scanImages} onChange={(event) => update(folder.path, { scanImages: event.target.checked })} /> {t("图片")}</label>
+      <UiButton size="compact" variant="danger" onClick={() => onChange(values.filter((item) => !samePath(item.path, folder.path)))}>{t("移除")}</UiButton>
+    </div>
+  </li>)}</ul>;
+}
+
 function unique(values: string[]): string[] {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function samePath(left: string, right: string): boolean {
+  const normalize = (value: string) => value.trim().replaceAll("\\", "/").replace(/\/+$/, "").toLocaleLowerCase();
+  return normalize(left) === normalize(right);
 }
 
 function isManagedPrivateLibrary(profileId: string, libraryPath?: string, appLocalDataDir?: string): boolean {

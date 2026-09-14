@@ -4,6 +4,8 @@
 
 **0.2 Desktop Beta Readiness。** V2 SQLite 存储迁移已经技术收口，当前重心从内部阶段编号转为普通用户可感知的完整流程：首次选择目录、可观察同步、异常处理、资料浏览与编辑、委托播放、备份恢复和 Windows 发行验收。
 
+2026-09-14 冗余治理第一节点引入统一 `contentFolders`：每个内容目录只保存一次，并分别声明是否扫描视频、NFO 和图片。设置页移除额外媒体/额外 NFO 两套目录入口；旧 `libraryRoots / mediaScanPaths / nfoScanPaths` 继续作为回退版本可读的兼容镜像。TS Application 与 Rust Settings 均可从旧设置无损迁移，等待多目录隔离环境实机验收。
+
 2026-09-14 完成第一轮用户术语治理：普通界面统一使用“影片库、内容目录、社区资料、待审核资料、个人备份”，不再要求用户理解 Library Profile、Private Library、Shared Pack、Canonical、Evidence 或 Commit Plan。内部 Domain / Schema 稳定名称保持不变；完整定义与可合并项见 `docs/product/user-terminology.md`。日英翻译已同步，等待用户实机验收。
 
 2026-09-14 首次使用流程完成第一处收敛：选择内容目录并创建受控私人资料库后，Desktop 直接进入“导入与整理”并触发已有 Unified Sync，不再返回首页要求用户再次点击“一键同步”。NFO → 图片 → Media 编排、进度和取消仍复用同一 Application / Platform 边界，等待全新 Profile 的 Windows 实机验收。

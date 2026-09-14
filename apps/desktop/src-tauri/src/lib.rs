@@ -64,6 +64,20 @@ struct DesktopRuntimeInfo {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopContentFolder {
+    path: String,
+    #[serde(default = "default_true")]
+    scan_video: bool,
+    #[serde(default = "default_true")]
+    scan_nfo: bool,
+    #[serde(default = "default_true")]
+    scan_images: bool,
+}
+
+fn default_true() -> bool { true }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopLibraryProfile {
     id: String,
     name: String,
@@ -77,6 +91,8 @@ struct DesktopLibraryProfile {
     media_scan_paths: Vec<String>,
     #[serde(default)]
     nfo_scan_paths: Vec<String>,
+    #[serde(default)]
+    content_folders: Vec<DesktopContentFolder>,
     #[serde(default)]
     shared_pack_paths: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -98,6 +114,8 @@ struct DesktopBootstrapSettings {
     #[serde(default)]
     nfo_scan_paths: Vec<String>,
     #[serde(default)]
+    content_folders: Vec<DesktopContentFolder>,
+    #[serde(default)]
     shared_pack_paths: Vec<String>,
     #[serde(default)]
     library_profiles: Vec<DesktopLibraryProfile>,
@@ -118,6 +136,7 @@ impl Default for DesktopBootstrapSettings {
             library_roots: Vec::new(),
             media_scan_paths: Vec::new(),
             nfo_scan_paths: Vec::new(),
+            content_folders: Vec::new(),
             shared_pack_paths: Vec::new(),
             library_profiles: Vec::new(),
             active_library_profile_id: None,
@@ -2459,6 +2478,8 @@ fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBoot
     value.library_roots = unique_clean_paths(value.library_roots)?;
     value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
     value.nfo_scan_paths = unique_clean_paths(value.nfo_scan_paths)?;
+    value.content_folders = normalize_content_folders(value.content_folders, &value.library_roots, &value.media_scan_paths, &value.nfo_scan_paths)?;
+    (value.library_roots, value.media_scan_paths, value.nfo_scan_paths) = legacy_paths_from_content_folders(&value.content_folders);
     value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
     value.library_profiles = normalize_library_profiles(value.library_profiles)?;
     value.active_library_profile_id = clean_optional_text(value.active_library_profile_id, 160)?;
@@ -2490,12 +2511,69 @@ fn normalize_library_profiles(values: Vec<DesktopLibraryProfile>) -> Result<Vec<
         profile.library_roots = unique_clean_paths(profile.library_roots)?;
         profile.media_scan_paths = unique_clean_paths(profile.media_scan_paths)?;
         profile.nfo_scan_paths = unique_clean_paths(profile.nfo_scan_paths)?;
+        profile.content_folders = normalize_content_folders(profile.content_folders, &profile.library_roots, &profile.media_scan_paths, &profile.nfo_scan_paths)?;
+        (profile.library_roots, profile.media_scan_paths, profile.nfo_scan_paths) = legacy_paths_from_content_folders(&profile.content_folders);
         profile.shared_pack_paths = unique_clean_paths(profile.shared_pack_paths)?;
         profile.created_at = clean_optional_text(profile.created_at, 80)?;
         profile.updated_at = clean_optional_text(profile.updated_at, 80)?;
         output.push(profile);
     }
     Ok(output)
+}
+
+fn normalize_content_folders(
+    values: Vec<DesktopContentFolder>,
+    library_roots: &[String],
+    media_roots: &[String],
+    nfo_roots: &[String],
+) -> Result<Vec<DesktopContentFolder>, String> {
+    let source = if values.is_empty() {
+        let mut migrated = Vec::new();
+        migrated.extend(library_roots.iter().map(|path| DesktopContentFolder { path: path.clone(), scan_video: true, scan_nfo: true, scan_images: true }));
+        migrated.extend(media_roots.iter().map(|path| DesktopContentFolder { path: path.clone(), scan_video: true, scan_nfo: false, scan_images: false }));
+        migrated.extend(nfo_roots.iter().map(|path| DesktopContentFolder { path: path.clone(), scan_video: false, scan_nfo: true, scan_images: true }));
+        migrated
+    } else { values };
+    let mut output: Vec<DesktopContentFolder> = Vec::new();
+    for mut folder in source {
+        folder.path = clean_content_folder_path(folder.path)?;
+        if !(folder.scan_video || folder.scan_nfo || folder.scan_images) { continue; }
+        if let Some(existing) = output.iter_mut().find(|item| content_paths_equal(&item.path, &folder.path)) {
+            existing.scan_video |= folder.scan_video;
+            existing.scan_nfo |= folder.scan_nfo;
+            existing.scan_images |= folder.scan_images;
+        } else {
+            output.push(folder);
+        }
+    }
+    Ok(output)
+}
+
+fn clean_content_folder_path(value: String) -> Result<String, String> {
+    let trimmed = value.trim();
+    validate_text_path(trimmed)?;
+    if trimmed.is_empty() { return Err("内容目录不能为空。".to_string()); }
+    Ok(trimmed.to_string())
+}
+
+fn content_paths_equal(left: &str, right: &str) -> bool {
+    left.trim_end_matches(['/', '\\']).replace('\\', "/").to_lowercase()
+        == right.trim_end_matches(['/', '\\']).replace('\\', "/").to_lowercase()
+}
+
+fn legacy_paths_from_content_folders(values: &[DesktopContentFolder]) -> (Vec<String>, Vec<String>, Vec<String>) {
+    let mut library = Vec::new();
+    let mut media = Vec::new();
+    let mut metadata = Vec::new();
+    for folder in values {
+        if folder.scan_video && folder.scan_nfo && folder.scan_images {
+            library.push(folder.path.clone());
+        } else {
+            if folder.scan_video { media.push(folder.path.clone()); }
+            if folder.scan_nfo || folder.scan_images { metadata.push(folder.path.clone()); }
+        }
+    }
+    (library, media, metadata)
 }
 
 fn clean_required_text(value: String, label: &str, max_chars: usize) -> Result<String, String> {

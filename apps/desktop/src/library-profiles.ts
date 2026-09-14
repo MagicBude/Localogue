@@ -1,4 +1,5 @@
 import type { DesktopBootstrapSettings, DesktopLibraryProfile } from "./contracts";
+import { normalizeContentFolders, withContentFolderCompatibility } from "./content-folders";
 
 const PROFILE_PREFIX = "library_profile_";
 const LEGACY_PROFILE_ID = "library_profile_legacy_default";
@@ -48,6 +49,7 @@ export function createEmptyLibraryProfile(id: string, name: string): DesktopLibr
     libraryRoots: [],
     mediaScanPaths: [],
     nfoScanPaths: [],
+    contentFolders: [],
     sharedPackPaths: [],
     createdAt: now,
     updatedAt: now,
@@ -126,6 +128,7 @@ export function snapshotLibraryProfile(
     libraryRoots: unique(settings.libraryRoots),
     mediaScanPaths: unique(settings.mediaScanPaths),
     nfoScanPaths: unique(settings.nfoScanPaths),
+    contentFolders: normalizeContentFolders(settings),
     sharedPackPaths: unique(settings.sharedPackPaths),
     createdAt: profile.createdAt,
     updatedAt: new Date().toISOString(),
@@ -136,15 +139,16 @@ export function applyLibraryProfile(
   settings: DesktopBootstrapSettings,
   profile: DesktopLibraryProfile,
 ): DesktopBootstrapSettings {
-  return {
+  return withContentFolderCompatibility({
     ...settings,
     activeLibraryProfileId: profile.id,
     libraryPath: profile.libraryPath,
     libraryRoots: [...profile.libraryRoots],
     mediaScanPaths: [...profile.mediaScanPaths],
     nfoScanPaths: [...profile.nfoScanPaths],
+    contentFolders: profile.contentFolders ? [...profile.contentFolders] : undefined,
     sharedPackPaths: [...profile.sharedPackPaths],
-  };
+  });
 }
 
 /** 保存 Settings 时，把当前路径状态写回当前 Profile。 */
@@ -196,6 +200,7 @@ export function removeLibraryProfile(
     libraryRoots: [],
     mediaScanPaths: [],
     nfoScanPaths: [],
+    contentFolders: [],
     sharedPackPaths: [],
   };
 }
@@ -264,6 +269,12 @@ function normalizeProfile(profile: DesktopLibraryProfile): DesktopLibraryProfile
     libraryRoots: unique(profile.libraryRoots ?? []),
     mediaScanPaths: unique(profile.mediaScanPaths ?? []),
     nfoScanPaths: unique(profile.nfoScanPaths ?? []),
+    contentFolders: normalizeContentFolders({
+      contentFolders: profile.contentFolders,
+      libraryRoots: profile.libraryRoots ?? [],
+      mediaScanPaths: profile.mediaScanPaths ?? [],
+      nfoScanPaths: profile.nfoScanPaths ?? [],
+    }),
     sharedPackPaths: unique(profile.sharedPackPaths ?? []),
   };
 }
