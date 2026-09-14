@@ -155,6 +155,7 @@ struct DesktopSharedPackInfo {
 #[serde(rename_all = "camelCase")]
 struct DesktopSqliteCollection {
     available: bool,
+    database_backed_roots: Vec<String>,
     items: Vec<Value>,
 }
 
@@ -1809,31 +1810,48 @@ fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -
         return Err(format!("SQLite 不允许读取集合：{collection}"));
     }
     let settings = load_desktop_settings(app.clone())?;
-    let mut sources: Vec<(PathBuf, bool)> = Vec::new();
+    let mut sources: Vec<(PathBuf, bool, PathBuf)> = Vec::new();
     if let Some(private) = settings.library_path {
-        sources.push((PathBuf::from(private).join("local.db"), true));
+        let root = PathBuf::from(private);
+        sources.push((root.join("local.db"), true, root));
     }
     for pack in settings.shared_pack_paths {
-        let root = PathBuf::from(pack);
-        sources.push((root.join("catalog.db"), false));
+        let requested = PathBuf::from(pack);
+        let root = if requested.is_absolute() {
+            normalize_lexical(&requested)
+        } else {
+            normalize_lexical(&std::env::current_dir().map_err(display_error)?.join(requested))
+        };
+        // Repository 的 JSON 读取根是 `<pack>/library`，返回同一个逻辑根才能
+        // 精确跳过数据库已经覆盖的一实体一 JSON 目录。
+        sources.push((root.join("catalog.db"), false, root.join("library")));
     }
     if let Ok(app_data) = app.path().app_local_data_dir() {
         // local.db 永远属于当前 Profile 的 Private Library。应用级目录只允许放
         // 发布的只读 Catalog，避免切换资料库后混入另一份私人数据。
-        sources.push((app_data.join("catalog.db"), false));
+        sources.push((app_data.join("catalog.db"), false, app_data));
     }
 
+    read_sqlite_collection_from_sources(&collection, sources)
+}
+
+fn read_sqlite_collection_from_sources(
+    collection: &str,
+    sources: Vec<(PathBuf, bool, PathBuf)>,
+) -> Result<DesktopSqliteCollection, String> {
     let mut available = false;
+    let mut database_backed_roots = Vec::new();
     let mut merged = BTreeMap::<String, Value>::new();
-    for (database_path, local) in sources {
+    for (database_path, local, source_root) in sources {
         if !database_path.is_file() || (!local && collection == "media-files") { continue; }
         available = true;
-        for value in read_sqlite_json_collection(&database_path, local, &collection)? {
+        database_backed_roots.push(path_to_string(&source_root));
+        for value in read_sqlite_json_collection(&database_path, local, collection)? {
             let Some(id) = value.get("id").and_then(Value::as_str) else { continue; };
             merged.entry(id.to_string()).or_insert(value);
         }
     }
-    Ok(DesktopSqliteCollection { available, items: merged.into_values().collect() })
+    Ok(DesktopSqliteCollection { available, database_backed_roots, items: merged.into_values().collect() })
 }
 
 fn sqlite_sidecar_path(database_path: &Path, suffix: &str) -> PathBuf {
@@ -2751,6 +2769,20 @@ mod tests {
         assert_eq!(catalog_works[0]["id"], "work_catalog");
         assert_eq!(local_works[0]["id"], "work_private");
         assert_eq!(media[0]["id"], "media_1");
+
+        // 返回值必须精确指出哪些数据根已由数据库覆盖。Web Repository 只跳过这些根，
+        // 因而带 catalog.db 的新 Pack 不再遍历 JSON，缺数据库的旧 Pack 仍可回退。
+        let private_root = root.join("private-source");
+        let catalog_root = root.join("catalog-source");
+        let legacy_root = root.join("legacy-source");
+        let merged = read_sqlite_collection_from_sources("works", vec![
+            (local_path.clone(), true, private_root.clone()),
+            (catalog_path.clone(), false, catalog_root.clone()),
+            (root.join("missing-catalog.db"), false, legacy_root),
+        ]).expect("merge sqlite sources");
+        assert!(merged.available);
+        assert_eq!(merged.items.len(), 2);
+        assert_eq!(merged.database_backed_roots, vec![path_to_string(&private_root), path_to_string(&catalog_root)]);
         fs::remove_dir_all(root).expect("cleanup sqlite temp");
     }
 

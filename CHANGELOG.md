@@ -1,5 +1,6 @@
 # Changelog
 
+- Desktop SQLite Reader 现在返回逐集合 `databaseBackedRoots`，Repository 会跳过这些数据根的一实体一 JSON 遍历；带 `catalog.db` 的 Shared Pack 直接读取数据库，缺少数据库的旧 Pack 继续使用 JSON Adapter，多 Pack 覆盖顺序保持不变。
 - Desktop 私人运行时读取进一步切换到 `local.db`：收藏、评分、首图偏好、Evidence Inbox、Lifecycle、Provenance、Commit / Restore 历史及扫描审计在零差异门控后读取 SQLite；门控未通过时继续读取 JSON。Native IPC 新增显式 `preferSqlite` 参数并将 Runtime Contract 提升到 revision 14。
 
 - Shared Portable Pack 支持携带只读 `catalog.db`：Web/Desktop 导出按二进制保存，Native 安装在临时目录验证 SHA-256、SQLite integrity、必要表、Schema 与 Pack ID/Version 后才原子启用；旧 Pack 保留只读 JSON 回退。新增 `catalog:sqlite:publish` 可为同级 Community Data 生成并对账发布数据库。

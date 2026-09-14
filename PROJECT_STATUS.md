@@ -2,6 +2,8 @@
 
 ## 当前阶段
 
+2026-09-14 V2 Storage Migration 第九节点停止数据库化数据根的重复 JSON 遍历：Native SQLite Reader 返回当前集合实际覆盖的 Private / Shared `library` 根，Desktop Repository 只为缺少数据库的旧 Shared Pack 调用 JSON Adapter。多 Pack 的 Private > Shared 1 > Shared 2 优先级不变，JSON 继续承担交换、审核、回滚与旧包兼容职责。
+
 2026-09-14 V2 Storage Migration 第八节点完成 Desktop 私人运行时读取切换：Presentation Preference、Evidence 与 Governance 审计集合和 Canonical / MediaFile 一样，只在当前 Profile 的 JSON / `local.db` 零差异门控通过后读取 SQLite；不满足门控时继续读取 JSON。Native IPC 显式传递 `preferSqlite`，Contract revision 提升到 14，避免 WebView 与 Rust 参数漂移。
 
 2026-09-11 V2 Storage Migration 第七节点完成公共 Catalog 发布边界：Shared Pack 可同时携带 `catalog.db`、可审核 JSON 与 Sources；Portable 导出将数据库作为二进制，Native 安装进行摘要、SQLite 完整性、Schema 和 Pack 身份校验后原子启用。官方 Community Data 已用可重复脚本生成 827392 字节发布投影并通过数据库对账；其仓库中的发布文件需独立提交。旧 Shared Pack 继续使用只读 JSON，等待用户实机导出/安装验收。

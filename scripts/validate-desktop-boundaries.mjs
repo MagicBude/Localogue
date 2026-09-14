@@ -659,6 +659,9 @@ if (!errors.length) {
   if (!desktopBridge.includes('{ collection, preferSqlite }') || !desktopBridge.includes('"read_private_presentation_preferences", { preferSqlite }')) {
     errors.push("V2 Desktop 私人偏好与审计集合读取必须显式传递 preferSqlite，避免 Native IPC 参数漂移。");
   }
+  if (!rust.includes("database_backed_roots") || !desktopRepository.includes("databaseBackedRoots") || !desktopRepository.includes("databaseBackedRoots.has(normalizeRoot(root))")) {
+    errors.push("V2 Desktop 必须按数据根跳过已由 local.db / catalog.db 覆盖的 JSON 目录，同时保留旧 Shared Pack 回退。");
+  }
   for (const token of ["catalog.db", "validate_catalog_sqlite_at", "PRAGMA integrity_check", "pack_id", "pack_version"]) {
     if (!rust.includes(token)) errors.push(`V2 Shared catalog.db 安装校验缺少：${token}`);
   }

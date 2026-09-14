@@ -32,6 +32,8 @@ export interface DesktopFileEntry {
 
 export interface DesktopSqliteCollection<T = unknown> {
   available: boolean;
+  /** 已由数据库提供该集合的数据根；Repository 据此跳过同根 JSON 目录。 */
+  databaseBackedRoots?: string[];
   items: T[];
 }
 

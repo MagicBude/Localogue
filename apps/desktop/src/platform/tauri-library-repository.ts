@@ -298,14 +298,16 @@ export class TauriLibraryRepository implements LibraryRepository {
     collection: Exclude<DesktopLibraryCollection, "media-files">,
   ): Promise<T[]> {
     const merged = new Map<string, T>();
+    const databaseBackedRoots = new Set<string>();
     if (this.preferSqlite) {
       const sqlite = await desktopBridge.readSqliteLibraryCollection<T>(collection);
+      for (const root of sqlite.databaseBackedRoots ?? []) databaseBackedRoots.add(normalizeRoot(root));
       if (sqlite.available) for (const entity of sqlite.items) if (entity.id) merged.set(entity.id, entity);
     }
     for (const root of this.readRoots) {
-      // 对账通过后 Private 已由 local.db 提供；Shared JSON 继续作为尚未发布
-      // catalog.db 的兼容回退，并且只填补 SQLite 中不存在的稳定 ID。
-      if (this.preferSqlite && root === this.privateRoot) continue;
+      // Native 会精确返回已由 local.db / catalog.db 覆盖的数据根。数据库存在时不再
+      // 重复遍历同根的一实体一 JSON；没有 catalog.db 的旧 Shared Pack 仍走兼容 Adapter。
+      if (databaseBackedRoots.has(normalizeRoot(root))) continue;
       const values = await desktopBridge.readLibraryCollection<T>(root, collection);
       for (const entity of values) {
         if (entity.id && !merged.has(entity.id)) merged.set(entity.id, entity);
@@ -330,4 +332,8 @@ function missingPrivateRoot<T = void>(): Promise<T> {
 
 function compactWorkCode(value: string): string {
   return value.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function normalizeRoot(value: string): string {
+  return value.trim().replaceAll("\\", "/").replace(/\/+$/, "");
 }
