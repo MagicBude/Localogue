@@ -892,3 +892,4 @@
 - Series 新增可选 `parentOrganizationId`，补齐 Maker → Label → Series 归属链。
 - 新增 `validate:registry` 与 `registry:audit`，并把 Registry Validator 接入 `pnpm check`。
 - 不进行基于名称相似度的自动 Organization 合并。
+- Settings V2 将私人资料位置、内容目录和社区资料路径收敛到影片库 Profile，删除全局路径镜像；Native 只在读取旧设置时迁移一次，保存后不再生成旧字段。该配置升级按单用户开发阶段处理，旧 EXE 不保证读取新设置。

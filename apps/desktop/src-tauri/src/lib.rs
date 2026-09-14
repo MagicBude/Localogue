@@ -86,12 +86,6 @@ struct DesktopLibraryProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     library_path: Option<String>,
     #[serde(default)]
-    library_roots: Vec<String>,
-    #[serde(default)]
-    media_scan_paths: Vec<String>,
-    #[serde(default)]
-    nfo_scan_paths: Vec<String>,
-    #[serde(default)]
     content_folders: Vec<DesktopContentFolder>,
     #[serde(default)]
     shared_pack_paths: Vec<String>,
@@ -105,18 +99,6 @@ struct DesktopLibraryProfile {
 #[serde(rename_all = "camelCase")]
 struct DesktopBootstrapSettings {
     schema_version: u8,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    library_path: Option<String>,
-    #[serde(default)]
-    library_roots: Vec<String>,
-    #[serde(default)]
-    media_scan_paths: Vec<String>,
-    #[serde(default)]
-    nfo_scan_paths: Vec<String>,
-    #[serde(default)]
-    content_folders: Vec<DesktopContentFolder>,
-    #[serde(default)]
-    shared_pack_paths: Vec<String>,
     #[serde(default)]
     library_profiles: Vec<DesktopLibraryProfile>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -131,13 +113,7 @@ struct DesktopBootstrapSettings {
 impl Default for DesktopBootstrapSettings {
     fn default() -> Self {
         Self {
-            schema_version: 1,
-            library_path: None,
-            library_roots: Vec::new(),
-            media_scan_paths: Vec::new(),
-            nfo_scan_paths: Vec::new(),
-            content_folders: Vec::new(),
-            shared_pack_paths: Vec::new(),
+            schema_version: 2,
             library_profiles: Vec::new(),
             active_library_profile_id: None,
             ffprobe_path: None,
@@ -145,6 +121,39 @@ impl Default for DesktopBootstrapSettings {
             updated_at: None,
         }
     }
+}
+
+/// 旧设置仅用于读取迁移。它永远不会被序列化回磁盘。
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct LegacyDesktopSettings {
+    library_path: Option<String>,
+    #[serde(default)] library_roots: Vec<String>,
+    #[serde(default)] media_scan_paths: Vec<String>,
+    #[serde(default)] nfo_scan_paths: Vec<String>,
+    #[serde(default)] content_folders: Vec<DesktopContentFolder>,
+    #[serde(default)] shared_pack_paths: Vec<String>,
+    #[serde(default)] library_profiles: Vec<LegacyDesktopLibraryProfile>,
+    active_library_profile_id: Option<String>,
+    ffprobe_path: Option<String>,
+    #[serde(default)] web_url: String,
+    updated_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LegacyDesktopLibraryProfile {
+    id: String,
+    name: String,
+    description: Option<String>,
+    library_path: Option<String>,
+    #[serde(default)] library_roots: Vec<String>,
+    #[serde(default)] media_scan_paths: Vec<String>,
+    #[serde(default)] nfo_scan_paths: Vec<String>,
+    #[serde(default)] content_folders: Vec<DesktopContentFolder>,
+    #[serde(default)] shared_pack_paths: Vec<String>,
+    created_at: Option<String>,
+    updated_at: Option<String>,
 }
 
 
@@ -347,7 +356,7 @@ fn get_runtime_info(app: AppHandle) -> Result<DesktopRuntimeInfo, String> {
         version: package.version.to_string(),
         identifier: app.config().identifier.clone(),
         environment: if cfg!(debug_assertions) { "development" } else { "production" },
-        contract_revision: 14,
+        contract_revision: 15,
         app_config_dir: path_to_string(&config_dir),
         app_local_data_dir: path_to_string(&local_data_dir),
         settings_path: path_to_string(&config_dir.join(SETTINGS_FILE)),
@@ -359,7 +368,12 @@ fn load_desktop_settings(app: AppHandle) -> Result<DesktopBootstrapSettings, Str
     let path = desktop_settings_path(&app)?;
     match fs::read_to_string(&path) {
         Ok(raw) => {
-            let parsed: DesktopBootstrapSettings = serde_json::from_str(&raw).map_err(display_error)?;
+            let value: serde_json::Value = serde_json::from_str(&raw).map_err(display_error)?;
+            let parsed = if value.get("schemaVersion").and_then(|item| item.as_u64()) == Some(2) {
+                serde_json::from_value(value).map_err(display_error)?
+            } else {
+                migrate_legacy_settings(serde_json::from_value(value).map_err(display_error)?)?
+            };
             normalize_settings(parsed)
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(DesktopBootstrapSettings::default()),
@@ -685,7 +699,8 @@ fn portable_json_entity(root: &Path, relative: &str) -> Result<Option<(String, S
 async fn collect_shared_portable_files(app: AppHandle, pack_path: String) -> Result<Vec<DesktopPortableFile>, String> {
     spawn_native_io("collect_shared_portable_files", move || {
         let settings = load_desktop_settings(app.clone())?;
-        if !settings.shared_pack_paths.iter().any(|item| item == &pack_path) { return Err("只能导出当前 Desktop 已挂载的 Shared Pack。".into()); }
+        let configured = active_library_profile(&settings).map(|profile| profile.shared_pack_paths.as_slice()).unwrap_or_default();
+        if !configured.iter().any(|item| item == &pack_path) { return Err("只能导出当前 Desktop 已挂载的 Shared Pack。".into()); }
         let info = inspect_shared_pack(pack_path)?;
         if !info.valid { return Err(info.error.unwrap_or_else(|| "Shared Pack 无效。".into())); }
         let root = PathBuf::from(info.absolute_path);
@@ -953,11 +968,12 @@ fn redact_log_message(app: &AppHandle, message: &str) -> Result<String, String> 
     let mut output = message.to_string();
     if let Ok(home) = app.path().home_dir() { output = output.replace(&path_to_string(&home), "<HOME>"); }
     if let Ok(settings) = load_desktop_settings(app.clone()) {
-        let mut paths = vec![settings.library_path, settings.ffprobe_path].into_iter().flatten().collect::<Vec<_>>();
-        paths.extend(settings.library_roots);
-        paths.extend(settings.media_scan_paths);
-        paths.extend(settings.nfo_scan_paths);
-        paths.extend(settings.shared_pack_paths);
+        let mut paths = vec![settings.ffprobe_path.clone()].into_iter().flatten().collect::<Vec<_>>();
+        if let Some(profile) = active_library_profile(&settings) {
+            paths.extend(profile.library_path.clone());
+            paths.extend(profile.content_folders.iter().map(|folder| folder.path.clone()));
+            paths.extend(profile.shared_pack_paths.clone());
+        }
         for (index, path) in paths.iter().filter(|value| !value.trim().is_empty()).enumerate() {
             output = output.replace(path, &format!("<CONFIG_PATH_{}>", index + 1));
         }
@@ -1347,10 +1363,11 @@ fn read_resolved_asset_bytes_blocking(app: AppHandle, asset_id: String, storage_
     validate_text_path(&storage_path)?;
     let settings = load_desktop_settings(app)?;
     let mut roots = Vec::<PathBuf>::new();
-    if let Some(private) = settings.library_path {
+    let profile = active_library_profile(&settings);
+    if let Some(private) = profile.and_then(|item| item.library_path.clone()) {
         roots.push(normalize_lexical(Path::new(&private)));
     }
-    for configured in settings.shared_pack_paths {
+    for configured in profile.map(|item| item.shared_pack_paths.clone()).unwrap_or_default() {
         let info = inspect_shared_pack(configured)?;
         if info.valid {
             if let Some(library_path) = info.library_path {
@@ -1830,11 +1847,12 @@ fn read_sqlite_library_collection_blocking(app: AppHandle, collection: String) -
     }
     let settings = load_desktop_settings(app.clone())?;
     let mut sources: Vec<(PathBuf, bool, PathBuf)> = Vec::new();
-    if let Some(private) = settings.library_path {
+    let profile = active_library_profile(&settings);
+    if let Some(private) = profile.and_then(|item| item.library_path.clone()) {
         let root = PathBuf::from(private);
         sources.push((root.join("local.db"), true, root));
     }
-    for pack in settings.shared_pack_paths {
+    for pack in profile.map(|item| item.shared_pack_paths.clone()).unwrap_or_default() {
         let requested = PathBuf::from(pack);
         let root = if requested.is_absolute() {
             normalize_lexical(&requested)
@@ -2342,7 +2360,14 @@ fn emit_progress(app: &AppHandle, task_id: &str, stage: &'static str, message: &
 
 fn configured_private_library_path(app: &AppHandle) -> Result<String, String> {
     let settings = load_desktop_settings(app.clone())?;
-    settings.library_path.ok_or_else(|| "当前没有配置 Private Library；Shared Pack 永远只读。".to_string())
+    active_library_profile(&settings).and_then(|profile| profile.library_path.clone())
+        .ok_or_else(|| "当前没有配置 Private Library；Shared Pack 永远只读。".to_string())
+}
+
+fn active_library_profile(settings: &DesktopBootstrapSettings) -> Option<&DesktopLibraryProfile> {
+    settings.active_library_profile_id.as_deref()
+        .and_then(|id| settings.library_profiles.iter().find(|profile| profile.id == id))
+        .or_else(|| settings.library_profiles.first())
 }
 
 fn desktop_settings_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -2472,15 +2497,8 @@ fn copy_directory_tree(source: &Path, destination: &Path) -> Result<(), String> 
 }
 
 fn normalize_settings(mut value: DesktopBootstrapSettings) -> Result<DesktopBootstrapSettings, String> {
-    value.schema_version = 1;
-    value.library_path = clean_optional_path(value.library_path)?;
+    value.schema_version = 2;
     value.ffprobe_path = clean_optional_path(value.ffprobe_path)?;
-    value.library_roots = unique_clean_paths(value.library_roots)?;
-    value.media_scan_paths = unique_clean_paths(value.media_scan_paths)?;
-    value.nfo_scan_paths = unique_clean_paths(value.nfo_scan_paths)?;
-    value.content_folders = normalize_content_folders(value.content_folders, &value.library_roots, &value.media_scan_paths, &value.nfo_scan_paths)?;
-    (value.library_roots, value.media_scan_paths, value.nfo_scan_paths) = legacy_paths_from_content_folders(&value.content_folders);
-    value.shared_pack_paths = unique_clean_paths(value.shared_pack_paths)?;
     value.library_profiles = normalize_library_profiles(value.library_profiles)?;
     value.active_library_profile_id = clean_optional_text(value.active_library_profile_id, 160)?;
     let active_is_valid = value.active_library_profile_id.as_deref()
@@ -2508,17 +2526,56 @@ fn normalize_library_profiles(values: Vec<DesktopLibraryProfile>) -> Result<Vec<
         }
         profile.description = clean_optional_text(profile.description, 240)?;
         profile.library_path = clean_optional_path(profile.library_path)?;
-        profile.library_roots = unique_clean_paths(profile.library_roots)?;
-        profile.media_scan_paths = unique_clean_paths(profile.media_scan_paths)?;
-        profile.nfo_scan_paths = unique_clean_paths(profile.nfo_scan_paths)?;
-        profile.content_folders = normalize_content_folders(profile.content_folders, &profile.library_roots, &profile.media_scan_paths, &profile.nfo_scan_paths)?;
-        (profile.library_roots, profile.media_scan_paths, profile.nfo_scan_paths) = legacy_paths_from_content_folders(&profile.content_folders);
+        profile.content_folders = normalize_content_folders(profile.content_folders, &[], &[], &[])?;
         profile.shared_pack_paths = unique_clean_paths(profile.shared_pack_paths)?;
         profile.created_at = clean_optional_text(profile.created_at, 80)?;
         profile.updated_at = clean_optional_text(profile.updated_at, 80)?;
         output.push(profile);
     }
     Ok(output)
+}
+
+fn migrate_legacy_settings(value: LegacyDesktopSettings) -> Result<DesktopBootstrapSettings, String> {
+    let mut profiles = value.library_profiles.into_iter().map(|profile| {
+        let folders = normalize_content_folders(profile.content_folders, &profile.library_roots, &profile.media_scan_paths, &profile.nfo_scan_paths)?;
+        Ok(DesktopLibraryProfile {
+            id: profile.id,
+            name: profile.name,
+            description: profile.description,
+            library_path: profile.library_path,
+            content_folders: folders,
+            shared_pack_paths: profile.shared_pack_paths,
+            created_at: profile.created_at,
+            updated_at: profile.updated_at,
+        })
+    }).collect::<Result<Vec<_>, String>>()?;
+
+    if profiles.is_empty() {
+        let folders = normalize_content_folders(value.content_folders, &value.library_roots, &value.media_scan_paths, &value.nfo_scan_paths)?;
+        let has_profile_data = value.library_path.is_some() || !folders.is_empty() || !value.shared_pack_paths.is_empty();
+        if has_profile_data {
+            profiles.push(DesktopLibraryProfile {
+                id: "library_profile_legacy_default".into(),
+                name: "影片库 1".into(),
+                description: Some("由旧版 Desktop 设置迁移".into()),
+                library_path: value.library_path,
+                content_folders: folders,
+                shared_pack_paths: value.shared_pack_paths,
+                created_at: value.updated_at.clone(),
+                updated_at: value.updated_at.clone(),
+            });
+        }
+    }
+    let active_id = value.active_library_profile_id.filter(|id| profiles.iter().any(|profile| &profile.id == id))
+        .or_else(|| profiles.first().map(|profile| profile.id.clone()));
+    Ok(DesktopBootstrapSettings {
+        schema_version: 2,
+        library_profiles: profiles,
+        active_library_profile_id: active_id,
+        ffprobe_path: value.ffprobe_path,
+        web_url: value.web_url,
+        updated_at: value.updated_at,
+    })
 }
 
 fn normalize_content_folders(
@@ -2559,21 +2616,6 @@ fn clean_content_folder_path(value: String) -> Result<String, String> {
 fn content_paths_equal(left: &str, right: &str) -> bool {
     left.trim_end_matches(['/', '\\']).replace('\\', "/").to_lowercase()
         == right.trim_end_matches(['/', '\\']).replace('\\', "/").to_lowercase()
-}
-
-fn legacy_paths_from_content_folders(values: &[DesktopContentFolder]) -> (Vec<String>, Vec<String>, Vec<String>) {
-    let mut library = Vec::new();
-    let mut media = Vec::new();
-    let mut metadata = Vec::new();
-    for folder in values {
-        if folder.scan_video && folder.scan_nfo && folder.scan_images {
-            library.push(folder.path.clone());
-        } else {
-            if folder.scan_video { media.push(folder.path.clone()); }
-            if folder.scan_nfo || folder.scan_images { metadata.push(folder.path.clone()); }
-        }
-    }
-    (library, media, metadata)
 }
 
 fn clean_required_text(value: String, label: &str, max_chars: usize) -> Result<String, String> {
@@ -2827,6 +2869,32 @@ fn now_marker() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn legacy_settings_migrate_into_one_profile_and_v2_drops_legacy_fields() {
+        let legacy: LegacyDesktopSettings = serde_json::from_value(serde_json::json!({
+            "schemaVersion": 1,
+            "libraryPath": "C:/Localogue/private",
+            "libraryRoots": ["D:/Videos"],
+            "mediaScanPaths": ["D:/MoreVideos"],
+            "nfoScanPaths": ["D:/Metadata"],
+            "sharedPackPaths": ["D:/SharedPack"],
+            "webUrl": "http://127.0.0.1:3000"
+        })).expect("parse legacy settings");
+        let migrated = migrate_legacy_settings(legacy).expect("migrate settings");
+        assert_eq!(migrated.schema_version, 2);
+        assert_eq!(migrated.library_profiles.len(), 1);
+        let profile = &migrated.library_profiles[0];
+        assert_eq!(profile.library_path.as_deref(), Some("C:/Localogue/private"));
+        assert_eq!(profile.content_folders.len(), 3);
+        assert_eq!(profile.shared_pack_paths, vec!["D:/SharedPack"]);
+        let json = serde_json::to_value(normalize_settings(migrated).expect("normalize v2")).expect("serialize v2");
+        assert!(json.get("libraryPath").is_none());
+        assert!(json.get("libraryRoots").is_none());
+        assert!(json.get("mediaScanPaths").is_none());
+        assert!(json.get("nfoScanPaths").is_none());
+        assert!(json["libraryProfiles"][0].get("libraryRoots").is_none());
+    }
 
     #[test]
     fn sqlite_reader_maps_catalog_and_local_json_without_writing() {

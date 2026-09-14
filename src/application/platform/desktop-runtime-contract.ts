@@ -23,11 +23,7 @@ export interface DesktopLibraryProfile {
   name: string;
   description?: string;
   libraryPath?: string;
-  libraryRoots: string[];
-  mediaScanPaths: string[];
-  nfoScanPaths: string[];
-  /** V2 统一内容目录；旧三组路径只作为兼容镜像。 */
-  contentFolders?: DesktopContentFolder[];
+  contentFolders: DesktopContentFolder[];
   sharedPackPaths: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -53,18 +49,9 @@ export interface DesktopPrivateLibraryInfo {
 }
 
 export interface DesktopBootstrapSettings {
-  schemaVersion: 1;
-  libraryPath?: string;
-  /** Unified Library Roots：一次配置即可递归发现视频、NFO、本地海报/封面等资料。 */
-  libraryRoots: string[];
-  /** 兼容/高级媒体专用路径；与 libraryRoots 合并扫描。 */
-  mediaScanPaths: string[];
-  nfoScanPaths: string[];
-  /** 影片、NFO、图片共用的唯一业务目录模型。 */
-  contentFolders?: DesktopContentFolder[];
-  sharedPackPaths: string[];
-  /** Desktop 本机资料库配置预设；切换时整组替换路径字段，不复制 Canonical 数据。 */
-  libraryProfiles?: DesktopLibraryProfile[];
+  schemaVersion: 2;
+  /** 影片库是全部路径配置的唯一来源；Settings 顶层只保存全局状态。 */
+  libraryProfiles: DesktopLibraryProfile[];
   activeLibraryProfileId?: string;
   ffprobePath?: string;
   webUrl: string;

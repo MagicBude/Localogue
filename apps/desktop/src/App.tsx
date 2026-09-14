@@ -30,14 +30,14 @@ import type { DesktopWorkExplorerState } from "./desktop-work-explorer";
 import {
   activeLibraryProfile,
   addLibraryProfile,
-  applyLibraryProfile,
-  ensureLibraryProfiles,
   isDevFixtureLibraryPath,
-  syncActiveLibraryProfile,
+  normalizeDesktopSettings,
+  selectLibraryProfile,
+  updateLibraryProfile,
 } from "./library-profiles";
 
 // Native Profile 命令的最小契约版本；低版本 Runtime 只能读取旧设置，不能安全保存多资料库配置。
-const PROFILE_NATIVE_CONTRACT_REVISION = 2;
+const PROFILE_NATIVE_CONTRACT_REVISION = 15;
 // 一次选择初始化依赖 Native 创建受控 Private Library，因此必须等待 revision 7。
 const QUICK_SETUP_NATIVE_CONTRACT_REVISION = 7;
 
@@ -59,11 +59,8 @@ const DesktopSettingsPage = lazy(() => import("./desktop-settings-page").then((m
 const DesktopAboutPage = lazy(() => import("./desktop-about-page").then((module) => ({ default: module.DesktopAboutPage })));
 
 const DEFAULT_SETTINGS: DesktopBootstrapSettings = {
-  schemaVersion: 1,
-  libraryRoots: [],
-  mediaScanPaths: [],
-  nfoScanPaths: [],
-  sharedPackPaths: [],
+  schemaVersion: 2,
+  libraryProfiles: [],
   webUrl: "http://127.0.0.1:3000",
 };
 
@@ -123,8 +120,9 @@ export default function App() {
   }, [message, messageState.revision, messageTone]);
 
   const refreshSources = useCallback(async (next: DesktopBootstrapSettings) => {
+    const profile = activeLibraryProfile(next);
     const inspected = await Promise.all(
-      next.sharedPackPaths.map(async (path) => {
+      (profile?.sharedPackPaths ?? []).map(async (path) => {
         try {
           return await desktopBridge.inspectSharedPack(path);
         } catch (error) {
@@ -133,7 +131,7 @@ export default function App() {
       }),
     );
     setPackInfos(inspected);
-    if (next.libraryPath) {
+    if (profile?.libraryPath) {
       try {
         const report = await desktopBridge.provisionLocalSqlite();
         setSqliteReady(report.available && report.missingInSqlite.length === 0 && report.missingInJson.length === 0 && report.contentMismatches.length === 0);
@@ -154,7 +152,7 @@ export default function App() {
     void Promise.all([desktopBridge.runtimeInfo(), desktopBridge.loadSettings()])
       .then(async ([runtimeInfo, saved]) => {
         if (disposed) return;
-        let prepared = ensureLibraryProfiles(saved);
+        let prepared = normalizeDesktopSettings(saved);
 
         // V1-24C：旧版本创建的“示例库”可能只有 Private Fixture，没有配套 Starter Shared Pack。
         // 只对内置示例 Profile 做一次向前修复；普通用户资料库绝不自动挂载任何 Shared Pack。
@@ -177,10 +175,7 @@ export default function App() {
                   profile.id === exampleProfile.id ? updatedProfile : profile,
                 ),
               };
-              if (prepared.activeLibraryProfileId === exampleProfile.id) {
-                repaired = applyLibraryProfile(repaired, updatedProfile);
-              }
-              prepared = ensureLibraryProfiles(await desktopBridge.saveSettings(repaired));
+              prepared = normalizeDesktopSettings(await desktopBridge.saveSettings(repaired));
             }
           } catch {
             // 示例 Shared Pack 修复失败不阻断 Desktop 启动；设置页“添加示例库”仍可显式重试。
@@ -210,22 +205,21 @@ export default function App() {
     };
   }, [refreshSources, t]);
 
+  const savedActiveProfile = activeLibraryProfile(savedSettings);
   const readRoots = useMemo(
     () => [
-      ...(savedSettings.libraryPath ? [savedSettings.libraryPath] : []),
+      ...(savedActiveProfile?.libraryPath ? [savedActiveProfile.libraryPath] : []),
       ...packInfos.flatMap((pack) =>
         pack.valid && pack.libraryPath ? [pack.libraryPath] : [],
       ),
     ],
-    [savedSettings.libraryPath, packInfos, libraryEpoch],
+    [savedActiveProfile?.libraryPath, packInfos, libraryEpoch],
   );
 
   const repository = useMemo(
-    () => new TauriLibraryRepository(readRoots, savedSettings.libraryPath ?? null, sqliteReady),
-    [readRoots, savedSettings.libraryPath, sqliteReady, libraryEpoch],
+    () => new TauriLibraryRepository(readRoots, savedActiveProfile?.libraryPath ?? null, sqliteReady),
+    [readRoots, savedActiveProfile?.libraryPath, sqliteReady, libraryEpoch],
   );
-
-  const savedActiveProfile = activeLibraryProfile(savedSettings);
 
   const navigate = useCallback((next: DesktopPage) => {
     navigationHistory.current = [];
@@ -286,16 +280,8 @@ export default function App() {
     setMediaSyncRequest((value) => value + 1);
   }, []);
 
-  async function persistDesktopSettings(
-    next: DesktopBootstrapSettings,
-    options: { syncActiveProfile?: boolean } = {},
-  ): Promise<DesktopBootstrapSettings> {
-    // 普通设置保存要把当前路径草稿写回 active Profile；Profile 自身的增删改切换
-    // 已经显式构造了完整状态，不能再做一次 active snapshot。
-    const prepared = ensureLibraryProfiles(
-      options.syncActiveProfile === false ? next : syncActiveLibraryProfile(next),
-    );
-    const saved = ensureLibraryProfiles(await desktopBridge.saveSettings(prepared));
+  async function persistDesktopSettings(next: DesktopBootstrapSettings): Promise<DesktopBootstrapSettings> {
+    const saved = normalizeDesktopSettings(await desktopBridge.saveSettings(normalizeDesktopSettings(next)));
     setSettings(saved);
     setSavedSettings(saved);
     await refreshSources(saved);
@@ -325,7 +311,7 @@ export default function App() {
     }
     setBusy(true);
     try {
-      const saved = await persistDesktopSettings(next, { syncActiveProfile: false });
+      const saved = await persistDesktopSettings(next);
       setDetail(null);
       setMessage(successMessage);
       return saved;
@@ -370,12 +356,9 @@ export default function App() {
 
   async function switchLibraryProfile(profileId: string): Promise<void> {
     try {
-      // 切换前先把当前界面值同步回旧 Profile；applyLibraryProfile 再替换路径字段，
-      // ffprobe / Web URL 等全局普通设置因此不会被旧 savedSettings 覆盖。
-      const prepared = syncActiveLibraryProfile(settings);
-      const profile = (prepared.libraryProfiles ?? []).find((item) => item.id === profileId);
-      if (!profile || profile.id === prepared.activeLibraryProfileId) return;
-      const next = applyLibraryProfile(prepared, profile);
+      const profile = settings.libraryProfiles.find((item) => item.id === profileId);
+      if (!profile || profile.id === settings.activeLibraryProfileId) return;
+      const next = selectLibraryProfile(settings, profileId);
       await persistProfileMutation(next, t("已切换影片库：{name}", { name: profile.name }));
     } catch {
       // persistProfileMutation 已给出错误信息。
@@ -383,9 +366,11 @@ export default function App() {
   }
 
   async function installSharedPackPath(path: string): Promise<void> {
-    const current = ensureLibraryProfiles(await desktopBridge.loadSettings());
-    const next = syncActiveLibraryProfile({ ...current, sharedPackPaths: unique([...current.sharedPackPaths, path]) });
-    const saved = ensureLibraryProfiles(await desktopBridge.saveSettings(next));
+    const current = normalizeDesktopSettings(await desktopBridge.loadSettings());
+    const profile = activeLibraryProfile(current);
+    if (!profile) throw new Error(t("请先创建影片库并确认数据存储位置。"));
+    const next = updateLibraryProfile(current, profile.id, { sharedPackPaths: unique([...profile.sharedPackPaths, path]) });
+    const saved = normalizeDesktopSettings(await desktopBridge.saveSettings(next));
     setSettings(saved);
     setSavedSettings(saved);
     await refreshSources(saved);
@@ -408,16 +393,13 @@ export default function App() {
         name: t("我的影片库"),
         description: t("由首次设置自动创建"),
         libraryPath: managed.libraryPath,
-        libraryRoots: [contentRoot],
-        mediaScanPaths: [],
-        nfoScanPaths: [],
         contentFolders: [{ path: contentRoot, scanVideo: true, scanNfo: true, scanImages: true }],
         sharedPackPaths: [],
         createdAt: now,
         updatedAt: now,
       };
-      const next = addLibraryProfile(ensureLibraryProfiles(savedSettings), profile);
-      await persistDesktopSettings(next, { syncActiveProfile: false });
+      const next = addLibraryProfile(normalizeDesktopSettings(savedSettings), profile);
+      await persistDesktopSettings(next);
       // 首次使用是一条连续任务：用户选完内容目录后直接进入既有 Unified Sync。
       // 同步仍由 DesktopMediaPage 编排，App 只发出一次意图，避免在首次设置里复制扫描规则。
       navigationHistory.current = [];
@@ -478,7 +460,7 @@ export default function App() {
         ) : page === "works" ? (
           detail?.kind === "work" ? (
           <DesktopWorkDetailPage
-              key={`${savedSettings.libraryPath ?? "shared"}:work:${detail.id}`}
+              key={`${savedActiveProfile?.libraryPath ?? "shared"}:work:${detail.id}`}
               repository={repository}
               id={detail.id}
               onBack={returnToPreviousLocation}
@@ -498,7 +480,7 @@ export default function App() {
         ) : page === "people" ? (
           detail?.kind === "person" ? (
             <DesktopPersonDetailPage
-              key={`${savedSettings.libraryPath ?? "shared"}:person:${detail.id}`}
+              key={`${savedActiveProfile?.libraryPath ?? "shared"}:person:${detail.id}`}
               repository={repository}
               id={detail.id}
               onBack={returnToPreviousLocation}
@@ -513,11 +495,11 @@ export default function App() {
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} />
         ) : page === "review" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "curation" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "history" ? (
-          <DesktopGovernance repository={repository} privateRoot={savedSettings.libraryPath ?? null} preferSqlite={sqliteReady} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+          <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "media" ? (
           <DesktopMediaPage
             repository={repository}
@@ -537,7 +519,7 @@ export default function App() {
           <DesktopPacksPage
             settings={settings}
             setSettings={setSettings}
-            privateLibraryPath={savedSettings.libraryPath}
+            privateLibraryPath={savedActiveProfile?.libraryPath}
             profileName={savedActiveProfile?.name}
             runtimeContractRevision={runtime?.contractRevision ?? 0}
             packInfos={packInfos}
@@ -569,7 +551,6 @@ export default function App() {
     </div>
   );
 }
-
 function EmptyLibrary({ busy, quickSetupReady, onQuickSetup, onConfigure }: { busy: boolean; quickSetupReady: boolean; onQuickSetup: () => void; onConfigure: () => void }) {
   const { t } = useDesktopI18n();
   return (
@@ -613,3 +594,4 @@ function toMessage(error: unknown): string {
   if (error === undefined || error === null) return "未知错误";
   return error instanceof Error ? error.message : String(error);
 }
+

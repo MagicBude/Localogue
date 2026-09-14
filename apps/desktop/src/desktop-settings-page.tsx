@@ -1,20 +1,20 @@
 import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
 import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
-import { normalizeContentFolders, withContentFolderCompatibility } from "./content-folders";
+import { normalizeContentFolders } from "./content-folders";
 import { useDesktopI18n } from "./desktop-i18n";
 import { InfoCard, PageTitle } from "./desktop-page-primitives";
 import {
   activeLibraryProfile,
   addLibraryProfile,
-  applyLibraryProfile,
-  createLibraryProfile,
+  createEmptyLibraryProfile,
   createLibraryProfileId,
   isDevFixtureLibraryPath,
   nextLibraryProfileName,
   removeLibraryProfile,
   renameLibraryProfile,
-  syncActiveLibraryProfile,
+  selectLibraryProfile,
+  updateLibraryProfile,
 } from "./library-profiles";
 import { TauriFileDialogAdapter } from "./platform/tauri-platform-adapters";
 import { desktopBridge } from "./tauri-bridge";
@@ -26,7 +26,7 @@ import { UiSelectField, UiTextField } from "./ui/form-control";
 
 // revision 14 同时保证 Profile 隔离、受控删除、ffprobe 引导和 SQLite 私人读取命令齐全；旧 EXE
 // 若加载了较新的前端资源，应先提示重启，避免按钮调用不存在的 Native Command。
-const PROFILE_NATIVE_CONTRACT_REVISION = 14;
+const PROFILE_NATIVE_CONTRACT_REVISION = 15;
 const fileDialog = new TauriFileDialogAdapter();
 
 /**
@@ -57,7 +57,7 @@ export function DesktopSettingsPage({
   setMessage: (message: string) => void;
 }) {
   const { t } = useDesktopI18n();
-  const profiles = settings.libraryProfiles ?? [];
+  const profiles = settings.libraryProfiles;
   const [ffprobeCheck, setFfprobeCheck] = useState<string>();
   const [renameOpen, setRenameOpen] = useState(false);
   const [renameDraft, setRenameDraft] = useState("");
@@ -70,23 +70,19 @@ export function DesktopSettingsPage({
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   async function chooseLibrary(): Promise<void> {
-    const path = await fileDialog.pickDirectory(settings.libraryPath);
-    if (path) await saveOrdinarySettings({ ...settings, libraryPath: path }, t("私人资料存储位置已自动保存。"));
+    if (!selectedProfile) return;
+    const path = await fileDialog.pickDirectory(selectedProfile.libraryPath);
+    if (path) await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: path }), t("私人资料存储位置已自动保存。"));
   }
 
   async function createProfile(): Promise<void> {
     try {
-      const prepared = syncActiveLibraryProfile(settings);
-      const name = nextLibraryProfileName(prepared, t("影片库"));
+      const name = nextLibraryProfileName(settings, t("影片库"));
       const profileId = createLibraryProfileId();
       const managed = await desktopBridge.provisionPrivateLibrary(profileId);
-      const profile = createLibraryProfile(
-        { ...prepared, libraryPath: managed.libraryPath, libraryRoots: [], mediaScanPaths: [], nfoScanPaths: [], sharedPackPaths: [] },
-        profileId,
-        name,
-      );
+      const profile = { ...createEmptyLibraryProfile(profileId, name), libraryPath: managed.libraryPath };
       await onPersistProfiles(
-        addLibraryProfile(prepared, profile),
+        addLibraryProfile(settings, profile),
         t("已新建影片库：{name}。数据存储位置已自动准备好，只需添加内容目录。", { name }),
       );
     } catch {
@@ -97,23 +93,12 @@ export function DesktopSettingsPage({
   async function addDevFixtureProfile(): Promise<void> {
     try {
       const provisioned = await desktopBridge.provisionExampleLibrary();
-      const prepared = syncActiveLibraryProfile(settings);
-      const existing = (prepared.libraryProfiles ?? []).find((profile) => isDevFixtureLibraryPath(profile.libraryPath));
-      const fixtureSettings: DesktopBootstrapSettings = {
-        ...prepared,
-        libraryPath: provisioned.libraryPath,
-        libraryRoots: [],
-        mediaScanPaths: [],
-        nfoScanPaths: [],
-        sharedPackPaths: provisioned.sharedPackPath ? [provisioned.sharedPackPath] : [],
-      };
-      const profile = createLibraryProfile(
-        fixtureSettings,
-        existing?.id ?? "library_profile_dev_fixture",
-        t("示例库"),
-      );
-      const next = addLibraryProfile(fixtureSettings, {
+      const existing = settings.libraryProfiles.find((profile) => isDevFixtureLibraryPath(profile.libraryPath));
+      const profile = createEmptyLibraryProfile(existing?.id ?? "library_profile_dev_fixture", t("示例库"));
+      const next = addLibraryProfile(settings, {
         ...profile,
+        libraryPath: provisioned.libraryPath,
+        sharedPackPaths: provisioned.sharedPackPath ? [provisioned.sharedPackPath] : [],
         description: t("Localogue 内置开发 / 功能展示 Fixture"),
         createdAt: existing?.createdAt ?? profile.createdAt,
       });
@@ -133,12 +118,11 @@ export function DesktopSettingsPage({
   }
 
   async function selectProfile(profileId: string): Promise<void> {
-    const prepared = syncActiveLibraryProfile(settings);
-    const profile = (prepared.libraryProfiles ?? []).find((item) => item.id === profileId);
-    if (!profile || profile.id === prepared.activeLibraryProfileId) return;
+    const profile = settings.libraryProfiles.find((item) => item.id === profileId);
+    if (!profile || profile.id === settings.activeLibraryProfileId) return;
 
     try {
-      await onPersistProfiles(applyLibraryProfile(prepared, profile), t("已切换影片库：{name}", { name: profile.name }));
+      await onPersistProfiles(selectLibraryProfile(settings, profileId), t("已切换影片库：{name}", { name: profile.name }));
     } catch {
       // 父级已经显示保存错误。
     }
@@ -199,33 +183,37 @@ export function DesktopSettingsPage({
   }
 
   async function addSharedPack(): Promise<void> {
-    const path = await fileDialog.pickDirectory(settings.sharedPackPaths.at(-1));
+    if (!selectedProfile) return;
+    const path = await fileDialog.pickDirectory(selectedProfile.sharedPackPaths.at(-1));
     if (!path) return;
-    await persistPaths({ ...settings, sharedPackPaths: unique([...settings.sharedPackPaths, path]) }, t("共享资料目录已添加并保存。"));
+    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { sharedPackPaths: unique([...selectedProfile.sharedPackPaths, path]) }), t("共享资料目录已添加并保存。"));
   }
 
   async function addLibraryRoot(): Promise<void> {
-    const folders = normalizeContentFolders(settings);
+    if (!selectedProfile) return;
+    const folders = normalizeContentFolders(selectedProfile);
     const path = await fileDialog.pickDirectory(folders.at(-1)?.path);
     if (!path) return;
     if (folders.some((folder) => samePath(folder.path, path))) return;
-    await persistPaths(withContentFolderCompatibility(settings, [...folders, { path, scanVideo: true, scanNfo: true, scanImages: true }]), t("内容目录已添加并保存，可以直接开始扫描。"));
+    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { contentFolders: [...folders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }), t("内容目录已添加并保存，可以直接开始扫描。"));
   }
 
   async function updateContentFolders(folders: DesktopContentFolder[]): Promise<void> {
-    await persistPaths(withContentFolderCompatibility(settings, folders), t("内容目录设置已保存。"));
+    if (!selectedProfile) return;
+    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { contentFolders: folders }), t("内容目录设置已保存。"));
   }
 
   async function persistPaths(next: DesktopBootstrapSettings, message: string): Promise<void> {
     try {
-      await onPersistProfiles(syncActiveLibraryProfile(next), message);
+      await onPersistProfiles(next, message);
     } catch {
       // 父级统一显示持久化错误，避免页面再弹出第二份错误。
     }
   }
 
-  async function removePath(key: "sharedPackPaths", path: string): Promise<void> {
-    await persistPaths({ ...settings, [key]: settings[key].filter((item) => item !== path) }, t("目录已移除并保存。"));
+  async function removeSharedPack(path: string): Promise<void> {
+    if (!selectedProfile) return;
+    await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { sharedPackPaths: selectedProfile.sharedPackPaths.filter((item) => item !== path) }), t("目录已移除并保存。"));
   }
 
   async function openWeb(): Promise<void> {
@@ -357,21 +345,21 @@ export function DesktopSettingsPage({
         <summary><span><span className="eyebrow">PRIVATE STORAGE</span><strong>{t("数据存储位置")}</strong></span><small>{t("通常无需修改")}</small></summary>
         <div className="advanced-settings-stack">
           <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
-          <code className="path-block">{settings.libraryPath || t("尚未选择")}</code>
-          <div className="button-row"><UiButton onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{settings.libraryPath ? <UiButton variant="danger" onClick={() => void saveOrdinarySettings({ ...settings, libraryPath: undefined }, t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
+          <code className="path-block">{selectedProfile?.libraryPath || t("尚未选择")}</code>
+          <div className="button-row"><UiButton disabled={!selectedProfile} onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{selectedProfile?.libraryPath ? <UiButton variant="danger" onClick={() => void persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: undefined }), t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
         </div>
       </details>
 
       <section className="settings-card featured-card settings-module-library">
         <div className="section-heading"><div><span className="eyebrow">CONTENT FOLDERS</span><h2>{t("内容目录")}</h2></div><UiButton variant="primary" onClick={() => void addLibraryRoot()}>{t("+ 添加内容目录")}</UiButton></div>
         <p className="muted">{t("优先只配置这里。一个根目录下可以同时有影片、NFO、poster / fanart / thumb，也可以按 VR / 影视 / 字幕等任意方式分子目录。")}</p>
-        <ContentFolderList values={normalizeContentFolders(settings)} onChange={(folders) => void updateContentFolders(folders)} />
+        <ContentFolderList values={selectedProfile ? normalizeContentFolders(selectedProfile) : []} onChange={(folders) => void updateContentFolders(folders)} />
       </section>
 
       <section className="settings-card settings-module-sources">
         <div className="section-heading"><div><span className="eyebrow">COMMUNITY DATA</span><h2>{t("社区资料")}</h2></div><div className="button-row"><UiButton onClick={() => void addSharedPack()}>{t("+ 添加社区资料")}</UiButton><UiButton variant="primary" onClick={onOpenPacks}>{t("社区资料与个人备份")}</UiButton></div></div>
         <p className="muted">{t("社区资料提供只读的作品、人物、厂商、系列、分类和多语言名称，不包含你的原始视频、收藏、评分或私人修改。")}</p>
-        <PathList values={settings.sharedPackPaths} onRemove={(path) => void removePath("sharedPackPaths", path)} />
+        <PathList values={selectedProfile?.sharedPackPaths ?? []} onRemove={(path) => void removeSharedPack(path)} />
         {packInfos.length ? <p className="muted">{t("当前已保存配置中：{valid} 个有效，{invalid} 个需要检查。", { valid: packInfos.filter((item) => item.valid).length, invalid: packInfos.filter((item) => !item.valid).length })}</p> : null}
       </section>
 
@@ -388,7 +376,7 @@ export function DesktopSettingsPage({
       <section className="settings-card settings-module-tools">
         <div className="section-heading">
           <div><span className="eyebrow">STORAGE MIGRATION</span><h2>{t("JSON / SQLite 对账")}</h2></div>
-          <UiButton disabled={!settings.libraryPath || checkingStorage || !profileNativeRuntimeReady} loading={checkingStorage} onClick={() => void inspectStorageSync()}>{t("检查同步状态")}</UiButton>
+          <UiButton disabled={!selectedProfile?.libraryPath || checkingStorage || !profileNativeRuntimeReady} loading={checkingStorage} onClick={() => void inspectStorageSync()}>{t("检查同步状态")}</UiButton>
         </div>
         <p className="muted">{t("迁移期间 JSON 保留为交换、审核和回滚格式；local.db 是同步的运行时投影。只有差异为零才可切换数据库读取。")}</p>
         {storageReport ? !storageReport.available ? (

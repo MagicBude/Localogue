@@ -329,7 +329,7 @@ if (!errors.length) {
   if (!rust.includes("example-shared-pack") || !rust.includes("provision_resource_snapshot") || !desktopApp.includes("sharedPackPaths.length === 0")) {
     errors.push("V1-24C 内置示例库必须自动修复 Starter Shared Pack，并使用 App Local Data 稳定副本。");
   }
-  if (!rust.includes("contract_revision: 14") || !rust.includes("preview_private_portable_files")) {
+  if (!rust.includes("contract_revision: 15") || !rust.includes("preview_private_portable_files")) {
     errors.push("V2 Native Runtime 必须保持最新 Contract revision，并开放 Portable Import Plan 与 SQLite 迁移命令。");
   }
   for (const token of ["expected_library_path", "same_library_path", "target_library_path", "当前资料库已在预览后发生切换"]) {
@@ -350,7 +350,7 @@ if (!errors.length) {
   if (!rust.includes('target.starts_with(&asset_root)') || !rust.includes('canonical_target.starts_with(&canonical_root)') || !rust.includes('Component::ParentDir')) {
     errors.push("V1-18 Private Asset Reader 必须限制在当前 Private Library/asset-files 并拒绝路径穿越。");
   }
-  for (const token of ["find_asset_record_at_root", "read_asset_bytes_from_root", "settings.shared_pack_paths", "storagePath 与当前最高优先级来源不一致"]) {
+  for (const token of ["find_asset_record_at_root", "read_asset_bytes_from_root", "profile.shared_pack_paths", "storagePath 与当前最高优先级来源不一致"]) {
     if (!rust.includes(token)) errors.push(`V1-24B Shared Asset Reader 缺少来源绑定或路径保护：${token}`);
   }
   if (!desktopMediaPage.includes("syncUnifiedLibrary") || !desktopMediaPage.includes("扫描资料库")) {
@@ -383,11 +383,8 @@ if (!errors.length) {
   if (!rust.includes("read_nfo_text") || !rust.includes('extension != "nfo"') || !rust.includes("MAX_NFO_BYTES")) {
     errors.push("V1-18 NFO Reader 必须限制为 .nfo 普通文件，并保留单文件大小上限。");
   }
-  if (!rust.includes("library_roots") || !desktopApp.includes("libraryRoots")) {
-    errors.push("V1-18 Desktop Settings 必须提供 Unified Library Roots。");
-  }
-  if (!rust.includes("nfo_scan_paths") || !desktopApp.includes("nfoScanPaths")) {
-    errors.push("V1-18 必须保留独立 NFO 根作为高级兼容路径。");
+  if (!rust.includes("content_folders") || !desktopApp.includes("contentFolders")) {
+    errors.push("Settings V2 必须以 Profile contentFolders 统一表达内容目录与扫描范围。");
   }
   if (!rust.includes("inspect_shared_pack") || !rust.includes('localogue-pack.json') || !rust.includes('kind=shared-library')) {
     errors.push("V1-18 Desktop 必须继续在 Rust 边界验证 Shared Pack manifest 与 library/ 目录。");
@@ -620,7 +617,7 @@ if (!errors.length) {
       errors.push(`V1-24 Library Profile TypeScript / Rust 契约缺少：${token}`);
     }
   }
-  for (const token of ["createLibraryProfile", "createEmptyLibraryProfile", "nextLibraryProfileName", "ensureLibraryProfiles", "applyLibraryProfile", "syncActiveLibraryProfile", "hasUnsavedLibraryPaths"]) {
+  for (const token of ["createEmptyLibraryProfile", "nextLibraryProfileName", "normalizeDesktopSettings", "selectLibraryProfile", "updateLibraryProfile", "hasUnsavedLibraryPaths"]) {
     if (!libraryProfiles.includes(token)) errors.push(`V1-24 Library Profile helper 缺少：${token}`);
   }
   if (!desktopApp.includes("switchLibraryProfile") || !desktopAppShell.includes("source-profile-select") || !desktopAppShell.includes("source-profile-manage")) {
@@ -629,7 +626,7 @@ if (!errors.length) {
   if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建影片库")')) {
     errors.push("V1-24 新建影片库必须使用“影片库 N”中性默认命名，并提供明确的新建入口。");
   }
-  if (!libraryProfiles.includes('"示例库"') || !desktopSettingsPage.includes('t("+ 添加示例库")')) {
+  if (!desktopSettingsPage.includes('t("示例库")') || !desktopSettingsPage.includes('t("+ 添加示例库")')) {
     errors.push("V1-24 开发 Fixture 必须以短名称“示例库”接入 Library Profile。");
   }
   if (!desktopApp.includes("provisionExampleLibrary") || !rust.includes("provision_example_library") || !permission.includes('"provision_example_library"')) {
@@ -641,13 +638,13 @@ if (!errors.length) {
   if (!rust.includes("#[cfg(debug_assertions)]") || !rust.includes('base.join("pnpm-workspace.yaml")') || !rust.includes('base.join("apps/desktop/src-tauri/Cargo.toml")')) {
     errors.push("V1-24B tauri dev 必须优先解析当前仓库 examples，避免旧 Resource 缓存遮蔽新 Gallery / JSON。");
   }
-  if (!desktopApp.includes('persistDesktopSettings(next, { syncActiveProfile: false })')) {
-    errors.push("V1-24 Profile metadata mutation 必须绕过 active path snapshot，避免重命名等操作被旧 Profile 快照覆盖。");
+  if (desktopApp.includes("syncActiveLibraryProfile") || desktopApp.includes("applyLibraryProfile")) {
+    errors.push("Settings V2 不得再把 Profile 路径镜像到全局设置。");
   }
-  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 14")) {
+  if (!desktopRuntimeContract.includes("contractRevision?: number") || !rust.includes("contract_revision: u16") || !rust.includes("contract_revision: 15")) {
     errors.push("V1-24 Desktop 必须暴露 Native contractRevision，用于识别 Webview 已热更新但 Rust Runtime 仍旧的状态。");
   }
-  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 2") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 14") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
+  if (!desktopApp.includes("PROFILE_NATIVE_CONTRACT_REVISION = 15") || !desktopSettingsPage.includes("PROFILE_NATIVE_CONTRACT_REVISION = 15") || !desktopApp.includes("Native Runtime 与当前界面版本不一致")) {
     errors.push("V1-24 Profile UI 必须在 Native Runtime 版本落后时阻止误保存并给出明确诊断。");
   }
   for (const token of ["provision_local_sqlite", "read_sqlite_library_collection", "inspect_local_sqlite_sync"]) {

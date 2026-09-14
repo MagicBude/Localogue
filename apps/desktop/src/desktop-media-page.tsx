@@ -6,8 +6,9 @@ import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 import type { MediaFile } from "@/domain/entities/media-file";
 
-import type { DesktopBootstrapSettings, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopLibraryProfile, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
 import { contentFolderRoots, normalizeContentFolders } from "./content-folders";
+import { activeLibraryProfile } from "./library-profiles";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
 import { DesktopReviewPage } from "./desktop-review-page";
@@ -113,16 +114,17 @@ export function DesktopMediaPage({
   const handledAutoSyncRequest = useRef(0);
   const recordedScanIds = useRef(new Set<string>());
   const mediaLibraryRef = useRef<HTMLDivElement | null>(null);
+  const profile = activeLibraryProfile(settings);
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
   }, []);
 
-  const mediaRoots = effectiveMediaRoots(settings);
-  const nfoRoots = effectiveNfoRoots(settings);
-  const assetRoots = effectiveAssetRoots(settings);
+  const mediaRoots = effectiveMediaRoots(profile);
+  const nfoRoots = effectiveNfoRoots(profile);
+  const assetRoots = effectiveAssetRoots(profile);
   // 组合路径只计算一次，避免 JSX 为“是否为空”和“实际展示”重复做去重工作。
-  const unifiedRoots = normalizeContentFolders(settings).map((folder) => folder.path);
+  const unifiedRoots = profile ? normalizeContentFolders(profile).map((folder) => folder.path) : [];
   const metadataRoots = unique([...nfoRoots, ...assetRoots]);
 
   // 使用 stale-while-refresh Hook：资料变化时保留旧列表，避免整个工作台闪烁并丢失滚动位置。
@@ -164,7 +166,7 @@ export function DesktopMediaPage({
   }
 
   async function startScan(options: { waitForCompletion?: boolean; roots?: string[]; nfoIdentityHints?: Array<{ path: string; code: string }> } = {}): Promise<MediaScanJobSnapshot | null> {
-    if (!settings.libraryPath) {
+    if (!profile?.libraryPath) {
       setMessage(t("请先创建影片库并确认数据存储位置；社区资料不能保存本地视频记录。"));
       return null;
     }
@@ -250,7 +252,7 @@ export function DesktopMediaPage({
   }
 
   async function scanMetadataSource(): Promise<void> {
-    if (!settings.libraryPath) {
+    if (!profile?.libraryPath) {
       setMessage(t("请先创建影片库并确认数据存储位置；NFO 和本地图片会写入当前影片库。"));
       return;
     }
@@ -324,7 +326,7 @@ export function DesktopMediaPage({
     const syncNfoRoots = onlyRoots ?? nfoRoots;
     const syncAssetRoots = onlyRoots ?? assetRoots;
     const syncMediaRoots = onlyRoots ?? mediaRoots;
-    if (!settings.libraryPath) {
+    if (!profile?.libraryPath) {
       setMessage(t("请先创建影片库并确认数据存储位置；扫描需要保存作品、图片和视频记录。"));
       return;
     }
@@ -529,7 +531,7 @@ export function DesktopMediaPage({
       </div>
 
       <DesktopAssetStorageGovernance
-        hasPrivateLibrary={Boolean(settings.libraryPath)}
+        hasPrivateLibrary={Boolean(profile?.libraryPath)}
         runtimeContractRevision={runtimeContractRevision}
         setMessage={setMessage}
       />
@@ -542,7 +544,6 @@ export function DesktopMediaPage({
     </div>
   );
 }
-
 function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string; code: string }> {
   return preview.items.flatMap((item) => item.code ? [{ path: item.path, code: item.code }] : []);
 }
@@ -605,16 +606,16 @@ function samePath(left: string, right: string): boolean {
   return normalize(left) === normalize(right);
 }
 
-function effectiveMediaRoots(settings: DesktopBootstrapSettings): string[] {
-  return contentFolderRoots(settings, "video");
+function effectiveMediaRoots(profile: DesktopLibraryProfile | null): string[] {
+  return profile ? contentFolderRoots(profile, "video") : [];
 }
 
-function effectiveNfoRoots(settings: DesktopBootstrapSettings): string[] {
-  return contentFolderRoots(settings, "nfo");
+function effectiveNfoRoots(profile: DesktopLibraryProfile | null): string[] {
+  return profile ? contentFolderRoots(profile, "nfo") : [];
 }
 
-function effectiveAssetRoots(settings: DesktopBootstrapSettings): string[] {
-  return contentFolderRoots(settings, "images");
+function effectiveAssetRoots(profile: DesktopLibraryProfile | null): string[] {
+  return profile ? contentFolderRoots(profile, "images") : [];
 }
 
 function unique(values: string[]): string[] {
@@ -624,3 +625,4 @@ function unique(values: string[]): string[] {
 function toMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+
