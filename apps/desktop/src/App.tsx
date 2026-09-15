@@ -510,7 +510,7 @@ export default function App() {
               setMessage={setMessage}
             />
           ) : (
-            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
+            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} directoryRoots={savedActiveProfile?.contentFolders?.map((folder) => folder.path) ?? []} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
           )
         ) : page === "favorites" ? (
           <DesktopFavoritesPage

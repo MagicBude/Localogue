@@ -36,6 +36,7 @@ export function DesktopWorksPage({
   onLibraryChanged,
   setMessage,
   initialQuery,
+  directoryRoots,
   initialState,
   onExplorerStateChange,
 }: {
@@ -45,6 +46,7 @@ export function DesktopWorksPage({
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
   initialQuery?: WorkQuery;
+  directoryRoots?: string[];
   initialState?: DesktopWorkExplorerState;
   onExplorerStateChange?: (state: DesktopWorkExplorerState) => void;
 }) {
@@ -58,7 +60,7 @@ export function DesktopWorksPage({
         </section>
         <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
       </div>
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} onStateChange={onExplorerStateChange} />
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} directoryRoots={directoryRoots} onStateChange={onExplorerStateChange} />
     </div>
   );
 }

@@ -72,6 +72,7 @@ export function DesktopWorkExplorer({
   pageSize = 24,
   storageKey = "localogue.desktop.work-view",
   initialQuery,
+  directoryRoots = [],
   initialState,
   onStateChange,
 }: {
@@ -82,6 +83,7 @@ export function DesktopWorkExplorer({
   pageSize?: number;
   storageKey?: string;
   initialQuery?: WorkQuery;
+  directoryRoots?: string[];
   initialState?: DesktopWorkExplorerState;
   onStateChange?: (state: DesktopWorkExplorerState) => void;
 }) {
@@ -225,7 +227,8 @@ export function DesktopWorkExplorer({
     }));
     const resolutionLabels: Record<string, string> = { "4k": "4K", "1080p": "1080P", "720p": "720P", sd: "SD" };
     const resolutions = result.facets.resolutions.map((facet) => ({ id: facet.id, label: resolutionLabels[facet.id] ?? facet.id, count: facet.count }));
-    const mediaScanRoots = result.facets.mediaScanRoots.map((facet) => ({ id: facet.id, label: directoryLabel(facet.id), count: facet.count }));
+    const facetCounts = new Map(result.facets.mediaScanRoots.map((facet) => [facet.id, facet.count]));
+    const mediaScanRoots = [...new Set([...directoryRoots, ...facetCounts.keys()])].map((id) => ({ id, label: directoryLabel(id), count: facetCounts.get(id) ?? 0 }));
 
     return {
       result,
@@ -244,7 +247,7 @@ export function DesktopWorkExplorer({
     };
   // 收藏 / 评分会参与筛选和排序，所以成功落盘后必须重新执行同一 WorkQuery。
   // 版本只在 Native 写入完成后递增，避免乐观 UI 抢先查询而读回旧文件。
-  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view]);
+  }, [repository, query, page, pageSize, fixedPersonId, metadataLanguage, persistedRevision, view, directoryRoots]);
 
   // Observer 与“加载更多”按钮可能在同一帧触发。同步锁先于 React 下一次渲染生效，
   // 防止一次请求意外跳过多个批次；查询结束（包括失败）后再允许用户重试。
