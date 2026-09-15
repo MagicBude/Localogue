@@ -383,11 +383,13 @@ button:focus-visible { outline: 2px solid color-mix(in srgb, var(--accent) 65%, 
 .directory-scope-options input { margin: 0; }
 .directory-display-toggle { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-size: 12px; font-weight: 700; }
 .directory-display-toggle input { margin: 0; }
+.directory-card-main .directory-display-toggle { grid-column: 1 / -1; justify-self: start; }
 .media-directory-groups { display: grid; gap: 10px; }
 .media-directory-group { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--soft); }
 .media-directory-group > summary { display: flex; justify-content: space-between; gap: 12px; cursor: pointer; padding: 11px 14px; list-style-position: inside; }
 .media-directory-group > summary span { color: var(--muted); font-size: 12px; }
-.media-directory-group .table-wrap { border-top: 1px solid var(--border); }
+.media-directory-group .table-wrap { margin: 0; border-top: 1px solid var(--border); overflow-x: auto; }
+.media-directory-group .data-table td:first-child { min-width: 320px; max-width: 620px; overflow-wrap: anywhere; }
 .directory-card-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .directory-card-title > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .directory-status { flex: 0 0 auto; padding: 3px 8px; border-radius: 999px; background: #e8e9e5; color: var(--muted); font-size: 10px; font-weight: 750; }
