@@ -7,7 +7,7 @@ import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history
 import type { MediaFile } from "@/domain/entities/media-file";
 
 import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopLibraryProfile, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
-import { contentFolderRoots, normalizeContentFolders } from "./content-folders";
+import { contentFolderRoots } from "./content-folders";
 import { activeLibraryProfile } from "./library-profiles";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -119,7 +119,6 @@ export function DesktopMediaPage({
   const scanTimer = useRef<number | null>(null);
   const handledAutoSyncRequest = useRef(0);
   const recordedScanIds = useRef(new Set<string>());
-  const mediaLibraryRef = useRef<HTMLDivElement | null>(null);
   const profile = activeLibraryProfile(settings);
 
   useEffect(() => () => {
@@ -130,7 +129,6 @@ export function DesktopMediaPage({
   const nfoRoots = effectiveNfoRoots(profile);
   const assetRoots = effectiveAssetRoots(profile);
   // 组合路径只计算一次，避免 JSX 为“是否为空”和“实际展示”重复做去重工作。
-  const unifiedRoots = profile ? normalizeContentFolders(profile).map((folder) => folder.path) : [];
   const metadataRoots = unique([...nfoRoots, ...assetRoots]);
 
   // 使用 stale-while-refresh Hook：资料变化时保留旧列表，避免整个工作台闪烁并丢失滚动位置。
@@ -148,7 +146,6 @@ export function DesktopMediaPage({
       scanHistory: scanHistory.sort((a, b) => b.recordedAt.localeCompare(a.recordedAt)).slice(0, 20),
     };
   }, [repository]);
-  const unlinkedMediaCount = data.value?.media.filter((item) => !item.workId).length ?? 0;
 
   async function recordScanHistory(snapshot: MediaScanJobSnapshot): Promise<void> {
     if (["running", "cancelling"].includes(snapshot.status) || recordedScanIds.current.has(snapshot.id)) return;
@@ -450,35 +447,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSync={(root) => void syncUnifiedLibrary([root])} />
-      <section className="settings-card unified-sync-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">ONE ROOT · ONE ACTION</span>
-            <h2>{t("扫描资料库（全部目录）")}</h2>
-            <p className="muted">{t("检查全部启用目录中的 NFO、图片和视频；目录卡片只处理单个目录。")}</p>
-          </div>
-          <button className="primary-button sync-library-button" disabled={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} onClick={() => void syncUnifiedLibrary()}>
-            {metadataBusy || scan?.status === "running" ? t("扫描中…") : t("扫描资料库（全部目录）")}
-          </button>
-        </div>
-        <code className="path-block">{unifiedRoots.length ? unifiedRoots.join("\n") : t("尚未配置内容目录；仍可使用下方高级媒体 / NFO 目录。")}</code>
-        {syncStage !== "idle" ? (
-          <div className={`unified-sync-progress is-${syncStage}`} role="status" aria-live="polite">
-            {["discover", "metadata", "media", "complete"].map((stage, index) => {
-              const labels = [t("发现文件"), t("导入资料与图片"), t("扫描视频"), t("完成")];
-              const current = ["discover", "metadata", "media", "complete"].indexOf(syncStage);
-              return <div className={index < current || syncStage === "complete" ? "is-done" : index === current ? "is-current" : ""} key={stage}><span>{index < current || syncStage === "complete" ? "✓" : index + 1}</span><strong>{labels[index]}</strong></div>;
-            })}
-            {syncStage === "error" ? <p>{t("同步失败，请查看上方错误信息后重试。")}</p> : null}
-            {syncStage === "media" && scan ? <p>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</p> : null}
-          </div>
-        ) : null}
-        {syncStage === "complete" ? <div className="button-row unified-sync-next-actions">
-          <UiButton variant="primary" onClick={onOpenLibrary}>{t("查看作品库")}</UiButton>
-          {unlinkedMediaCount ? <UiButton onClick={() => mediaLibraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
-        </div> : null}
-      </section>
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
       <MediaScanSection
         roots={mediaRoots}
         scan={scan}
@@ -522,7 +491,7 @@ export function DesktopMediaPage({
         onReveal={() => void fileOpener.revealInFolder(selectedPath)}
       />
 
-      <div ref={mediaLibraryRef} className="media-library-anchor">
+      <div className="media-library-anchor">
       <MediaLibrarySection
         loading={data.loading}
         error={data.error}
@@ -558,7 +527,7 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ folders, media, history, syncingRoots, running, scan, syncStage, onAdd, onUpdate, onRemove, onSync }: {
+function DirectoryScanPanel({ folders, media, history, syncingRoots, running, scan, syncStage, onAdd, onUpdate, onRemove, onSyncAll, onSync }: {
   folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
@@ -569,11 +538,12 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, sc
   onAdd: () => void;
   onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onRemove: (path: string) => void;
+  onSyncAll: () => void;
   onSync: (path: string) => void;
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；扫描全部目录请使用下方统一同步。")}</p></div><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；也可以直接扫描全部启用目录。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描资料库（全部目录）")}</button></div></div>
     {running ? <div className="directory-scan-live" role="status" aria-live="polite"><strong>{t(syncStage === "media" ? "正在扫描视频" : "正在扫描资料目录")}</strong><span>{syncingRoots.length ? t("当前目录：{path}", { path: syncingRoots.join("、") }) : t("正在准备扫描…")}</span>{scan?.progress ? <span>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</span> : null}</div> : null}
     {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
       const root = folder.path;
