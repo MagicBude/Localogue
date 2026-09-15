@@ -1032,11 +1032,14 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-person-filter-grid {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  left: auto;
   right: 0;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   padding: 12px;
   border: 1px solid var(--border);
@@ -1044,7 +1047,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
   background: rgba(247, 247, 243, .98);
   box-shadow: 0 18px 40px rgba(30, 34, 28, .16);
 }
-.desktop-person-search { grid-column: span 2; }
+.desktop-person-search { grid-column: 1 / -1; }
 .desktop-people-results { display: grid; gap: 14px; }
 .desktop-person-grid {
   display: grid;
