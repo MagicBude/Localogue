@@ -578,9 +578,10 @@ function FilterGroup({
 }) {
   const { t } = useDesktopI18n();
   if (!options.length && !values.length) return null;
-  const ordered = [...options].sort((a, b) => Number(values.includes(b.id)) - Number(values.includes(a.id)) || optionSort(a, b));
+  // 选中状态只改变复选框和计数，不重新排序；固定位置能避免连续勾选时鼠标目标跳动。
+  const ordered = [...options].sort(optionSort);
   return (
-    <details className="desktop-facet-group" open={values.length > 0}>
+    <details className="desktop-facet-group">
       <summary><span>{label}</span><small>{values.length ? t("已选 {count}", { count: values.length }) : t("{count} 项", { count: options.length })}</small></summary>
       <div className="desktop-facet-options">
         {ordered.slice(0, 80).map((option) => (
