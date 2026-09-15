@@ -38,10 +38,11 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
       <div className="section-heading">
         <div><span className="eyebrow">PRIVATE LOCAL DATA</span><h2>{media.length} {t("视频")} · {t("{count} 个资产", { count: props.assetCount ?? 0 })}</h2></div>
       </div>
-      {media.length ? <div className="table-wrap">
-        <table className="data-table">
+      {media.length ? <div className="media-directory-groups">{groupMediaByRoot(media).map(([root, files]) => <details className="media-directory-group" open key={root}>
+        <summary><strong>{root}</strong><span>{files.length} {t("视频")}</span></summary>
+        <div className="table-wrap"><table className="data-table">
           <thead><tr><th>{t("文件")}</th><th>{t("作品")}</th><th>{t("大小")}</th><th>{t("媒体参数")}</th><th>{t("操作")}</th></tr></thead>
-          <tbody>{media.map((file) => {
+          <tbody>{files.map((file) => {
             const work = file.workId ? works.get(file.workId) : undefined;
             return <tr key={file.id}>
               <td><strong>{file.fileName}</strong>{recognitionSummary(file, t)}<small className="path-text">{file.path}</small></td>
@@ -55,10 +56,19 @@ export function MediaLibrarySection(props: MediaLibrarySectionProps) {
               </div></td>
             </tr>;
           })}</tbody>
-        </table>
-      </div> : <UiEmptyState title={t("尚未扫描到本地媒体。")} />}
+        </table></div>
+      </details>)}</div> : <UiEmptyState title={t("尚未扫描到本地媒体。")} />}
     </section>
   );
+}
+
+function groupMediaByRoot(media: MediaFile[]): Array<[string, MediaFile[]]> {
+  const groups = new Map<string, MediaFile[]>();
+  for (const file of media) {
+    const root = file.scanRoot?.trim() || "未分配目录";
+    groups.set(root, [...(groups.get(root) ?? []), file]);
+  }
+  return [...groups.entries()].sort(([left], [right]) => left.localeCompare(right));
 }
 
 function recognitionSummary(file: MediaFile, t: (source: string) => string): ReactNode {

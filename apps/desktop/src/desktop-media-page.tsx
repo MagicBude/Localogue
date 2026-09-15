@@ -7,7 +7,7 @@ import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history
 import type { MediaFile } from "@/domain/entities/media-file";
 
 import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopLibraryProfile, DesktopMediaProbeResult, DesktopTaskProgress } from "./contracts";
-import { contentFolderRoots } from "./content-folders";
+import { contentFolderRoots, normalizeContentFolders } from "./content-folders";
 import { activeLibraryProfile } from "./library-profiles";
 import { DesktopAssetStorageGovernance } from "./desktop-asset-storage-governance";
 import { useDesktopI18n } from "./desktop-i18n";
@@ -110,6 +110,7 @@ export function DesktopMediaPage({
   const [metadataBusy, setMetadataBusy] = useState(false);
   const [syncStage, setSyncStage] = useState<"idle" | "discover" | "metadata" | "media" | "complete" | "error">("idle");
   const [syncingRoots, setSyncingRoots] = useState<string[]>([]);
+  const [visibleRoots, setVisibleRoots] = useState<string[]>([]);
   const [bindingMediaId, setBindingMediaId] = useState<string | null>(null);
   const [vocabularyPreview, setVocabularyPreview] = useState<VocabularyRepairPreview | null>(null);
   const [vocabularyResult, setVocabularyResult] = useState<VocabularyRepairResult | null>(null);
@@ -120,6 +121,11 @@ export function DesktopMediaPage({
   const handledAutoSyncRequest = useRef(0);
   const recordedScanIds = useRef(new Set<string>());
   const profile = activeLibraryProfile(settings);
+
+  useEffect(() => {
+    const roots = profile ? normalizeContentFolders(profile).map((folder) => folder.path) : [];
+    setVisibleRoots((current) => current.filter((root) => roots.some((item) => samePath(item, root))).length ? current.filter((root) => roots.some((item) => samePath(item, root))) : roots);
+  }, [profile?.id]);
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);
@@ -447,7 +453,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} visibleRoots={visibleRoots} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onToggleVisible={(root) => setVisibleRoots((current) => current.some((item) => samePath(item, root)) ? current.filter((item) => !samePath(item, root)) : [...current, root])} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
       <MediaScanSection
         roots={mediaRoots}
         scan={scan}
@@ -495,7 +501,7 @@ export function DesktopMediaPage({
       <MediaLibrarySection
         loading={data.loading}
         error={data.error}
-        media={data.value?.media}
+        media={data.value?.media.filter((item) => !item.scanRoot || visibleRoots.some((root) => samePath(root, item.scanRoot)))}
         works={data.value?.works}
         assetCount={data.value?.assets.length}
         bindingMediaId={bindingMediaId}
@@ -527,10 +533,11 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ folders, media, history, syncingRoots, running, scan, syncStage, onAdd, onUpdate, onRemove, onSyncAll, onSync }: {
+function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoots, running, scan, syncStage, onAdd, onUpdate, onRemove, onToggleVisible, onSyncAll, onSync }: {
   folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
+  visibleRoots: string[];
   syncingRoots: string[];
   running: boolean;
   scan: MediaScanJobSnapshot | null;
@@ -538,6 +545,7 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, sc
   onAdd: () => void;
   onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onRemove: (path: string) => void;
+  onToggleVisible: (path: string) => void;
   onSyncAll: () => void;
   onSync: (path: string) => void;
 }) {
@@ -557,6 +565,7 @@ function DirectoryScanPanel({ folders, media, history, syncingRoots, running, sc
           <div className="directory-card-title"><strong title={root}>{root}</strong><span className={`directory-status is-${status}`}>{directoryStatusLabel(status, t)}</span></div>
           <div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span>{last?.snapshot.result ? <><span>{t("新增")} {last.snapshot.result.added}</span><span>{t("已更新")} {last.snapshot.result.updated}</span></> : null}</div>
           <div className="directory-scope-options"><label><input type="checkbox" checked={folder.scanVideo} onChange={(event) => onUpdate(root, { scanVideo: event.target.checked })} />{t("视频")}</label><label><input type="checkbox" checked={folder.scanNfo} onChange={(event) => onUpdate(root, { scanNfo: event.target.checked })} />NFO</label><label><input type="checkbox" checked={folder.scanImages} onChange={(event) => onUpdate(root, { scanImages: event.target.checked })} />{t("图片")}</label></div>
+          <label className="directory-display-toggle"><input type="checkbox" checked={visibleRoots.some((item) => samePath(item, root))} onChange={() => onToggleVisible(root)} />{t("在本地数据中显示")}</label>
           {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
           {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
         </div>
