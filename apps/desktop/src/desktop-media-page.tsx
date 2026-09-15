@@ -551,7 +551,7 @@ function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoot
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；也可以直接扫描全部启用目录。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描资料库（全部目录）")}</button></div></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；也可以直接扫描全部目录。显示勾选只影响列表，不影响扫描。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" title={t("扫描资料库")} aria-label={t("扫描资料库")} disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描全部目录")}</button></div></div>
     {running ? <div className="directory-scan-live" role="status" aria-live="polite"><strong>{t(syncStage === "media" ? "正在扫描视频" : "正在扫描资料目录")}</strong><span>{syncingRoots.length ? t("当前目录：{path}", { path: syncingRoots.join("、") }) : t("正在准备扫描…")}</span>{scan?.progress ? <span>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</span> : null}</div> : null}
     {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
       const root = folder.path;
