@@ -561,11 +561,11 @@ function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoot
       const isCurrent = syncingRoots.some((item) => samePath(item, root));
       const status = isCurrent ? "running" : last?.snapshot.status ?? "idle";
       return <article key={root}>
+        <input className="directory-card-select" type="checkbox" checked={visibleRoots.some((item) => samePath(item, root))} onChange={() => onToggleVisible(root)} aria-label={t("在本地数据中显示")} />
         <div className="directory-card-main">
           <div className="directory-card-title"><strong title={root}>{root}</strong><span className={`directory-status is-${status}`}>{directoryStatusLabel(status, t)}</span></div>
           <div className="desktop-dense-chips"><span>{t("视频")} {files.length}</span><span>{t("已关联")} {linked}</span><span>{t("未关联")} {files.length - linked}</span>{last?.snapshot.result ? <><span>{t("新增")} {last.snapshot.result.added}</span><span>{t("已更新")} {last.snapshot.result.updated}</span></> : null}</div>
           <div className="directory-scope-options"><label><input type="checkbox" checked={folder.scanVideo} onChange={(event) => onUpdate(root, { scanVideo: event.target.checked })} />{t("视频")}</label><label><input type="checkbox" checked={folder.scanNfo} onChange={(event) => onUpdate(root, { scanNfo: event.target.checked })} />NFO</label><label><input type="checkbox" checked={folder.scanImages} onChange={(event) => onUpdate(root, { scanImages: event.target.checked })} />{t("图片")}</label></div>
-          <label className="directory-display-toggle"><input type="checkbox" checked={visibleRoots.some((item) => samePath(item, root))} onChange={() => onToggleVisible(root)} />{t("在本地数据中显示")}</label>
           {last ? <small>{t("上次扫描：{time}", { time: new Date(last.recordedAt).toLocaleString() })} · {t("耗时 {duration}", { duration: formatDirectoryDuration(last.durationMs) })}</small> : <small>{t("尚未扫描")}</small>}
           {last?.snapshot.error ? <small className="directory-card-error">{last.snapshot.error}</small> : null}
         </div>
