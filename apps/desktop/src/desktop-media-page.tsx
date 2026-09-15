@@ -126,6 +126,9 @@ export function DesktopMediaPage({
     const roots = profile ? normalizeContentFolders(profile).map((folder) => folder.path) : [];
     setVisibleRoots((current) => current.filter((root) => roots.some((item) => samePath(item, root))).length ? current.filter((root) => roots.some((item) => samePath(item, root))) : roots);
   }, [profile?.id]);
+  useEffect(() => {
+    window.localStorage.setItem("localogue.desktop.visible-roots", JSON.stringify(visibleRoots));
+  }, [visibleRoots]);
 
   useEffect(() => () => {
     if (scanTimer.current !== null) window.clearInterval(scanTimer.current);

@@ -88,7 +88,7 @@ export function DesktopWorkExplorer({
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
   const loadMorePending = useRef(false);
-  const [query, setQuery] = useState<WorkQuery>(() => initialState?.query ?? ({ sort: "release_desc", ...initialQuery }));
+  const [query, setQuery] = useState<WorkQuery>(() => initialState?.query ?? ({ sort: "release_desc", ...initialQuery, ...readVisibleRootQuery() }));
   const [page, setPage] = useState(() => initialState?.page ?? 1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
     if (initialState) return initialState.view;
@@ -346,6 +346,16 @@ export function DesktopWorkExplorer({
       </section>
     </div>
   );
+}
+
+function readVisibleRootQuery(): Pick<WorkQuery, "mediaScanRoots"> {
+  try {
+    const raw = window.localStorage.getItem("localogue.desktop.visible-roots");
+    const roots = raw ? JSON.parse(raw) : [];
+    return Array.isArray(roots) && roots.every((item) => typeof item === "string") && roots.length ? { mediaScanRoots: roots } : {};
+  } catch {
+    return {};
+  }
 }
 
 function WorkFacetPanel({
