@@ -62,6 +62,7 @@ export interface DesktopWorkExplorerState {
   page: number;
   view: DesktopWorkViewMode;
   scrollY: number;
+  pageSize?: number;
 }
 
 export function DesktopWorkExplorer({
@@ -69,7 +70,7 @@ export function DesktopWorkExplorer({
   onOpen,
   onOpenPerson,
   fixedPersonId,
-  pageSize = 24,
+  pageSize: requestedPageSize = 24,
   storageKey = "localogue.desktop.work-view",
   initialQuery,
   directoryRoots = [],
@@ -90,6 +91,7 @@ export function DesktopWorkExplorer({
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
   const loadMorePending = useRef(false);
+  const [pageSize, setPageSize] = useState(() => initialState?.pageSize ?? readPageSize(storageKey, requestedPageSize));
   const [query, setQuery] = useState<WorkQuery>(() => initialState?.query ?? ({ sort: "release_desc", ...initialQuery, ...readVisibleRootQuery() }));
   const [page, setPage] = useState(() => initialState?.page ?? 1);
   const [view, setView] = useState<DesktopWorkViewMode>(() => {
@@ -108,8 +110,8 @@ export function DesktopWorkExplorer({
   }, [initialQuery, initialState]);
 
   const publishState = useCallback((scrollY = window.scrollY) => {
-    onStateChange?.({ query, page, view, scrollY });
-  }, [onStateChange, page, query, view]);
+    onStateChange?.({ query, page, view, scrollY, pageSize });
+  }, [onStateChange, page, pageSize, query, view]);
 
   // 查询、分页和视图变化后立即更新壳层快照；滚动单独监听，避免把滚动位置放进 React state。
   useEffect(() => publishState(), [publishState]);
@@ -274,6 +276,13 @@ export function DesktopWorkExplorer({
     window.localStorage.setItem(storageKey, next);
   }
 
+  function changePageSize(nextPageSize: number): void {
+    if (!Number.isFinite(nextPageSize) || nextPageSize === pageSize) return;
+    setPageSize(nextPageSize);
+    setPage(1);
+    window.localStorage.setItem(`${storageKey}-page-size`, String(nextPageSize));
+  }
+
   const isWaterfall = view === "waterfall";
   const waterfallCardCount = data.value?.cards.length ?? 0;
   const waterfallTotal = data.value?.result.total ?? 0;
@@ -299,7 +308,7 @@ export function DesktopWorkExplorer({
 
   const { result, cards } = data.value;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
-  const showPagination = !isWaterfall && result.total > pageSize;
+  const showPagination = !isWaterfall && result.total > 0;
 
   function changePage(nextPage: number): void {
     if (nextPage === page) return;
@@ -317,7 +326,6 @@ export function DesktopWorkExplorer({
         onViewChange={changeView}
         fixedPersonId={fixedPersonId}
         data={data.value}
-        pagination={showPagination ? <DesktopPagination compact page={page} pageCount={pageCount} onChange={changePage} /> : undefined}
       />
 
       <section className="desktop-results-panel" ref={resultsPanelRef}>
@@ -346,6 +354,7 @@ export function DesktopWorkExplorer({
             onLoadMore={loadMoreWaterfallItems}
           />
         ) : null}
+        {showPagination ? <DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} /> : null}
       </section>
     </div>
   );
@@ -361,6 +370,11 @@ function readVisibleRootQuery(): Pick<WorkQuery, "mediaScanRoots"> {
   }
 }
 
+function readPageSize(storageKey: string, fallback: number): number {
+  const value = Number(window.localStorage.getItem(`${storageKey}-page-size`));
+  return [12, 24, 48, 96].includes(value) ? value : fallback;
+}
+
 function WorkFacetPanel({
   query,
   onChange,
@@ -368,7 +382,6 @@ function WorkFacetPanel({
   onViewChange,
   fixedPersonId,
   data,
-  pagination,
 }: {
   query: WorkQuery;
   onChange: (query: WorkQuery) => void;
@@ -376,7 +389,6 @@ function WorkFacetPanel({
   onViewChange: (view: DesktopWorkViewMode) => void;
   fixedPersonId?: string;
   data: ExplorerData;
-  pagination?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
@@ -454,7 +466,6 @@ function WorkFacetPanel({
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
 
-        {pagination ? <div className="desktop-facet-pagination">{pagination}</div> : null}
       </div>
 
     </aside>

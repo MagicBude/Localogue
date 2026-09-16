@@ -21,7 +21,7 @@ import type { WorkQuery } from "@/domain/queries/work-query";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { desktopBridge } from "./tauri-bridge";
 import { useDesktopI18n } from "./desktop-i18n";
-import { DesktopSidebar, DesktopTopbar, type DesktopPage, type DesktopSettingsModule } from "./desktop-app-shell";
+import { DesktopContextTabs, DesktopSidebar, DesktopTopbar, type DesktopPage, type DesktopSettingsModule } from "./desktop-app-shell";
 import { DesktopFavoritesProvider } from "./desktop-favorites-provider";
 import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
@@ -458,7 +458,12 @@ export default function App() {
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   return (
-    <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
+    <div className="desktop-window">
+      <DesktopTopbar
+        version={runtime?.version}
+        onSearch={(text) => filterWorks({ text, sort: "release_desc" })}
+      />
+      <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
       <DesktopSidebar
         page={page}
         collapsed={sidebarCollapsed}
@@ -477,16 +482,13 @@ export default function App() {
       />
 
       <main className="content-shell">
-        <UiConfirmProvider>
-        <DesktopTopbar
+        <DesktopContextTabs
           page={page}
-          version={runtime?.version}
           settingsModule={settingsModule}
-          onSearch={(text) => filterWorks({ text, sort: "release_desc" })}
           onNavigate={navigate}
           onSettingsModule={(module) => { setSettingsModule(module); navigate("settings"); }}
         />
-
+        <UiConfirmProvider>
         {detail ? <button className="desktop-floating-back" type="button" onClick={returnToPreviousLocation}><ChevronLeft20Regular />{t("返回上一页")}</button> : null}
 
         {message ? <UiToast key={messageState.revision} closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
@@ -591,6 +593,7 @@ export default function App() {
         </DesktopFavoritesProvider>
         </UiConfirmProvider>
       </main>
+      </div>
     </div>
   );
 }

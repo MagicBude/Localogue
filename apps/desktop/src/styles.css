@@ -1707,8 +1707,13 @@ select[multiple] { min-height: 105px; padding: 6px; }
    artwork and result cards. The shell keeps the same actions, but removes
    decorative height and lets the result grid reclaim the freed space. */
 .content-shell { padding-inline: clamp(16px, 1.5vw, 32px); padding-bottom: 34px; }
+.desktop-window { min-height: 100vh; }
+.desktop-window > .desktop-layout { min-height: calc(100vh - 48px); }
+.desktop-window > .desktop-layout > .sidebar { top: 48px; height: calc(100vh - 48px); }
 .topbar { min-height: 0; gap: 4px; padding-block: 4px; }
+.topbar-main { padding-inline: clamp(16px, 1.5vw, 32px); }
 .topbar-main { min-height: 38px; }
+.desktop-context-tabs { padding-top: 4px; }
 .context-tabs { padding: 2px; }
 .context-tabs button { min-height: 30px; }
 .desktop-library-page { gap: 10px; }
@@ -1733,6 +1738,40 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-library-page .desktop-person-card__body strong { font-size: 14px; }
 .desktop-library-page .desktop-work-grid .desktop-work-card__body { padding: 9px 10px 11px; }
 .desktop-library-page .desktop-work-grid .desktop-work-card__body h3 { margin-block: 4px 5px; }
+.desktop-library-page .desktop-pagination:not(.is-compact) {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+.desktop-library-page .desktop-pagination__controls,
+.desktop-library-page .desktop-pagination__numbers,
+.desktop-library-page .desktop-pagination__jump,
+.desktop-library-page .desktop-pagination__size { display: flex; align-items: center; gap: 6px; }
+.desktop-library-page .desktop-pagination__numbers > span { display: inline-flex; align-items: center; gap: 4px; }
+.desktop-library-page .desktop-pagination__numbers i { color: var(--muted); font-style: normal; }
+.desktop-library-page .desktop-pagination__controls > button,
+.desktop-library-page .desktop-pagination__numbers button { min-width: 30px; height: 30px; padding: 0 7px; }
+.desktop-library-page .desktop-pagination__controls > button { display: inline-flex; align-items: center; justify-content: center; }
+.desktop-library-page .desktop-pagination__controls > button svg { width: 16px; height: 16px; }
+.desktop-library-page .desktop-pagination__numbers button { border-color: transparent; background: transparent; }
+.desktop-library-page .desktop-pagination__numbers button.is-active { border-color: var(--accent); background: var(--accent); color: white; }
+.desktop-library-page .desktop-pagination__jump { color: var(--muted); font-size: 11px; }
+.desktop-library-page .desktop-pagination__jump input { width: 46px; min-height: 30px; padding: 5px 6px; text-align: center; }
+.desktop-library-page .desktop-pagination__total,
+.desktop-library-page .desktop-pagination__size { color: var(--muted); font-size: 11px; }
+.desktop-library-page .desktop-pagination__size select { min-height: 30px; padding: 5px 24px 5px 8px; }
+
+@media (max-width: 760px) {
+  .desktop-library-page .desktop-pagination:not(.is-compact) { align-items: stretch; flex-direction: column; }
+  .desktop-library-page .desktop-pagination__controls { flex-wrap: wrap; }
+  .desktop-library-page .desktop-pagination__size { justify-content: flex-end; }
+}
 
 @media (max-width: 1180px) {
   .content-shell { padding-inline: 16px; }

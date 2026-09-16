@@ -14,7 +14,7 @@ import { resolvePersonPresentation } from "./desktop-presentation";
 import { personActivityStatusLabel } from "./desktop-person-labels";
 import { DesktopPagination } from "./desktop-pagination";
 
-const PAGE_SIZE = 24;
+const DEFAULT_PAGE_SIZE = 24;
 
 export function DesktopPersonExplorer({
   repository,
@@ -26,6 +26,7 @@ export function DesktopPersonExplorer({
   const { t } = useDesktopI18n();
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(() => readPeoplePageSize());
   const resultsPanelRef = useRef<HTMLElement>(null);
   const data = useAsyncPersonData(async () => {
     const [filteredPeople, allPeople, allWorks, assets, preferences] = await Promise.all([
@@ -65,9 +66,9 @@ export function DesktopPersonExplorer({
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取人物。")}</ExplorerState>;
 
   const total = data.value.filteredPerformers.length;
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const visible = data.value.filteredPerformers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visible = data.value.filteredPerformers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   function changeQuery(next: PersonQuery): void {
     setPage(1);
@@ -80,8 +81,8 @@ export function DesktopPersonExplorer({
     window.requestAnimationFrame(() => resultsPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
-  const pagination = total > PAGE_SIZE
-    ? <DesktopPagination compact page={currentPage} pageCount={pageCount} onChange={changePage} />
+  const pagination = total > 0
+    ? <DesktopPagination page={currentPage} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={(next) => { setPageSize(next); setPage(1); window.localStorage.setItem("localogue.desktop.people-page-size", String(next)); }} />
     : undefined;
 
   return (
@@ -92,7 +93,6 @@ export function DesktopPersonExplorer({
         <div className="desktop-results-toolbar">
           <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
           <div className="desktop-results-toolbar__actions">
-            {pagination}
             <button className="desktop-facet-clear" disabled={!hasPersonFilters(query)} onClick={() => changeQuery({ sort: "name_asc" })} type="button">{t("清除")}</button>
           </div>
         </div>
@@ -108,6 +108,7 @@ export function DesktopPersonExplorer({
           ))}
         </div>
         {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
+        {pagination}
       </section>
     </>
   );
@@ -210,6 +211,11 @@ function PersonFilterChips({ query, onChange }: { query: PersonQuery; onChange: 
 
 function hasPersonFilters(query: PersonQuery): boolean {
   return Boolean(query.text || query.statuses?.length || query.birthYears?.length || query.debutYears?.length || query.retirementYears?.length || query.heightMin !== undefined || query.heightMax !== undefined);
+}
+
+function readPeoplePageSize(): number {
+  const value = Number(window.localStorage.getItem("localogue.desktop.people-page-size"));
+  return [12, 24, 48, 96].includes(value) ? value : DEFAULT_PAGE_SIZE;
 }
 
 function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {

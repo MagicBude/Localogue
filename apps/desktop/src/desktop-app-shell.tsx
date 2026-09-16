@@ -110,7 +110,7 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
 }
 
 /** 顶部应用框架只保留跨页面能力；页面设置和数据刷新由各自唯一入口负责。 */
-export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavigate, onSettingsModule }: { page: DesktopPage; version?: string; settingsModule: DesktopSettingsModule; onSearch: (text: string) => void; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {
+export function DesktopTopbar({ version, onSearch }: { version?: string; onSearch: (text: string) => void }) {
   const { t } = useDesktopI18n();
   const [searchText, setSearchText] = useState("");
   function submitSearch(event: FormEvent<HTMLFormElement>): void {
@@ -118,6 +118,11 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
     const text = searchText.trim();
     if (text) onSearch(text);
   }
+  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><form className="topbar-search" role="search" onSubmit={submitSearch}><input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} /><button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button></form><DesktopLanguageControls compact /></div></header>;
+}
+
+export function DesktopContextTabs({ page, settingsModule, onNavigate, onSettingsModule }: { page: DesktopPage; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {
+  const { t } = useDesktopI18n();
   const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "media"
     ? [
       { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
@@ -139,5 +144,5 @@ export function DesktopTopbar({ page, version, settingsModule, onSearch, onNavig
           { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },
         ]
         : [];
-  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><form className="topbar-search" role="search" onSubmit={submitSearch}><input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} /><button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button></form><DesktopLanguageControls compact /></div>{tabs.length ? <ContextTabBar label={t("页面分类")} items={tabs} /> : null}</header>;
+  return tabs.length ? <div className="desktop-context-tabs"><ContextTabBar label={t("页面分类")} items={tabs} /></div> : null;
 }
