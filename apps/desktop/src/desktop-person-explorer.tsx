@@ -96,18 +96,20 @@ export function DesktopPersonExplorer({
             <button className="desktop-facet-clear" disabled={!hasPersonFilters(query)} onClick={() => changeQuery({ sort: "name_asc" })} type="button">{t("清除")}</button>
           </div>
         </div>
-        <div className="desktop-person-grid">
-          {visible.map((person) => (
-            <DesktopPersonCard
-              key={person.id}
-              person={person}
-              portrait={data.value!.portraits.get(person.id)}
-              workCount={data.value!.workCounts.get(person.id) ?? 0}
-              onOpen={() => onOpen(person.id)}
-            />
-          ))}
+        <div className="desktop-results-scroll">
+          <div className="desktop-person-grid">
+            {visible.map((person) => (
+              <DesktopPersonCard
+                key={person.id}
+                person={person}
+                portrait={data.value!.portraits.get(person.id)}
+                workCount={data.value!.workCounts.get(person.id) ?? 0}
+                onOpen={() => onOpen(person.id)}
+              />
+            ))}
+          </div>
+          {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
         </div>
-        {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
         {pagination ? <div className="desktop-pagination-dock">{pagination}</div> : null}
       </section>
     </>

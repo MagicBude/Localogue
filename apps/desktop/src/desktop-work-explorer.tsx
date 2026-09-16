@@ -339,22 +339,24 @@ export function DesktopWorkExplorer({
             {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
           </div>
         </div>
-        <DesktopWorkResults
-          cards={cards}
-          view={view}
-          onOpen={openWork}
-          onOpenPerson={onOpenPerson ? openPerson : undefined}
-          onSelectGenre={(id) => changeQuery({ ...query, genreIds: [id] })}
-          onSelectTag={(id) => changeQuery({ ...query, tagIds: [id] })}
-        />
-        {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
-        {isWaterfall && cards.length ? (
-          <DesktopInfiniteScrollSentinel
-            hasMore={hasMoreWaterfallItems}
-            loading={data.refreshing}
-            onLoadMore={loadMoreWaterfallItems}
+        <div className="desktop-results-scroll">
+          <DesktopWorkResults
+            cards={cards}
+            view={view}
+            onOpen={openWork}
+            onOpenPerson={onOpenPerson ? openPerson : undefined}
+            onSelectGenre={(id) => changeQuery({ ...query, genreIds: [id] })}
+            onSelectTag={(id) => changeQuery({ ...query, tagIds: [id] })}
           />
-        ) : null}
+          {!cards.length ? <ExplorerState>{t("没有符合当前筛选条件的作品。")}</ExplorerState> : null}
+          {isWaterfall && cards.length ? (
+            <DesktopInfiniteScrollSentinel
+              hasMore={hasMoreWaterfallItems}
+              loading={data.refreshing}
+              onLoadMore={loadMoreWaterfallItems}
+            />
+          ) : null}
+        </div>
         {showPagination ? <div className="desktop-pagination-dock"><DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} /></div> : null}
       </section>
     </div>
