@@ -15,9 +15,11 @@ import { useDesktopI18n } from "./desktop-i18n";
 export function DesktopFavoritesPage({
   repository,
   openWork,
+  searchText,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
+  searchText?: string;
 }) {
   const { t } = useDesktopI18n();
   const { favoriteCount } = useFavorites();
@@ -38,7 +40,7 @@ export function DesktopFavoritesPage({
           repository={repository}
           onOpen={openWork}
           storageKey="localogue.desktop.favorites-view"
-          initialQuery={{ favoriteOnly: true }}
+          initialQuery={{ favoriteOnly: true, ...(searchText ? { text: searchText } : {}) }}
         />
       )}
     </div>

@@ -120,13 +120,13 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
  * Tauri 无边框窗口的第一行。标题栏空白区域使用 data-tauri-drag-region，
  * 输入框和按钮仍然是可交互区域，不会抢走拖动手势。
  */
-export function DesktopTopbar({ version, onSearch }: { version?: string; onSearch: (text: string) => void }) {
+export function DesktopTopbar({ version, search }: { version?: string; search?: { placeholder: string; value?: string; onSubmit: (text: string) => void } }) {
   const { t } = useDesktopI18n();
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(search?.value ?? "");
   function submitSearch(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     const text = searchText.trim();
-    if (text) onSearch(text);
+    if (search) search.onSubmit(text);
   }
   const appWindow = getCurrentWindow();
   function startWindowDrag(event: MouseEvent<HTMLElement>): void {
@@ -138,10 +138,10 @@ export function DesktopTopbar({ version, onSearch }: { version?: string; onSearc
   return <header className="topbar window-chrome" onMouseDown={startWindowDrag}>
     <div className="topbar-main">
       <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
-      <form className="topbar-search" role="search" onSubmit={submitSearch}>
-        <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} />
+      {search ? <form className="topbar-search" role="search" onSubmit={submitSearch}>
+        <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={search.placeholder} aria-label={search.placeholder} />
         <button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button>
-      </form>
+      </form> : null}
       <div className="topbar-end">
         <DesktopLanguageControls compact />
         <div className="window-controls" onMouseDown={(event) => event.stopPropagation()}>

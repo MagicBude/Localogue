@@ -86,6 +86,9 @@ export default function App() {
   const [page, setPage] = useState<DesktopPage>("home");
   const [detail, setDetail] = useState<DetailTarget>(null);
   const [worksInitialQuery, setWorksInitialQuery] = useState<WorkQuery | undefined>();
+  const [peopleSearchText, setPeopleSearchText] = useState("");
+  const [catalogSearchText, setCatalogSearchText] = useState("");
+  const [favoritesSearchText, setFavoritesSearchText] = useState("");
   const [messageState, setMessageState] = useState(() => ({ revision: 0, text: t("正在连接 Tauri Runtime…") }));
   const message = messageState.text;
   const messageTone = classifyMessageTone(message);
@@ -456,12 +459,23 @@ export default function App() {
 
   const hasLibrarySource = readRoots.length > 0;
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
+  const topbarSearch = detail ? undefined
+    : page === "works"
+      ? { placeholder: t("搜索番号或标题"), value: worksInitialQuery?.text, onSubmit: (text: string) => filterWorks({ ...(text ? { text } : {}), sort: "release_desc" }) }
+      : page === "people"
+        ? { placeholder: t("搜索姓名 / 别名 / 旧艺名"), value: peopleSearchText, onSubmit: setPeopleSearchText }
+        : page === "browse"
+          ? { placeholder: t("搜索分类名称或 ID"), value: catalogSearchText, onSubmit: setCatalogSearchText }
+          : page === "favorites"
+            ? { placeholder: t("搜索收藏作品"), value: favoritesSearchText, onSubmit: setFavoritesSearchText }
+            : undefined;
 
   return (
     <div className={sidebarCollapsed ? "desktop-window is-sidebar-collapsed" : "desktop-window"}>
       <DesktopTopbar
+        key={`${page}:${detail?.kind ?? "list"}`}
         version={runtime?.version}
-        onSearch={(text) => filterWorks({ text, sort: "release_desc" })}
+        search={topbarSearch}
       />
       <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
       <DesktopSidebar
@@ -518,6 +532,7 @@ export default function App() {
           <DesktopFavoritesPage
             repository={repository}
             openWork={openWork}
+            searchText={favoritesSearchText}
           />
         ) : page === "people" ? (
           detail?.kind === "person" ? (
@@ -532,10 +547,10 @@ export default function App() {
               runtimeContractRevision={runtime?.contractRevision ?? 0}
             />
           ) : (
-            <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
+            <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} searchText={peopleSearchText} />
           )
         ) : page === "browse" ? (
-          <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} />
+          <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} searchText={catalogSearchText} />
         ) : page === "review" ? (
           <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="review" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "curation" ? (

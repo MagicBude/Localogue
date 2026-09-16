@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   getPreferredPersonName,
@@ -26,10 +26,12 @@ export function DesktopCatalogBrowser({
   repository,
   openWork,
   setMessage,
+  searchText,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
   setMessage: (message: string) => void;
+  searchText?: string;
 }) {
   const { t, uiLanguage, metadataLanguage } = useDesktopI18n();
   const [selection, setSelection] = useState<CatalogSelection | null>(null);
@@ -37,6 +39,7 @@ export function DesktopCatalogBrowser({
   const [genreFacet, setGenreFacet] = useState<GenreFacetFilter>("all");
   const [search, setSearch] = useState("");
   const [catalogRevision, setCatalogRevision] = useState(0);
+  useEffect(() => setSearch(searchText ?? ""), [searchText]);
   const usageLabels = catalogUsageLabels(uiLanguage);
   const data = useAsyncCatalogData(async () => {
     const [result, organizations, series, libraryGenres, tags, people] = await Promise.all([
@@ -163,14 +166,6 @@ export function DesktopCatalogBrowser({
   return (
     <div className="page-stack desktop-catalog-page">
       <section className="settings-card form-card desktop-catalog-toolbar">
-        <label className="search-box">
-          <span>{t("搜索")}</span>
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={`${t("名称")} / ID`}
-          />
-        </label>
         <div className="button-row" aria-label={`${t("作品")} filter`}>
           <button
             className={usageFilter === "used" ? "primary-button" : "ghost-button"}

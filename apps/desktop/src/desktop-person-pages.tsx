@@ -20,15 +20,17 @@ export function DesktopPeoplePage({
   openPerson,
   onLibraryChanged,
   setMessage,
+  searchText,
 }: {
   repository: TauriLibraryRepository;
   openPerson: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
+  searchText?: string;
 }) {
   return (
     <div className="page-stack desktop-library-page">
-      <DesktopPersonExplorer repository={repository} onOpen={openPerson} toolbarAction={<CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />} />
+      <DesktopPersonExplorer repository={repository} onOpen={openPerson} searchText={searchText} toolbarAction={<CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />} />
     </div>
   );
 }
