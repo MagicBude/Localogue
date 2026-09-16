@@ -1739,16 +1739,32 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-library-page .desktop-work-grid .desktop-work-card__body { padding: 9px 10px 11px; }
 .desktop-library-page .desktop-work-grid .desktop-work-card__body h3 { margin-block: 4px 5px; }
 .desktop-library-page .desktop-pagination:not(.is-compact) {
-  position: sticky;
-  bottom: 0;
-  z-index: 6;
+  position: static;
+  z-index: auto;
   justify-content: space-between;
-  margin-top: 4px;
+  margin: 0;
+  padding: 0;
+  border-top: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+.desktop-library-page .desktop-results-panel { padding-bottom: 64px; }
+.desktop-pagination-dock {
+  position: fixed;
+  left: calc(176px + 16px);
+  right: 16px;
+  bottom: 0;
+  z-index: 12;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
   padding: 7px 10px;
   border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--panel) 94%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+  box-shadow: 0 -5px 18px rgba(0,0,0,.07);
+  backdrop-filter: blur(14px);
 }
+.desktop-window.is-sidebar-collapsed .desktop-pagination-dock { left: calc(68px + 16px); }
 .desktop-library-page .desktop-pagination__controls,
 .desktop-library-page .desktop-pagination__numbers,
 .desktop-library-page .desktop-pagination__jump,
@@ -1773,8 +1789,48 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-library-page .desktop-pagination__size { justify-content: flex-end; }
 }
 
+/* 115-Desktop 风格的窗口级标题栏：搜索保持在窗口顶部，分页保持在窗口底部。
+   两者都脱离页面内容流，滚动作品卡片时不会随内容移动或重新排版。 */
+.window-chrome {
+  user-select: none;
+  -webkit-app-region: drag;
+}
+.window-chrome .topbar-main {
+  grid-template-columns: minmax(150px, 1fr) minmax(300px, 560px) minmax(260px, 1fr);
+  min-height: 42px;
+  gap: 12px;
+}
+.window-chrome .topbar-search,
+.window-chrome .desktop-language-controls,
+.window-chrome .window-controls,
+.window-chrome input,
+.window-chrome button,
+.window-chrome select,
+.window-chrome label { -webkit-app-region: no-drag; }
+.window-chrome .topbar-search { justify-self: center; width: min(100%, 560px); }
+.window-chrome .topbar-end { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+.window-chrome .desktop-language-controls { justify-self: end; padding-right: 0; }
+.window-controls { display: flex; align-self: stretch; align-items: stretch; justify-content: flex-end; gap: 0; }
+.window-control {
+  width: 42px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+}
+.window-control svg { width: 16px; height: 16px; }
+.window-control:hover:not(:disabled) { border-color: transparent; background: rgba(0,0,0,.07); color: var(--text); }
+.window-control.is-close:hover:not(:disabled) { background: #c42b1c; color: #fff; }
+
 @media (max-width: 1180px) {
   .content-shell { padding-inline: 16px; }
+  .window-chrome .topbar-main { grid-template-columns: minmax(120px, 1fr) minmax(240px, 460px) auto; }
+  .desktop-pagination-dock { left: 16px; }
+  .desktop-window.is-sidebar-collapsed .desktop-pagination-dock { left: 16px; }
 }
 
 /* V1-23 Governance Parity -------------------------------------------------- */

@@ -458,7 +458,7 @@ export default function App() {
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
 
   return (
-    <div className="desktop-window">
+    <div className={sidebarCollapsed ? "desktop-window is-sidebar-collapsed" : "desktop-window"}>
       <DesktopTopbar
         version={runtime?.version}
         onSearch={(text) => filterWorks({ text, sort: "release_desc" })}

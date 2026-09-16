@@ -897,3 +897,4 @@
 - 新增 `validate:registry` 与 `registry:audit`，并把 Registry Validator 接入 `pnpm check`。
 - 不进行基于名称相似度的自动 Organization 合并。
 - Settings V2 将私人资料位置、内容目录和社区资料路径收敛到影片库 Profile，删除全局路径镜像；Native 只在读取旧设置时迁移一次，保存后不再生成旧字段。该配置升级按单用户开发阶段处理，旧 EXE 不保证读取新设置。
+- Desktop 浏览框架参考 115-Desktop 再收敛：Tauri 使用自绘无边框标题栏，将搜索、语言与最小化/最大化/关闭控制放入窗口框；作品与人物分页、跳页和每页数量改为固定在窗口底部的停靠条，避免吸顶分页在滚到底部时跳动或遮挡结果。等待用户实机验收拖动窗口与底栏位置。

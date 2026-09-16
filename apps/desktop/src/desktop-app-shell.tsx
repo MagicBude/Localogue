@@ -18,8 +18,12 @@ import {
   Wrench20Regular,
   Settings20Regular,
   Toolbox20Regular,
+  Subtract20Regular,
+  SquareMultiple20Regular,
+  Dismiss20Regular,
 } from "@fluentui/react-icons";
 import { useState, type ComponentType, type FormEvent } from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
 import { activeLibraryProfile } from "./library-profiles";
@@ -109,7 +113,13 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
   </aside>;
 }
 
-/** 顶部应用框架只保留跨页面能力；页面设置和数据刷新由各自唯一入口负责。 */
+/**
+ * 自绘窗口标题栏承载跨页面搜索和原生窗口控制。
+ *
+ * 115-Desktop 的搜索位于窗口最上方，不随页面滚动；Localogue 也把它放到
+ * Tauri 无边框窗口的第一行。标题栏空白区域使用 data-tauri-drag-region，
+ * 输入框和按钮仍然是可交互区域，不会抢走拖动手势。
+ */
 export function DesktopTopbar({ version, onSearch }: { version?: string; onSearch: (text: string) => void }) {
   const { t } = useDesktopI18n();
   const [searchText, setSearchText] = useState("");
@@ -118,7 +128,24 @@ export function DesktopTopbar({ version, onSearch }: { version?: string; onSearc
     const text = searchText.trim();
     if (text) onSearch(text);
   }
-  return <header className="topbar"><div className="topbar-main"><span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span><form className="topbar-search" role="search" onSubmit={submitSearch}><input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} /><button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button></form><DesktopLanguageControls compact /></div></header>;
+  const appWindow = getCurrentWindow();
+  return <header className="topbar window-chrome" data-tauri-drag-region>
+    <div className="topbar-main" data-tauri-drag-region>
+      <span className="topbar-product" data-tauri-drag-region>{`Localogue · ${version ?? "…"}`}</span>
+      <form className="topbar-search" role="search" onSubmit={submitSearch}>
+        <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} />
+        <button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button>
+      </form>
+      <div className="topbar-end">
+        <DesktopLanguageControls compact />
+        <div className="window-controls" onMouseDown={(event) => event.stopPropagation()}>
+          <button type="button" className="window-control" aria-label={t("最小化")} title={t("最小化")} onClick={() => void appWindow.minimize()}><Subtract20Regular aria-hidden="true" /></button>
+          <button type="button" className="window-control" aria-label={t("最大化")} title={t("最大化")} onClick={() => void appWindow.toggleMaximize()}><SquareMultiple20Regular aria-hidden="true" /></button>
+          <button type="button" className="window-control is-close" aria-label={t("关闭")} title={t("关闭")} onClick={() => void appWindow.close()}><Dismiss20Regular aria-hidden="true" /></button>
+        </div>
+      </div>
+    </div>
+  </header>;
 }
 
 export function DesktopContextTabs({ page, settingsModule, onNavigate, onSettingsModule }: { page: DesktopPage; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {

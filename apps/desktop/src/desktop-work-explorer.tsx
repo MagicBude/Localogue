@@ -354,7 +354,7 @@ export function DesktopWorkExplorer({
             onLoadMore={loadMoreWaterfallItems}
           />
         ) : null}
-        {showPagination ? <DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} /> : null}
+        {showPagination ? <div className="desktop-pagination-dock"><DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} /></div> : null}
       </section>
     </div>
   );

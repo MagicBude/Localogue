@@ -108,7 +108,7 @@ export function DesktopPersonExplorer({
           ))}
         </div>
         {!visible.length ? <ExplorerState>{t("没有符合当前筛选条件的演员。")}</ExplorerState> : null}
-        {pagination}
+        {pagination ? <div className="desktop-pagination-dock">{pagination}</div> : null}
       </section>
     </>
   );
