@@ -1751,7 +1751,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-library-page .desktop-results-panel { padding-bottom: 64px; }
 .desktop-pagination-dock {
   position: fixed;
-  left: calc(176px + 16px);
+  left: calc(var(--desktop-sidebar-width, 176px) + 16px);
   right: 16px;
   bottom: 0;
   z-index: 12;
@@ -1764,7 +1764,8 @@ select[multiple] { min-height: 105px; padding: 6px; }
   box-shadow: 0 -5px 18px rgba(0,0,0,.07);
   backdrop-filter: blur(14px);
 }
-.desktop-window.is-sidebar-collapsed .desktop-pagination-dock { left: calc(68px + 16px); }
+.desktop-window { --desktop-sidebar-width: 176px; }
+.desktop-window.is-sidebar-collapsed { --desktop-sidebar-width: 68px; }
 .desktop-library-page .desktop-pagination__controls,
 .desktop-library-page .desktop-pagination__numbers,
 .desktop-library-page .desktop-pagination__jump,
@@ -1793,7 +1794,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
    两者都脱离页面内容流，滚动作品卡片时不会随内容移动或重新排版。 */
 .window-chrome {
   user-select: none;
-  -webkit-app-region: drag;
+  -webkit-app-region: no-drag;
 }
 .window-chrome .topbar-main {
   grid-template-columns: minmax(150px, 1fr) minmax(300px, 560px) minmax(260px, 1fr);
@@ -1829,8 +1830,9 @@ select[multiple] { min-height: 105px; padding: 6px; }
 @media (max-width: 1180px) {
   .content-shell { padding-inline: 16px; }
   .window-chrome .topbar-main { grid-template-columns: minmax(120px, 1fr) minmax(240px, 460px) auto; }
-  .desktop-pagination-dock { left: 16px; }
-  .desktop-window.is-sidebar-collapsed .desktop-pagination-dock { left: 16px; }
+}
+@media (max-width: 1040px) {
+  .desktop-window:not(.is-sidebar-collapsed) { --desktop-sidebar-width: 168px; }
 }
 
 /* V1-23 Governance Parity -------------------------------------------------- */

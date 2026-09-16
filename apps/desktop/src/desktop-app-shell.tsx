@@ -22,7 +22,7 @@ import {
   SquareMultiple20Regular,
   Dismiss20Regular,
 } from "@fluentui/react-icons";
-import { useState, type ComponentType, type FormEvent } from "react";
+import { useState, type ComponentType, type FormEvent, type MouseEvent } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
@@ -129,9 +129,14 @@ export function DesktopTopbar({ version, onSearch }: { version?: string; onSearc
     if (text) onSearch(text);
   }
   const appWindow = getCurrentWindow();
-  return <header className="topbar window-chrome" data-tauri-drag-region>
-    <div className="topbar-main" data-tauri-drag-region>
-      <span className="topbar-product" data-tauri-drag-region>{`Localogue · ${version ?? "…"}`}</span>
+  function startWindowDrag(event: MouseEvent<HTMLElement>): void {
+    const target = event.target as HTMLElement;
+    if (target.closest("input, button, select, summary, details, label, form")) return;
+    void appWindow.startDragging();
+  }
+  return <header className="topbar window-chrome" onMouseDown={startWindowDrag}>
+    <div className="topbar-main">
+      <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
       <form className="topbar-search" role="search" onSubmit={submitSearch}>
         <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={t("搜索番号或标题")} aria-label={t("搜索番号或标题")} />
         <button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button>
