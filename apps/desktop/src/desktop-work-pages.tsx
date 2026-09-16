@@ -52,7 +52,7 @@ export function DesktopWorksPage({
 }) {
   const { t } = useDesktopI18n();
   return (
-    <div className="page-stack">
+    <div className="page-stack desktop-library-page">
       <div className="desktop-page-heading-row">
         <section className="page-title">
           <h1>{t("作品库")}</h1>

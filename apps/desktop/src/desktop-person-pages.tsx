@@ -28,7 +28,7 @@ export function DesktopPeoplePage({
 }) {
   const { t } = useDesktopI18n();
   return (
-    <div className="page-stack">
+    <div className="page-stack desktop-library-page">
       <section className="page-title">
         <span className="eyebrow">PEOPLE · PROFILE · ADVANCED FILTER</span>
         <h1>{t("人物库")}</h1>
