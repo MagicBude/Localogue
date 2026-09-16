@@ -167,7 +167,7 @@ function PersonFilterPanel({
         <div><strong>{t("人物筛选")}</strong><small>{activeCount ? t("已启用 {count} 个条件", { count: activeCount }) : t("姓名、状态、年份和身高")}</small></div>
         <div className="desktop-person-filter-actions">{pagination}<button onClick={() => onChange({ sort: "name_asc" })} type="button">{t("清除")}</button></div>
       </div>
-      <div className="desktop-person-filter-compact"><label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label><button type="button" onClick={() => setAdvancedOpen((value) => !value)}>{advancedOpen ? t("收起筛选") : t("更多筛选")}{activeCount ? ` · ${activeCount}` : ""}</button></div>
+      <div className="desktop-person-filter-compact"><label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label><button type="button" aria-expanded={advancedOpen} onClick={() => setAdvancedOpen((value) => !value)}>{advancedOpen ? t("收起筛选") : t("更多筛选")}{activeCount ? ` · ${activeCount}` : ""}</button></div>
       {advancedOpen ? <div className="desktop-person-filter-grid">
         <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
         <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
