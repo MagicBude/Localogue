@@ -174,7 +174,7 @@ function PersonFilterPanel({
   return (
     <section className="desktop-facet-bar desktop-person-facet-bar">
       <div className="desktop-facet-bar__primary">
-        <label className="field desktop-facet-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
+        <label className="field desktop-facet-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input aria-label={t("搜索姓名 / 别名 / 旧艺名")} placeholder={t("搜索姓名 / 别名 / 旧艺名")} value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
         <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
         <label className="field"><span>{t("排序")}</span><select value={query.sort ?? "name_asc"} onChange={(event) => patch({ sort: event.target.value as PersonSort })}>
           <option value="name_asc">{t("名称")} A → Z</option><option value="name_desc">{t("名称")} Z → A</option>
