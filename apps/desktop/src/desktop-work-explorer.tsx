@@ -308,6 +308,7 @@ export function DesktopWorkExplorer({
 
   const { result, cards } = data.value;
   const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
+  // 单页仍保留右侧“每页显示”，只隐藏没有意义的翻页、页码与跳转控件。
   const showPagination = !isWaterfall && result.total > 0;
 
   function changePage(nextPage: number): void {

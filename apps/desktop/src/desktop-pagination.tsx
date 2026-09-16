@@ -37,8 +37,8 @@ export function DesktopPagination({
       ? Array.from({ length: pageCount }, (_, index) => index + 1)
       : [...new Set([1, Math.max(1, page - 1), page, Math.min(pageCount, page + 1), pageCount])].sort((a, b) => a - b);
     return (
-      <nav className="desktop-pagination" aria-label={t("分页")}>
-        <div className="desktop-pagination__controls">
+      <nav className={pageCount <= 1 ? "desktop-pagination is-single-page" : "desktop-pagination"} aria-label={t("分页")}>
+        {pageCount > 1 ? <div className="desktop-pagination__controls">
           <button type="button" title={t("上一页")} aria-label={t("上一页")} disabled={page <= 1} onClick={() => onChange(Math.max(1, page - 1))}><ChevronLeft20Regular /></button>
           <div className="desktop-pagination__numbers">
             {visiblePages.map((item, index) => {
@@ -49,7 +49,7 @@ export function DesktopPagination({
           <button type="button" title={t("下一页")} aria-label={t("下一页")} disabled={page >= pageCount} onClick={() => onChange(Math.min(pageCount, page + 1))}><ChevronRight20Regular /></button>
           <label className="desktop-pagination__jump"><span>{t("跳转")}</span><input inputMode="numeric" min="1" max={pageCount} value={jumpValue} onChange={(event) => setJumpValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") jump(); }} onBlur={jump} type="number" /><span>{t("页")}</span></label>
           <span className="desktop-pagination__total">{t("共 {count} 页", { count: pageCount })}</span>
-        </div>
+        </div> : null}
         {onPageSizeChange && pageSize ? <label className="desktop-pagination__size"><span>{t("每页显示")}</span><select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>{pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label> : null}
       </nav>
     );

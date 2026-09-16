@@ -130,6 +130,7 @@ export function DesktopTopbar({ version, onSearch }: { version?: string; onSearc
   }
   const appWindow = getCurrentWindow();
   function startWindowDrag(event: MouseEvent<HTMLElement>): void {
+    if (event.button !== 0) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, button, select, summary, details, label, form")) return;
     void appWindow.startDragging();
