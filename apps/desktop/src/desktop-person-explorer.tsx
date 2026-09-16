@@ -86,10 +86,15 @@ export function DesktopPersonExplorer({
 
   return (
     <>
-      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} pagination={pagination} />
+      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} />
       <section className="desktop-results-panel desktop-people-results" ref={resultsPanelRef}>
+        <PersonFilterChips query={query} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
           <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
+          <div className="desktop-results-toolbar__actions">
+            {pagination}
+            <button className="desktop-facet-clear" disabled={!hasPersonFilters(query)} onClick={() => changeQuery({ sort: "name_asc" })} type="button">{t("清除")}</button>
+          </div>
         </div>
         <div className="desktop-person-grid">
           {visible.map((person) => (
@@ -141,7 +146,6 @@ function PersonFilterPanel({
   query,
   onChange,
   data,
-  pagination,
 }: {
   query: PersonQuery;
   onChange: (query: PersonQuery) => void;
@@ -151,9 +155,9 @@ function PersonFilterPanel({
     debutYears: string[];
     retirementYears: string[];
   };
-  pagination?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
+  const [moreOpen, setMoreOpen] = useState(false);
   const patch = (next: Partial<PersonQuery>) => onChange({ ...query, ...next });
   const selectedStatus = query.statuses?.[0] ?? "";
   const selectedBirth = query.birthYears?.[0] ?? "";
@@ -161,28 +165,51 @@ function PersonFilterPanel({
   const selectedRetirement = query.retirementYears?.[0] ?? "";
   const activeCount = [selectedStatus, selectedBirth, selectedDebut, selectedRetirement, query.heightMin, query.heightMax].filter(Boolean).length;
   return (
-    <section className="desktop-person-filter-panel">
-      <div className="desktop-person-filter-heading">
-        <div><strong>{t("人物筛选")}</strong><small>{activeCount ? t("已启用 {count} 个条件", { count: activeCount }) : t("姓名、状态、年份和身高")}</small></div>
-        <div className="desktop-person-filter-actions">{pagination}<button onClick={() => onChange({ sort: "name_asc" })} type="button">{t("清除")}</button></div>
-      </div>
-      <div className="desktop-person-filter-grid">
-        <label className="field desktop-person-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
+    <section className="desktop-facet-bar desktop-person-facet-bar">
+      <div className="desktop-facet-bar__primary">
+        <label className="field desktop-facet-search"><span>{t("搜索姓名 / 别名 / 旧艺名")}</span><input value={query.text ?? ""} onChange={(event: ChangeEvent<HTMLInputElement>) => patch({ text: event.target.value || undefined })} type="search" /></label>
         <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
-        <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
-        <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
-        <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
-        <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
-        <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
         <label className="field"><span>{t("排序")}</span><select value={query.sort ?? "name_asc"} onChange={(event) => patch({ sort: event.target.value as PersonSort })}>
           <option value="name_asc">{t("名称")} A → Z</option><option value="name_desc">{t("名称")} Z → A</option>
           <option value="debut_desc">{t("出道年份")} ↓</option><option value="debut_asc">{t("出道年份")} ↑</option>
           <option value="birth_desc">{t("出生年份")} ↓</option><option value="birth_asc">{t("出生年份")} ↑</option>
           <option value="height_desc">{t("身高")} ↓</option><option value="height_asc">{t("身高")} ↑</option>
         </select></label>
+        <button className="desktop-facet-toggle" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)} type="button">{t("更多")}{activeCount ? <span className="desktop-facet-toggle__badge">{activeCount}</span> : null}<span className="desktop-facet-toggle__caret">{moreOpen ? "▴" : "▾"}</span></button>
       </div>
+      {moreOpen ? <div className="desktop-person-filter-menu">
+        <div className="desktop-person-filter-menu__grid">
+          <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
+          <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
+          <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
+          <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
+          <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
+        </div>
+      </div> : null}
     </section>
   );
+}
+
+function PersonFilterChips({ query, onChange }: { query: PersonQuery; onChange: (query: PersonQuery) => void }) {
+  const { t } = useDesktopI18n();
+  const selectedStatus = query.statuses?.[0];
+  const selectedBirth = query.birthYears?.[0];
+  const selectedDebut = query.debutYears?.[0];
+  const selectedRetirement = query.retirementYears?.[0];
+  const chips: Array<{ label: string; clear: () => void }> = [];
+  if (query.text) chips.push({ label: `${t("搜索")}: ${query.text}`, clear: () => onChange({ ...query, text: undefined }) });
+  if (selectedStatus) chips.push({ label: `${t("状态")}: ${personActivityStatusLabel(selectedStatus, t)}`, clear: () => onChange({ ...query, statuses: undefined }) });
+  if (selectedDebut) chips.push({ label: `${t("出道年份")}: ${selectedDebut}`, clear: () => onChange({ ...query, debutYears: undefined }) });
+  if (selectedRetirement) chips.push({ label: `${t("引退年份")}: ${selectedRetirement}`, clear: () => onChange({ ...query, retirementYears: undefined }) });
+  if (selectedBirth) chips.push({ label: `${t("出生年份")}: ${selectedBirth}`, clear: () => onChange({ ...query, birthYears: undefined }) });
+  if (query.heightMin !== undefined) chips.push({ label: `${t("身高 ≥")}: ${query.heightMin}`, clear: () => onChange({ ...query, heightMin: undefined }) });
+  if (query.heightMax !== undefined) chips.push({ label: `${t("身高 ≤")}: ${query.heightMax}`, clear: () => onChange({ ...query, heightMax: undefined }) });
+  if (!chips.length) return null;
+  return <div className="desktop-active-filters"><strong>{t("已选筛选")}</strong><div>{chips.map((chip) => <button key={chip.label} onClick={chip.clear} type="button">{chip.label} ×</button>)}</div></div>;
+}
+
+function hasPersonFilters(query: PersonQuery): boolean {
+  return Boolean(query.text || query.statuses?.length || query.birthYears?.length || query.debutYears?.length || query.retirementYears?.length || query.heightMin !== undefined || query.heightMax !== undefined);
 }
 
 function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {

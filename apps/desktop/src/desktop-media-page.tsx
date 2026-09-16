@@ -504,7 +504,7 @@ export function DesktopMediaPage({
       <MediaLibrarySection
         loading={data.loading}
         error={data.error}
-        media={data.value?.media.filter((item) => !item.scanRoot || visibleRoots.some((root) => samePath(root, item.scanRoot)))}
+        media={data.value?.media.filter((item) => item.scanRoot ? visibleRoots.some((root) => samePath(root, item.scanRoot!)) : true)}
         works={data.value?.works}
         assetCount={data.value?.assets.length}
         bindingMediaId={bindingMediaId}

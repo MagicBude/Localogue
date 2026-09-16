@@ -1025,6 +1025,53 @@ select[multiple] { min-height: 105px; padding: 6px; }
   background: rgba(247, 247, 243, .94);
   backdrop-filter: blur(14px);
 }
+.desktop-person-facet-bar {
+  position: sticky;
+  top: 88px;
+  z-index: 9;
+  gap: 8px;
+  padding: 10px 12px;
+}
+.desktop-person-facet-bar .desktop-facet-bar__primary {
+  align-items: end;
+}
+.desktop-person-facet-bar .desktop-facet-search {
+  flex: 1 1 300px;
+  min-width: 250px;
+}
+.desktop-person-facet-bar .desktop-facet-bar__primary > .field:not(.desktop-facet-search) {
+  flex: 0 1 170px;
+}
+.desktop-person-filter-menu {
+  position: absolute;
+  z-index: 32;
+  top: calc(100% + 7px);
+  right: 12px;
+  width: min(560px, calc(100vw - 112px));
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 14px 36px rgba(0,0,0,.2);
+}
+.desktop-person-filter-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.desktop-person-filter-menu__grid .field { min-width: 0; }
+.desktop-results-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.desktop-results-toolbar__actions .desktop-facet-clear {
+  min-height: 34px;
+  padding: 0 11px;
+}
+@media (prefers-color-scheme: dark) {
+  .desktop-person-filter-menu { background: #20211e; }
+}
 .desktop-person-filter-actions { display: flex; align-items: center; gap: 8px; }
 .desktop-person-filter-compact { display: flex; align-items: end; gap: 10px; }
 .desktop-person-filter-compact .field { flex: 1 1 auto; min-width: 0; }
@@ -1105,12 +1152,12 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-person-detail-copy h1 { margin: 8px 0; }
 
 @media (max-width: 1180px) {
-  .desktop-person-filter-grid { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
-  .desktop-person-search { grid-column: span 2; }
+  .desktop-person-facet-bar .desktop-facet-bar__primary { flex-wrap: wrap; }
+  .desktop-person-facet-bar .desktop-facet-search { flex: 1 1 100%; }
+  .desktop-person-facet-bar .desktop-facet-bar__primary > .field:not(.desktop-facet-search) { flex: 1 1 140px; }
 }
 @media (max-width: 860px) {
-  .desktop-person-filter-grid { grid-template-columns: 1fr 1fr; }
-  .desktop-person-search { grid-column: 1 / -1; }
+  .desktop-person-filter-menu__grid { grid-template-columns: 1fr 1fr; }
   .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
 }
 .desktop-catalog-sections { display: grid; gap: 16px; }
