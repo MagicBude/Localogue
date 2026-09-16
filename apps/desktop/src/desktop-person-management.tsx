@@ -7,6 +7,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { compactLocalizedText, datePrecision, isPositiveInteger, isValidPartialDate, message } from "./desktop-management-utils";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useUiConfirm } from "./ui/confirm-dialog";
+import { UiActionDialog } from "./ui/action-dialog";
 
 /** Desktop Person 的新建与编辑表单；名称类型在本模块内保持明确语义。 */
 export function CreatePersonPanel({ repository, onSaved, setMessage }: { repository: TauriLibraryRepository; onSaved: (person: Person) => void; setMessage: (message: string) => void }) {
@@ -43,7 +44,17 @@ export function CreatePersonPanel({ repository, onSaved, setMessage }: { reposit
     finally { operationPending.current = false; setBusy(false); }
   }
 
-  return <section className="settings-card compact-management-card"><div className="section-heading"><div><span className="eyebrow">PRIVATE CRUD</span><h2>{t("新建人物")}</h2></div><button className={open ? "ghost-button" : "primary-button"} disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("+ 新建 Person")}</button></div>{open ? <fieldset className="editor-grid" disabled={busy}><label>{t("日文主名称")}<input value={nameJa} onChange={(event) => setNameJa(event.target.value)} /></label><label>{t("中文名称")}<input value={nameZh} onChange={(event) => setNameZh(event.target.value)} /></label><label>{t("英文名称")}<input value={nameEn} onChange={(event) => setNameEn(event.target.value)} /></label><div className="form-actions"><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div></fieldset> : null}</section>;
+  return <div className="desktop-create-person-trigger-row">
+    <button className="primary-button" disabled={busy} onClick={() => setOpen(true)}>{t("+ 新建 Person")}</button>
+    <UiActionDialog open={open} onOpenChange={setOpen} title={t("新建人物")} description={t("先建立人物主名称，保存后可继续补充别名、状态和图片。") } closeLabel={t("关闭")}>
+      <fieldset className="editor-grid" disabled={busy}>
+        <label>{t("日文主名称")}<input value={nameJa} onChange={(event) => setNameJa(event.target.value)} /></label>
+        <label>{t("中文名称")}<input value={nameZh} onChange={(event) => setNameZh(event.target.value)} /></label>
+        <label>{t("英文名称")}<input value={nameEn} onChange={(event) => setNameEn(event.target.value)} /></label>
+        <div className="form-actions"><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : t("创建")}</button></div>
+      </fieldset>
+    </UiActionDialog>
+  </div>;
 }
 
 /** 取消会重新建立编辑会话，丢弃这次尚未保存的字段，同时不触碰磁盘。 */

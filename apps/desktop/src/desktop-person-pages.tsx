@@ -26,16 +26,9 @@ export function DesktopPeoplePage({
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
 }) {
-  const { t } = useDesktopI18n();
   return (
     <div className="page-stack desktop-library-page">
-      <section className="page-title">
-        <span className="eyebrow">PEOPLE · PROFILE · ADVANCED FILTER</span>
-        <h1>{t("人物库")}</h1>
-        <p>{t("对齐 Web 的人物高级筛选：姓名 / 别名、活动状态、出道年份、引退年份、出生年份、身高区间和排序；人物库仍按有 performer 作品关系的人物收口。")}</p>
-      </section>
-      <CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />
-      <DesktopPersonExplorer repository={repository} onOpen={openPerson} />
+      <DesktopPersonExplorer repository={repository} onOpen={openPerson} toolbarAction={<CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />} />
     </div>
   );
 }

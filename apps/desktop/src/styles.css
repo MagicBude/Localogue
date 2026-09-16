@@ -1157,11 +1157,25 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-person-filter-menu__grid { grid-template-columns: 1fr 1fr; }
   .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
 }
-.desktop-catalog-sections { display: grid; gap: 16px; }
+.desktop-catalog-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+.desktop-catalog-toolbar { padding: 10px 12px; }
+.desktop-catalog-scroll {
+  min-height: 0;
+  overflow: auto;
+  padding: 0 4px 12px 0;
+  scrollbar-gutter: stable;
+}
+.desktop-catalog-sections { display: grid; gap: 12px; }
 /* Genre 维度较多，滚动目录时保留工具栏；布局样式集中在 CSS，组件只描述语义和状态。 */
 .catalog-genre-facet-toolbar {
   position: sticky;
-  top: 80px;
+  top: 0;
   z-index: 8;
   margin-block: 12px 18px;
   padding-block: 10px;
@@ -1713,19 +1727,21 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-context-tabs { padding-top: 4px; }
 .context-tabs { padding: 2px; }
 .context-tabs button { min-height: 30px; }
-.content-shell:has(.desktop-library-page) {
+.content-shell:has(.desktop-library-page),
+.content-shell:has(.desktop-catalog-page) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding-bottom: 12px;
 }
-.content-shell:has(.desktop-library-page) > .desktop-context-tabs { flex: 0 0 auto; }
+.content-shell:has(.desktop-library-page) > .desktop-context-tabs,
+.content-shell:has(.desktop-catalog-page) > .desktop-context-tabs { flex: 0 0 auto; }
 .desktop-library-page {
   flex: 1 1 auto;
   height: auto;
   min-height: 0;
   gap: 10px;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   overflow: hidden;
 }
 .desktop-library-page > .page-title { padding-top: 2px; }
@@ -1793,6 +1809,14 @@ select[multiple] { min-height: 105px; padding: 6px; }
   padding: 10px;
   scrollbar-gutter: stable;
 }
+.desktop-browser-toolbar-action {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: end;
+}
+.desktop-browser-toolbar-action .primary-button { min-height: 34px; padding-block: 6px; white-space: nowrap; }
+.desktop-create-work-trigger-row,
+.desktop-create-person-trigger-row { display: contents; }
 .desktop-pagination-dock {
   position: relative;
   z-index: 2;

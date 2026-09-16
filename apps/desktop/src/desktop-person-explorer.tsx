@@ -19,9 +19,11 @@ const DEFAULT_PAGE_SIZE = 24;
 export function DesktopPersonExplorer({
   repository,
   onOpen,
+  toolbarAction,
 }: {
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
+  toolbarAction?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
@@ -86,8 +88,8 @@ export function DesktopPersonExplorer({
     : undefined;
 
   return (
-    <>
-      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} />
+    <div className="desktop-library-layout">
+      <PersonFilterPanel query={query} onChange={changeQuery} data={data.value} toolbarAction={toolbarAction} />
       <section className="desktop-results-panel desktop-people-results" ref={resultsPanelRef}>
         <PersonFilterChips query={query} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
@@ -112,7 +114,7 @@ export function DesktopPersonExplorer({
         </div>
         {pagination ? <div className="desktop-pagination-dock">{pagination}</div> : null}
       </section>
-    </>
+    </div>
   );
 }
 
@@ -149,6 +151,7 @@ function PersonFilterPanel({
   query,
   onChange,
   data,
+  toolbarAction,
 }: {
   query: PersonQuery;
   onChange: (query: PersonQuery) => void;
@@ -158,6 +161,7 @@ function PersonFilterPanel({
     debutYears: string[];
     retirementYears: string[];
   };
+  toolbarAction?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -179,6 +183,7 @@ function PersonFilterPanel({
           <option value="height_desc">{t("身高")} ↓</option><option value="height_asc">{t("身高")} ↑</option>
         </select></label>
         <button className="desktop-facet-toggle" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)} type="button">{t("更多")}{activeCount ? <span className="desktop-facet-toggle__badge">{activeCount}</span> : null}<span className="desktop-facet-toggle__caret">{moreOpen ? "▴" : "▾"}</span></button>
+        {toolbarAction ? <div className="desktop-browser-toolbar-action">{toolbarAction}</div> : null}
       </div>
       {moreOpen ? <div className="desktop-person-filter-menu">
         <div className="desktop-person-filter-menu__grid">

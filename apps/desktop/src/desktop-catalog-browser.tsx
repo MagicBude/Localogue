@@ -20,7 +20,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { DesktopTagManager } from "./desktop-tag-manager";
-import { catalogCommunityDescription, catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetAriaLabel, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
+import { catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetAriaLabel, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
 
 export function DesktopCatalogBrowser({
   repository,
@@ -161,14 +161,8 @@ export function DesktopCatalogBrowser({
   ];
 
   return (
-    <div className="page-stack">
-      <section className="page-title">
-        <span className="eyebrow">EXPLORE · CATALOG INDEX</span>
-        <h1>{t("分类浏览")}</h1>
-        <p>{catalogCommunityDescription(uiLanguage)}</p>
-      </section>
-
-      <section className="settings-card form-card">
+    <div className="page-stack desktop-catalog-page">
+      <section className="settings-card form-card desktop-catalog-toolbar">
         <label className="search-box">
           <span>{t("搜索")}</span>
           <input
@@ -203,6 +197,7 @@ export function DesktopCatalogBrowser({
         </div>
       </section>
 
+      <div className="desktop-catalog-scroll">
       <div className="desktop-catalog-sections">
         {sections.map((section) => {
           const usageVisibleItems = filterCatalogItems(section.items, usageFilter, search);
@@ -286,6 +281,7 @@ export function DesktopCatalogBrowser({
             </section>
           );
         })}
+      </div>
       </div>
     </div>
   );

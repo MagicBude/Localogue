@@ -76,6 +76,7 @@ export function DesktopWorkExplorer({
   directoryRoots = [],
   initialState,
   onStateChange,
+  toolbarAction,
 }: {
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
@@ -87,6 +88,7 @@ export function DesktopWorkExplorer({
   directoryRoots?: string[];
   initialState?: DesktopWorkExplorerState;
   onStateChange?: (state: DesktopWorkExplorerState) => void;
+  toolbarAction?: ReactNode;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const { persistedRevision } = useFavorites();
@@ -327,6 +329,7 @@ export function DesktopWorkExplorer({
         onViewChange={changeView}
         fixedPersonId={fixedPersonId}
         data={data.value}
+        toolbarAction={toolbarAction}
       />
 
       <section className="desktop-results-panel" ref={resultsPanelRef}>
@@ -385,6 +388,7 @@ function WorkFacetPanel({
   onViewChange,
   fixedPersonId,
   data,
+  toolbarAction,
 }: {
   query: WorkQuery;
   onChange: (query: WorkQuery) => void;
@@ -392,6 +396,7 @@ function WorkFacetPanel({
   onViewChange: (view: DesktopWorkViewMode) => void;
   fixedPersonId?: string;
   data: ExplorerData;
+  toolbarAction?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
@@ -468,7 +473,7 @@ function WorkFacetPanel({
         </FilterMenu>
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
-
+        {toolbarAction ? <div className="desktop-browser-toolbar-action">{toolbarAction}</div> : null}
       </div>
 
     </aside>

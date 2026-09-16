@@ -50,17 +50,9 @@ export function DesktopWorksPage({
   initialState?: DesktopWorkExplorerState;
   onExplorerStateChange?: (state: DesktopWorkExplorerState) => void;
 }) {
-  const { t } = useDesktopI18n();
   return (
     <div className="page-stack desktop-library-page">
-      <div className="desktop-page-heading-row">
-        <section className="page-title">
-          <h1>{t("作品库")}</h1>
-          <p>{t("浏览、筛选和整理全部作品。")}</p>
-        </section>
-        <CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />
-      </div>
-      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} directoryRoots={directoryRoots} onStateChange={onExplorerStateChange} />
+      <DesktopWorkExplorer repository={repository} onOpen={openWork} onOpenPerson={openPerson} storageKey="localogue.desktop.work-view" initialQuery={initialQuery} initialState={initialState} directoryRoots={directoryRoots} onStateChange={onExplorerStateChange} toolbarAction={<CreateWorkPanel repository={repository} onSaved={(work) => { onLibraryChanged(); openWork(work.id); }} setMessage={setMessage} />} />
     </div>
   );
 }
