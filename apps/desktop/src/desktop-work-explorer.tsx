@@ -29,6 +29,7 @@ import {
 } from "./desktop-work-results";
 import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
 import { DesktopPagination } from "./desktop-pagination";
+import { UiEmptyState } from "./ui/feedback";
 
 interface FilterOption {
   id: string;
@@ -621,7 +622,7 @@ function FilterGroup({
 }
 
 function ExplorerState({ children, error = false }: { children: ReactNode; error?: boolean }) {
-  return <div className={error ? "empty-state desktop-explorer-state error-state" : "empty-state desktop-explorer-state"}>{children}</div>;
+  return <UiEmptyState className="desktop-explorer-state" tone={error ? "error" : "neutral"} title={children} />;
 }
 
 function useAsyncExplorerData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {

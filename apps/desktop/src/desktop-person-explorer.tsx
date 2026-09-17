@@ -13,6 +13,7 @@ import { useStableAsyncData } from "./use-stable-async-data";
 import { resolvePersonPresentation } from "./desktop-presentation";
 import { personActivityStatusLabel } from "./desktop-person-labels";
 import { DesktopPagination } from "./desktop-pagination";
+import { UiEmptyState } from "./ui/feedback";
 
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -261,7 +262,7 @@ function parseOptionalNumber(value: string): number | undefined {
 }
 
 function ExplorerState({ children, error = false }: { children: ReactNode; error?: boolean }) {
-  return <div className={error ? "empty-state desktop-explorer-state error-state" : "empty-state desktop-explorer-state"}>{children}</div>;
+  return <UiEmptyState className="desktop-explorer-state" tone={error ? "error" : "neutral"} title={children} />;
 }
 
 function useAsyncPersonData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {

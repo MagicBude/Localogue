@@ -20,6 +20,7 @@ import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { DesktopTagManager } from "./desktop-tag-manager";
+import { UiEmptyState } from "./ui/feedback";
 import { catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetAriaLabel, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
 
 export function DesktopCatalogBrowser({
@@ -192,6 +193,7 @@ export function DesktopCatalogBrowser({
         </div>
       </section>
 
+      <section className="desktop-catalog-content-frame">
       <div className="desktop-catalog-scroll">
       <div className="desktop-catalog-sections">
         {sections.map((section) => {
@@ -201,17 +203,7 @@ export function DesktopCatalogBrowser({
             const facetGroups = genreFacet === "all" ? groupGenreItemsByPrimaryFacet(facetVisibleItems) : [];
             const hasOtherGenres = section.items.some((item) => !item.genreFacets?.length);
             return (
-              <section className="settings-card" key={section.kind}>
-                <div className="section-heading">
-                  <div>
-                    <span className="eyebrow">{section.eyebrow}</span>
-                    <h2>{section.title}</h2>
-                    <small className="muted">{genreFacetDescription(uiLanguage)}</small>
-                  </div>
-                  <small className="muted">
-                    {t("{count} 项", { count: facetVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
-                  </small>
-                </div>
+              <section className="desktop-catalog-section" key={section.kind}>
                 <div className="button-row catalog-genre-facet-toolbar" aria-label={genreFacetAriaLabel(uiLanguage)}>
                   {(["all", ...GENRE_FACET_ORDER, ...(hasOtherGenres ? ["other" as const] : [])] as GenreFacetFilter[]).map((facet) => (
                     <button
@@ -223,6 +215,16 @@ export function DesktopCatalogBrowser({
                       {genreFacetLabel(facet, uiLanguage)}
                     </button>
                   ))}
+                </div>
+                <div className="section-heading">
+                  <div>
+                    <span className="eyebrow">{section.eyebrow}</span>
+                    <h2>{section.title}</h2>
+                    <small className="muted">{genreFacetDescription(uiLanguage)}</small>
+                  </div>
+                  <small className="muted">
+                    {t("{count} 项", { count: facetVisibleItems.length })} / {t("{count} 项", { count: section.items.length })}
+                  </small>
                 </div>
                 {facetVisibleItems.length ? (
                   genreFacet === "all" ? (
@@ -256,7 +258,7 @@ export function DesktopCatalogBrowser({
           }
 
           return (
-            <section className="settings-card" key={section.kind}>
+            <section className="desktop-catalog-section" key={section.kind}>
               <div className="section-heading">
                 <div><span className="eyebrow">{section.eyebrow}</span><h2>{section.title}</h2></div>
                 <div className="button-row">
@@ -278,6 +280,7 @@ export function DesktopCatalogBrowser({
         })}
       </div>
       </div>
+      </section>
     </div>
   );
 }
@@ -390,7 +393,7 @@ function catalogSort(a: CatalogItem, b: CatalogItem): number {
 }
 
 function BrowserState({ children, error = false }: { children: ReactNode; error?: boolean }) {
-  return <div className={error ? "empty-state desktop-explorer-state error-state" : "empty-state desktop-explorer-state"}>{children}</div>;
+  return <UiEmptyState className="desktop-explorer-state" tone={error ? "error" : "neutral"} title={children} />;
 }
 
 function useAsyncCatalogData<T>(factory: () => Promise<T>, dependencies: readonly unknown[]) {
