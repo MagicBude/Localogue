@@ -30,6 +30,7 @@ import {
 import { DesktopInfiniteScrollSentinel } from "./desktop-infinite-scroll-sentinel";
 import { DesktopPagination } from "./desktop-pagination";
 import { UiEmptyState } from "./ui/feedback";
+import { FilterPopover } from "./ui/filter-popover";
 
 interface FilterOption {
   id: string;
@@ -335,14 +336,7 @@ export function DesktopWorkExplorer({
 
       <section className="desktop-results-panel" ref={resultsPanelRef}>
         <DesktopWorkFilterChips query={query} data={data.value} onChange={changeQuery} />
-        <div className="desktop-results-toolbar">
-          <div className="result-meta">
-            {isWaterfall
-              ? t("已显示 {shown} / {count} 项作品", { shown: cards.length, count: result.total })
-              : t("{count} 项作品 · 第 {page} / {pages} 页", { count: result.total, page: result.page, pages: pageCount })}
-            {data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}
-          </div>
-        </div>
+        {data.refreshing ? <div className="desktop-results-toolbar"><span className="desktop-refresh-indicator">{t("正在刷新…")}</span></div> : null}
         <div className="desktop-results-scroll">
           <DesktopWorkResults
             cards={cards}
@@ -361,7 +355,7 @@ export function DesktopWorkExplorer({
             />
           ) : null}
         </div>
-        {showPagination ? <div className="desktop-pagination-dock"><DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} /></div> : null}
+        {showPagination ? <div className="desktop-pagination-dock"><DesktopPagination page={page} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={changePageSize} totalLabel={t("共 {count} 项作品", { count: result.total })} /></div> : null}
       </section>
     </div>
   );
@@ -401,29 +395,13 @@ function WorkFacetPanel({
 }) {
   const { t } = useDesktopI18n();
   const patch = (next: Partial<WorkQuery>) => onChange({ ...query, ...next });
-  type FilterMenuId = "directories" | "people" | "classification" | "more";
-  const [openMenu, setOpenMenu] = useState<FilterMenuId>();
-  const panelRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!openMenu) return;
-    const closeOutside = (event: PointerEvent) => {
-      if (!panelRef.current?.contains(event.target as Node)) setOpenMenu(undefined);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpenMenu(undefined);
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [openMenu]);
-
-  const toggleMenu = (menu: FilterMenuId) => setOpenMenu((current) => current === menu ? undefined : menu);
+  const activeFilterCount = (query.mediaScanRoots?.length ?? 0)
+    + (query.personIds?.length ?? 0)
+    + (query.directorIds?.length ?? 0)
+    + countClassificationFilters(query)
+    + countMoreFilters(query);
   return (
-    <aside className="desktop-facet-bar" ref={panelRef}>
+    <aside className="desktop-facet-bar">
       <div className="desktop-facet-bar__primary">
         <label className="field">
           <span>{t("排序")}</span>
@@ -443,22 +421,11 @@ function WorkFacetPanel({
           </select>
         </label>
 
-        <FilterMenu label={t("目录")} count={query.mediaScanRoots?.length ?? 0} open={openMenu === "directories"} onToggle={() => toggleMenu("directories")} onClose={() => setOpenMenu(undefined)}>
-          <FilterGroup label={t("内容目录")} values={query.mediaScanRoots} options={data.mediaScanRoots} onChange={(values) => patch({ mediaScanRoots: values.length ? values : undefined })} />
-        </FilterMenu>
-
-        <FilterMenu label={t("人物")} count={(query.personIds?.length ?? 0) + (query.directorIds?.length ?? 0)} open={openMenu === "people"} onToggle={() => toggleMenu("people")} onClose={() => setOpenMenu(undefined)}>
-          {!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}
-          <FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} />
-        </FilterMenu>
-
-        <FilterMenu label={t("分类")} count={countClassificationFilters(query)} open={openMenu === "classification"} onToggle={() => toggleMenu("classification")} onClose={() => setOpenMenu(undefined)}>
-          <FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} />
-          <FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} />
-          <FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} />
-        </FilterMenu>
-
-        <FilterMenu alignRight label={t("更多")} count={countMoreFilters(query)} open={openMenu === "more"} onToggle={() => toggleMenu("more")} onClose={() => setOpenMenu(undefined)}>
+        <FilterPopover count={activeFilterCount} label={t("筛选")} wide>
+          <div className="desktop-filter-section"><strong>{t("目录")}</strong><FilterGroup label={t("内容目录")} values={query.mediaScanRoots} options={data.mediaScanRoots} onChange={(values) => patch({ mediaScanRoots: values.length ? values : undefined })} /></div>
+          <div className="desktop-filter-section"><strong>{t("人物")}</strong>{!fixedPersonId ? <FilterGroup label={t("演员")} values={query.personIds} options={data.people} onChange={(values) => patch({ personIds: values.length ? values : undefined })} /> : null}<FilterGroup label={t("导演")} values={query.directorIds} options={data.directors} onChange={(values) => patch({ directorIds: values.length ? values : undefined })} /></div>
+          <div className="desktop-filter-section"><strong>{t("分类")}</strong><FilterGroup label={t("作品类型")} values={query.workTypeIds} options={data.workTypes} onChange={(values) => patch({ workTypeIds: values.length ? values : undefined })} /><FilterGroup label={t("题材")} values={query.genreIds} options={data.genres} onChange={(values) => patch({ genreIds: values.length ? values : undefined })} /><FilterGroup label={t("标签")} values={query.tagIds} options={data.tags} onChange={(values) => patch({ tagIds: values.length ? values : undefined })} /></div>
+          <div className="desktop-filter-section"><strong>{t("更多")}</strong>
           <div className="desktop-facet-bar__pairs">
             <div className="desktop-filter-pair">
               <label className="field desktop-facet-rating"><span>{t("评分至少")}</span><select value={query.ratingMin ?? ""} onChange={(event) => patch({ ratingMin: event.target.value ? Number(event.target.value) : undefined })}><option value="">{t("任意")}</option><option value="1">★1+</option><option value="2">★2+</option><option value="3">★3+</option><option value="4">★4+</option><option value="5">★5</option></select></label>
@@ -471,7 +438,8 @@ function WorkFacetPanel({
           </div>
           <FilterGroup label={t("年份")} values={query.releaseYears} options={data.years} onChange={(values) => patch({ releaseYears: values.length ? values : undefined })} />
           <FilterGroup label={t("清晰度")} values={query.resolutionTiers} options={data.resolutions} onChange={(values) => patch({ resolutionTiers: values.length ? values as WorkQuery["resolutionTiers"] : undefined })} />
-        </FilterMenu>
+          </div>
+        </FilterPopover>
 
         <DesktopWorkViewSwitcher current={view} onChange={onViewChange} />
         {toolbarAction ? <div className="desktop-browser-toolbar-action">{toolbarAction}</div> : null}
@@ -544,31 +512,6 @@ function DesktopWorkFilterChips({
       </div>
     </div>
   );
-}
-
-/** 每个入口只展示一组相关条件，避免把整套 Facet 同时铺在作品上方。 */
-function FilterMenu({ alignRight = false, children, count, label, onClose, onToggle, open }: {
-  alignRight?: boolean;
-  children: ReactNode;
-  count: number;
-  label: string;
-  onClose: () => void;
-  onToggle: () => void;
-  open: boolean;
-}) {
-  const { t } = useDesktopI18n();
-  return <div className="desktop-filter-menu-anchor">
-    <button aria-expanded={open} className="desktop-facet-toggle" type="button" onClick={onToggle}>
-      <span>{label}</span>
-      {count ? <span className="desktop-facet-toggle__badge">{count}</span> : null}
-      <span className="desktop-facet-toggle__caret">{open ? "▴" : "▾"}</span>
-    </button>
-    {open ? <section aria-label={label} className={alignRight ? "desktop-filter-menu is-align-right" : "desktop-filter-menu"}>
-      <header><strong>{label}</strong><button aria-label={t("关闭")} className="ui-icon-button" type="button" onClick={onClose}>×</button></header>
-      <div className="desktop-filter-menu__body">{children}</div>
-      <footer><button className="primary-button" type="button" onClick={onClose}>{t("完成")}</button></footer>
-    </section> : null}
-  </div>;
 }
 
 function BooleanSelect({ label, value, onChange }: { label: string; value?: boolean; onChange: (value?: boolean) => void }) {

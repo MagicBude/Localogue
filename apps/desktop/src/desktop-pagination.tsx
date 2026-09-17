@@ -1,5 +1,5 @@
 import { ChevronLeft20Regular, ChevronRight20Regular } from "@fluentui/react-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { useDesktopI18n } from "./desktop-i18n";
 
@@ -15,6 +15,7 @@ export function DesktopPagination({
   pageSize,
   pageSizeOptions = [12, 24, 48, 96],
   onPageSizeChange,
+  totalLabel,
 }: {
   page: number;
   pageCount: number;
@@ -23,6 +24,7 @@ export function DesktopPagination({
   pageSize?: number;
   pageSizeOptions?: number[];
   onPageSizeChange?: (pageSize: number) => void;
+  totalLabel?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
   const [jumpValue, setJumpValue] = useState(String(page));
@@ -38,6 +40,8 @@ export function DesktopPagination({
       : [...new Set([1, Math.max(1, page - 1), page, Math.min(pageCount, page + 1), pageCount])].sort((a, b) => a - b);
     return (
       <nav className={pageCount <= 1 ? "desktop-pagination is-single-page" : "desktop-pagination"} aria-label={t("分页")}>
+        <div className="desktop-pagination__start">
+        {totalLabel ? <span className="desktop-pagination__item-total">{totalLabel}</span> : null}
         {pageCount > 1 ? <div className="desktop-pagination__controls">
           <button type="button" title={t("上一页")} aria-label={t("上一页")} disabled={page <= 1} onClick={() => onChange(Math.max(1, page - 1))}><ChevronLeft20Regular /></button>
           <div className="desktop-pagination__numbers">
@@ -50,6 +54,7 @@ export function DesktopPagination({
           <label className="desktop-pagination__jump"><span>{t("跳转")}</span><input inputMode="numeric" min="1" max={pageCount} value={jumpValue} onChange={(event) => setJumpValue(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") jump(); }} onBlur={jump} type="number" /><span>{t("页")}</span></label>
           <span className="desktop-pagination__total">{t("共 {count} 页", { count: pageCount })}</span>
         </div> : null}
+        </div>
         {onPageSizeChange && pageSize ? <label className="desktop-pagination__size"><span>{t("每页显示")}</span><select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>{pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label> : null}
       </nav>
     );

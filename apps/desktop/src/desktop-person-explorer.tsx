@@ -14,6 +14,7 @@ import { resolvePersonPresentation } from "./desktop-presentation";
 import { personActivityStatusLabel } from "./desktop-person-labels";
 import { DesktopPagination } from "./desktop-pagination";
 import { UiEmptyState } from "./ui/feedback";
+import { FilterPopover } from "./ui/filter-popover";
 
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -92,7 +93,7 @@ export function DesktopPersonExplorer({
   }
 
   const pagination = total > 0
-    ? <DesktopPagination page={currentPage} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={(next) => { setPageSize(next); setPage(1); window.localStorage.setItem("localogue.desktop.people-page-size", String(next)); }} />
+    ? <DesktopPagination page={currentPage} pageCount={pageCount} onChange={changePage} pageSize={pageSize} onPageSizeChange={(next) => { setPageSize(next); setPage(1); window.localStorage.setItem("localogue.desktop.people-page-size", String(next)); }} totalLabel={t("共 {count} 项人物", { count: total })} />
     : undefined;
 
   return (
@@ -101,7 +102,7 @@ export function DesktopPersonExplorer({
       <section className="desktop-results-panel desktop-people-results" ref={resultsPanelRef}>
         <PersonFilterChips query={query} onChange={changeQuery} />
         <div className="desktop-results-toolbar">
-          <div className="result-meta">{t("{count} 项人物 · 第 {page} / {pages} 页", { count: total, page: currentPage, pages: pageCount })}{data.refreshing ? <span className="desktop-refresh-indicator"> · {t("正在刷新…")}</span> : null}</div>
+          <div className="result-meta">{data.refreshing ? <span className="desktop-refresh-indicator">{t("正在刷新…")}</span> : null}</div>
           <div className="desktop-results-toolbar__actions">
             <button className="desktop-facet-clear" disabled={!hasPersonFilters(query)} onClick={() => changeQuery({ sort: "name_asc" })} type="button">{t("清除")}</button>
           </div>
@@ -172,7 +173,6 @@ function PersonFilterPanel({
   toolbarAction?: ReactNode;
 }) {
   const { t } = useDesktopI18n();
-  const [moreOpen, setMoreOpen] = useState(false);
   const patch = (next: Partial<PersonQuery>) => onChange({ ...query, ...next });
   const selectedStatus = query.statuses?.[0] ?? "";
   const selectedBirth = query.birthYears?.[0] ?? "";
@@ -182,25 +182,24 @@ function PersonFilterPanel({
   return (
     <section className="desktop-facet-bar desktop-person-facet-bar">
       <div className="desktop-facet-bar__primary">
-        <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
         <label className="field"><span>{t("排序")}</span><select value={query.sort ?? "name_asc"} onChange={(event) => patch({ sort: event.target.value as PersonSort })}>
           <option value="name_asc">{t("名称")} A → Z</option><option value="name_desc">{t("名称")} Z → A</option>
           <option value="debut_desc">{t("出道年份")} ↓</option><option value="debut_asc">{t("出道年份")} ↑</option>
           <option value="birth_desc">{t("出生年份")} ↓</option><option value="birth_asc">{t("出生年份")} ↑</option>
           <option value="height_desc">{t("身高")} ↓</option><option value="height_asc">{t("身高")} ↑</option>
         </select></label>
-        <button className="desktop-facet-toggle" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)} type="button">{t("更多")}{activeCount ? <span className="desktop-facet-toggle__badge">{activeCount}</span> : null}<span className="desktop-facet-toggle__caret">{moreOpen ? "▴" : "▾"}</span></button>
+        <FilterPopover count={activeCount} label={t("筛选")} wide>
+          <div className="desktop-person-filter-menu__grid">
+            <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
+            <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
+            <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
+            <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
+            <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
+            <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
+          </div>
+        </FilterPopover>
         {toolbarAction ? <div className="desktop-browser-toolbar-action">{toolbarAction}</div> : null}
       </div>
-      {moreOpen ? <div className="desktop-person-filter-menu">
-        <div className="desktop-person-filter-menu__grid">
-          <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
-          <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
-          <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
-          <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
-          <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
-        </div>
-      </div> : null}
     </section>
   );
 }
