@@ -909,6 +909,9 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .desktop-filter-menu__body { min-height: 0; display: grid; align-content: start; gap: 8px; overflow-y: auto; overscroll-behavior: contain; padding: 10px 12px; }
 .desktop-filter-menu > footer { display: flex; justify-content: flex-end; padding: 9px 12px; border-top: 1px solid var(--border); background: #fff; }
 .desktop-filter-menu > footer button { min-width: 76px; }
+.desktop-filter-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.desktop-filter-choice-grid button { min-height: 34px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--panel); color: var(--text); text-align: left; }
+.desktop-filter-choice-grid button.is-selected { border-color: var(--accent); background: var(--accent); color: white; }
 .desktop-filter-section { display: grid; gap: 7px; padding: 2px 0 10px; }
 .desktop-filter-section + .desktop-filter-section { padding-top: 10px; border-top: 1px solid var(--border); }
 .desktop-filter-section > strong { font-size: 12px; }
@@ -1175,7 +1178,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
   gap: 10px;
   overflow: hidden;
 }
-.desktop-catalog-toolbar { padding: 10px 12px; }
+.desktop-catalog-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px; }
+.desktop-catalog-toolbar__summary { min-width: 0; display: flex; align-items: baseline; gap: 10px; }
+.desktop-catalog-toolbar__summary strong { font-size: 13px; }
+.desktop-catalog-toolbar__summary span { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .desktop-catalog-content-frame {
   min-height: 0;
   overflow: hidden;
@@ -1721,6 +1727,21 @@ select[multiple] { min-height: 105px; padding: 6px; }
   .desktop-metadata-row { grid-template-columns: 106px minmax(0, 1fr); }
   .desktop-asset-management-row { grid-template-columns: 1fr; }
   .desktop-asset-management-row .danger-button { justify-self: start; }
+}
+
+@media (max-width: 760px) {
+  /* 窄窗口共用右侧抽屉，筛选不再盖住整片结果，也不因锚点位置跑出视口。 */
+  .desktop-filter-menu,
+  .desktop-filter-menu.is-wide,
+  .desktop-filter-menu.is-align-right {
+    position: fixed;
+    inset: calc(var(--desktop-titlebar-height, 52px) + 8px) 8px 8px auto;
+    width: min(420px, calc(100vw - 24px));
+    max-height: none;
+    border-radius: 14px;
+  }
+  .desktop-catalog-toolbar { align-items: stretch; }
+  .desktop-catalog-toolbar__summary { display: grid; gap: 2px; }
 }
 
 

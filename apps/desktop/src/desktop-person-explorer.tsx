@@ -15,6 +15,7 @@ import { personActivityStatusLabel } from "./desktop-person-labels";
 import { DesktopPagination } from "./desktop-pagination";
 import { UiEmptyState } from "./ui/feedback";
 import { FilterPopover } from "./ui/filter-popover";
+import { queryPeople } from "@/application/library/library-query";
 
 const DEFAULT_PAGE_SIZE = 24;
 
@@ -56,16 +57,28 @@ export function DesktopPersonExplorer({
       }
     }
     const portraits = buildPortraitMap(assets, allPerformers, preferences);
+    const statusOptions = [...new Set(allPerformers.map((person) => person.activityStatus))].sort();
+    const birthYears = toYears(allPerformers.map((person) => person.birthDate?.value));
+    const debutYears = toYears(allPerformers.map((person) => careerDate(person, "debut")));
+    const retirementYears = toYears(allPerformers.map((person) => careerDate(person, "retirement")));
+    const cupSizes = [...new Set(allPerformers.map((person) => person.measurements?.cup).filter((value): value is string => Boolean(value)))].sort();
     return {
       allPerformers,
       filteredPerformers,
       workCounts,
       portraits,
-      statusOptions: [...new Set(allPerformers.map((person) => person.activityStatus))].sort(),
-      birthYears: toYears(allPerformers.map((person) => person.birthDate?.value)),
-      debutYears: toYears(allPerformers.map((person) => careerDate(person, "debut"))),
-      retirementYears: toYears(allPerformers.map((person) => careerDate(person, "retirement"))),
-      cupSizes: [...new Set(allPerformers.map((person) => person.measurements?.cup).filter((value): value is string => Boolean(value)))].sort(),
+      statusOptions,
+      birthYears,
+      debutYears,
+      retirementYears,
+      cupSizes,
+      optionCounts: {
+        statuses: personOptionCounts(allPerformers, query, "statuses", statusOptions, (person) => person.activityStatus),
+        birthYears: personOptionCounts(allPerformers, query, "birthYears", birthYears, (person) => person.birthDate?.value.slice(0, 4)),
+        debutYears: personOptionCounts(allPerformers, query, "debutYears", debutYears, (person) => careerDate(person, "debut")?.slice(0, 4)),
+        retirementYears: personOptionCounts(allPerformers, query, "retirementYears", retirementYears, (person) => careerDate(person, "retirement")?.slice(0, 4)),
+        cupSizes: personOptionCounts(allPerformers, query, "cupSizes", cupSizes, (person) => person.measurements?.cup),
+      },
     };
   }, [repository, query]);
 
@@ -171,6 +184,7 @@ function PersonFilterPanel({
     debutYears: string[];
     retirementYears: string[];
     cupSizes: string[];
+    optionCounts: Record<"statuses" | "birthYears" | "debutYears" | "retirementYears" | "cupSizes", Map<string, number>>;
   };
   toolbarAction?: ReactNode;
 }) {
@@ -204,10 +218,10 @@ function PersonFilterPanel({
           <div className="desktop-filter-section">
             <strong>{t("人物资料")}</strong>
           <div className="desktop-person-filter-menu__grid">
-            <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
-            <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
-            <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
-            <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
+            <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} counts={data.optionCounts.statuses} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
+            <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} counts={data.optionCounts.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
+            <SelectField label={t("引退年份")} value={selectedRetirement} options={data.retirementYears} counts={data.optionCounts.retirementYears} onChange={(value) => patch({ retirementYears: value ? [value] : undefined })} />
+            <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} counts={data.optionCounts.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
             <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
             <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
           </div>
@@ -216,7 +230,7 @@ function PersonFilterPanel({
             <strong>{t("身体与地区")}</strong>
             <div className="desktop-person-filter-menu__grid">
               <label className="field"><span>{t("出生地")}</span><input value={query.birthPlaceText ?? ""} onChange={(event) => patch({ birthPlaceText: event.target.value || undefined })} placeholder={t("输入地区名称")} /></label>
-              <SelectField label={t("罩杯")} value={query.cupSizes?.[0] ?? ""} options={data.cupSizes} onChange={(value) => patch({ cupSizes: value ? [value] : undefined })} />
+              <SelectField label={t("罩杯")} value={query.cupSizes?.[0] ?? ""} options={data.cupSizes} counts={data.optionCounts.cupSizes} onChange={(value) => patch({ cupSizes: value ? [value] : undefined })} />
             </div>
           </div>
           <div className="desktop-filter-section">
@@ -274,9 +288,23 @@ function readPeoplePageSize(): number {
   return [12, 24, 48, 96].includes(value) ? value : DEFAULT_PAGE_SIZE;
 }
 
-function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {
+function SelectField({ label, value, options, counts, onChange, getOptionLabel }: { label: string; value: string; options: string[]; counts?: Map<string, number>; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {
   const { t } = useDesktopI18n();
-  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{getOptionLabel ? getOptionLabel(option) : option}</option>)}</select></label>;
+  return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{getOptionLabel ? getOptionLabel(option) : option}{counts ? ` (${counts.get(option) ?? 0})` : ""}</option>)}</select></label>;
+}
+
+function personOptionCounts(people: Person[], query: PersonQuery, key: keyof PersonQuery, options: string[], valueOf: (person: Person) => string | undefined): Map<string, number> {
+  const facetQuery = { ...query };
+  delete facetQuery[key];
+  delete facetQuery.page;
+  delete facetQuery.pageSize;
+  const eligible = queryPeople(people, { ...facetQuery, page: 1, pageSize: Math.max(1, people.length) }).items;
+  const counts = new Map(options.map((option) => [option, 0]));
+  for (const person of eligible) {
+    const value = valueOf(person);
+    if (value && counts.has(value)) counts.set(value, (counts.get(value) ?? 0) + 1);
+  }
+  return counts;
 }
 
 function PresenceSelect({ label, value, onChange }: { label: string; value?: boolean; onChange: (value?: boolean) => void }) {

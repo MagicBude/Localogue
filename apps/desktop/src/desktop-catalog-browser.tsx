@@ -21,7 +21,8 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { DesktopTagManager } from "./desktop-tag-manager";
 import { UiEmptyState } from "./ui/feedback";
-import { catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetAriaLabel, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
+import { FilterPopover } from "./ui/filter-popover";
+import { catalogQuery, catalogTitle, catalogUsageLabels, filterCatalogItems, filterGenreFacetItems, GENRE_FACET_ORDER, genreFacetDescription, genreFacetLabel, groupGenreItemsByPrimaryFacet, type CatalogItem, type CatalogKind, type CatalogSelection, type CatalogUsageFilter, type GenreFacetFilter } from "./desktop-catalog-model";
 
 export function DesktopCatalogBrowser({
   repository,
@@ -167,29 +168,26 @@ export function DesktopCatalogBrowser({
   return (
     <div className="page-stack desktop-catalog-page">
       <section className="settings-card form-card desktop-catalog-toolbar">
-        <div className="button-row" aria-label={`${t("作品")} filter`}>
-          <button
-            className={usageFilter === "used" ? "primary-button" : "ghost-button"}
-            type="button"
-            onClick={() => setUsageFilter("used")}
-          >
-            {usageLabels.used}
-          </button>
-          <button
-            className={usageFilter === "unused" ? "primary-button" : "ghost-button"}
-            type="button"
-            onClick={() => setUsageFilter("unused")}
-          >
-            {usageLabels.unused}
-          </button>
-          <button
-            className={usageFilter === "all" ? "primary-button" : "ghost-button"}
-            type="button"
-            onClick={() => setUsageFilter("all")}
-          >
-            {usageLabels.all}
-          </button>
-          {search ? <button className="ghost-button" type="button" onClick={() => setSearch("")}>{t("清除")}</button> : null}
+        <div className="desktop-catalog-toolbar__summary">
+          <strong>{t("分类浏览")}</strong>
+          <span>{usageLabels[usageFilter]} · {genreFacetLabel(genreFacet, uiLanguage)}</span>
+        </div>
+        <div className="button-row">
+          <FilterPopover align="right" count={(usageFilter !== "used" ? 1 : 0) + (genreFacet !== "all" ? 1 : 0)} label={t("筛选")} wide>
+            <div className="desktop-filter-section">
+              <strong>{t("使用情况")}</strong>
+              <div className="desktop-filter-choice-grid">
+                {(["used", "unused", "all"] as CatalogUsageFilter[]).map((value) => <button className={usageFilter === value ? "is-selected" : ""} key={value} type="button" onClick={() => setUsageFilter(value)}>{usageLabels[value]}</button>)}
+              </div>
+            </div>
+            <div className="desktop-filter-section">
+              <strong>{t("题材分组")}</strong>
+              <div className="desktop-filter-choice-grid">
+                {(["all", ...GENRE_FACET_ORDER, "other"] as GenreFacetFilter[]).map((facet) => <button className={genreFacet === facet ? "is-selected" : ""} key={facet} type="button" onClick={() => setGenreFacet(facet)}>{genreFacetLabel(facet, uiLanguage)}</button>)}
+              </div>
+            </div>
+          </FilterPopover>
+          {(search || usageFilter !== "used" || genreFacet !== "all") ? <button className="desktop-facet-clear" type="button" onClick={() => { setSearch(""); setUsageFilter("used"); setGenreFacet("all"); }}>{t("清除")}</button> : null}
         </div>
       </section>
 
@@ -201,21 +199,8 @@ export function DesktopCatalogBrowser({
           if (section.kind === "genres") {
             const facetVisibleItems = filterGenreFacetItems(usageVisibleItems, genreFacet);
             const facetGroups = genreFacet === "all" ? groupGenreItemsByPrimaryFacet(facetVisibleItems) : [];
-            const hasOtherGenres = section.items.some((item) => !item.genreFacets?.length);
             return (
               <section className="desktop-catalog-section" key={section.kind}>
-                <div className="button-row catalog-genre-facet-toolbar" aria-label={genreFacetAriaLabel(uiLanguage)}>
-                  {(["all", ...GENRE_FACET_ORDER, ...(hasOtherGenres ? ["other" as const] : [])] as GenreFacetFilter[]).map((facet) => (
-                    <button
-                      className={genreFacet === facet ? "primary-button" : "ghost-button"}
-                      key={facet}
-                      type="button"
-                      onClick={() => setGenreFacet(facet)}
-                    >
-                      {genreFacetLabel(facet, uiLanguage)}
-                    </button>
-                  ))}
-                </div>
                 <div className="section-heading">
                   <div>
                     <span className="eyebrow">{section.eyebrow}</span>
