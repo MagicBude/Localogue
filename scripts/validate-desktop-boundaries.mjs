@@ -262,7 +262,7 @@ if (!errors.length) {
   for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
     if (!desktopCatalogBrowser.includes(token)) errors.push(`V1-19 Desktop 分类浏览缺少目录维度：${token}`);
   }
-  if (!desktopAppShell.includes('id: "browse"') || !desktopAppShell.includes('onNavigate("browse")')) {
+  if (!desktopAppShell.includes('id: "browse"') || !desktopAppShell.includes('landingPage: "browse"')) {
     errors.push("V1-19 Desktop 主导航必须提供分类浏览入口。");
   }
   if (!desktopI18n.includes("DesktopI18nProvider") || !desktopI18n.includes("DesktopLanguageControls") || !desktopI18n.includes("useDesktopI18n")) {

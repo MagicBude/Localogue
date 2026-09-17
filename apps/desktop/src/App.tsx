@@ -77,7 +77,7 @@ type NavigationLocation = {
 
 export default function App() {
   const { t } = useDesktopI18n();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.localStorage.getItem("localogue.desktop.sidebar-collapsed-v2") !== "false");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.localStorage.getItem("localogue.desktop.sidebar-collapsed-v3") !== "false");
   const [settingsModule, setSettingsModule] = useState<DesktopSettingsModule>("library");
   const [runtime, setRuntime] = useState<DesktopRuntimeInfo | null>(null);
   const [settings, setSettings] = useState<DesktopBootstrapSettings>(DEFAULT_SETTINGS);
@@ -490,7 +490,7 @@ export default function App() {
         onSwitchProfile={(profileId) => void switchLibraryProfile(profileId)}
         onToggleCollapsed={() => setSidebarCollapsed((value) => {
           const next = !value;
-          window.localStorage.setItem("localogue.desktop.sidebar-collapsed-v2", String(next));
+          window.localStorage.setItem("localogue.desktop.sidebar-collapsed-v3", String(next));
           return next;
         })}
       />

@@ -50,20 +50,17 @@ interface DesktopNavGroup {
  */
 const NAV_GROUPS: DesktopNavGroup[] = [
   { id: "home", label: "首页", icon: Home20Regular, landingPage: "home", pages: ["home"] },
-  {
-    id: "library",
-    label: "影片库",
-    icon: BookDatabase20Regular,
-    landingPage: "works",
-    pages: ["works", "people", "browse", "media", "review"],
-  },
+  { id: "works", label: "作品", icon: AppsListDetail20Regular, landingPage: "works", pages: ["works"] },
+  { id: "people", label: "人物", icon: People20Regular, landingPage: "people", pages: ["people"] },
+  { id: "browse", label: "分类浏览", icon: SearchSquare20Regular, landingPage: "browse", pages: ["browse"] },
+  { id: "media", label: "目录与扫描", icon: ArrowSync20Regular, landingPage: "media", pages: ["media"] },
   { id: "favorites", label: "收藏", icon: Heart20Regular, landingPage: "favorites", pages: ["favorites"] },
   {
     id: "maintenance",
     label: "资料维护",
     icon: Toolbox20Regular,
     landingPage: "curation",
-    pages: ["curation", "history"],
+    pages: ["review", "curation", "history"],
   },
   {
     id: "settings",
@@ -156,15 +153,9 @@ export function DesktopTopbar({ version, search }: { version?: string; search?: 
 
 export function DesktopContextTabs({ page, settingsModule, onNavigate, onSettingsModule }: { page: DesktopPage; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {
   const { t } = useDesktopI18n();
-  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "media"
-    ? [
-      { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
-      { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
-      { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
-      { id: "scan", label: t("目录与扫描"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
-    ]
-    : page === "curation" || page === "history"
+  const tabs: ContextTabItem[] = page === "curation" || page === "history" || page === "review"
       ? [
+        { id: "review", label: t("导入审核"), icon: BookDatabase20Regular, active: page === "review", onSelect: () => onNavigate("review") },
         { id: "curation", label: t("资料问题"), icon: Wrench20Regular, active: page === "curation", onSelect: () => onNavigate("curation") },
         { id: "history", label: t("变更历史"), icon: Clock20Regular, active: page === "history", onSelect: () => onNavigate("history") },
       ]
