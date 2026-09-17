@@ -88,20 +88,19 @@ export function DesktopPersonDetailPage({
           <DesktopAssetImage asset={portrait} alt={`${displayName} portrait`} fallback={<span className="avatar-placeholder">{displayName.slice(0, 1)}</span>} />
         </div>
         <div className="desktop-person-detail-copy">
-          <span className="status-chip">{personActivityStatusLabel(person.activityStatus, t)}</span>
+          <div className="desktop-person-detail-copy__top"><span className="status-chip">{personActivityStatusLabel(person.activityStatus, t)}</span><PersonEditor key={person.id} repository={repository} person={person} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} /></div>
           <h1>{displayName}</h1>
           <p>{localizeText(person.biographies, metadataLanguage, t("暂无人物简介"))}</p>
+          <section className="detail-grid desktop-person-detail-facts">
+            <InfoCard label={t("出生日期")} value={person.birthDate?.value} />
+            <InfoCard label={t("出生地")} value={localizeText(person.birthPlace, metadataLanguage)} />
+            <InfoCard label={t("身高")} value={person.heightCm ? `${person.heightCm} cm` : undefined} />
+            <InfoCard label={t("作品数")} value={String(workCount)} />
+          </section>
         </div>
       </section>
       <PersonAssetGovernance person={person} assets={personAssets} resolved={portrait} repository={repository} runtimeContractRevision={runtimeContractRevision} onLibraryChanged={onLibraryChanged} setMessage={setMessage} />
       <PresentationAssetPicker entityType="person" entityId={person.id} candidates={presentation.candidates} preference={presentationPreference} resolved={presentation.resolved} stalePreferredAssetId={presentation.stalePreferredAssetId} repository={repository} onSaved={onLibraryChanged} setMessage={setMessage} />
-      <PersonEditor key={person.id} repository={repository} person={person} onSaved={onLibraryChanged} onDeleted={() => { onLibraryChanged(); onBack(); }} setMessage={setMessage} />
-      <section className="detail-grid">
-        <InfoCard label={t("出生日期")} value={person.birthDate?.value} />
-        <InfoCard label={t("出生地")} value={localizeText(person.birthPlace, metadataLanguage)} />
-        <InfoCard label={t("身高")} value={person.heightCm ? `${person.heightCm} cm` : undefined} />
-        <InfoCard label={t("作品数")} value={String(workCount)} />
-      </section>
       <section className="settings-card">
         <span className="eyebrow">NAMES</span>
         <h2>{t("名称 / 别名")}</h2>

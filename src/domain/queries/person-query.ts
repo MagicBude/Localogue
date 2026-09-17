@@ -22,8 +22,15 @@ export interface PersonQuery {
   birthYears?: string[];
   debutYears?: string[];
   retirementYears?: string[];
+  birthPlaceText?: string;
+  cupSizes?: string[];
   heightMin?: number;
   heightMax?: number;
+  hasPortrait?: boolean;
+  hasBirthDate?: boolean;
+  hasHeight?: boolean;
+  hasMeasurements?: boolean;
+  hasBiography?: boolean;
   sort?: PersonSort;
   page?: number;
   pageSize?: number;

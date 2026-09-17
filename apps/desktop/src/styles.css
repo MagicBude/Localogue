@@ -1153,6 +1153,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
 }
 .desktop-person-detail-copy { align-self: center; }
 .desktop-person-detail-copy h1 { margin: 8px 0; }
+.desktop-person-detail-copy__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.desktop-person-detail-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 16px; gap: 8px; }
+.desktop-person-detail-facts .info-card { min-width: 0; padding: 10px 12px; border-radius: 10px; box-shadow: none; }
+.desktop-person-detail-facts .info-card strong { overflow-wrap: anywhere; }
 
 @media (max-width: 860px) {
   .desktop-person-facet-bar .desktop-facet-bar__primary { flex-wrap: wrap; }
@@ -1162,6 +1166,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
 @media (max-width: 860px) {
   .desktop-person-filter-menu__grid { grid-template-columns: 1fr 1fr; }
   .desktop-person-detail-hero { grid-template-columns: 130px minmax(0, 1fr); }
+  .desktop-person-detail-facts { grid-template-columns: 1fr 1fr; }
 }
 .desktop-catalog-page {
   flex: 1 1 auto;

@@ -60,13 +60,23 @@ export function CreatePersonPanel({ repository, onSaved, setMessage }: { reposit
 /** 取消会重新建立编辑会话，丢弃这次尚未保存的字段，同时不触碰磁盘。 */
 export function PersonEditor(props: { repository: TauriLibraryRepository; person: Person; onSaved: () => void; onDeleted: () => void; setMessage: (message: string) => void }) {
   const [session, setSession] = useState(0);
-  return <PersonEditorSession key={session} {...props} onCancel={() => setSession((value) => value + 1)} />;
+  const [open, setOpen] = useState(false);
+  const { t } = useDesktopI18n();
+  function closeAndReset(): void {
+    setOpen(false);
+    setSession((value) => value + 1);
+  }
+  return <>
+    <button className="primary-button desktop-person-edit-trigger" type="button" onClick={() => setOpen(true)}>{t("编辑人物")}</button>
+    <UiActionDialog wide open={open} onOpenChange={(next) => { if (!next) closeAndReset(); }} title={t("编辑人物")} description={t("集中修改人物名称、状态与基础资料，保存后返回当前详情。")} closeLabel={t("关闭")}>
+      <PersonEditorSession key={session} {...props} onSaved={() => { props.onSaved(); closeAndReset(); }} onCancel={closeAndReset} />
+    </UiActionDialog>
+  </>;
 }
 
 function PersonEditorSession({ repository, person, onSaved, onDeleted, setMessage, onCancel }: { repository: TauriLibraryRepository; person: Person; onSaved: () => void; onDeleted: () => void; setMessage: (message: string) => void; onCancel: () => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const confirm = useUiConfirm();
-  const [open, setOpen] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [busy, setBusy] = useState(false);
   const operationPending = useRef(false);
@@ -128,7 +138,7 @@ function PersonEditorSession({ repository, person, onSaved, onDeleted, setMessag
     finally { operationPending.current = false; setBusy(false); }
   }
 
-  return <section className="settings-card"><div className="section-heading"><div><span className="eyebrow">DESKTOP EDIT</span><h2>{t("编辑人物")}</h2><p className="muted">{isPrivate ? t("Private Person 可直接修改。") : t("Shared Person 保存时会创建 Private Override。")}</p></div><div className="button-row"><button disabled={busy} onClick={() => setOpen((value) => !value)}>{open ? t("收起") : t("编辑")}</button>{isPrivate ? <button className="danger-button" disabled={busy} onClick={() => void remove()}>{t("删除 Private Person")}</button> : null}</div></div>{open ? <fieldset className="editor-grid" disabled={busy}><label>{t("日文主名称")}<input value={nameJa} onChange={(event) => setNameJa(event.target.value)} /></label><label>{t("中文名称")}<input value={nameZh} onChange={(event) => setNameZh(event.target.value)} /></label><label>{t("英文名称")}<input value={nameEn} onChange={(event) => setNameEn(event.target.value)} /></label><label>{t("状态")}<select value={status} onChange={(event) => setStatus(event.target.value as PersonActivityStatus)}>{["active", "retired", "hiatus", "inactive", "unknown"].map((item) => <option key={item} value={item}>{activityStatusLabel(item as PersonActivityStatus, t)}</option>)}</select></label><label>{t("出生日期")}<input value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label><label>{t("身高（cm）")}<input type="number" min="1" value={height} onChange={(event) => setHeight(event.target.value)} /></label><label>{t("日文简介")}<textarea rows={4} value={biographyJa} onChange={(event) => setBiographyJa(event.target.value)} /></label><label>{t("中文简介")}<textarea rows={4} value={biographyZh} onChange={(event) => setBiographyZh(event.target.value)} /></label><label className="span-2">{t("英文简介")}<textarea rows={4} value={biographyEn} onChange={(event) => setBiographyEn(event.target.value)} /></label><div className="span-2 form-actions"><button onClick={onCancel}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div></fieldset> : null}</section>;
+  return <fieldset className="editor-grid" disabled={busy}><label>{t("日文主名称")}<input value={nameJa} onChange={(event) => setNameJa(event.target.value)} /></label><label>{t("中文名称")}<input value={nameZh} onChange={(event) => setNameZh(event.target.value)} /></label><label>{t("英文名称")}<input value={nameEn} onChange={(event) => setNameEn(event.target.value)} /></label><label>{t("状态")}<select value={status} onChange={(event) => setStatus(event.target.value as PersonActivityStatus)}>{["active", "retired", "hiatus", "inactive", "unknown"].map((item) => <option key={item} value={item}>{activityStatusLabel(item as PersonActivityStatus, t)}</option>)}</select></label><label>{t("出生日期")}<input value={birthDate} onChange={(event) => setBirthDate(event.target.value)} /></label><label>{t("身高（cm）")}<input type="number" min="1" value={height} onChange={(event) => setHeight(event.target.value)} /></label><label>{t("日文简介")}<textarea rows={4} value={biographyJa} onChange={(event) => setBiographyJa(event.target.value)} /></label><label>{t("中文简介")}<textarea rows={4} value={biographyZh} onChange={(event) => setBiographyZh(event.target.value)} /></label><label className="span-2">{t("英文简介")}<textarea rows={4} value={biographyEn} onChange={(event) => setBiographyEn(event.target.value)} /></label><div className="span-2 form-actions">{isPrivate ? <button className="danger-button" onClick={() => void remove()}>{t("删除 Private Person")}</button> : null}<button onClick={onCancel}>{t("取消")}</button><button className="primary-button" onClick={() => void save()}>{busy ? t("保存中…") : isPrivate ? t("保存修改") : t("保存为 Private Override")}</button></div></fieldset>;
 }
 
 function activityStatusLabel(status: PersonActivityStatus, t: (source: string) => string): string {

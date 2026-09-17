@@ -65,6 +65,7 @@ export function DesktopPersonExplorer({
       birthYears: toYears(allPerformers.map((person) => person.birthDate?.value)),
       debutYears: toYears(allPerformers.map((person) => careerDate(person, "debut"))),
       retirementYears: toYears(allPerformers.map((person) => careerDate(person, "retirement"))),
+      cupSizes: [...new Set(allPerformers.map((person) => person.measurements?.cup).filter((value): value is string => Boolean(value)))].sort(),
     };
   }, [repository, query]);
 
@@ -169,6 +170,7 @@ function PersonFilterPanel({
     birthYears: string[];
     debutYears: string[];
     retirementYears: string[];
+    cupSizes: string[];
   };
   toolbarAction?: ReactNode;
 }) {
@@ -178,7 +180,17 @@ function PersonFilterPanel({
   const selectedBirth = query.birthYears?.[0] ?? "";
   const selectedDebut = query.debutYears?.[0] ?? "";
   const selectedRetirement = query.retirementYears?.[0] ?? "";
-  const activeCount = [selectedStatus, selectedBirth, selectedDebut, selectedRetirement, query.heightMin, query.heightMax].filter(Boolean).length;
+  const activeCount = [
+    selectedStatus,
+    selectedBirth,
+    selectedDebut,
+    selectedRetirement,
+    query.birthPlaceText,
+    query.cupSizes?.length,
+    query.heightMin,
+    query.heightMax,
+  ].filter((value) => value !== undefined && value !== "").length
+    + [query.hasPortrait, query.hasBirthDate, query.hasHeight, query.hasMeasurements, query.hasBiography].filter((value) => value !== undefined).length;
   return (
     <section className="desktop-facet-bar desktop-person-facet-bar">
       <div className="desktop-facet-bar__primary">
@@ -189,6 +201,8 @@ function PersonFilterPanel({
           <option value="height_desc">{t("身高")} ↓</option><option value="height_asc">{t("身高")} ↑</option>
         </select></label>
         <FilterPopover count={activeCount} label={t("筛选")} wide>
+          <div className="desktop-filter-section">
+            <strong>{t("人物资料")}</strong>
           <div className="desktop-person-filter-menu__grid">
             <SelectField label={t("状态")} value={selectedStatus} options={data.statusOptions} getOptionLabel={(value) => personActivityStatusLabel(value, t)} onChange={(value) => patch({ statuses: value ? [value] : undefined })} />
             <SelectField label={t("出道年份")} value={selectedDebut} options={data.debutYears} onChange={(value) => patch({ debutYears: value ? [value] : undefined })} />
@@ -196,6 +210,24 @@ function PersonFilterPanel({
             <SelectField label={t("出生年份")} value={selectedBirth} options={data.birthYears} onChange={(value) => patch({ birthYears: value ? [value] : undefined })} />
             <label className="field"><span>{t("身高 ≥")}</span><input min="0" value={query.heightMin ?? ""} onChange={(event) => patch({ heightMin: parseOptionalNumber(event.target.value) })} placeholder="150" type="number" /></label>
             <label className="field"><span>{t("身高 ≤")}</span><input min="0" value={query.heightMax ?? ""} onChange={(event) => patch({ heightMax: parseOptionalNumber(event.target.value) })} placeholder="175" type="number" /></label>
+          </div>
+          </div>
+          <div className="desktop-filter-section">
+            <strong>{t("身体与地区")}</strong>
+            <div className="desktop-person-filter-menu__grid">
+              <label className="field"><span>{t("出生地")}</span><input value={query.birthPlaceText ?? ""} onChange={(event) => patch({ birthPlaceText: event.target.value || undefined })} placeholder={t("输入地区名称")} /></label>
+              <SelectField label={t("罩杯")} value={query.cupSizes?.[0] ?? ""} options={data.cupSizes} onChange={(value) => patch({ cupSizes: value ? [value] : undefined })} />
+            </div>
+          </div>
+          <div className="desktop-filter-section">
+            <strong>{t("资料情况")}</strong>
+            <div className="desktop-person-filter-menu__grid desktop-person-presence-grid">
+              <PresenceSelect label={t("人物图片")} value={query.hasPortrait} onChange={(value) => patch({ hasPortrait: value })} />
+              <PresenceSelect label={t("出生日期")} value={query.hasBirthDate} onChange={(value) => patch({ hasBirthDate: value })} />
+              <PresenceSelect label={t("身高资料")} value={query.hasHeight} onChange={(value) => patch({ hasHeight: value })} />
+              <PresenceSelect label={t("三围资料")} value={query.hasMeasurements} onChange={(value) => patch({ hasMeasurements: value })} />
+              <PresenceSelect label={t("人物简介")} value={query.hasBiography} onChange={(value) => patch({ hasBiography: value })} />
+            </div>
           </div>
         </FilterPopover>
         {toolbarAction ? <div className="desktop-browser-toolbar-action">{toolbarAction}</div> : null}
@@ -216,14 +248,25 @@ function PersonFilterChips({ query, onChange }: { query: PersonQuery; onChange: 
   if (selectedDebut) chips.push({ label: `${t("出道年份")}: ${selectedDebut}`, clear: () => onChange({ ...query, debutYears: undefined }) });
   if (selectedRetirement) chips.push({ label: `${t("引退年份")}: ${selectedRetirement}`, clear: () => onChange({ ...query, retirementYears: undefined }) });
   if (selectedBirth) chips.push({ label: `${t("出生年份")}: ${selectedBirth}`, clear: () => onChange({ ...query, birthYears: undefined }) });
+  if (query.birthPlaceText) chips.push({ label: `${t("出生地")}: ${query.birthPlaceText}`, clear: () => onChange({ ...query, birthPlaceText: undefined }) });
+  if (query.cupSizes?.[0]) chips.push({ label: `${t("罩杯")}: ${query.cupSizes[0]}`, clear: () => onChange({ ...query, cupSizes: undefined }) });
   if (query.heightMin !== undefined) chips.push({ label: `${t("身高 ≥")}: ${query.heightMin}`, clear: () => onChange({ ...query, heightMin: undefined }) });
   if (query.heightMax !== undefined) chips.push({ label: `${t("身高 ≤")}: ${query.heightMax}`, clear: () => onChange({ ...query, heightMax: undefined }) });
+  pushPresenceChip(chips, t("人物图片"), query.hasPortrait, () => onChange({ ...query, hasPortrait: undefined }), t);
+  pushPresenceChip(chips, t("出生日期"), query.hasBirthDate, () => onChange({ ...query, hasBirthDate: undefined }), t);
+  pushPresenceChip(chips, t("身高资料"), query.hasHeight, () => onChange({ ...query, hasHeight: undefined }), t);
+  pushPresenceChip(chips, t("三围资料"), query.hasMeasurements, () => onChange({ ...query, hasMeasurements: undefined }), t);
+  pushPresenceChip(chips, t("人物简介"), query.hasBiography, () => onChange({ ...query, hasBiography: undefined }), t);
   if (!chips.length) return null;
   return <div className="desktop-active-filters"><strong>{t("已选筛选")}</strong><div>{chips.map((chip) => <button key={chip.label} onClick={chip.clear} type="button">{chip.label} ×</button>)}</div></div>;
 }
 
 function hasPersonFilters(query: PersonQuery): boolean {
-  return Boolean(query.text || query.statuses?.length || query.birthYears?.length || query.debutYears?.length || query.retirementYears?.length || query.heightMin !== undefined || query.heightMax !== undefined);
+  return Boolean(query.text || query.statuses?.length || query.birthYears?.length || query.debutYears?.length || query.retirementYears?.length || query.birthPlaceText || query.cupSizes?.length || query.heightMin !== undefined || query.heightMax !== undefined || query.hasPortrait !== undefined || query.hasBirthDate !== undefined || query.hasHeight !== undefined || query.hasMeasurements !== undefined || query.hasBiography !== undefined);
+}
+
+function pushPresenceChip(chips: Array<{ label: string; clear: () => void }>, label: string, value: boolean | undefined, clear: () => void, t: (key: string) => string): void {
+  if (value !== undefined) chips.push({ label: `${label}: ${value ? t("有") : t("无")}`, clear });
 }
 
 function readPeoplePageSize(): number {
@@ -234,6 +277,11 @@ function readPeoplePageSize(): number {
 function SelectField({ label, value, options, onChange, getOptionLabel }: { label: string; value: string; options: string[]; onChange: (value: string) => void; getOptionLabel?: (value: string) => string }) {
   const { t } = useDesktopI18n();
   return <label className="field"><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option value="">{t("任意")}</option>{options.map((option) => <option key={option} value={option}>{getOptionLabel ? getOptionLabel(option) : option}</option>)}</select></label>;
+}
+
+function PresenceSelect({ label, value, onChange }: { label: string; value?: boolean; onChange: (value?: boolean) => void }) {
+  const { t } = useDesktopI18n();
+  return <label className="field"><span>{label}</span><select value={value === undefined ? "" : String(value)} onChange={(event) => onChange(event.target.value === "" ? undefined : event.target.value === "true")}><option value="">{t("任意")}</option><option value="true">{t("有")}</option><option value="false">{t("无")}</option></select></label>;
 }
 
 function buildPortraitMap(assets: Asset[], people: Person[], preferences: PresentationPreference[]): Map<string, Asset> {

@@ -95,6 +95,20 @@ export function queryPeople(
       return false;
     }
 
+    if (query.birthPlaceText) {
+      const birthplace = Object.values(person.birthPlace ?? {})
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase();
+      if (!birthplace.includes(query.birthPlaceText.trim().toLocaleLowerCase())) return false;
+    }
+    if (query.cupSizes?.length && (!person.measurements?.cup || !query.cupSizes.includes(person.measurements.cup))) return false;
+    if (!matchesPresence(Boolean(person.portraitAssetId || person.galleryAssetIds.length), query.hasPortrait)) return false;
+    if (!matchesPresence(Boolean(person.birthDate?.value), query.hasBirthDate)) return false;
+    if (!matchesPresence(person.heightCm !== undefined, query.hasHeight)) return false;
+    if (!matchesPresence(Boolean(person.measurements && Object.values(person.measurements).some((value) => value !== undefined)), query.hasMeasurements)) return false;
+    if (!matchesPresence(Boolean(person.biographies && Object.values(person.biographies).some(Boolean)), query.hasBiography)) return false;
+
     if (
       query.heightMin !== undefined &&
       (person.heightCm === undefined || person.heightCm < query.heightMin)
@@ -132,6 +146,10 @@ export function queryPeople(
     page,
     pageSize,
   };
+}
+
+function matchesPresence(actual: boolean, expected: boolean | undefined): boolean {
+  return expected === undefined || actual === expected;
 }
 
 function matchesWork(
