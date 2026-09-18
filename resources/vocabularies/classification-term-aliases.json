@@ -14903,6 +14903,121 @@
         "localogue-community-data"
       ],
       "note": "Community genre_000131 (role) 精确名称。"
+    },
+    {
+      "term": "4小时+",
+      "status": "approved",
+      "targets": [
+        "workType:over_four_hours"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "中文来源将四小时以上缩写为 4小时+；语义唯一对应 over_four_hours。"
+    },
+    {
+      "term": "4时间以上作品",
+      "status": "approved",
+      "targets": [
+        "workType:over_four_hours"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "来源中文本地化将 4時間以上作品直译为 4时间以上作品；精确路由到 over_four_hours。"
+    },
+    {
+      "term": "无毛",
+      "status": "approved",
+      "targets": [
+        "genre:hairless"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "fanza",
+        "javlibrary",
+        "localogue-user-evidence"
+      ],
+      "note": "パイパン的来源中文名称；精确对应 hairless。"
+    },
+    {
+      "term": "学生妹",
+      "status": "approved",
+      "targets": [
+        "genre:student"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "来源词只确认学生身份，未确认高中或大学，保守路由到通用 student。"
+    },
+    {
+      "term": "职业装",
+      "status": "approved",
+      "targets": [
+        "genre:suit"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "来源服装分类词；精确路由到 suit，不推断职业或场景。"
+    },
+    {
+      "term": "乳液",
+      "status": "approved",
+      "targets": [
+        "genre:lotion_play"
+      ],
+      "candidateTargets": [],
+      "sources": [
+        "javbus",
+        "javlibrary",
+        "localogue-user-evidence"
+      ],
+      "note": "ローション的来源中文名称；分类语义对应 lotion_play。"
+    },
+    {
+      "term": "淫乱真实",
+      "status": "review-required",
+      "targets": [],
+      "candidateTargets": [
+        "genre:seductress"
+      ],
+      "sources": [
+        "javlibrary",
+        "localogue-user-evidence"
+      ],
+      "note": "疑似“淫乱、ハード系”的错误中文本地化；复合语义不自动写入 Canonical。"
+    },
+    {
+      "term": "爱美臀",
+      "status": "review-required",
+      "targets": [],
+      "candidateTargets": [
+        "genre:beautiful_butt",
+        "genre:butt_fetish"
+      ],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "可能表达美臀属性或臀部偏好，无法从原词唯一确定，保留人工审核。"
+    },
+    {
+      "term": "强迫口交",
+      "status": "review-required",
+      "targets": [],
+      "candidateTargets": [
+        "genre:blowjob",
+        "genre:abuse"
+      ],
+      "sources": [
+        "localogue-user-evidence"
+      ],
+      "note": "同时包含行为与强迫语义，禁止自动拆分写入多个 Canonical Genre。"
     }
   ]
 }

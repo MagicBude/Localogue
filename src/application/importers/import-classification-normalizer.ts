@@ -35,6 +35,7 @@ export interface WorkTypeDefinition {
 export interface ImportClassificationNormalization {
   candidate: NormalizedImportCandidate;
   unmappedTerms: string[];
+  reviewTerms: string[];
   structuralTerms: string[];
 }
 
@@ -159,6 +160,7 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
 
   const structuralTerms: string[] = [];
   const unmappedTerms: string[] = [];
+  const reviewTerms: string[] = [];
   const series = new Set(candidate.series.filter((value) => !matchesKnownPerson(value, candidate)));
   const workTypes = new Set<string>();
   const genres = new Set<string>();
@@ -200,6 +202,11 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
       continue;
     }
 
+    if (REVIEW_TERM_KEYS.has(termKey(term))) {
+      reviewTerms.push(term);
+      continue;
+    }
+
     const workType = workTypeFor(term);
     if (workType) {
       workTypes.add(workType.id);
@@ -225,6 +232,7 @@ export function normalizeImportedClassifications(input: NormalizedImportCandidat
   return {
     candidate,
     structuralTerms: uniqueClean(structuralTerms),
+    reviewTerms: uniqueClean(reviewTerms),
     unmappedTerms: uniqueClean(unmappedTerms),
   };
 }

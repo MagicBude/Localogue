@@ -9,7 +9,7 @@
 → 不创建用户 Tag
 ```
 
-V1-25A 当前维护 **38 个**已知 Source-only 分类。
+当前维护 **51 个**已知 Source-only 分类。
 
 其中 21 个直接来自 Community Data：
 
@@ -26,6 +26,8 @@ V1-25A 当前维护 **38 个**已知 Source-only 分类。
 - generic source bucket：Normal / Sexy / Adult / Culture / Various Professions；
 - age-coded source term：`ショタ`、`ロリ系`，只识别和保留来源，不自动提升为 Canonical Genre；
 - content warning：药物相关来源词。
+
+促销标题即使包含“独占”“素人”等内容词，也不等同作品 Genre。`素人独占レーベル30％OFF第1弾` 作为 `provider_marketing_campaign` 的精确别名保留在来源 Evidence 中，不写入 Canonical 分类。
 
 机器可读文件：
 

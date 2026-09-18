@@ -1225,3 +1225,12 @@ Yukata,approved,genre:yukata,,localogue-community-data,Community genre_000154 (w
 骑乘位,approved,genre:cowgirl,,legacy-localogue,V1-24 以前的 Localogue Canonical 显示词，保留为稳定别名。
 黑人演員,approved,genre:black_performer,,javbus,JavBus 来源词经 OpenCC 香港繁体转简体为“黑人演员”，并唯一精确命中 genre:black_performer；不进行模糊语义推断。
 黑人演员,approved,genre:black_performer,,localogue-community-data,Community genre_000131 (role) 精确名称。
+4小时+,approved,workType:over_four_hours,,localogue-user-evidence,中文来源将四小时以上缩写为 4小时+；语义唯一对应 over_four_hours。
+4时间以上作品,approved,workType:over_four_hours,,localogue-user-evidence,来源中文本地化将 4時間以上作品直译为 4时间以上作品；精确路由到 over_four_hours。
+无毛,approved,genre:hairless,,fanza|javlibrary|localogue-user-evidence,パイパン的来源中文名称；精确对应 hairless。
+学生妹,approved,genre:student,,localogue-user-evidence,来源词只确认学生身份，未确认高中或大学，保守路由到通用 student。
+职业装,approved,genre:suit,,localogue-user-evidence,来源服装分类词；精确路由到 suit，不推断职业或场景。
+乳液,approved,genre:lotion_play,,javbus|javlibrary|localogue-user-evidence,ローション的来源中文名称；分类语义对应 lotion_play。
+淫乱真实,review-required,,genre:seductress,javlibrary|localogue-user-evidence,疑似“淫乱、ハード系”的错误中文本地化；复合语义不自动写入 Canonical。
+爱美臀,review-required,,genre:beautiful_butt|genre:butt_fetish,localogue-user-evidence,可能表达美臀属性或臀部偏好，无法从原词唯一确定，保留人工审核。
+强迫口交,review-required,,genre:blowjob|genre:abuse,localogue-user-evidence,同时包含行为与强迫语义，禁止自动拆分写入多个 Canonical Genre。

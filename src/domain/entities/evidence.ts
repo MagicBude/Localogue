@@ -21,6 +21,7 @@ export type ImportWarningCode =
   | "missing_performers"
   | "json_row_not_object"
   | "xlsx_fallback_sheet"
+  | "review_required_classification"
   | "unmapped_classification";
 
 export interface ImportWarning {

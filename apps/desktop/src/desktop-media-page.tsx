@@ -44,6 +44,7 @@ import { desktopBridge } from "./tauri-bridge";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { useUiConfirm } from "./ui/confirm-dialog";
 import { UiButton } from "./ui/button";
+import { UiActionDialog } from "./ui/action-dialog";
 import {
   applyVocabularyRepair,
   previewVocabularyRepair,
@@ -529,7 +530,14 @@ export function DesktopMediaPage({
 
       {!data.loading && data.value && bindingMediaId ? (() => {
         const target = data.value.media.find((item) => item.id === bindingMediaId);
-        return target ? <MediaBindingPanel media={target} repository={repository} setMessage={setMessage} onChanged={() => { setBindingMediaId(null); onLibraryChanged(); }} /> : null;
+        return target ? <UiActionDialog
+          closeLabel={t("关闭")}
+          description={t("自动扫描只做保守番号匹配。请确认候选后再绑定、重新绑定或解除绑定。")}
+          onOpenChange={(open) => { if (!open) setBindingMediaId(null); }}
+          open
+          title={`${t("管理绑定")}：${target.fileName}`}
+          wide
+        ><MediaBindingPanel media={target} repository={repository} setMessage={setMessage} onChanged={() => { setBindingMediaId(null); onLibraryChanged(); }} /></UiActionDialog> : null;
       })() : null}
 
     </div>

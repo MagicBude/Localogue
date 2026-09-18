@@ -41,6 +41,7 @@ export interface NfoImportItem {
   /** Parser / Validator 的完整结构化警告；Evidence 必须原样保留，不能只留 UI 当前展示的一类。 */
   warnings?: ImportWarning[];
   unmappedTerms?: string[];
+  reviewTerms?: string[];
 }
 
 export interface NfoImportGroup {
@@ -129,6 +130,9 @@ export async function previewNfoImport(
       const unmappedTerms = candidateWarnings
         .filter((warning) => warning.code === "unmapped_classification" && warning.detail)
         .map((warning) => warning.detail!) ?? [];
+      const reviewTerms = candidateWarnings
+        .filter((warning) => warning.code === "review_required_classification" && warning.detail)
+        .map((warning) => warning.detail!) ?? [];
 
       parsedItems[index] = {
         path: entry.path,
@@ -147,6 +151,7 @@ export async function previewNfoImport(
         ...(normalized ? { normalized } : {}),
         ...(candidateWarnings.length ? { warnings: candidateWarnings } : {}),
         ...(unmappedTerms.length ? { unmappedTerms } : {}),
+        ...(reviewTerms.length ? { reviewTerms } : {}),
         ...(matched ? { matchedWorkId: matched.id } : {}),
       };
     } catch (error) {
@@ -276,6 +281,7 @@ export async function importNfoPreview(
       else result.unchangedWorks += 1;
       result.imported += 1;
       if (item.unmappedTerms?.length) result.warnings.push(`${item.fileName}: ${item.unmappedTerms.length} 个来源分类词保持 unmapped：${item.unmappedTerms.join(" · ")}`);
+      if (item.reviewTerms?.length) result.warnings.push(`${item.fileName}: ${item.reviewTerms.length} 个来源分类词需要人工审核：${item.reviewTerms.join(" · ")}`);
       for (const warning of item.warnings?.filter((value) => value.code === "invalid_date") ?? []) {
         result.warnings.push(`${item.fileName}: 日期无效，未写入发行日期：${warning.detail ?? "—"}`);
       }

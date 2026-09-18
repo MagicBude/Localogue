@@ -128,6 +128,8 @@ Raw Source Term
 
 也禁止 AI / fuzzy match 未经审核直接写 Canonical。
 
+`review-required` 与真正未知词在 UI 中分开提示：前者表示词条已经登记，但候选目标不唯一或来源翻译不可靠，需要人工判断；后者才表示当前词表没有任何明确规则。
+
 ## 为什么 Source `<tag>` ≠ Localogue Tag
 
 Localogue Tag 是用户自己的整理标签。来源 NFO `<tag>` 经常只是刮削器复制出来的分类桶，因此不能自动等同用户 Tag。

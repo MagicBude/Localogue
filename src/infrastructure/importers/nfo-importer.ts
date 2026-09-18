@@ -37,6 +37,7 @@ export class NfoMetadataImporter implements MetadataImporter {
         normalized,
         warnings: [
           ...validateImportCandidate(normalized),
+          ...classification.reviewTerms.map((term) => ({ code: "review_required_classification" as const, detail: term })),
           ...classification.unmappedTerms.map((term) => ({ code: "unmapped_classification" as const, detail: term })),
         ],
       }],
@@ -104,4 +105,3 @@ function normalizeExtractedCode(value: unknown): string | undefined {
   if (typeof value !== "string" && typeof value !== "number") return undefined;
   return normalizeNfoCode(String(value));
 }
-
