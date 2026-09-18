@@ -131,7 +131,13 @@ export function DesktopTopbar({ version, search }: { version?: string; search?: 
     if (target.closest("input, button, select, summary, details, label, form")) return;
     void appWindow.startDragging();
   }
-  return <header className="topbar window-chrome" onMouseDown={startWindowDrag}>
+  function toggleWindowMaximize(event: MouseEvent<HTMLElement>): void {
+    if (event.button !== 0) return;
+    const target = event.target as HTMLElement;
+    if (target.closest("input, button, select, summary, details, label, form")) return;
+    void appWindow.toggleMaximize();
+  }
+  return <header className="topbar window-chrome" onMouseDown={startWindowDrag} onDoubleClick={toggleWindowMaximize}>
     <div className="topbar-main">
       <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
       {search ? <form className="topbar-search" role="search" onSubmit={submitSearch}>

@@ -103,6 +103,14 @@ export function DesktopPersonExplorer({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [page, pageSize, query]);
 
+  // Hook 必须在加载态和结果态都按同样顺序执行，否则数据返回时 React 会直接卸载整棵人物页。
+  useLayoutEffect(() => {
+    if (scrollRestored.current || data.loading || !data.value || initialState === undefined) return;
+    scrollRestored.current = true;
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: initialState.scrollY, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [data.loading, data.value, initialState]);
+
   if (data.loading) return <ExplorerState>{t("正在读取人物资料…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取人物。")}</ExplorerState>;
 
@@ -110,13 +118,6 @@ export function DesktopPersonExplorer({
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
   const visible = data.value.filteredPerformers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-
-  useLayoutEffect(() => {
-    if (scrollRestored.current || data.loading || !data.value || initialState === undefined) return;
-    scrollRestored.current = true;
-    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: initialState.scrollY, behavior: "auto" }));
-    return () => window.cancelAnimationFrame(frame);
-  }, [data.loading, data.value, initialState]);
 
   function changeQuery(next: PersonQuery): void {
     setPage(1);
