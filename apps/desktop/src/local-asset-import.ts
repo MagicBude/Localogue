@@ -1,6 +1,7 @@
 import { inferCatalogFilenameMetadata, normalizeNfoCode } from "@/application/importers/nfo-filename-metadata";
 import type { Asset, AssetType } from "@/domain/entities/asset";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
+import type { DesktopMetadataProgressHandler } from "./desktop-metadata-discovery";
 import type { DesktopFileEntry } from "./contracts";
 
 import type { NfoImportPreview } from "./nfo-library-import";
@@ -135,6 +136,7 @@ export async function importLocalAssetPreview(
   preview: LocalAssetImportPreview,
   repository: LibraryRepository,
   hashText: (value: string) => string,
+  onProgress?: DesktopMetadataProgressHandler,
 ): Promise<LocalAssetImportResult> {
   const result: LocalAssetImportResult = {
     imported: 0,
@@ -160,7 +162,10 @@ export async function importLocalAssetPreview(
   // 同一 Work 的 poster / fanart / thumb 一次性处理，最后只写一次 Work.assetIds。
   // 真实资料库通常每个作品有 3~4 张图片；按图片逐张 saveWork 会反复清空
   // Repository cache 并重读整套 Works，在数百张图片时会放大 I/O。
-  for (const items of groups.values()) {
+  const groupedItems = [...groups.values()];
+  let processed = 0;
+  const total = groupedItems.reduce((sum, items) => sum + items.length, 0);
+  for (const items of groupedItems) {
     const code = items[0]?.code;
     if (!code) continue;
     const work = await repository.findWorkByCode(code);
@@ -214,6 +219,8 @@ export async function importLocalAssetPreview(
         result.skipped += 1;
         result.warnings.push(`${item.fileName}: ${message(error)}`);
       }
+      processed += 1;
+      onProgress?.({ phase: "importing_assets", current: processed, total, fileName: item.fileName, message: "正在保存本地图片" });
     }
 
     if (workChanged) {

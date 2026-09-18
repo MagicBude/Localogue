@@ -10,6 +10,16 @@ export interface DesktopMetadataDiscovery {
   assetEntries: DesktopFileEntry[];
 }
 
+export interface DesktopMetadataProgress {
+  phase: "discovering" | "parsing_nfo" | "importing_nfo" | "importing_assets";
+  current: number;
+  total: number;
+  fileName?: string;
+  message: string;
+}
+
+export type DesktopMetadataProgressHandler = (progress: DesktopMetadataProgress) => void;
+
 /**
  * 用一次目录树遍历同时发现 NFO 与图片。
  *
@@ -20,6 +30,7 @@ export interface DesktopMetadataDiscovery {
 export async function discoverDesktopMetadataFiles(
   nfoRoots: readonly string[],
   assetRoots: readonly string[],
+  onProgress?: DesktopMetadataProgressHandler,
 ): Promise<DesktopMetadataDiscovery> {
   const plans = new Map<string, { root: string; nfo: boolean; assets: boolean }>();
   addRoots(plans, nfoRoots, "nfo");
@@ -27,7 +38,9 @@ export async function discoverDesktopMetadataFiles(
 
   const nfoEntries = new Map<string, DesktopFileEntry>();
   const assetEntries = new Map<string, DesktopFileEntry>();
-  for (const plan of plans.values()) {
+  const plannedRoots = [...plans.values()];
+  for (const [index, plan] of plannedRoots.entries()) {
+    onProgress?.({ phase: "discovering", current: index, total: plannedRoots.length, message: `正在发现文件：${plan.root}` });
     const extensions = [
       ...(plan.nfo ? NFO_EXTENSIONS : []),
       ...(plan.assets ? IMAGE_EXTENSIONS : []),
@@ -44,6 +57,7 @@ export async function discoverDesktopMetadataFiles(
       if (plan.nfo && NFO_EXTENSIONS.has(extension)) nfoEntries.set(key, entry);
       if (plan.assets && IMAGE_EXTENSIONS.has(extension)) assetEntries.set(key, entry);
     }
+    onProgress?.({ phase: "discovering", current: index + 1, total: plannedRoots.length, message: `目录发现完成：${plan.root}` });
   }
   return { nfoEntries: [...nfoEntries.values()], assetEntries: [...assetEntries.values()] };
 }

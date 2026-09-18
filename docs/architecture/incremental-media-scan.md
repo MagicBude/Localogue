@@ -102,6 +102,8 @@ ABC-123-poster.jpg
 
 V1-12 会只更新 `MediaFile.sidecars`，不会再次读取整个视频。
 
+Desktop 统一扫描对同一内容根只执行一次 NFO / 图片发现。NFO 文本读取与 XML 解析采用固定 6 路受控并发，避免大量文件完全串行，也避免无上限并发耗尽文件句柄；Canonical Work、Person、Organization 等写入仍保持顺序执行，以维护规范化精确复用语义。界面按“发现文件 → 解析 NFO → 保存 NFO → 保存图片 → 分析视频”复用同一条实时进度状态。
+
 ## 手工绑定优先级
 
 ```text
@@ -165,6 +167,8 @@ Web 页面使用轮询；Tauri 后续可以把同一模型映射成 Rust Event�
 # 清晰度为什么不是 Work 分类
 
 清晰度属于具体 `MediaFile` 的技术属性。同一 Work 可能同时关联 4K、1080P 和较低清晰度版本，因此不能在 Canonical Work 上保存一个单值“清晰度”。
+
+同一番号出现原档、4K、破解、内嵌中字或多段文件属于合法的一对多关系：每个文件保留独立 `MediaFile`，共同指向一个 Work。只有文件名番号与明确 NFO 番号互相矛盾时才是身份冲突；多个媒体文件共享番号本身不是错误。
 
 共享 `queryWorks` 会从每个关联 MediaFile 的 `width / height` 派生 `4k / 1080p / 720p / sd` 档位，再建立 `Work -> Set<ResolutionTier>` 索引。Works 筛选采用“任一关联版本命中”的语义，并像其它维度一样计算 self-excluding Facet：选择 4K 后，清晰度分组仍能显示切换到 1080P 会得到多少作品。
 

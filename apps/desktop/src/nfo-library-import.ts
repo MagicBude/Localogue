@@ -14,8 +14,10 @@ import { NfoMetadataImporter } from "@/infrastructure/importers/nfo-importer";
 
 import { desktopBridge } from "./tauri-bridge";
 import { buildDesktopWorkCodeIndex } from "./desktop-work-code-index";
+import type { DesktopMetadataProgressHandler } from "./desktop-metadata-discovery";
 
 const MAX_NFO_FILES = 10_000;
+const NFO_PARSE_CONCURRENCY = 6;
 
 export type NfoImportItemStatus =
   | "new_work"
@@ -87,6 +89,7 @@ export async function previewNfoImport(
   roots: readonly string[],
   repository: LibraryRepository,
   discoveredEntries?: readonly DesktopFileEntry[],
+  onProgress?: DesktopMetadataProgressHandler,
 ): Promise<NfoImportPreview> {
   const importer = new NfoMetadataImporter();
   const worksByCode = await buildDesktopWorkCodeIndex(repository, compactCode);
@@ -103,8 +106,14 @@ export async function previewNfoImport(
     }
   }
 
-  const parsedItems: NfoImportItem[] = [];
-  for (const entry of [...discovered.values()].sort((a, b) => a.path.localeCompare(b.path, "en"))) {
+  const entries = [...discovered.values()].sort((a, b) => a.path.localeCompare(b.path, "en"));
+  const parsedItems = new Array<NfoImportItem>(entries.length);
+  let cursor = 0;
+  let completed = 0;
+  async function parseNext(): Promise<void> {
+    while (cursor < entries.length) {
+      const index = cursor++;
+      const entry = entries[index];
     try {
       const text = await desktopBridge.readNfoText(entry.path);
       const preview = await importer.parse({
@@ -121,7 +130,7 @@ export async function previewNfoImport(
         .filter((warning) => warning.code === "unmapped_classification" && warning.detail)
         .map((warning) => warning.detail!) ?? [];
 
-      parsedItems.push({
+      parsedItems[index] = {
         path: entry.path,
         fileName: entry.name,
         size: entry.size,
@@ -139,18 +148,22 @@ export async function previewNfoImport(
         ...(candidateWarnings.length ? { warnings: candidateWarnings } : {}),
         ...(unmappedTerms.length ? { unmappedTerms } : {}),
         ...(matched ? { matchedWorkId: matched.id } : {}),
-      });
+      };
     } catch (error) {
-      parsedItems.push({
+      parsedItems[index] = {
         path: entry.path,
         fileName: entry.name,
         size: entry.size,
         modifiedAt: entry.modifiedAt,
         status: "parse_error",
         error: message(error),
-      });
+      };
+    }
+      completed += 1;
+      onProgress?.({ phase: "parsing_nfo", current: completed, total: entries.length, fileName: entry.name, message: "正在读取并解析 NFO" });
     }
   }
+  await Promise.all(Array.from({ length: Math.min(NFO_PARSE_CONCURRENCY, entries.length) }, () => parseNext()));
 
   markDuplicateCodes(parsedItems);
   const importableItems = parsedItems.filter(isImportable);
@@ -210,6 +223,7 @@ export async function importNfoPreview(
   preview: NfoImportPreview,
   repository: LibraryRepository,
   hashText: (value: string) => string,
+  onProgress?: DesktopMetadataProgressHandler,
 ): Promise<NfoImportResult> {
   const result: NfoImportResult = {
     imported: 0,
@@ -234,9 +248,10 @@ export async function importNfoPreview(
   ]);
   const people = peopleResult.items;
 
-  for (const item of preview.items) {
+  for (const [index, item] of preview.items.entries()) {
     if (!isImportable(item) || !item.normalized || !item.code) {
       result.skipped += 1;
+      onProgress?.({ phase: "importing_nfo", current: index + 1, total: preview.items.length, fileName: item.fileName, message: "正在保存 NFO 资料" });
       continue;
     }
 
@@ -268,6 +283,7 @@ export async function importNfoPreview(
       result.skipped += 1;
       result.warnings.push(`${item.fileName}: ${message(error)}`);
     }
+    onProgress?.({ phase: "importing_nfo", current: index + 1, total: preview.items.length, fileName: item.fileName, message: "正在保存 NFO 资料" });
   }
 
   return result;

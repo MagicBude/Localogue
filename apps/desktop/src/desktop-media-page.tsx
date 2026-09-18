@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { MediaScanCoordinator } from "@/application/media/media-scan-coordinator";
-import { discoverDesktopMetadataFiles } from "./desktop-metadata-discovery";
+import { discoverDesktopMetadataFiles, type DesktopMetadataProgress } from "./desktop-metadata-discovery";
 import type { MediaScanJobSnapshot } from "@/domain/entities/media-scan";
 import type { MediaScanHistoryEntry } from "@/domain/entities/media-scan-history";
 import type { MediaFile } from "@/domain/entities/media-file";
@@ -108,6 +108,7 @@ export function DesktopMediaPage({
   const [assetPreview, setAssetPreview] = useState<LocalAssetImportPreview | null>(null);
   const [assetResult, setAssetResult] = useState<LocalAssetImportResult | null>(null);
   const [metadataBusy, setMetadataBusy] = useState(false);
+  const [metadataProgress, setMetadataProgress] = useState<DesktopMetadataProgress | null>(null);
   const [syncStage, setSyncStage] = useState<"idle" | "discover" | "metadata" | "media" | "complete" | "error">("idle");
   const [syncingRoots, setSyncingRoots] = useState<string[]>([]);
   const [visibleRoots, setVisibleRoots] = useState<string[]>([]);
@@ -278,9 +279,9 @@ export function DesktopMediaPage({
     setNfoResult(null);
     setAssetResult(null);
     try {
-      const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots);
+      const discovery = await discoverDesktopMetadataFiles(nfoRoots, assetRoots, setMetadataProgress);
       setSyncStage("metadata");
-      const nfo = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries);
+      const nfo = await previewNfoImport(nfoRoots, repository, discovery.nfoEntries, setMetadataProgress);
       const assets = await previewLocalAssetImport(assetRoots, repository, nfo, discovery.assetEntries);
       setNfoPreview(nfo);
       setAssetPreview(assets);
@@ -290,6 +291,7 @@ export function DesktopMediaPage({
       setMessage(t("资料源扫描失败：{error}", { error: toMessage(error) }));
     } finally {
       setMetadataBusy(false);
+      setMetadataProgress(null);
     }
   }
 
@@ -317,12 +319,12 @@ export function DesktopMediaPage({
       let nfo: NfoImportResult | null = null;
       let assets: LocalAssetImportResult | null = null;
       if (nfoPreview?.importable) {
-        nfo = await importNfoPreview(nfoPreview, repository, (value) => fileHash.sha256Text(value));
+        nfo = await importNfoPreview(nfoPreview, repository, (value) => fileHash.sha256Text(value), setMetadataProgress);
         setNfoResult(nfo);
       }
       if (assetPreview?.linkable) {
         // Asset Import 会在真正写入时重新按番号查 Work，因此同一次操作里刚由 NFO 创建的 Work 也能立即接住 poster/fanart/thumb。
-        assets = await importLocalAssetPreview(assetPreview, repository, (value) => fileHash.sha256Text(value));
+        assets = await importLocalAssetPreview(assetPreview, repository, (value) => fileHash.sha256Text(value), setMetadataProgress);
         setAssetResult(assets);
       }
       onLibraryChanged();
@@ -331,6 +333,7 @@ export function DesktopMediaPage({
       setMessage(t("资料导入失败：{error}", { error: toMessage(error) }));
     } finally {
       setMetadataBusy(false);
+      setMetadataProgress(null);
     }
   }
 
@@ -350,19 +353,22 @@ export function DesktopMediaPage({
 
     setSyncingRoots(unique([...syncNfoRoots, ...syncAssetRoots, ...syncMediaRoots]));
     setMetadataBusy(true);
+    setSyncStage("discover");
+    setMetadataProgress(null);
     setNfoResult(null);
     setAssetResult(null);
     let nfoIdentityHints: Array<{ path: string; code: string }> = [];
     try {
       setMessage(t("正在扫描 NFO 和本地图片…"));
-      const discovery = await discoverDesktopMetadataFiles(syncNfoRoots, syncAssetRoots);
-      const nfoPreviewNext = await previewNfoImport(syncNfoRoots, repository, discovery.nfoEntries);
+      const discovery = await discoverDesktopMetadataFiles(syncNfoRoots, syncAssetRoots, setMetadataProgress);
+      setSyncStage("metadata");
+      const nfoPreviewNext = await previewNfoImport(syncNfoRoots, repository, discovery.nfoEntries, setMetadataProgress);
       nfoIdentityHints = buildNfoIdentityHints(nfoPreviewNext);
       setNfoPreview(nfoPreviewNext);
 
       let nfo: NfoImportResult | null = null;
       if (nfoPreviewNext.importable) {
-        nfo = await importNfoPreview(nfoPreviewNext, repository, (value) => fileHash.sha256Text(value));
+        nfo = await importNfoPreview(nfoPreviewNext, repository, (value) => fileHash.sha256Text(value), setMetadataProgress);
         setNfoResult(nfo);
       }
 
@@ -372,7 +378,7 @@ export function DesktopMediaPage({
       setAssetPreview(assetPreviewNext);
       let assets: LocalAssetImportResult | null = null;
       if (assetPreviewNext.linkable) {
-        assets = await importLocalAssetPreview(assetPreviewNext, repository, (value) => fileHash.sha256Text(value));
+        assets = await importLocalAssetPreview(assetPreviewNext, repository, (value) => fileHash.sha256Text(value), setMetadataProgress);
         setAssetResult(assets);
       }
 
@@ -384,6 +390,7 @@ export function DesktopMediaPage({
       return;
     } finally {
       setMetadataBusy(false);
+      setMetadataProgress(null);
     }
 
     setSyncStage("media");
@@ -456,7 +463,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} visibleRoots={visibleRoots} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onToggleVisible={(root) => setVisibleRoots((current) => current.some((item) => samePath(item, root)) ? current.filter((item) => !samePath(item, root)) : [...current, root])} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} visibleRoots={visibleRoots} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} metadataProgress={metadataProgress} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onToggleVisible={(root) => setVisibleRoots((current) => current.some((item) => samePath(item, root)) ? current.filter((item) => !samePath(item, root)) : [...current, root])} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
       <MediaScanSection
         roots={mediaRoots}
         scan={scan}
@@ -536,7 +543,7 @@ function buildNfoIdentityHints(preview: NfoImportPreview): Array<{ path: string;
  * 内容目录是 Profile 配置，扫描统计由 MediaFile 与 Receipt 派生。
  * 这样先交付 JavBoss 式逐目录操作，又不把本机目录误建成 Canonical 实体。
  */
-function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoots, running, scan, syncStage, onAdd, onUpdate, onRemove, onToggleVisible, onSyncAll, onSync }: {
+function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoots, running, scan, metadataProgress, syncStage, onAdd, onUpdate, onRemove, onToggleVisible, onSyncAll, onSync }: {
   folders: DesktopContentFolder[];
   media: MediaFile[];
   history: MediaScanHistoryEntry[];
@@ -544,6 +551,7 @@ function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoot
   syncingRoots: string[];
   running: boolean;
   scan: MediaScanJobSnapshot | null;
+  metadataProgress: DesktopMetadataProgress | null;
   syncStage: "idle" | "discover" | "metadata" | "media" | "complete" | "error";
   onAdd: () => void;
   onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void;
@@ -555,7 +563,7 @@ function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoot
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
     <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；也可以直接扫描全部目录。显示勾选只影响列表，不影响扫描。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" title={t("扫描资料库")} aria-label={t("扫描资料库")} disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描全部目录")}</button></div></div>
-    {running ? <div className="directory-scan-live" role="status" aria-live="polite"><strong>{t(syncStage === "media" ? "正在扫描视频" : "正在扫描资料目录")}</strong><span>{syncingRoots.length ? t("当前目录：{path}", { path: syncingRoots.join("、") }) : t("正在准备扫描…")}</span>{scan?.progress ? <span>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</span> : null}</div> : null}
+    {running ? <div className="directory-scan-live" role="status" aria-live="polite"><strong>{t(syncStage === "media" ? "正在扫描视频" : "正在扫描资料目录")}</strong><span>{syncingRoots.length ? t("当前目录：{path}", { path: syncingRoots.join("、") }) : t("正在准备扫描…")}</span>{syncStage === "media" && scan?.progress ? <span>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</span> : metadataProgress ? <span>{metadataProgress.message}{metadataProgress.fileName ? ` · ${metadataProgress.fileName}` : ""} · {metadataProgress.current} / {metadataProgress.total || "—"}</span> : null}</div> : null}
     {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
       const root = folder.path;
       const files = media.filter((item) => item.scanRoot && samePath(item.scanRoot, root));
