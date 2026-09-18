@@ -14,8 +14,12 @@ export function inferCatalogFilenameMetadata(fileName: string): NfoFilenameMetad
   const stem = stripLastExtension(fileName.normalize("NFKC").trim());
   if (!stem) return {};
 
-  const codeMatch = findCode(stem);
   const dateMatch = findDate(stem);
+  // 日期与番号紧贴时（例如 2025-01-31SAME-151），日期末尾的“31”不能被
+  // 番号规则吞进前缀。先识别日期并用等长空白遮蔽，既保留字符串边界，又让
+  // 后续番号识别只处理真正属于番号的部分。
+  const codeSearchValue = dateMatch ? stem.replace(dateMatch.raw, " ".repeat(dateMatch.raw.length)) : stem;
+  const codeMatch = findCode(codeSearchValue);
   const title = cleanTitle(stem, codeMatch?.raw, dateMatch?.raw);
 
   return {

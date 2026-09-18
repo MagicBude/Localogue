@@ -25,6 +25,15 @@ const crossFolderVideo = analyzeMediaIdentity({ fileName: "2025 abc123 匿名片
 assert.equal(crossFolderVideo.status, "recognized");
 assert.deepEqual([crossFolderVideo.filenameCode, crossFolderVideo.nfoCode], ["ABC-123", "ABC-123"]);
 
+// 真实资料库常把日期、番号和标题直接拼接。日期尾部数字不得污染番号前缀。
+const attachedDate = analyzeMediaIdentity({ fileName: "2025-01-31SAME-151痴汉被抓太狼狈五旬老头射甜妹(破解).mp4" });
+assert.equal(attachedDate.filenameCode, "SAME-151");
+assert.equal(attachedDate.status, "needs_review");
+assert.ok(attachedDate.editionTags.includes("uncensored"));
+
+const compactAttachedDate = analyzeMediaIdentity({ fileName: "20250131SAME151标题.mp4" });
+assert.equal(compactAttachedDate.filenameCode, "SAME-151");
+
 const broken = analyzeMediaIdentity({ fileName: "unknown-video.mkv" });
 assert.equal(broken.status, "unrecognized");
 
