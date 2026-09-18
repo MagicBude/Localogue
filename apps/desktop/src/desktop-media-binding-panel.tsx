@@ -13,11 +13,12 @@ import type { TauriLibraryRepository } from "./platform/tauri-library-repository
  * 人工媒体绑定是独立的治理用例：候选搜索只帮助用户判断，永远不会自动保存 Work 关系。
  * 真正写入发生在 bind 中，并和 Media Binding Receipt 组成一个需要补偿回滚的整体。
  */
-export function MediaBindingPanel({ media, repository, onChanged, onViewWork, setMessage }: { media: MediaFile; repository: TauriLibraryRepository; onChanged: () => void; onViewWork: (workId: string) => void; setMessage: (message: string) => void }) {
+export function MediaBindingPanel({ media, repository, onChanged, setMessage }: { media: MediaFile; repository: TauriLibraryRepository; onChanged: () => void; setMessage: (message: string) => void }) {
   const { t, metadataLanguage } = useDesktopI18n();
   // query 是可编辑的搜索条件；works 是候选快照。候选本身不代表系统已经认可关联。
   const [query, setQuery] = useState("");
   const [works, setWorks] = useState<Work[]>([]);
+  const [expandedWorkId, setExpandedWorkId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export function MediaBindingPanel({ media, repository, onChanged, onViewWork, se
     }
   }
 
-  return <div className="binding-panel">{media.workId ? <div className="button-row"><button className="danger-button" disabled={busy} onClick={() => void bind(null)}>{t("解除绑定")}</button></div> : null}<div className="binding-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("搜索番号或标题")} onKeyDown={(event) => { if (event.key === "Enter") void search(); }} /><button disabled={busy} onClick={() => void search()}>{busy ? t("查询中…") : t("搜索")}</button></div><div className="candidate-list">{works.map((work) => <article className="candidate-card" key={work.id}><div><strong>{work.code}</strong><p>{localizeText(work.titles, metadataLanguage)}</p><small>{[work.releaseDate?.value, work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : null, t("{count} 个已关联媒体", { count: work.mediaFileIds.length })].filter(Boolean).join(" · ")}</small></div><div className="row-actions"><button type="button" onClick={() => onViewWork(work.id)}>{t("查看作品")}</button><button className="primary-button" disabled={busy || media.workId === work.id} onClick={() => void bind(work.id)}>{media.workId === work.id ? t("当前绑定") : media.workId ? t("重新绑定") : t("绑定")}</button></div></article>)}{!works.length ? <p className="muted">{t("没有候选。尝试输入番号或标题。")} </p> : null}</div></div>;
+  return <div className="binding-panel">{media.workId ? <div className="button-row"><button className="danger-button" disabled={busy} onClick={() => void bind(null)}>{t("解除绑定")}</button></div> : null}<div className="binding-search"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("搜索番号或标题")} onKeyDown={(event) => { if (event.key === "Enter") void search(); }} /><button disabled={busy} onClick={() => void search()}>{busy ? t("查询中…") : t("搜索")}</button></div><div className="candidate-list">{works.map((work) => { const expanded = expandedWorkId === work.id; return <article className="candidate-card" key={work.id}><div className="candidate-card__main"><strong>{work.code}</strong><p>{localizeText(work.titles, metadataLanguage)}</p><small>{[work.releaseDate?.value, work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : null, t("{count} 个已关联媒体", { count: work.mediaFileIds.length })].filter(Boolean).join(" · ")}</small>{expanded ? <div className="candidate-detail"><dl><div><dt>{t("番号")}</dt><dd>{work.code}</dd></div><div><dt>{t("原文标题")}</dt><dd>{localizeText(work.titles, "ja", "—")}</dd></div><div><dt>{t("发行日期")}</dt><dd>{work.releaseDate?.value ?? "—"}</dd></div><div><dt>{t("时长")}</dt><dd>{work.durationMinutes ? `${work.durationMinutes} ${t("分钟")}` : "—"}</dd></div></dl><p>{localizeText(work.descriptions, metadataLanguage, t("暂无简介"))}</p></div> : null}</div><div className="row-actions"><button type="button" onClick={() => setExpandedWorkId(expanded ? null : work.id)}>{expanded ? t("收起信息") : t("查看信息")}</button><button className="primary-button" disabled={busy || media.workId === work.id} onClick={() => void bind(work.id)}>{media.workId === work.id ? t("当前绑定") : media.workId ? t("重新绑定") : t("绑定")}</button></div></article>; })}{!works.length ? <p className="muted">{t("没有候选。尝试输入番号或标题。")} </p> : null}</div></div>;
 }
 
 function message(error: unknown): string {

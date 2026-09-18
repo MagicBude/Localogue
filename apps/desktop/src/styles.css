@@ -564,8 +564,16 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .candidate-list { display: grid; gap: 8px; }
 .candidate-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid var(--border); border-radius: 12px; padding: 11px 12px; background: #f8f8f4; }
 .candidate-card > div { min-width: 0; }
+.candidate-card__main { flex: 1; min-width: 0; }
 .candidate-card p { margin: 2px 0; font-size: 12px; }
 .candidate-card small { color: var(--muted); font-size: 9px; overflow-wrap: anywhere; }
+.candidate-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--muted); }
+.candidate-detail dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 0 0 8px; }
+.candidate-detail dl div { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px; }
+.candidate-detail dt { color: var(--muted); }
+.candidate-detail dd { margin: 0; color: inherit; overflow-wrap: anywhere; }
+.candidate-detail p { white-space: pre-wrap; }
+@media (max-width: 700px) { .candidate-detail dl { grid-template-columns: 1fr; } }
 @media (max-width: 1100px) {
   .filter-bar { grid-template-columns: 1fr 1fr; }
   .search-box { grid-column: 1 / -1; }
