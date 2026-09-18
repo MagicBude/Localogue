@@ -91,7 +91,7 @@ export function DesktopMediaPage({
   runtimeContractRevision: number;
   autoSyncRequest: number;
   onOpenSettings: () => void;
-  onAddContentFolder: () => void;
+  onAddContentFolder: () => Promise<string | undefined>;
   onUpdateContentFolder: (path: string, patch: Partial<DesktopContentFolder>) => void;
   onRemoveContentFolder: (path: string) => void;
   onOpenLibrary: () => void;
@@ -404,6 +404,13 @@ export function DesktopMediaPage({
     }
   }
 
+  async function addAndSyncContentFolder(): Promise<void> {
+    const path = await onAddContentFolder();
+    if (!path) return;
+    // “添加并扫描”是一次明确的用户操作。这里只处理新目录，避免已有大目录被无意重扫。
+    await syncUnifiedLibrary([path]);
+  }
+
   useEffect(() => {
     // 首页只发出同步意图。令牌必须严格变大才执行，普通重渲染和返回 Media 页都不会重复扫描。
     if (!autoSyncRequest || autoSyncRequest <= handledAutoSyncRequest.current) return;
@@ -463,7 +470,7 @@ export function DesktopMediaPage({
   return (
     <div className="page-stack">
       <PageTitle eyebrow="IMPORT · ORGANIZE" title={t("导入与整理")} description={t("在同一工作台完成资料同步、预览导入和差异核对；日常操作从上往下处理，需要时再展开高级工具。")} />
-      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} visibleRoots={visibleRoots} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} metadataProgress={metadataProgress} syncStage={syncStage} onAdd={onAddContentFolder} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onToggleVisible={(root) => setVisibleRoots((current) => current.some((item) => samePath(item, root)) ? current.filter((item) => !samePath(item, root)) : [...current, root])} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
+      <DirectoryScanPanel folders={profile?.contentFolders ?? []} media={data.value?.media ?? []} history={data.value?.scanHistory ?? []} visibleRoots={visibleRoots} syncingRoots={syncingRoots} running={metadataBusy || scan?.status === "running" || scan?.status === "cancelling"} scan={scan} metadataProgress={metadataProgress} syncStage={syncStage} onAdd={() => void addAndSyncContentFolder()} onUpdate={onUpdateContentFolder} onRemove={onRemoveContentFolder} onToggleVisible={(root) => setVisibleRoots((current) => current.some((item) => samePath(item, root)) ? current.filter((item) => !samePath(item, root)) : [...current, root])} onSyncAll={() => void syncUnifiedLibrary()} onSync={(root) => void syncUnifiedLibrary([root])} />
       <MediaScanSection
         roots={mediaRoots}
         scan={scan}
@@ -562,7 +569,7 @@ function DirectoryScanPanel({ folders, media, history, visibleRoots, syncingRoot
 }) {
   const { t } = useDesktopI18n();
   return <section className="settings-card directory-manager-card">
-    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；也可以直接扫描全部目录。显示勾选只影响列表，不影响扫描。")}</p></div><div className="button-row"><button type="button" onClick={onAdd}>{t("+ 添加内容目录")}</button><button className="primary-button" title={t("扫描资料库")} aria-label={t("扫描资料库")} disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描全部目录")}</button></div></div>
+    <div className="section-heading"><div><span className="eyebrow">DIRECTORY SCAN</span><h2>{t("按目录扫描")}</h2><p className="muted">{t("管理内容目录和扫描范围；新增目录会立即扫描，已有目录仍可单独或全部扫描。显示勾选只影响列表，不影响扫描。")}</p></div><div className="button-row"><button disabled={running} type="button" onClick={onAdd}>{t("+ 添加并扫描")}</button><button className="primary-button" title={t("扫描资料库")} aria-label={t("扫描资料库")} disabled={running || !folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages)} type="button" onClick={onSyncAll}>{running ? t("扫描中…") : t("扫描全部目录")}</button></div></div>
     {running ? <div className="directory-scan-live" role="status" aria-live="polite"><strong>{t(syncStage === "media" ? "正在扫描视频" : "正在扫描资料目录")}</strong><span>{syncingRoots.length ? t("当前目录：{path}", { path: syncingRoots.join("、") }) : t("正在准备扫描…")}</span>{syncStage === "media" && scan?.progress ? <span>{scan.progress.message} · {scan.progress.current} / {scan.progress.total}</span> : metadataProgress ? <span>{metadataProgress.message}{metadataProgress.fileName ? ` · ${metadataProgress.fileName}` : ""} · {metadataProgress.current} / {metadataProgress.total || "—"}</span> : null}</div> : null}
     {folders.length ? <div className="directory-card-list">{folders.map((folder) => {
       const root = folder.path;

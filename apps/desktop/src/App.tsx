@@ -360,22 +360,23 @@ export default function App() {
     }
   }
 
-  async function addContentFolderFromMedia(): Promise<void> {
+  async function addContentFolderFromMedia(): Promise<string | undefined> {
     const profile = activeLibraryProfile(settings);
     if (!profile) {
       setMessage(t("请先创建影片库并确认数据存储位置。"));
-      return;
+      return undefined;
     }
     const path = await contentFolderDialog.pickDirectory(profile.contentFolders.at(-1)?.path);
-    if (!path) return;
+    if (!path) return undefined;
     if (profile.contentFolders.some((folder) => folder.path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase() === path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase())) {
       setMessage(t("内容目录设置已保存。"));
-      return;
+      return undefined;
     }
     await persistProfileMutation(
       updateLibraryProfile(settings, profile.id, { contentFolders: [...profile.contentFolders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }),
       t("内容目录设置已保存。"),
     );
+    return path;
   }
 
   async function updateContentFolderFromMedia(path: string, patch: Partial<DesktopContentFolder>): Promise<void> {
@@ -567,7 +568,7 @@ export default function App() {
             runtimeContractRevision={runtime?.contractRevision ?? 0}
             autoSyncRequest={mediaSyncRequest}
             onOpenSettings={() => navigate("settings")}
-            onAddContentFolder={() => void addContentFolderFromMedia()}
+            onAddContentFolder={addContentFolderFromMedia}
             onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
             onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
             onOpenLibrary={() => navigate("works")}
