@@ -1,11 +1,8 @@
 import type { ReactNode } from "react";
 
-import type { Asset } from "@/domain/entities/asset";
 import type { WorkQuery } from "@/domain/queries/work-query";
 
 import { useDesktopI18n } from "./desktop-i18n";
-import { DesktopPersonCard } from "./desktop-person-explorer";
-import { resolvePersonPresentation } from "./desktop-presentation";
 import { buildDesktopWorkCards, DesktopWorkResults } from "./desktop-work-results";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
@@ -13,8 +10,8 @@ import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 
 /**
- * Desktop 首页只组合资料库摘要和最近内容。
- * 全部 Works 只读取一次：同一份结果同时计算总数、人物作品数和最近作品，避免 JSON Repository 重复扫描。
+ * Desktop 工作台只提供资料库状态、待处理事项和最近活动。
+ * 完整作品、人物和分类浏览交给资料库页签，避免工作台变成第二个作品库。
  */
 export function DesktopHomePage({
   repository,
@@ -24,6 +21,7 @@ export function DesktopHomePage({
   filterWorks,
   openMedia,
   startUnifiedSync,
+  contentFolderCount,
 }: {
   repository: TauriLibraryRepository;
   openWork: (id: string) => void;
@@ -32,6 +30,7 @@ export function DesktopHomePage({
   filterWorks: (query: WorkQuery) => void;
   openMedia: () => void;
   startUnifiedSync: () => void;
+  contentFolderCount: number;
 }) {
   const { t, metadataLanguage } = useDesktopI18n();
   const data = useStableAsyncData(async () => {
@@ -47,44 +46,28 @@ export function DesktopHomePage({
       repository.listTags(),
     ]);
     const recentWorks = works.items.slice(0, 12);
-    const performerIds = new Set(recentWorks.flatMap((work) => work.personRelations.filter((relation) => relation.role === "performer").map((relation) => relation.personId)));
-    const featuredPeople = people.items.filter((person) => performerIds.has(person.id)).slice(0, 6);
-    const workCounts = new Map<string, number>();
-    for (const work of works.items) {
-      for (const personId of new Set(work.personRelations.filter((relation) => relation.role === "performer").map((relation) => relation.personId))) {
-        workCounts.set(personId, (workCounts.get(personId) ?? 0) + 1);
-      }
-    }
-    const portraitByPersonId = new Map<string, Asset>();
-    const preferenceByPersonId = new Map(preferences.filter((item) => item.entityType === "person").map((item) => [item.entityId, item]));
-    for (const person of featuredPeople) {
-      const portrait = resolvePersonPresentation(person, assets, preferenceByPersonId.get(person.id)).resolved;
-      if (portrait) portraitByPersonId.set(person.id, portrait);
-    }
     return {
       works,
       people,
       organizations,
       series,
       media,
-      featuredPeople,
-      workCounts,
-      portraitByPersonId,
       recentCards: buildDesktopWorkCards(recentWorks, people.items, organizations, assets, metadataLanguage, preferences, genres, tags),
     };
   }, [repository, metadataLanguage], toMessage);
 
   if (data.loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
   if (data.error || !data.value) return <UiEmptyState tone="error" title={t("无法读取影片库。")} description={data.error} />;
-  const { works, people, organizations, series, media, featuredPeople, recentCards, workCounts, portraitByPersonId } = data.value;
+  const { works, people, organizations, series, media, recentCards } = data.value;
   const unlinkedMediaCount = media.filter((file) => !file.workId).length;
 
   return (
     <div className="page-stack">
       <section className="hero-panel desktop-hero">
         <div className="desktop-home-hero-copy">
-          <h1>{t("我的影片库")}</h1>
-          <p>{t("浏览本地作品与人物，或同步内容目录中的新增文件。")}</p>
+          <span className="eyebrow">WORKSPACE</span>
+          <h1>{t("资料库工作台")}</h1>
+          <p>{t("查看当前影片库状态，处理扫描结果，再继续浏览作品和人物。")}</p>
         </div>
         <div className="button-row desktop-home-primary-actions">
           <UiButton variant="primary" onClick={startUnifiedSync}>{t("扫描资料库")}</UiButton>
@@ -94,24 +77,27 @@ export function DesktopHomePage({
       <section className="stat-grid">
         <Stat label={t("作品")} value={works.total} />
         <Stat label={t("人物")} value={people.total} />
-        <Stat label={t("厂商")} value={organizations.filter((item) => item.kind === "maker").length} />
+        <Stat label={t("内容目录")} value={contentFolderCount} />
         <Stat label={t("系列")} value={series.length} />
         <Stat label={t("视频文件")} value={media.length} />
+        <Stat label={t("待关联媒体")} value={unlinkedMediaCount} />
+      </section>
+      <section className="settings-card">
+        <SectionTitle eyebrow="NEXT STEP" title={t("下一步")}/>
+        <p className="muted">{unlinkedMediaCount ? t("有媒体文件尚未关联作品，建议先处理这些文件。") : t("资料库目前没有待处理媒体，可以继续浏览或扫描新增内容。")}</p>
+        <div className="button-row">
+          <UiButton variant="ghost" onClick={openWorks}>{t("浏览作品")}</UiButton>
+          {unlinkedMediaCount ? <UiButton onClick={openMedia}>{t("查看未关联媒体")}</UiButton> : null}
+        </div>
       </section>
       <SectionTitle
         eyebrow="RECENT WORKS"
-        title={t("最近作品")}
+        title={t("最近活动")}
         action={<UiButton variant="ghost" onClick={openWorks}>{t("查看全部作品")}</UiButton>}
       />
       <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} onOpenPerson={openPerson}
         onSelectGenre={(id) => filterWorks({ genreIds: [id] })}
         onSelectTag={(id) => filterWorks({ tagIds: [id] })} />
-      {featuredPeople.length ? <>
-        <SectionTitle eyebrow="PEOPLE" title={t("相关人物")} />
-        <div className="desktop-person-grid desktop-home-people-grid">
-          {featuredPeople.map((person) => <DesktopPersonCard key={person.id} person={person} portrait={portraitByPersonId.get(person.id)} workCount={workCounts.get(person.id) ?? 0} onOpen={() => openPerson(person.id)} />)}
-        </div>
-      </> : null}
     </div>
   );
 }

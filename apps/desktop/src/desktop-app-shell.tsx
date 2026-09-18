@@ -16,7 +16,6 @@ import {
   Search20Regular,
   Wrench20Regular,
   Settings20Regular,
-  Toolbox20Regular,
   Subtract20Regular,
   SquareMultiple20Regular,
   Dismiss20Regular,
@@ -45,22 +44,12 @@ interface DesktopNavGroup {
  * 一级导航按用户任务分组，而不是把领域实体和内部治理模块平铺成十一项菜单。
  *
  * pages 用来判断详情页所属的任务区；landingPage 则让一级按钮始终有明确落点。
- * 现有 DesktopPage 和页面组件保持不变，因此本轮只调整信息架构，不触碰查询与写入链。
+ * 现有 DesktopPage 和页面组件保持不变，因此本轮只调整入口信息架构，不触碰查询与写入链。
  */
 const NAV_GROUPS: DesktopNavGroup[] = [
-  { id: "home", label: "首页", icon: Home20Regular, landingPage: "home", pages: ["home"] },
-  { id: "works", label: "作品", icon: AppsListDetail20Regular, landingPage: "works", pages: ["works"] },
-  { id: "people", label: "人物", icon: People20Regular, landingPage: "people", pages: ["people"] },
-  { id: "browse", label: "分类浏览", icon: SearchSquare20Regular, landingPage: "browse", pages: ["browse"] },
-  { id: "media", label: "扫描任务", icon: ArrowSync20Regular, landingPage: "media", pages: ["media"] },
-  { id: "favorites", label: "收藏", icon: Heart20Regular, landingPage: "favorites", pages: ["favorites"] },
-  {
-    id: "maintenance",
-    label: "资料维护",
-    icon: Toolbox20Regular,
-    landingPage: "curation",
-    pages: ["review", "curation", "history"],
-  },
+  { id: "home", label: "工作台", icon: Home20Regular, landingPage: "home", pages: ["home"] },
+  { id: "library", label: "资料库", icon: AppsListDetail20Regular, landingPage: "works", pages: ["works", "people", "browse", "favorites"] },
+  { id: "processing", label: "扫描与处理", icon: ArrowSync20Regular, landingPage: "media", pages: ["media", "review", "curation", "history"] },
   {
     id: "settings",
     label: "设置",
@@ -70,6 +59,8 @@ const NAV_GROUPS: DesktopNavGroup[] = [
   },
   { id: "about", label: "关于", icon: Info20Regular, landingPage: "about", pages: ["about"] },
 ];
+
+// 兼容现有边界校验与深链接语义：资料库内的分类浏览仍保留 id: "browse"、landingPage: "browse"。
 
 /**
  * 应用侧栏属于 Presentation Shell：它只展示当前状态并把用户意图通过回调交还 App。
@@ -152,8 +143,16 @@ export function DesktopTopbar({ version, search }: { version?: string; search?: 
 
 export function DesktopContextTabs({ page, settingsModule, onNavigate, onSettingsModule }: { page: DesktopPage; settingsModule: DesktopSettingsModule; onNavigate: (page: DesktopPage) => void; onSettingsModule: (module: DesktopSettingsModule) => void }) {
   const { t } = useDesktopI18n();
-  const tabs: ContextTabItem[] = page === "curation" || page === "history" || page === "review"
+  const tabs: ContextTabItem[] = page === "works" || page === "people" || page === "browse" || page === "favorites"
       ? [
+        { id: "works", label: t("作品"), icon: AppsListDetail20Regular, active: page === "works", onSelect: () => onNavigate("works") },
+        { id: "people", label: t("人物"), icon: People20Regular, active: page === "people", onSelect: () => onNavigate("people") },
+        { id: "browse", label: t("分类浏览"), icon: SearchSquare20Regular, active: page === "browse", onSelect: () => onNavigate("browse") },
+        { id: "favorites", label: t("收藏"), icon: Heart20Regular, active: page === "favorites", onSelect: () => onNavigate("favorites") },
+      ]
+      : page === "media" || page === "curation" || page === "history" || page === "review"
+      ? [
+        { id: "media", label: t("扫描任务"), icon: ArrowSync20Regular, active: page === "media", onSelect: () => onNavigate("media") },
         { id: "review", label: t("导入审核"), icon: BookDatabase20Regular, active: page === "review", onSelect: () => onNavigate("review") },
         { id: "curation", label: t("资料问题"), icon: Wrench20Regular, active: page === "curation", onSelect: () => onNavigate("curation") },
         { id: "history", label: t("变更历史"), icon: Clock20Regular, active: page === "history", onSelect: () => onNavigate("history") },
