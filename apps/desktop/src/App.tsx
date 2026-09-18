@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { ChevronLeft20Regular } from "@fluentui/react-icons";
 
 import type {
   DesktopBootstrapSettings,
@@ -27,6 +26,7 @@ import { UiButton } from "./ui/button";
 import { UiEmptyState } from "./ui/feedback";
 import { UiToast, type ToastTone } from "./ui/toast";
 import { UiConfirmProvider } from "./ui/confirm-dialog";
+import { UiActionDialog } from "./ui/action-dialog";
 import type { DesktopWorkExplorerState } from "./desktop-work-explorer";
 import type { DesktopPersonExplorerState } from "./desktop-person-explorer";
 import {
@@ -469,8 +469,7 @@ export default function App() {
 
   const hasLibrarySource = readRoots.length > 0;
   const profileNativeRuntimeReady = (runtime?.contractRevision ?? 0) >= PROFILE_NATIVE_CONTRACT_REVISION;
-  const topbarSearch = detail ? undefined
-    : page === "works"
+  const topbarSearch = page === "works"
       ? { placeholder: t("搜索番号或标题"), value: worksInitialQuery?.text, onSubmit: (text: string) => filterWorks({ ...(text ? { text } : {}), sort: "release_desc" }) }
       : page === "people"
         ? { placeholder: t("搜索姓名 / 别名 / 旧艺名"), value: peopleSearchText, onSubmit: setPeopleSearchText }
@@ -483,7 +482,7 @@ export default function App() {
   return (
     <div className={sidebarCollapsed ? "desktop-window is-sidebar-collapsed" : "desktop-window"}>
       <DesktopTopbar
-        key={`${page}:${detail?.kind ?? "list"}`}
+        key={page}
         version={runtime?.version}
         search={topbarSearch}
       />
@@ -513,8 +512,6 @@ export default function App() {
           onSettingsModule={(module) => { setSettingsModule(module); navigate("settings"); }}
         />
         <UiConfirmProvider>
-        {detail ? <button className="desktop-floating-back" type="button" onClick={returnToPreviousLocation}><ChevronLeft20Regular />{t("返回上一页")}</button> : null}
-
         {message ? <UiToast key={messageState.revision} closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 
         <DesktopFavoritesProvider repository={repository} setMessage={setMessage}>
@@ -546,20 +543,7 @@ export default function App() {
         ) : page === "home" ? (
           <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} filterWorks={filterWorks} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} />
         ) : page === "works" ? (
-          detail?.kind === "work" ? (
-          <DesktopWorkDetailPage
-              key={`${savedActiveProfile?.libraryPath ?? "shared"}:work:${detail.id}`}
-              repository={repository}
-              id={detail.id}
-              onBack={returnToPreviousLocation}
-              openPerson={openPerson}
-              filterWorks={filterWorks}
-              onLibraryChanged={refreshLibrary}
-              setMessage={setMessage}
-            />
-          ) : (
-            <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} directoryRoots={savedActiveProfile?.contentFolders?.map((folder) => folder.path) ?? []} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
-          )
+          <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} directoryRoots={savedActiveProfile?.contentFolders?.map((folder) => folder.path) ?? []} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
         ) : page === "favorites" ? (
           <DesktopFavoritesPage
             repository={repository}
@@ -567,20 +551,7 @@ export default function App() {
             searchText={favoritesSearchText}
           />
         ) : page === "people" ? (
-          detail?.kind === "person" ? (
-            <DesktopPersonDetailPage
-              key={`${savedActiveProfile?.libraryPath ?? "shared"}:person:${detail.id}`}
-              repository={repository}
-              id={detail.id}
-              onBack={returnToPreviousLocation}
-              openWork={openWork}
-              onLibraryChanged={refreshLibrary}
-              setMessage={setMessage}
-              runtimeContractRevision={runtime?.contractRevision ?? 0}
-            />
-          ) : (
-              <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} searchText={peopleSearchText} initialState={peopleExplorerState.current} onExplorerStateChange={(state) => { peopleExplorerState.current = state; }} />
-          )
+          <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} searchText={peopleSearchText} initialState={peopleExplorerState.current} onExplorerStateChange={(state) => { peopleExplorerState.current = state; }} />
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} searchText={catalogSearchText} />
         ) : page === "review" ? (
@@ -625,6 +596,8 @@ export default function App() {
           />
         )}
         </Suspense>
+        {detail?.kind === "work" ? <UiActionDialog closeLabel={t("关闭")} description={t("在当前浏览位置查看作品详情，关闭后会回到原来的列表轨迹。")} onOpenChange={(open) => { if (!open) returnToPreviousLocation(); }} open title={t("作品详情")} wide><DesktopWorkDetailPage repository={repository} id={detail.id} onBack={returnToPreviousLocation} openPerson={openPerson} filterWorks={filterWorks} onLibraryChanged={refreshLibrary} setMessage={setMessage} /></UiActionDialog> : null}
+        {detail?.kind === "person" ? <UiActionDialog closeLabel={t("关闭")} description={t("在当前浏览位置查看人物详情，关闭后会回到原来的列表轨迹。")} onOpenChange={(open) => { if (!open) returnToPreviousLocation(); }} open title={t("人物详情")} wide><DesktopPersonDetailPage repository={repository} id={detail.id} onBack={returnToPreviousLocation} openWork={openWork} onLibraryChanged={refreshLibrary} setMessage={setMessage} runtimeContractRevision={runtime?.contractRevision ?? 0} /></UiActionDialog> : null}
         </DesktopFavoritesProvider>
         </UiConfirmProvider>
       </main>
