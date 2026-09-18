@@ -508,6 +508,28 @@ export default function App() {
         {message ? <UiToast key={messageState.revision} closeLabel={t("关闭")} onDismiss={() => setMessageState((current) => ({ ...current, text: "" }))} tone={messageTone}>{message}</UiToast> : null}
 
         <DesktopFavoritesProvider repository={repository} setMessage={setMessage}>
+        {hasLibrarySource ? (
+          <div hidden={page !== "media"}>
+            <Suspense fallback={page === "media" ? <PageLoadingState /> : null}>
+              <DesktopMediaPage
+                key={savedActiveProfile?.id ?? "active-library"}
+                repository={repository}
+                settings={savedSettings}
+                setMessage={setMessage}
+                progress={progress}
+                onLibraryChanged={refreshLibrary}
+                runtimeContractRevision={runtime?.contractRevision ?? 0}
+                autoSyncRequest={mediaSyncRequest}
+                onOpenSettings={() => navigate("settings")}
+                onAddContentFolder={() => void addContentFolderFromMedia()}
+                onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
+                onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
+                onOpenLibrary={() => navigate("works")}
+                openWork={openWork}
+              />
+            </Suspense>
+          </div>
+        ) : null}
         <Suspense fallback={<PageLoadingState />}>
         {!hasLibrarySource && page !== "settings" && page !== "about" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
@@ -557,23 +579,7 @@ export default function App() {
           <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="curation" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
         ) : page === "history" ? (
           <DesktopGovernance repository={repository} privateRoot={savedActiveProfile?.libraryPath ?? null} preferSqlite={sqliteReady} section="history" openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} />
-        ) : page === "media" ? (
-          <DesktopMediaPage
-            repository={repository}
-            settings={savedSettings}
-            setMessage={setMessage}
-            progress={progress}
-            onLibraryChanged={refreshLibrary}
-            runtimeContractRevision={runtime?.contractRevision ?? 0}
-            autoSyncRequest={mediaSyncRequest}
-            onOpenSettings={() => navigate("settings")}
-            onAddContentFolder={() => void addContentFolderFromMedia()}
-            onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
-            onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
-            onOpenLibrary={() => navigate("works")}
-            openWork={openWork}
-          />
-        ) : page === "about" ? (
+        ) : page === "media" ? null : page === "about" ? (
           <DesktopAboutPage runtime={runtime} setMessage={setMessage} />
         ) : page === "packs" ? (
           <DesktopPacksPage

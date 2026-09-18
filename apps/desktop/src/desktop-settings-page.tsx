@@ -76,6 +76,15 @@ export function DesktopSettingsPage({
     if (path) await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: path }), t("私人资料存储位置已自动保存。"));
   }
 
+  async function revealLibrary(): Promise<void> {
+    if (!selectedProfile?.libraryPath) return;
+    try {
+      await desktopBridge.revealInFolder(selectedProfile.libraryPath);
+    } catch (error) {
+      setMessage(t("无法打开数据存储位置：{error}", { error: toMessage(error) }));
+    }
+  }
+
   async function createProfile(): Promise<void> {
     try {
       const contentRoot = await fileDialog.pickDirectory();
@@ -358,7 +367,7 @@ export function DesktopSettingsPage({
         <div className="advanced-settings-stack">
           <p className="muted">{t("这里只放 Localogue 生成和维护的结构化资料；不要把影片文件直接要求放进这个目录。")}</p>
           <code className="path-block">{selectedProfile?.libraryPath || t("尚未选择")}</code>
-          <div className="button-row"><UiButton disabled={!selectedProfile} onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{selectedProfile?.libraryPath ? <UiButton variant="danger" onClick={() => void persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: undefined }), t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
+          <div className="button-row">{selectedProfile?.libraryPath ? <UiButton onClick={() => void revealLibrary()}>{t("打开文件夹")}</UiButton> : null}<UiButton disabled={!selectedProfile} onClick={() => void chooseLibrary()}>{t("更改位置")}</UiButton>{selectedProfile?.libraryPath ? <UiButton variant="danger" onClick={() => void persistPaths(updateLibraryProfile(settings, selectedProfile.id, { libraryPath: undefined }), t("数据存储位置已清除并自动保存。"))}>{t("清除位置")}</UiButton> : null}</div>
         </div>
       </details>
 
