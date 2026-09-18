@@ -360,23 +360,22 @@ export default function App() {
     }
   }
 
-  async function addContentFolderFromMedia(): Promise<string | undefined> {
+  async function addContentFolderFromMedia(): Promise<void> {
     const profile = activeLibraryProfile(settings);
     if (!profile) {
       setMessage(t("请先创建影片库并确认数据存储位置。"));
-      return undefined;
+      return;
     }
     const path = await contentFolderDialog.pickDirectory(profile.contentFolders.at(-1)?.path);
-    if (!path) return undefined;
+    if (!path) return;
     if (profile.contentFolders.some((folder) => folder.path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase() === path.replaceAll("\\", "/").replace(/\/+$/, "").toLowerCase())) {
       setMessage(t("内容目录设置已保存。"));
-      return undefined;
+      return;
     }
     await persistProfileMutation(
       updateLibraryProfile(settings, profile.id, { contentFolders: [...profile.contentFolders, { path, scanVideo: true, scanNfo: true, scanImages: true }] }),
       t("内容目录设置已保存。"),
     );
-    return path;
   }
 
   async function updateContentFolderFromMedia(path: string, patch: Partial<DesktopContentFolder>): Promise<void> {
@@ -568,7 +567,7 @@ export default function App() {
             runtimeContractRevision={runtime?.contractRevision ?? 0}
             autoSyncRequest={mediaSyncRequest}
             onOpenSettings={() => navigate("settings")}
-            onAddContentFolder={addContentFolderFromMedia}
+            onAddContentFolder={() => void addContentFolderFromMedia()}
             onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
             onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
             onOpenLibrary={() => navigate("works")}
@@ -600,6 +599,7 @@ export default function App() {
             packInfos={packInfos}
             onPersistSettings={persistOrdinarySettings}
             onPersistProfiles={persistProfileMutation}
+            onStartLibrarySync={startUnifiedSync}
             onOpenPacks={() => navigate("packs")}
             settingsModule={settingsModule}
             setMessage={setMessage}

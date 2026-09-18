@@ -40,6 +40,7 @@ export function DesktopSettingsPage({
   packInfos,
   onPersistSettings,
   onPersistProfiles,
+  onStartLibrarySync,
   onOpenPacks,
   settingsModule,
   setMessage,
@@ -51,6 +52,7 @@ export function DesktopSettingsPage({
   packInfos: DesktopSharedPackInfo[];
   onPersistSettings: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   onPersistProfiles: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
+  onStartLibrarySync: () => void;
   onOpenPacks: () => void;
   settingsModule: DesktopSettingsModule;
   setMessage: (message: string) => void;
@@ -76,14 +78,38 @@ export function DesktopSettingsPage({
 
   async function createProfile(): Promise<void> {
     try {
+      const contentRoot = await fileDialog.pickDirectory();
+      if (!contentRoot) return;
       const name = nextLibraryProfileName(settings, t("影片库"));
       const profileId = createLibraryProfileId();
       const managed = await desktopBridge.provisionPrivateLibrary(profileId);
-      const profile = { ...createEmptyLibraryProfile(profileId, name), libraryPath: managed.libraryPath };
+      const profile = {
+        ...createEmptyLibraryProfile(profileId, name),
+        libraryPath: managed.libraryPath,
+        contentFolders: [{ path: contentRoot, scanVideo: true, scanNfo: true, scanImages: true }],
+      };
       await onPersistProfiles(
         addLibraryProfile(settings, profile),
-        t("已新建影片库：{name}。数据存储位置已自动准备好，只需添加内容目录。", { name }),
+        t("已新建影片库：{name}。正在扫描首个内容目录。", { name }),
       );
+      onStartLibrarySync();
+    } catch {
+      // 父级已经显示保存错误。
+    }
+  }
+
+  async function completeEmptyProfile(): Promise<void> {
+    if (!selectedProfile || selectedProfile.contentFolders.length) return;
+    try {
+      const contentRoot = await fileDialog.pickDirectory();
+      if (!contentRoot) return;
+      await onPersistProfiles(
+        updateLibraryProfile(settings, selectedProfile.id, {
+          contentFolders: [{ path: contentRoot, scanVideo: true, scanNfo: true, scanImages: true }],
+        }),
+        t("内容目录已保存，正在开始扫描。"),
+      );
+      onStartLibrarySync();
     } catch {
       // 父级已经显示保存错误。
     }
@@ -279,7 +305,7 @@ export function DesktopSettingsPage({
             <UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建影片库")}</UiButton>
           </div>
         </div>
-        <p className="muted">{t("新建影片库会自动准备独立的数据存储位置；你只需添加影片所在的内容目录。名称和高级设置以后都可以修改。")}</p>
+        <p className="muted">{t("新建影片库时选择首个内容目录，Localogue 会准备独立的数据存储位置并直接开始扫描。名称和高级设置以后都可以修改。")}</p>
         {profiles.length ? (
           <div className="profile-toolbar">
             <UiSelectField label={t("当前影片库")} disabled={busy || !profileNativeRuntimeReady} value={settings.activeLibraryProfileId ?? selectedProfile?.id ?? ""} onChange={(event) => void selectProfile(event.target.value)}>
@@ -287,6 +313,7 @@ export function DesktopSettingsPage({
                 {profiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}
             </UiSelectField>
             <div className="button-row">
+              {selectedProfile && !selectedProfile.contentFolders.length ? <UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void completeEmptyProfile()}>{t("选择内容目录并开始扫描")}</UiButton> : null}
               <UiButton disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openRenameProfile}>{t("重命名")}</UiButton>
               <UiButton variant="danger" disabled={busy || !profileNativeRuntimeReady || !selectedProfile} onClick={openDeleteProfile}>{t("移除影片库")}</UiButton>
             </div>
