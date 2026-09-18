@@ -620,8 +620,8 @@ if (!errors.length) {
   for (const token of ["createEmptyLibraryProfile", "nextLibraryProfileName", "normalizeDesktopSettings", "selectLibraryProfile", "updateLibraryProfile", "hasUnsavedLibraryPaths"]) {
     if (!libraryProfiles.includes(token)) errors.push(`V1-24 Library Profile helper 缺少：${token}`);
   }
-  if (!desktopApp.includes("switchLibraryProfile") || !desktopAppShell.includes("source-profile-select") || !desktopAppShell.includes("source-profile-manage")) {
-    errors.push("V1-24 Desktop 必须在侧栏提供资料库快速切换与管理入口。");
+  if (!desktopApp.includes("switchLibraryProfile") || !desktopAppShell.includes("topbar-library-select") || !desktopAppShell.includes("topbar-library-manage")) {
+    errors.push("V1-24 Desktop 必须在窗口顶栏提供资料库快速切换与管理入口。");
   }
   if (!libraryProfiles.includes('`${prefix} ${index}`') || !desktopSettingsPage.includes('t("+ 新建影片库")')) {
     errors.push("V1-24 新建影片库必须使用“影片库 N”中性默认命名，并提供明确的新建入口。");

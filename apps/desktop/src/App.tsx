@@ -485,18 +485,15 @@ export default function App() {
         key={page}
         version={runtime?.version}
         search={topbarSearch}
+        library={{ settings: savedSettings, disabled: busy || !profileNativeRuntimeReady, onSwitchProfile: (profileId) => void switchLibraryProfile(profileId) }}
+        onOpenSettings={() => navigate("settings")}
       />
       <div className={sidebarCollapsed ? "desktop-layout is-sidebar-collapsed" : "desktop-layout"}>
       <DesktopSidebar
         page={page}
         collapsed={sidebarCollapsed}
         runtime={runtime}
-        settings={savedSettings}
-        packInfos={packInfos}
-        busy={busy}
-        profileSwitchEnabled={profileNativeRuntimeReady}
         onNavigate={navigate}
-        onSwitchProfile={(profileId) => void switchLibraryProfile(profileId)}
         onToggleCollapsed={() => setSidebarCollapsed((value) => {
           const next = !value;
           window.localStorage.setItem("localogue.desktop.sidebar-collapsed-v3", String(next));

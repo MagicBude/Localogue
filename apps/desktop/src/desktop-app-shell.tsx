@@ -22,9 +22,8 @@ import {
 } from "@fluentui/react-icons";
 import { useState, type ComponentType, type FormEvent, type MouseEvent } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopRuntimeInfo } from "./contracts";
 import { DesktopLanguageControls, useDesktopI18n } from "./desktop-i18n";
-import { activeLibraryProfile } from "./library-profiles";
 import localogueIcon from "./assets/localogue-icon.png";
 import { UiTooltip } from "./ui/tooltip";
 import { ContextTabBar, type ContextTabItem } from "./ui/context-tab-bar";
@@ -66,21 +65,14 @@ const NAV_GROUPS: DesktopNavGroup[] = [
  * 应用侧栏属于 Presentation Shell：它只展示当前状态并把用户意图通过回调交还 App。
  * Profile 切换和设置持久化仍由 App 执行，避免导航组件知道 Native Bridge。
  */
-export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, busy, profileSwitchEnabled, onNavigate, onSwitchProfile, onToggleCollapsed }: {
+export function DesktopSidebar({ page, collapsed, runtime, onNavigate, onToggleCollapsed }: {
   page: DesktopPage;
   collapsed: boolean;
   runtime: DesktopRuntimeInfo | null;
-  settings: DesktopBootstrapSettings;
-  packInfos: DesktopSharedPackInfo[];
-  busy: boolean;
-  profileSwitchEnabled: boolean;
   onNavigate: (page: DesktopPage) => void;
-  onSwitchProfile: (profileId: string) => void;
   onToggleCollapsed: () => void;
 }) {
   const { t } = useDesktopI18n();
-  const selectedProfile = activeLibraryProfile(settings);
-  const validSharedCount = packInfos.filter((item) => item.valid).length;
 
   return <aside className="sidebar">
     <button className="brand" onClick={() => onNavigate("home")}><img className="brand-mark" src={localogueIcon} alt="" aria-hidden="true" /><span className="brand-copy"><strong>Localogue</strong><small>{`Desktop · ${runtime?.version ?? "…"}`}</small></span></button>
@@ -94,7 +86,6 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
         </button></UiTooltip>
       </div>;
     })}</nav>
-    <div className="source-summary">{settings.libraryProfiles.length ? <select className="source-profile-select" aria-label={t("快速切换影片库")} disabled={busy || !profileSwitchEnabled} value={settings.activeLibraryProfileId ?? ""} onChange={(event) => onSwitchProfile(event.target.value)}><option value="" disabled>{t("选择影片库…")}</option>{settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select> : <button className="source-profile-manage" type="button" onClick={() => onNavigate("settings")}>{t("+ 新建影片库")}</button>}<small>{selectedProfile?.libraryPath ? t("本机数据 + {count} 份社区资料", { count: validSharedCount }) : t("{count} 份社区资料", { count: validSharedCount })}</small></div>
     <button className="sidebar-collapse-button" title={collapsed ? t("展开侧边栏") : t("收起侧边栏")} aria-label={collapsed ? t("展开侧边栏") : t("收起侧边栏")} onClick={onToggleCollapsed} type="button">{collapsed ? <ChevronRight20Regular /> : <ChevronLeft20Regular />}<span className="sidebar-collapse-label">{collapsed ? t("展开侧边栏") : t("收起侧边栏")}</span></button>
     <div className="runtime-pill"><span className={runtime ? "runtime-dot online" : "runtime-dot"} /><span>{runtime ? `${runtime.environment} · ${runtime.version}` : "connecting"}</span></div>
   </aside>;
@@ -107,7 +98,7 @@ export function DesktopSidebar({ page, collapsed, runtime, settings, packInfos, 
  * Tauri 无边框窗口的第一行。标题栏空白区域使用 data-tauri-drag-region，
  * 输入框和按钮仍然是可交互区域，不会抢走拖动手势。
  */
-export function DesktopTopbar({ version, search }: { version?: string; search?: { placeholder: string; value?: string; onSubmit: (text: string) => void } }) {
+export function DesktopTopbar({ version, search, library, onOpenSettings }: { version?: string; search?: { placeholder: string; value?: string; onSubmit: (text: string) => void }; library?: { settings: DesktopBootstrapSettings; disabled: boolean; onSwitchProfile: (profileId: string) => void }; onOpenSettings: () => void }) {
   const { t } = useDesktopI18n();
   const [searchText, setSearchText] = useState(search?.value ?? "");
   function submitSearch(event: FormEvent<HTMLFormElement>): void {
@@ -124,7 +115,10 @@ export function DesktopTopbar({ version, search }: { version?: string; search?: 
   }
   return <header className="topbar window-chrome" data-tauri-drag-region onDoubleClick={toggleWindowMaximize}>
     <div className="topbar-main" data-tauri-drag-region>
-      <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
+      <div className="topbar-product-area">
+        <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
+        {library?.settings.libraryProfiles.length ? <select className="topbar-library-select" aria-label={t("快速切换影片库")} disabled={library.disabled} value={library.settings.activeLibraryProfileId ?? ""} onChange={(event) => library.onSwitchProfile(event.target.value)}>{library.settings.libraryProfiles.map((profile) => <option key={profile.id} value={profile.id}>{profile.name}</option>)}</select> : <button className="topbar-library-manage" type="button" onClick={onOpenSettings}>{t("+ 新建影片库")}</button>}
+      </div>
       {search ? <form className="topbar-search" role="search" onSubmit={submitSearch}>
         <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={search.placeholder} aria-label={search.placeholder} />
         <button type="submit" title={t("搜索")} aria-label={t("搜索")}><Search20Regular aria-hidden="true" /></button>
