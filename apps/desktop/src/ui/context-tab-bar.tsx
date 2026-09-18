@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 
+import { UiButton } from "./button";
+
 export interface ContextTabItem {
   id: string;
   label: string;
@@ -17,8 +19,8 @@ export interface ContextTabItem {
 export function ContextTabBar({ label, items }: { label: string; items: ContextTabItem[] }) {
   return <nav className="context-tabs" aria-label={label}>{items.map((item) => {
     const Icon = item.icon;
-    return <button key={item.id} className={item.active ? "is-active" : ""} onClick={item.onSelect} aria-current={item.active ? "page" : undefined}>
+    return <UiButton key={item.id} className={item.active ? "is-active" : ""} onClick={item.onSelect} aria-current={item.active ? "page" : undefined} variant="ghost">
       {Icon ? <Icon /> : null}<span>{item.label}</span>
-    </button>;
+    </UiButton>;
   })}</nav>;
 }

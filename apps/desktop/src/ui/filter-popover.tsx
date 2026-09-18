@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useDesktopI18n } from "../desktop-i18n";
+import { UiButton } from "./button";
 
 /**
  * 浏览页共用的筛选入口。
@@ -36,15 +37,15 @@ export function FilterPopover({ children, count = 0, label, wide = false, align 
   }, [open]);
 
   return <div className="desktop-filter-menu-anchor" ref={anchorRef}>
-    <button aria-expanded={open} className="desktop-facet-toggle" type="button" onClick={() => setOpen((value) => !value)}>
+    <UiButton aria-expanded={open} className="desktop-facet-toggle" type="button" variant="ghost" onClick={() => setOpen((value) => !value)}>
       <span>{label}</span>
       {count ? <span className="desktop-facet-toggle__badge">{count}</span> : null}
       <span className="desktop-facet-toggle__caret">{open ? "▴" : "▾"}</span>
-    </button>
+    </UiButton>
     {open ? <section aria-label={typeof label === "string" ? label : undefined} className={`desktop-filter-menu${wide ? " is-wide" : ""}${align === "right" ? " is-align-right" : ""}`}>
-      <header><strong>{label}</strong><button aria-label={t("关闭")} className="ui-icon-button" type="button" onClick={() => setOpen(false)}>×</button></header>
+      <header><strong>{label}</strong><UiButton aria-label={t("关闭")} className="ui-icon-button" size="icon" variant="ghost" type="button" onClick={() => setOpen(false)}>×</UiButton></header>
       <div className="desktop-filter-menu__body">{children}</div>
-      <footer><button className="primary-button" type="button" onClick={() => setOpen(false)}>{t("完成")}</button></footer>
+      <footer><UiButton variant="primary" type="button" onClick={() => setOpen(false)}>{t("完成")}</UiButton></footer>
     </section> : null}
   </div>;
 }
