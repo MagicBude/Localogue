@@ -5,7 +5,7 @@ import { useDesktopI18n } from "./desktop-i18n";
 import { CreatePersonPanel, PersonEditor } from "./desktop-person-management";
 import { InfoCard } from "./desktop-page-primitives";
 import { PersonAssetGovernance } from "./desktop-person-asset-governance";
-import { DesktopPersonExplorer } from "./desktop-person-explorer";
+import { DesktopPersonExplorer, type DesktopPersonExplorerState } from "./desktop-person-explorer";
 import { resolvePersonPresentation } from "./desktop-presentation";
 import { PresentationAssetPicker } from "./desktop-presentation-workbench";
 import { DesktopWorkExplorer } from "./desktop-work-explorer";
@@ -21,16 +21,20 @@ export function DesktopPeoplePage({
   onLibraryChanged,
   setMessage,
   searchText,
+  initialState,
+  onExplorerStateChange,
 }: {
   repository: TauriLibraryRepository;
   openPerson: (id: string) => void;
   onLibraryChanged: () => void;
   setMessage: (message: string) => void;
   searchText?: string;
+  initialState?: DesktopPersonExplorerState;
+  onExplorerStateChange?: (state: DesktopPersonExplorerState) => void;
 }) {
   return (
     <div className="page-stack desktop-library-page">
-      <DesktopPersonExplorer repository={repository} onOpen={openPerson} searchText={searchText} toolbarAction={<CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />} />
+      <DesktopPersonExplorer repository={repository} onOpen={openPerson} searchText={searchText} initialState={initialState} onStateChange={onExplorerStateChange} toolbarAction={<CreatePersonPanel repository={repository} onSaved={(person) => { onLibraryChanged(); openPerson(person.id); }} setMessage={setMessage} />} />
     </div>
   );
 }

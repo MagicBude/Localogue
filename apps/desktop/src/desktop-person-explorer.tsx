@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 import { getPreferredPersonName } from "@/application/services/localization-service";
 import type { Asset } from "@/domain/entities/asset";
@@ -19,22 +19,29 @@ import { queryPeople } from "@/application/library/library-query";
 
 const DEFAULT_PAGE_SIZE = 24;
 
+export type DesktopPersonExplorerState = { query: PersonQuery; page: number; pageSize: number; scrollY: number };
+
 export function DesktopPersonExplorer({
   repository,
   onOpen,
   toolbarAction,
   searchText,
+  initialState,
+  onStateChange,
 }: {
   repository: TauriLibraryRepository;
   onOpen: (id: string) => void;
   toolbarAction?: ReactNode;
   searchText?: string;
+  initialState?: DesktopPersonExplorerState;
+  onStateChange?: (state: DesktopPersonExplorerState) => void;
 }) {
   const { t } = useDesktopI18n();
-  const [query, setQuery] = useState<PersonQuery>({ sort: "name_asc" });
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(() => readPeoplePageSize());
+  const [query, setQuery] = useState<PersonQuery>(() => initialState?.query ?? { sort: "name_asc" });
+  const [page, setPage] = useState(() => initialState?.page ?? 1);
+  const [pageSize, setPageSize] = useState(() => initialState?.pageSize ?? readPeoplePageSize());
   const resultsPanelRef = useRef<HTMLElement>(null);
+  const scrollRestored = useRef(false);
   const data = useAsyncPersonData(async () => {
     const [filteredPeople, allPeople, allWorks, assets, preferences] = await Promise.all([
       repository.listPeople({ ...query, page: 1, pageSize: 100000 }),
@@ -83,9 +90,18 @@ export function DesktopPersonExplorer({
   }, [repository, query]);
 
   useEffect(() => {
+    if (initialState) return;
     setPage(1);
     setQuery((current) => ({ ...current, text: searchText || undefined }));
-  }, [searchText]);
+  }, [initialState, searchText]);
+
+  const publishState = () => onStateChange?.({ query, page, pageSize, scrollY: window.scrollY });
+  useEffect(() => publishState(), [page, pageSize, query]);
+  useEffect(() => {
+    const handleScroll = () => publishState();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [page, pageSize, query]);
 
   if (data.loading) return <ExplorerState>{t("正在读取人物资料…")}</ExplorerState>;
   if (data.error || !data.value) return <ExplorerState error>{data.error ?? t("无法读取人物。")}</ExplorerState>;
@@ -94,6 +110,13 @@ export function DesktopPersonExplorer({
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const currentPage = Math.min(page, pageCount);
   const visible = data.value.filteredPerformers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  useLayoutEffect(() => {
+    if (scrollRestored.current || data.loading || !data.value || initialState === undefined) return;
+    scrollRestored.current = true;
+    const frame = window.requestAnimationFrame(() => window.scrollTo({ top: initialState.scrollY, behavior: "auto" }));
+    return () => window.cancelAnimationFrame(frame);
+  }, [data.loading, data.value, initialState]);
 
   function changeQuery(next: PersonQuery): void {
     setPage(1);
@@ -129,7 +152,7 @@ export function DesktopPersonExplorer({
                 person={person}
                 portrait={data.value!.portraits.get(person.id)}
                 workCount={data.value!.workCounts.get(person.id) ?? 0}
-                onOpen={() => onOpen(person.id)}
+                onOpen={() => { publishState(); onOpen(person.id); }}
               />
             ))}
           </div>

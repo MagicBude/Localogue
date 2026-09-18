@@ -28,6 +28,7 @@ import { UiEmptyState } from "./ui/feedback";
 import { UiToast, type ToastTone } from "./ui/toast";
 import { UiConfirmProvider } from "./ui/confirm-dialog";
 import type { DesktopWorkExplorerState } from "./desktop-work-explorer";
+import type { DesktopPersonExplorerState } from "./desktop-person-explorer";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -73,6 +74,8 @@ type NavigationLocation = {
   detail: DetailTarget;
   worksInitialQuery: WorkQuery | undefined;
   worksExplorerState: DesktopWorkExplorerState | undefined;
+  peopleExplorerState: DesktopPersonExplorerState | undefined;
+  peopleSearchText: string;
 };
 
 export default function App() {
@@ -104,8 +107,9 @@ export default function App() {
   // 这样 Work -> Person -> Work 的关系跳转仍能逐级返回，而不是按实体类型猜测返回哪个列表。
   const navigationHistory = useRef<NavigationLocation[]>([]);
   const worksExplorerState = useRef<DesktopWorkExplorerState | undefined>(undefined);
-  const currentLocation = useRef<NavigationLocation>({ page, detail, worksInitialQuery, worksExplorerState: undefined });
-  currentLocation.current = { page, detail, worksInitialQuery, worksExplorerState: worksExplorerState.current };
+  const peopleExplorerState = useRef<DesktopPersonExplorerState | undefined>(undefined);
+  const currentLocation = useRef<NavigationLocation>({ page, detail, worksInitialQuery, worksExplorerState: undefined, peopleExplorerState: undefined, peopleSearchText: "" });
+  currentLocation.current = { page, detail, worksInitialQuery, worksExplorerState: worksExplorerState.current, peopleExplorerState: peopleExplorerState.current, peopleSearchText };
 
   /**
    * 所有页面状态消息从这里汇合，因此日志接入不需要让一百多个调用点分别理解文件 I/O。
@@ -235,6 +239,10 @@ export default function App() {
       worksExplorerState.current = undefined;
       setWorksInitialQuery(undefined);
     }
+    if (next === "people") {
+      peopleExplorerState.current = undefined;
+      setPeopleSearchText("");
+    }
   }, []);
 
   const filterWorks = useCallback((query: WorkQuery) => {
@@ -246,14 +254,14 @@ export default function App() {
   }, []);
 
   const openWork = useCallback((id: string) => {
-    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current });
+    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current, peopleExplorerState: peopleExplorerState.current, peopleSearchText });
     setPage("works");
     setDetail({ kind: "work", id });
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   const openPerson = useCallback((id: string) => {
-    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current });
+    navigationHistory.current.push({ ...currentLocation.current, worksExplorerState: worksExplorerState.current, peopleExplorerState: peopleExplorerState.current, peopleSearchText });
     setPage("people");
     setDetail({ kind: "person", id });
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -269,6 +277,8 @@ export default function App() {
     setDetail(previous.detail);
     setWorksInitialQuery(previous.worksInitialQuery);
     worksExplorerState.current = previous.worksExplorerState;
+    peopleExplorerState.current = previous.peopleExplorerState;
+    setPeopleSearchText(previous.peopleSearchText);
   }, []);
 
   const refreshLibrary = useCallback(() => {
@@ -569,7 +579,7 @@ export default function App() {
               runtimeContractRevision={runtime?.contractRevision ?? 0}
             />
           ) : (
-            <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} searchText={peopleSearchText} />
+              <DesktopPeoplePage repository={repository} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} searchText={peopleSearchText} initialState={peopleExplorerState.current} onExplorerStateChange={(state) => { peopleExplorerState.current = state; }} />
           )
         ) : page === "browse" ? (
           <DesktopCatalogBrowser repository={repository} openWork={openWork} setMessage={setMessage} searchText={catalogSearchText} />

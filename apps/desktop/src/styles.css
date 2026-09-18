@@ -578,6 +578,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .library-content-folder-list article { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-soft); }
 .library-content-folder-list article > div { min-width: 0; flex: 1; }
 .library-content-folder-list strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.library-content-folders > .section-heading > .button-row { margin-left: auto; flex: 0 0 auto; flex-direction: column; align-items: stretch; min-width: 170px; }
 @media (max-width: 1100px) {
   .filter-bar { grid-template-columns: 1fr 1fr; }
   .search-box { grid-column: 1 / -1; }
@@ -1783,7 +1784,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .topbar { min-height: 0; gap: 4px; padding-block: 4px; }
 .topbar-main { padding-inline: clamp(16px, 1.5vw, 32px); }
 .topbar-main { min-height: 38px; }
-.desktop-context-tabs { padding-top: 4px; }
+.desktop-context-tabs { position: sticky; top: 0; z-index: 9; padding-top: 4px; padding-bottom: 4px; background: rgba(243,243,239,.94); backdrop-filter: blur(14px); }
 .context-tabs { padding: 2px; }
 .context-tabs button { min-height: 30px; }
 .content-shell:has(.desktop-library-page),
