@@ -125,20 +125,14 @@ export function DesktopTopbar({ version, search }: { version?: string; search?: 
     if (search) search.onSubmit(text);
   }
   const appWindow = getCurrentWindow();
-  function startWindowDrag(event: MouseEvent<HTMLElement>): void {
-    if (event.button !== 0) return;
-    const target = event.target as HTMLElement;
-    if (target.closest("input, button, select, summary, details, label, form")) return;
-    void appWindow.startDragging();
-  }
   function toggleWindowMaximize(event: MouseEvent<HTMLElement>): void {
     if (event.button !== 0) return;
     const target = event.target as HTMLElement;
     if (target.closest("input, button, select, summary, details, label, form")) return;
     void appWindow.toggleMaximize();
   }
-  return <header className="topbar window-chrome" onMouseDown={startWindowDrag} onDoubleClick={toggleWindowMaximize}>
-    <div className="topbar-main">
+  return <header className="topbar window-chrome" data-tauri-drag-region onDoubleClick={toggleWindowMaximize}>
+    <div className="topbar-main" data-tauri-drag-region>
       <span className="topbar-product">{`Localogue · ${version ?? "…"}`}</span>
       {search ? <form className="topbar-search" role="search" onSubmit={submitSearch}>
         <input value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder={search.placeholder} aria-label={search.placeholder} />

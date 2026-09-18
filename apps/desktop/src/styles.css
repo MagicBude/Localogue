@@ -1928,7 +1928,7 @@ select[multiple] { min-height: 105px; padding: 6px; }
    两者都脱离页面内容流，滚动作品卡片时不会随内容移动或重新排版。 */
 .window-chrome {
   user-select: none;
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
 }
 .window-chrome .topbar-main {
   position: relative;
