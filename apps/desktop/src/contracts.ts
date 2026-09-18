@@ -38,6 +38,14 @@ export interface DesktopSqliteCollection<T = unknown> {
   items: T[];
 }
 
+export interface DesktopLibrarySummary {
+  works: number;
+  people: number;
+  series: number;
+  mediaFiles: number;
+  unlinkedMediaFiles: number;
+}
+
 export interface DesktopStorageSyncReport {
   available: boolean;
   jsonCount: number;

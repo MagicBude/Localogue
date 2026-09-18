@@ -189,6 +189,16 @@ struct DesktopSqliteCollection {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct DesktopLibrarySummary {
+    works: usize,
+    people: usize,
+    series: usize,
+    media_files: usize,
+    unlinked_media_files: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct DesktopStorageSyncReport {
     available: bool,
     json_count: usize,
@@ -1748,6 +1758,11 @@ async fn read_sqlite_library_collection(app: AppHandle, collection: String) -> R
 }
 
 #[tauri::command]
+async fn read_library_summary(app: AppHandle) -> Result<DesktopLibrarySummary, String> {
+    spawn_native_io("read_library_summary", move || read_library_summary_blocking(app)).await
+}
+
+#[tauri::command]
 async fn inspect_local_sqlite_sync(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
     spawn_native_io("inspect_local_sqlite_sync", move || inspect_local_sqlite_sync_blocking(app)).await
 }
@@ -1755,6 +1770,109 @@ async fn inspect_local_sqlite_sync(app: AppHandle) -> Result<DesktopStorageSyncR
 #[tauri::command]
 async fn provision_local_sqlite(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
     spawn_native_io("provision_local_sqlite", move || provision_local_sqlite_blocking(app)).await
+}
+
+/// 工作台只读取集合 ID 和媒体绑定列，避免把完整 JSON 实体送进 WebView。
+/// SQLite 可用时走 COUNT/轻量列查询；旧 JSON 资料库只解析每个文件的 ID，保持兼容。
+fn read_library_summary_blocking(app: AppHandle) -> Result<DesktopLibrarySummary, String> {
+    let settings = load_desktop_settings(app.clone())?;
+    let profile = active_library_profile(&settings);
+    let mut sources: Vec<(PathBuf, bool, PathBuf)> = Vec::new();
+    if let Some(private) = profile.and_then(|item| item.library_path.clone()) {
+        let root = PathBuf::from(private);
+        sources.push((root.join("local.db"), true, root));
+    }
+    for pack in profile.map(|item| item.shared_pack_paths.clone()).unwrap_or_default() {
+        let requested = PathBuf::from(pack);
+        let root = if requested.is_absolute() {
+            normalize_lexical(&requested)
+        } else {
+            normalize_lexical(&std::env::current_dir().map_err(display_error)?.join(requested))
+        };
+        sources.push((root.join("catalog.db"), false, root.join("library")));
+    }
+    if let Ok(app_data) = app.path().app_local_data_dir() {
+        sources.push((app_data.join("catalog.db"), false, app_data));
+    }
+
+    let works = summary_ids_from_sources(&sources, "works")?.len();
+    let people = summary_ids_from_sources(&sources, "people")?.len();
+    let series = summary_ids_from_sources(&sources, "series")?.len();
+    let (media_files, unlinked_media_files) = summary_media_from_sources(&sources)?;
+    Ok(DesktopLibrarySummary { works, people, series, media_files, unlinked_media_files })
+}
+
+fn summary_ids_from_sources(
+    sources: &[(PathBuf, bool, PathBuf)],
+    collection: &str,
+) -> Result<HashSet<String>, String> {
+    let mut ids = HashSet::new();
+    for (database_path, local, root) in sources {
+        if database_path.is_file() {
+            let connection = Connection::open_with_flags(database_path, OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(display_error)?;
+            let (sql, parameter) = if *local {
+                ("SELECT id FROM private_entities WHERE collection = ?1", Some(collection))
+            } else {
+                (match collection {
+                    "works" => "SELECT id FROM works",
+                    "people" => "SELECT id FROM people",
+                    "series" => "SELECT id FROM series",
+                    _ => return Ok(ids),
+                }, None)
+            };
+            let mut statement = connection.prepare(sql).map_err(display_error)?;
+            if let Some(value) = parameter {
+                let rows = statement.query_map([value], |row| row.get::<_, String>(0)).map_err(display_error)?;
+                for row in rows { ids.insert(row.map_err(display_error)?); }
+            } else {
+                let rows = statement.query_map([], |row| row.get::<_, String>(0)).map_err(display_error)?;
+                for row in rows { ids.insert(row.map_err(display_error)?); }
+            }
+            continue;
+        }
+        let directory = root.join(collection);
+        if !directory.is_dir() { continue; }
+        for item in fs::read_dir(directory).map_err(display_error)? {
+            let path = item.map_err(display_error)?.path();
+            if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
+            let raw = fs::read_to_string(path).map_err(display_error)?;
+            if let Some(id) = serde_json::from_str::<Value>(&raw).map_err(display_error)?.get("id").and_then(Value::as_str) { ids.insert(id.to_string()); }
+        }
+    }
+    Ok(ids)
+}
+
+fn summary_media_from_sources(sources: &[(PathBuf, bool, PathBuf)]) -> Result<(usize, usize), String> {
+    let mut ids = HashSet::new();
+    let mut unlinked = HashSet::new();
+    for (database_path, local, root) in sources {
+        if !*local { continue; }
+        if database_path.is_file() {
+            let connection = Connection::open_with_flags(database_path, OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(display_error)?;
+            let mut statement = connection.prepare("SELECT id, json FROM media_files").map_err(display_error)?;
+            let rows = statement.query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))).map_err(display_error)?;
+            for row in rows {
+                let (id, json) = row.map_err(display_error)?;
+                ids.insert(id.clone());
+                let value: Value = serde_json::from_str(&json).map_err(display_error)?;
+                if value.get("workId").and_then(Value::as_str).unwrap_or("").is_empty() { unlinked.insert(id); }
+            }
+            continue;
+        }
+        let directory = root.join("media-files");
+        if !directory.is_dir() { continue; }
+        for item in fs::read_dir(directory).map_err(display_error)? {
+            let path = item.map_err(display_error)?.path();
+            if path.extension().and_then(|value| value.to_str()) != Some("json") { continue; }
+            let raw = fs::read_to_string(path).map_err(display_error)?;
+            let value: Value = serde_json::from_str(&raw).map_err(display_error)?;
+            if let Some(id) = value.get("id").and_then(Value::as_str) {
+                ids.insert(id.to_string());
+                if value.get("workId").and_then(Value::as_str).unwrap_or("").is_empty() { unlinked.insert(id.to_string()); }
+            }
+        }
+    }
+    Ok((ids.len(), unlinked.len()))
 }
 
 fn provision_local_sqlite_blocking(app: AppHandle) -> Result<DesktopStorageSyncReport, String> {
@@ -3184,6 +3302,7 @@ pub fn run() {
             inspect_shared_pack,
             read_library_collection,
             read_sqlite_library_collection,
+            read_library_summary,
             inspect_local_sqlite_sync,
             provision_local_sqlite,
             write_library_entity,

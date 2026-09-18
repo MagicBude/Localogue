@@ -24,6 +24,7 @@ import type {
   DesktopSharedPackInfo,
   DesktopSqliteCollection,
   DesktopStorageSyncReport,
+  DesktopLibrarySummary,
 } from "./contracts";
 
 const PROGRESS_EVENT = "localogue://desktop-task-progress";
@@ -80,6 +81,7 @@ export const desktopBridge = {
     invoke<T[]>("read_library_collection", { libraryPath, collection }),
   readSqliteLibraryCollection: <T>(collection: DesktopLibraryCollection) =>
     invoke<DesktopSqliteCollection<T>>("read_sqlite_library_collection", { collection }),
+  readLibrarySummary: () => invoke<DesktopLibrarySummary>("read_library_summary"),
   inspectLocalSqliteSync: () => invoke<DesktopStorageSyncReport>("inspect_local_sqlite_sync"),
   provisionLocalSqlite: () => invoke<DesktopStorageSyncReport>("provision_local_sqlite"),
   writeLibraryEntity: (collection: DesktopWritableLibraryCollection, entity: unknown) =>

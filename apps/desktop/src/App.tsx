@@ -541,7 +541,7 @@ export default function App() {
         {!hasLibrarySource && page !== "settings" && page !== "about" ? (
           <EmptyLibrary busy={busy} quickSetupReady={(runtime?.contractRevision ?? 0) >= QUICK_SETUP_NATIVE_CONTRACT_REVISION} onQuickSetup={() => void quickSetupLibrary()} onConfigure={() => navigate("settings")} />
         ) : page === "home" ? (
-          <DesktopHomePage repository={repository} openWork={openWork} openPerson={openPerson} openWorks={() => navigate("works")} filterWorks={filterWorks} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} contentFolderCount={savedActiveProfile?.contentFolders.length ?? 0} />
+          <DesktopHomePage repository={repository} openWorks={() => navigate("works")} openMedia={() => navigate("media")} startUnifiedSync={startUnifiedSync} contentFolderCount={savedActiveProfile?.contentFolders.length ?? 0} />
         ) : page === "works" ? (
           <DesktopWorksPage repository={repository} openWork={openWork} openPerson={openPerson} onLibraryChanged={refreshLibrary} setMessage={setMessage} directoryRoots={savedActiveProfile?.contentFolders?.map((folder) => folder.path) ?? []} initialQuery={worksInitialQuery} initialState={worksExplorerState.current} onExplorerStateChange={updateWorksExplorerState} />
         ) : page === "favorites" ? (

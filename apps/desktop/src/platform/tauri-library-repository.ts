@@ -14,7 +14,7 @@ import type { PersonQuery, PersonSearchResult } from "@/domain/queries/person-qu
 import type { WorkQuery, WorkSearchResult } from "@/domain/queries/work-query";
 import type { LibraryRepository } from "@/domain/repositories/library-repository";
 
-import type { DesktopLibraryCollection, DesktopWritableLibraryCollection } from "../contracts";
+import type { DesktopLibraryCollection, DesktopLibrarySummary, DesktopWritableLibraryCollection } from "../contracts";
 import { desktopBridge } from "../tauri-bridge";
 
 // App 刷新资料后会创建新的 Repository 实例；队列按 Private Library 路径共享，
@@ -37,6 +37,14 @@ export class TauriLibraryRepository implements LibraryRepository {
     private readonly privateRoot: string | null,
     private readonly preferSqlite = false,
   ) {}
+
+  /**
+   * 工作台只需要数量摘要，不应为了显示几个数字把整个作品库反序列化到 WebView。
+   * Native 端优先用 SQLite COUNT，旧 JSON 库则只读取必要的 ID/绑定字段。
+   */
+  getLibrarySummary(): Promise<DesktopLibrarySummary> {
+    return desktopBridge.readLibrarySummary();
+  }
 
   async findWorkById(id: string): Promise<Work | null> {
     return (await this.readMerged<Work>("works")).find((item) => item.id === id) ?? null;

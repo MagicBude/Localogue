@@ -1,9 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { WorkQuery } from "@/domain/queries/work-query";
-
 import { useDesktopI18n } from "./desktop-i18n";
-import { buildDesktopWorkCards, DesktopWorkResults } from "./desktop-work-results";
 import { TauriLibraryRepository } from "./platform/tauri-library-repository";
 import { useStableAsyncData } from "./use-stable-async-data";
 import { UiButton } from "./ui/button";
@@ -15,51 +12,23 @@ import { UiEmptyState } from "./ui/feedback";
  */
 export function DesktopHomePage({
   repository,
-  openWork,
-  openPerson,
   openWorks,
-  filterWorks,
   openMedia,
   startUnifiedSync,
   contentFolderCount,
 }: {
   repository: TauriLibraryRepository;
-  openWork: (id: string) => void;
-  openPerson: (id: string) => void;
   openWorks: () => void;
-  filterWorks: (query: WorkQuery) => void;
   openMedia: () => void;
   startUnifiedSync: () => void;
   contentFolderCount: number;
 }) {
-  const { t, metadataLanguage } = useDesktopI18n();
-  const data = useStableAsyncData(async () => {
-    const [works, people, organizations, series, media, assets, preferences, genres, tags] = await Promise.all([
-      repository.listWorks({ page: 1, pageSize: 100_000, sort: "release_desc" }),
-      repository.listPeople({ page: 1, pageSize: 100_000, sort: "name_asc" }),
-      repository.listOrganizations(),
-      repository.listSeries(),
-      repository.listMediaFiles(),
-      repository.listAssets(),
-      repository.listPresentationPreferences(),
-      repository.listGenres(),
-      repository.listTags(),
-    ]);
-    const recentWorks = works.items.slice(0, 12);
-    return {
-      works,
-      people,
-      organizations,
-      series,
-      media,
-      recentCards: buildDesktopWorkCards(recentWorks, people.items, organizations, assets, metadataLanguage, preferences, genres, tags),
-    };
-  }, [repository, metadataLanguage], toMessage);
+  const { t } = useDesktopI18n();
+  const data = useStableAsyncData(() => repository.getLibrarySummary(), [repository], toMessage);
 
   if (data.loading) return <UiEmptyState busy title={t("正在读取影片库…")} />;
   if (data.error || !data.value) return <UiEmptyState tone="error" title={t("无法读取影片库。")} description={data.error} />;
-  const { works, people, organizations, series, media, recentCards } = data.value;
-  const unlinkedMediaCount = media.filter((file) => !file.workId).length;
+  const { works, people, series, mediaFiles, unlinkedMediaFiles } = data.value;
 
   return (
     <div className="page-stack">
@@ -71,33 +40,25 @@ export function DesktopHomePage({
         </div>
         <div className="button-row desktop-home-primary-actions">
           <UiButton variant="primary" onClick={startUnifiedSync}>{t("扫描资料库")}</UiButton>
-          {unlinkedMediaCount ? <UiButton variant="ghost" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaCount })}</UiButton> : null}
+          {unlinkedMediaFiles ? <UiButton variant="ghost" onClick={openMedia}>{t("处理 {count} 个未关联媒体", { count: unlinkedMediaFiles })}</UiButton> : null}
         </div>
       </section>
       <section className="stat-grid">
-        <Stat label={t("作品")} value={works.total} />
-        <Stat label={t("人物")} value={people.total} />
+        <Stat label={t("作品")} value={works} />
+        <Stat label={t("人物")} value={people} />
         <Stat label={t("内容目录")} value={contentFolderCount} />
-        <Stat label={t("系列")} value={series.length} />
-        <Stat label={t("视频文件")} value={media.length} />
-        <Stat label={t("待关联媒体")} value={unlinkedMediaCount} />
+        <Stat label={t("系列")} value={series} />
+        <Stat label={t("视频文件")} value={mediaFiles} />
+        <Stat label={t("待关联媒体")} value={unlinkedMediaFiles} />
       </section>
       <section className="settings-card">
         <SectionTitle eyebrow="NEXT STEP" title={t("下一步")}/>
-        <p className="muted">{unlinkedMediaCount ? t("有媒体文件尚未关联作品，建议先处理这些文件。") : t("资料库目前没有待处理媒体，可以继续浏览或扫描新增内容。")}</p>
+        <p className="muted">{unlinkedMediaFiles ? t("有媒体文件尚未关联作品，建议先处理这些文件。") : t("资料库目前没有待处理媒体，可以继续浏览或扫描新增内容。")}</p>
         <div className="button-row">
           <UiButton variant="ghost" onClick={openWorks}>{t("浏览作品")}</UiButton>
-          {unlinkedMediaCount ? <UiButton onClick={openMedia}>{t("查看未关联媒体")}</UiButton> : null}
+          {unlinkedMediaFiles ? <UiButton onClick={openMedia}>{t("查看未关联媒体")}</UiButton> : null}
         </div>
       </section>
-      <SectionTitle
-        eyebrow="RECENT WORKS"
-        title={t("最近活动")}
-        action={<UiButton variant="ghost" onClick={openWorks}>{t("查看全部作品")}</UiButton>}
-      />
-      <DesktopWorkResults cards={recentCards} view="grid" onOpen={openWork} onOpenPerson={openPerson}
-        onSelectGenre={(id) => filterWorks({ genreIds: [id] })}
-        onSelectTag={(id) => filterWorks({ tagIds: [id] })} />
     </div>
   );
 }

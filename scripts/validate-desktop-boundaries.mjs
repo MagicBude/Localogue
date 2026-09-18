@@ -256,8 +256,8 @@ if (!errors.length) {
   for (const token of ["statuses", "birthYears", "debutYears", "retirementYears", "heightMin", "heightMax", "PersonSort"]) {
     if (!desktopPersonExplorer.includes(token)) errors.push(`V1-19 Desktop 人物高级筛选缺少条件：${token}`);
   }
-  if (!desktopPersonPages.includes("fixedPersonId={id}") || !desktopHomePage.includes("recentCards") || !desktopHomePage.includes('view="grid"')) {
-    errors.push("V1-19 首页最近作品与 Person 相关作品必须复用真实海报 Work Explorer / Work Results，而不是旧占位 Tile。");
+  if (!desktopPersonPages.includes("fixedPersonId={id}") || !desktopHomePage.includes("getLibrarySummary")) {
+    errors.push("V1-19 工作台必须使用轻量资料库摘要；完整作品和人物浏览应留在资料库页面。");
   }
   for (const token of ["makers", "labels", "series", "genres", "directors", "workTypes", "tags"]) {
     if (!desktopCatalogBrowser.includes(token)) errors.push(`V1-19 Desktop 分类浏览缺少目录维度：${token}`);

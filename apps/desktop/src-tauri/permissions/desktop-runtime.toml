@@ -43,6 +43,7 @@ commands.allow = [
   "inspect_shared_pack",
   "read_library_collection",
   "read_sqlite_library_collection",
+  "read_library_summary",
   "inspect_local_sqlite_sync",
   "provision_local_sqlite",
   "write_library_entity",
