@@ -537,7 +537,7 @@ export function DesktopMediaPage({
           open
           title={`${t("管理绑定")}：${target.fileName}`}
           wide
-        ><MediaBindingPanel media={target} repository={repository} setMessage={setMessage} onChanged={() => { setBindingMediaId(null); onLibraryChanged(); }} /></UiActionDialog> : null;
+        ><MediaBindingPanel media={target} repository={repository} setMessage={setMessage} onViewWork={(workId) => { setBindingMediaId(null); openWork(workId); }} onChanged={() => { setBindingMediaId(null); onLibraryChanged(); }} /></UiActionDialog> : null;
       })() : null}
 
     </div>
