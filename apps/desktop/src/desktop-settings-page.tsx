@@ -1,8 +1,8 @@
 import { useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
-import type { DesktopBootstrapSettings, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
+import type { DesktopBootstrapSettings, DesktopContentFolder, DesktopRuntimeInfo, DesktopSharedPackInfo, DesktopStorageSyncReport } from "./contracts";
 import { useDesktopI18n } from "./desktop-i18n";
-import { InfoCard, PageTitle } from "./desktop-page-primitives";
+import { PageTitle } from "./desktop-page-primitives";
 import {
   activeLibraryProfile,
   addLibraryProfile,
@@ -41,6 +41,9 @@ export function DesktopSettingsPage({
   onPersistSettings,
   onPersistProfiles,
   onStartLibrarySync,
+  onAddContentFolder,
+  onUpdateContentFolder,
+  onRemoveContentFolder,
   onOpenPacks,
   settingsModule,
   setMessage,
@@ -53,6 +56,9 @@ export function DesktopSettingsPage({
   onPersistSettings: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   onPersistProfiles: (next: DesktopBootstrapSettings, successMessage: string) => Promise<DesktopBootstrapSettings>;
   onStartLibrarySync: () => void;
+  onAddContentFolder: () => void;
+  onUpdateContentFolder: (path: string, patch: Partial<DesktopContentFolder>) => void;
+  onRemoveContentFolder: (path: string) => void;
   onOpenPacks: () => void;
   settingsModule: DesktopSettingsModule;
   setMessage: (message: string) => void;
@@ -236,15 +242,6 @@ export function DesktopSettingsPage({
     await persistPaths(updateLibraryProfile(settings, selectedProfile.id, { sharedPackPaths: selectedProfile.sharedPackPaths.filter((item) => item !== path) }), t("目录已移除并保存。"));
   }
 
-  async function openWeb(): Promise<void> {
-    try {
-      await desktopBridge.openWebUrl(settings.webUrl);
-      setMessage(t("已交给系统浏览器打开 Localogue Web。"));
-    } catch (error) {
-      setMessage(t("无法打开 Web URL：{error}", { error: toMessage(error) }));
-    }
-  }
-
   async function chooseFfprobe(): Promise<void> {
     try {
       const path = await desktopBridge.pickFfprobeFile(settings.ffprobePath);
@@ -265,15 +262,6 @@ export function DesktopSettingsPage({
     } catch (error) {
       setFfprobeCheck(undefined);
       setMessage(t("ffprobe 不可用：{error}", { error: toMessage(error) }));
-    }
-  }
-
-  async function revealLog(): Promise<void> {
-    try {
-      await desktopBridge.revealAppLog();
-      setMessage(t("已在文件管理器中定位 Localogue 日志。"));
-    } catch (error) {
-      setMessage(t("无法打开日志位置：{error}", { error: toMessage(error) }));
     }
   }
 
@@ -330,6 +318,16 @@ export function DesktopSettingsPage({
         ) : <UiEmptyState title={t("还没有影片库")} description={t("点击“新建影片库”会创建“影片库 1”；也可以加入内置示例库体验功能。")} action={<UiButton variant="primary" disabled={busy || !profileNativeRuntimeReady} onClick={() => void createProfile()}>{t("+ 新建影片库")}</UiButton>} />}
       </section>
 
+      <LibraryContentFoldersSection
+        folders={selectedProfile?.contentFolders ?? []}
+        busy={busy}
+        onAdd={onAddContentFolder}
+        onUpdate={onUpdateContentFolder}
+        onRemove={onRemoveContentFolder}
+        onScan={onStartLibrarySync}
+        disabled={!selectedProfile || !profileNativeRuntimeReady}
+      />
+
       <UiActionDialog
         actions={<><UiButton variant="ghost" onClick={() => setRenameOpen(false)}>{t("取消")}</UiButton><UiButton variant="primary" loading={busy} disabled={!renameDraft.trim()} onClick={() => void renameProfile()}>{t("保存修改")}</UiButton></>}
         closeLabel={t("关闭")}
@@ -356,7 +354,7 @@ export function DesktopSettingsPage({
         <summary><span><span className="eyebrow">PATH GUIDE</span><strong>{t("了解各种目录的用途")}</strong></span><small>{t("需要时展开")}</small></summary>
         <div className="source-model-grid advanced-settings-stack">
           <article><strong>1 · {t("数据存储位置")}</strong><p>{t("保存这个影片库的作品资料、个人修改、收藏和管理记录，通常由 Localogue 自动设置。")}</p></article>
-          <article><strong>2 · {t("内容目录")}</strong><p>{t("内容目录的添加、扫描范围和扫描操作统一在“影片库 → 目录与扫描”中完成。")}</p></article>
+          <article><strong>2 · {t("内容目录")}</strong><p>{t("内容目录、扫描范围和首次扫描都在当前影片库设置中完成；“扫描任务”用于查看实时进度和高级排查。")}</p></article>
           <article><strong>3 · {t("社区资料")}</strong><p>{t("社区整理的只读作品、人物和分类资料，不包含你的视频、收藏和私人修改。")}</p></article>
           <article><strong>4 · {t("高级兼容目录")}</strong><p>{t("只有媒体或 NFO / 图片完全放在内容根目录之外时才需要；普通用户可以不展开。")}</p></article>
         </div>
@@ -384,8 +382,7 @@ export function DesktopSettingsPage({
           <UiTextField label={t("ffprobe 可执行文件路径")} description={t("修改后离开输入框即自动保存。") } value={settings.ffprobePath ?? ""} placeholder="ffprobe" onChange={(event: ChangeEvent<HTMLInputElement>) => { setSettings((current) => ({ ...current, ffprobePath: event.target.value })); setFfprobeCheck(undefined); }} onBlur={(event) => void saveOrdinarySettings({ ...settings, ffprobePath: event.currentTarget.value }, t("ffprobe 路径已自动保存。"))} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
           {ffprobeCheck ? <UiFeedback tone="success">{t("已检测：{version}", { version: ffprobeCheck })}</UiFeedback> : null}
         </div>
-        <UiTextField label="Localogue Web URL" description={t("修改后离开输入框即自动保存。") } value={settings.webUrl} onChange={(event: ChangeEvent<HTMLInputElement>) => setSettings((current) => ({ ...current, webUrl: event.target.value }))} onBlur={(event) => void saveOrdinarySettings({ ...settings, webUrl: event.currentTarget.value }, t("Web URL 已自动保存。"))} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} />
-        <div className="button-row"><UiButton disabled={busy} onClick={() => void openWeb()}>{t("浏览器打开 Web")}</UiButton><span className="muted">{busy ? t("正在自动保存…") : t("设置会自动保存")}</span></div>
+        <UiFeedback tone="info">{t("当前 Desktop 版本不内置 Web 服务；Localogue Web 需要单独启动 Web 运行入口，因此这里不再提供容易误解的浏览器按钮。")}</UiFeedback>
       </section>
 
       <section className="settings-card settings-module-tools">
@@ -403,18 +400,6 @@ export function DesktopSettingsPage({
         ) : null}
       </section>
 
-      <section className="settings-card soft-card settings-module-about">
-        <span className="eyebrow">RUNTIME</span>
-        <h2>Tauri Runtime</h2>
-        <div className="runtime-info-grid">
-          <InfoCard label={t("产品")} value={runtime?.productName} />
-          <InfoCard label={t("版本")} value={runtime?.version} />
-          <InfoCard label={t("标识符")} value={runtime?.identifier} />
-          <InfoCard label={t("环境")} value={runtime?.environment} />
-        </div>
-        <code className="path-block">{runtime?.settingsPath ?? "—"}</code>
-        <div className="button-row"><UiButton onClick={() => void revealLog()}>{t("打开日志位置")}</UiButton></div>
-      </section>
     </div>
   );
 }
@@ -423,6 +408,15 @@ function PathList({ values, onRemove }: { values: string[]; onRemove: (value: st
   const { t } = useDesktopI18n();
   if (!values.length) return <p className="muted">{t("尚未配置。")} </p>;
   return <ul className="path-list">{values.map((path) => <li key={path}><code>{path}</code><UiButton size="compact" variant="danger" onClick={() => onRemove(path)}>{t("移除")}</UiButton></li>)}</ul>;
+}
+
+function LibraryContentFoldersSection({ folders, busy, disabled, onAdd, onUpdate, onRemove, onScan }: { folders: DesktopContentFolder[]; busy: boolean; disabled: boolean; onAdd: () => void; onUpdate: (path: string, patch: Partial<DesktopContentFolder>) => void; onRemove: (path: string) => void; onScan: () => void }) {
+  const { t } = useDesktopI18n();
+  const canScan = folders.some((folder) => folder.scanVideo || folder.scanNfo || folder.scanImages);
+  return <section className="settings-card library-content-folders settings-module-library">
+    <div className="section-heading"><div><span className="eyebrow">CONTENT SOURCES</span><h2>{t("内容目录")}</h2><p className="muted">{t("当前影片库会从这里发现 NFO、图片和视频；保存后可立即扫描，不需要再跳到其他页面配置。")}</p></div><div className="button-row"><UiButton disabled={busy || disabled} onClick={onAdd}>{t("+ 添加内容目录")}</UiButton><UiButton variant="primary" disabled={busy || disabled || !canScan} onClick={onScan}>{t("扫描全部目录")}</UiButton></div></div>
+    {folders.length ? <div className="library-content-folder-list">{folders.map((folder) => <article key={folder.path}><div><strong title={folder.path}>{folder.path}</strong><div className="directory-scope-options"><label><input type="checkbox" checked={folder.scanVideo} disabled={disabled} onChange={(event) => onUpdate(folder.path, { scanVideo: event.target.checked })} />{t("视频")}</label><label><input type="checkbox" checked={folder.scanNfo} disabled={disabled} onChange={(event) => onUpdate(folder.path, { scanNfo: event.target.checked })} />NFO</label><label><input type="checkbox" checked={folder.scanImages} disabled={disabled} onChange={(event) => onUpdate(folder.path, { scanImages: event.target.checked })} />{t("图片")}</label></div></div><UiButton size="compact" variant="danger" disabled={busy || disabled} onClick={() => onRemove(folder.path)}>{t("移除")}</UiButton></article>)}</div> : <UiFeedback tone="warning">{t("这个影片库还没有内容目录。添加一个目录后，Localogue 才能发现和扫描影片资料。")}</UiFeedback>}
+  </section>;
 }
 
 function unique(values: string[]): string[] {

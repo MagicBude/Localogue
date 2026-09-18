@@ -8,7 +8,6 @@ import {
   AppsListDetail20Regular,
   ArrowImport20Regular,
   BookContacts20Regular,
-  BoxMultiple20Regular,
   Clock20Regular,
   Database20Regular,
   Heart20Regular,
@@ -32,7 +31,7 @@ import { UiTooltip } from "./ui/tooltip";
 import { ContextTabBar, type ContextTabItem } from "./ui/context-tab-bar";
 
 export type DesktopPage = "home" | "works" | "people" | "browse" | "review" | "curation" | "history" | "media" | "packs" | "settings" | "favorites" | "about";
-export type DesktopSettingsModule = "library" | "sources" | "tools" | "about";
+export type DesktopSettingsModule = "library" | "sources" | "tools";
 
 interface DesktopNavGroup {
   id: string;
@@ -53,7 +52,7 @@ const NAV_GROUPS: DesktopNavGroup[] = [
   { id: "works", label: "作品", icon: AppsListDetail20Regular, landingPage: "works", pages: ["works"] },
   { id: "people", label: "人物", icon: People20Regular, landingPage: "people", pages: ["people"] },
   { id: "browse", label: "分类浏览", icon: SearchSquare20Regular, landingPage: "browse", pages: ["browse"] },
-  { id: "media", label: "目录与扫描", icon: ArrowSync20Regular, landingPage: "media", pages: ["media"] },
+  { id: "media", label: "扫描任务", icon: ArrowSync20Regular, landingPage: "media", pages: ["media"] },
   { id: "favorites", label: "收藏", icon: Heart20Regular, landingPage: "favorites", pages: ["favorites"] },
   {
     id: "maintenance",
@@ -164,7 +163,6 @@ export function DesktopContextTabs({ page, settingsModule, onNavigate, onSetting
           { id: "library", label: t("影片库与目录"), icon: Database20Regular, active: page === "settings" && settingsModule === "library", onSelect: () => onSettingsModule("library") },
           { id: "sources", label: t("社区资料"), icon: BookContacts20Regular, active: page === "settings" && settingsModule === "sources", onSelect: () => onSettingsModule("sources") },
           { id: "tools", label: t("扫描与工具"), icon: Wrench20Regular, active: page === "settings" && settingsModule === "tools", onSelect: () => onSettingsModule("tools") },
-          { id: "about", label: t("诊断"), icon: BoxMultiple20Regular, active: page === "settings" && settingsModule === "about", onSelect: () => onSettingsModule("about") },
           { id: "packs", label: t("导入、导出与备份"), icon: ArrowImport20Regular, active: page === "packs", onSelect: () => onNavigate("packs") },
         ]
         : [];

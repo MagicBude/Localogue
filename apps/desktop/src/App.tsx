@@ -606,6 +606,9 @@ export default function App() {
             onPersistSettings={persistOrdinarySettings}
             onPersistProfiles={persistProfileMutation}
             onStartLibrarySync={startUnifiedSync}
+            onAddContentFolder={() => void addContentFolderFromMedia()}
+            onUpdateContentFolder={(path, patch) => void updateContentFolderFromMedia(path, patch)}
+            onRemoveContentFolder={(path) => void removeContentFolderFromMedia(path)}
             onOpenPacks={() => navigate("packs")}
             settingsModule={settingsModule}
             setMessage={setMessage}

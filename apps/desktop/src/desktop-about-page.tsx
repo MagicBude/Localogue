@@ -13,7 +13,7 @@ export function DesktopAboutPage({ runtime, setMessage }: { runtime: DesktopRunt
   const { t } = useDesktopI18n();
 
   return <div className="page-stack about-page">
-    <PageTitle eyebrow="LOCALOGUE DESKTOP" title={t("关于")} description={t("查看版本、运行环境和本机数据位置。")}/>
+    <PageTitle eyebrow="LOCALOGUE DESKTOP" title={t("关于")} description={t("查看版本、运行环境、日志和本机数据位置；诊断入口统一放在这里。")}/>
     <div className="ui-settings-list">
       <SettingsRow icon={<Info20Regular />} title="Localogue Desktop" description={t("本地优先的 AV 个人影片库与策展管理器")} action={<strong>{runtime?.version ?? "…"}</strong>} />
       <SettingsRow icon={<WindowDevTools20Regular />} title={t("运行环境")} description={runtime?.identifier ?? "—"} action={<span>{runtime?.environment ?? "—"}</span>} />

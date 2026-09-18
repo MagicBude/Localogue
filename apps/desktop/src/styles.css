@@ -574,6 +574,10 @@ select[multiple] { min-height: 105px; padding: 6px; }
 .candidate-detail dd { margin: 0; color: inherit; overflow-wrap: anywhere; }
 .candidate-detail p { white-space: pre-wrap; }
 @media (max-width: 700px) { .candidate-detail dl { grid-template-columns: 1fr; } }
+.library-content-folder-list { display: grid; gap: 8px; }
+.library-content-folder-list article { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-soft); }
+.library-content-folder-list article > div { min-width: 0; flex: 1; }
+.library-content-folder-list strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 1100px) {
   .filter-bar { grid-template-columns: 1fr 1fr; }
   .search-box { grid-column: 1 / -1; }
